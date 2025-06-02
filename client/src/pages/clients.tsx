@@ -153,6 +153,47 @@ export default function Clients() {
     }
   };
 
+  // Função para formatar telefone
+  const formatPhone = (value: string) => {
+    const numbers = value.replace(/\D/g, '');
+    if (numbers.length <= 11) {
+      return numbers.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+    }
+    return value;
+  };
+
+  // Função para formatar CPF
+  const formatCPF = (value: string) => {
+    const numbers = value.replace(/\D/g, '');
+    if (numbers.length <= 11) {
+      return numbers.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+    }
+    return value;
+  };
+
+  // Função para buscar endereço por CEP
+  const handleCEPChange = async (cep: string, form: HTMLFormElement) => {
+    const cleanCEP = cep.replace(/\D/g, '');
+    if (cleanCEP.length === 8) {
+      try {
+        const response = await fetch(`https://viacep.com.br/ws/${cleanCEP}/json/`);
+        const data = await response.json();
+        
+        if (!data.erro) {
+          const addressInput = form.querySelector('input[name="address"]') as HTMLInputElement;
+          const cityInput = form.querySelector('input[name="city"]') as HTMLInputElement;
+          const stateInput = form.querySelector('input[name="state"]') as HTMLInputElement;
+          
+          if (addressInput) addressInput.value = `${data.logradouro}, ${data.bairro}`;
+          if (cityInput) cityInput.value = data.localidade;
+          if (stateInput) stateInput.value = data.uf;
+        }
+      } catch (error) {
+        console.error('Erro ao buscar CEP:', error);
+      }
+    }
+  };
+
   if (authLoading || isLoading) {
     return <LoadingSpinner />;
   }
@@ -199,17 +240,37 @@ export default function Clients() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium mb-2">Telefone *</label>
-                  <Input name="phone" required placeholder="(00) 00000-0000" />
+                  <Input 
+                    name="phone" 
+                    required 
+                    placeholder="(00) 00000-0000"
+                    onChange={(e) => {
+                      e.target.value = formatPhone(e.target.value);
+                    }}
+                  />
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-2">CPF</label>
-                  <Input name="cpf" placeholder="000.000.000-00" />
+                  <Input 
+                    name="cpf" 
+                    placeholder="000.000.000-00"
+                    onChange={(e) => {
+                      e.target.value = formatCPF(e.target.value);
+                    }}
+                  />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium mb-2">CEP</label>
-                  <Input name="zipCode" placeholder="00000-000" />
+                  <Input 
+                    name="zipCode" 
+                    placeholder="00000-000"
+                    onChange={(e) => {
+                      const form = e.target.closest('form') as HTMLFormElement;
+                      handleCEPChange(e.target.value, form);
+                    }}
+                  />
                 </div>
                 <div></div>
               </div>

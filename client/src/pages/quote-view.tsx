@@ -39,8 +39,8 @@ export default function QuoteView() {
   }, [isAuthenticated, authLoading, toast]);
 
   const { data: quote, isLoading, error } = useQuery<QuoteWithDetails>({
-    queryKey: ["/api/quotes/number", quoteNumber],
-    enabled: !!quoteNumber && isAuthenticated,
+    queryKey: ["/api/quotes/public", quoteNumber],
+    enabled: !!quoteNumber,
     retry: false,
   });
 
