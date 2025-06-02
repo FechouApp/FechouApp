@@ -57,7 +57,7 @@ export default function NewQuote() {
 
   // Load quote data for editing
   const { data: quoteData, isLoading: quoteLoading } = useQuery<QuoteWithDetails>({
-    queryKey: ["/api/quotes", quoteId],
+    queryKey: [`/api/quotes/${quoteId}`],
     enabled: !!quoteId,
     retry: false,
   });

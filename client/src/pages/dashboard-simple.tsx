@@ -89,7 +89,7 @@ export default function Dashboard() {
                 <p className="text-base font-medium text-gray-600">Total de Orçamentos</p>
                 <p className="text-4xl font-bold text-gray-900">{dashboardStats.totalQuotes}</p>
               </div>
-              <FileText className="w-12 h-12 text-blue-600" />
+              <FileText className="w-10 h-10 text-blue-600" />
             </div>
           </CardContent>
         </Card>
@@ -101,7 +101,7 @@ export default function Dashboard() {
                 <p className="text-base font-medium text-gray-600">Aprovados</p>
                 <p className="text-4xl font-bold text-green-600">{dashboardStats.approvedQuotes}</p>
               </div>
-              <CheckCircle className="w-12 h-12 text-green-600" />
+              <CheckCircle className="w-10 h-10 text-green-600" />
             </div>
           </CardContent>
         </Card>
@@ -115,7 +115,7 @@ export default function Dashboard() {
                   {formatCurrency(dashboardStats.totalRevenue)}
                 </p>
               </div>
-              <DollarSign className="w-12 h-12 text-purple-600" />
+              <DollarSign className="w-10 h-10 text-purple-600" />
             </div>
           </CardContent>
         </Card>
@@ -132,7 +132,7 @@ export default function Dashboard() {
                   <Star className="w-8 h-8 text-yellow-400 fill-current" />
                 </div>
               </div>
-              <Star className="w-12 h-12 text-yellow-600" />
+              <Star className="w-10 h-10 text-yellow-600" />
             </div>
           </CardContent>
         </Card>

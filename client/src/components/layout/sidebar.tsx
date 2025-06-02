@@ -39,14 +39,15 @@ export default function Sidebar() {
   };
 
   const getUserDisplayName = () => {
-    if (user?.firstName && user?.lastName) {
-      return `${user.firstName} ${user.lastName}`;
+    const userData = user as any;
+    if (userData?.firstName && userData?.lastName) {
+      return `${userData.firstName} ${userData.lastName}`;
     }
-    if (user?.firstName) {
-      return user.firstName;
+    if (userData?.firstName) {
+      return userData.firstName;
     }
-    if (user?.email) {
-      return user.email.split('@')[0];
+    if (userData?.email) {
+      return userData.email.split('@')[0];
     }
     return "Usuário";
   };
@@ -93,9 +94,9 @@ export default function Sidebar() {
         <div className="mt-8 pt-6 border-t border-white/20">
           <div className="glassmorphism rounded-xl p-4">
             <div className="flex items-center gap-3 mb-3">
-              {user?.profileImageUrl ? (
+              {(user as any)?.profileImageUrl ? (
                 <img
-                  src={user.profileImageUrl}
+                  src={(user as any).profileImageUrl}
                   alt="Foto do usuário"
                   className="w-12 h-12 rounded-full object-cover"
                 />
@@ -111,7 +112,7 @@ export default function Sidebar() {
                   {getUserDisplayName()}
                 </p>
                 <p className="text-white/60 text-xs truncate">
-                  {user?.profession || "Profissional"}
+                  {(user as any)?.profession || "Profissional"}
                 </p>
               </div>
             </div>
