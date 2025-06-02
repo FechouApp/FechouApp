@@ -149,6 +149,7 @@ export default function NewQuote() {
           isSubmitting={createQuoteMutation.isPending}
           step={step}
           onStepChange={setStep}
+          existingQuote={quoteData}
         />
       </div>
     </div>

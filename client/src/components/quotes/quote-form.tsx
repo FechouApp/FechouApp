@@ -22,6 +22,7 @@ interface QuoteFormProps {
   isSubmitting: boolean;
   step: number;
   onStepChange: (step: number) => void;
+  existingQuote?: any; // Dados do orçamento para edição
 }
 
 interface QuoteItemData {
@@ -37,21 +38,30 @@ export default function QuoteForm({
   onSubmit, 
   isSubmitting, 
   step, 
-  onStepChange 
+  onStepChange,
+  existingQuote
 }: QuoteFormProps) {
-  const [selectedClientId, setSelectedClientId] = useState("");
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [observations, setObservations] = useState("");
-  const [paymentTerms, setPaymentTerms] = useState("");
-  const [executionDeadline, setExecutionDeadline] = useState("");
+  const [selectedClientId, setSelectedClientId] = useState(existingQuote?.clientId || "");
+  const [title, setTitle] = useState(existingQuote?.title || "");
+  const [description, setDescription] = useState(existingQuote?.description || "");
+  const [observations, setObservations] = useState(existingQuote?.observations || "");
+  const [paymentTerms, setPaymentTerms] = useState(existingQuote?.paymentTerms || "");
+  const [executionDeadline, setExecutionDeadline] = useState(existingQuote?.executionDeadline || "");
   const [validityDays, setValidityDays] = useState(30);
-  const [sendByWhatsapp, setSendByWhatsapp] = useState(true);
-  const [sendByEmail, setSendByEmail] = useState(false);
-  const [items, setItems] = useState<QuoteItemData[]>([
-    { id: "1", description: "", quantity: 1, unitPrice: "0", total: "0" }
-  ]);
-  const [discount, setDiscount] = useState("0");
+  const [sendByWhatsapp, setSendByWhatsapp] = useState(existingQuote?.sendByWhatsapp ?? true);
+  const [sendByEmail, setSendByEmail] = useState(existingQuote?.sendByEmail ?? false);
+  const [items, setItems] = useState<QuoteItemData[]>(
+    existingQuote?.items?.length > 0 
+      ? existingQuote.items.map((item: any, index: number) => ({
+          id: String(index + 1),
+          description: item.description,
+          quantity: item.quantity,
+          unitPrice: item.unitPrice,
+          total: item.total
+        }))
+      : [{ id: "1", description: "", quantity: 1, unitPrice: "0", total: "0" }]
+  );
+  const [discount, setDiscount] = useState(existingQuote?.discount || "0");
 
   const addItem = () => {
     const newItem: QuoteItemData = {

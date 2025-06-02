@@ -317,6 +317,127 @@ export default function Clients() {
             </form>
           </DialogContent>
         </Dialog>
+
+        {/* Modal de Edição de Cliente */}
+        <Dialog open={!!editingClient} onOpenChange={() => setEditingClient(null)}>
+          <DialogContent className="max-w-lg max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Editar Cliente</DialogTitle>
+            </DialogHeader>
+            {editingClient && (
+              <form onSubmit={(e) => {
+                e.preventDefault();
+                const formData = new FormData(e.currentTarget);
+                const clientData = {
+                  name: formData.get('name') as string,
+                  email: formData.get('email') as string,
+                  phone: formData.get('phone') as string,
+                  cpf: formData.get('cpf') as string,
+                  address: formData.get('address') as string,
+                  number: formData.get('number') as string,
+                  complement: formData.get('complement') as string,
+                  city: formData.get('city') as string,
+                  state: formData.get('state') as string,
+                  zipCode: formData.get('zipCode') as string,
+                  notes: formData.get('notes') as string,
+                };
+                // Implementar updateClientMutation
+                console.log('Editando cliente:', clientData);
+                setEditingClient(null);
+              }} className="space-y-3">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Nome *</label>
+                    <Input name="name" required placeholder="Nome completo" defaultValue={editingClient.name} />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-2">E-mail</label>
+                    <Input name="email" type="email" placeholder="email@exemplo.com" defaultValue={editingClient.email || ''} />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Telefone *</label>
+                    <Input 
+                      name="phone" 
+                      required 
+                      placeholder="(00) 00000-0000"
+                      defaultValue={editingClient.phone}
+                      onChange={(e) => {
+                        e.target.value = formatPhone(e.target.value);
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-2">CPF</label>
+                    <Input 
+                      name="cpf" 
+                      placeholder="000.000.000-00"
+                      defaultValue={editingClient.cpf || ''}
+                      onChange={(e) => {
+                        e.target.value = formatCPF(e.target.value);
+                      }}
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2">CEP</label>
+                  <Input 
+                    name="zipCode" 
+                    placeholder="00000-000"
+                    defaultValue={editingClient.zipCode || ''}
+                    onChange={(e) => {
+                      const form = e.target.closest('form') as HTMLFormElement;
+                      handleCEPChange(e.target.value, form);
+                    }}
+                  />
+                </div>
+                <div className="grid grid-cols-3 gap-3">
+                  <div className="col-span-2">
+                    <label className="block text-sm font-medium mb-2">Endereço</label>
+                    <Input name="address" placeholder="Rua, avenida, praça" defaultValue={editingClient.address || ''} />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Número</label>
+                    <Input name="number" placeholder="123" defaultValue={editingClient.number || ''} />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2">Complemento</label>
+                  <Input name="complement" placeholder="Apto, casa, bloco, etc." defaultValue={editingClient.complement || ''} />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Cidade</label>
+                    <Input name="city" placeholder="Cidade" defaultValue={editingClient.city || ''} />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Estado</label>
+                    <Input name="state" placeholder="SP" defaultValue={editingClient.state || ''} />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2">Observações</label>
+                  <textarea
+                    name="notes"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-brand-primary focus:border-transparent"
+                    rows={3}
+                    placeholder="Notas sobre o cliente..."
+                    defaultValue={editingClient.notes || ''}
+                  />
+                </div>
+                <div className="flex justify-end gap-3">
+                  <Button type="button" variant="outline" onClick={() => setEditingClient(null)}>
+                    Cancelar
+                  </Button>
+                  <Button type="submit" className="brand-gradient text-white">
+                    Salvar Alterações
+                  </Button>
+                </div>
+              </form>
+            )}
+          </DialogContent>
+        </Dialog>
       </div>
 
       {/* Search and Filters */}
