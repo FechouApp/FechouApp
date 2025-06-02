@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Star, CheckCircle, XCircle, Calendar, Phone, Mail, MapPin } from "lucide-react";
+import { Star, CheckCircle, XCircle, Calendar, Phone, Mail, MapPin, ArrowLeft } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import type { QuoteWithDetails } from "@/types";
@@ -117,16 +117,32 @@ export default function QuoteView() {
 
   if (!quote) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <Card className="max-w-md">
-          <CardContent className="p-8 text-center">
-            <XCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
-            <h2 className="text-xl font-bold mb-2">Orçamento não encontrado</h2>
-            <p className="text-gray-600">
-              O orçamento que você está procurando não existe ou expirou.
-            </p>
-          </CardContent>
-        </Card>
+      <div className="min-h-screen bg-gray-50">
+        <div className="container mx-auto px-4 py-8">
+          {/* Botão de Voltar */}
+          <div className="mb-6">
+            <Button
+              variant="ghost"
+              onClick={() => window.history.back()}
+              className="flex items-center gap-2 text-gray-600 hover:text-gray-900"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Voltar
+            </Button>
+          </div>
+
+          <div className="flex items-center justify-center">
+            <Card className="max-w-md">
+              <CardContent className="p-8 text-center">
+                <XCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
+                <h2 className="text-xl font-bold mb-2">Orçamento não encontrado</h2>
+                <p className="text-gray-600">
+                  O orçamento que você está procurando não existe ou expirou.
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
       </div>
     );
   }
@@ -137,6 +153,18 @@ export default function QuoteView() {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto px-4 py-8 max-w-4xl">
+        {/* Botão de Voltar */}
+        <div className="mb-6">
+          <Button
+            variant="ghost"
+            onClick={() => window.history.back()}
+            className="flex items-center gap-2 text-gray-600 hover:text-gray-900"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Voltar
+          </Button>
+        </div>
+
         {/* Header */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-3 mb-4">
