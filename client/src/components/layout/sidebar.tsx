@@ -20,6 +20,7 @@ const navigation = [
   { name: "Novo Orçamento", href: "/new-quote", icon: Plus },
   { name: "Avaliações", href: "/reviews", icon: Star },
   { name: "Planos", href: "/plans", icon: Crown },
+  { name: "Configurações", href: "/settings", icon: Settings },
 ];
 
 export default function Sidebar() {

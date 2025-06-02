@@ -12,6 +12,7 @@ import Quotes from "@/pages/quotes";
 import NewQuote from "@/pages/new-quote";
 import Reviews from "@/pages/reviews";
 import Plans from "@/pages/plans";
+import Settings from "@/pages/settings";
 import QuoteView from "@/pages/quote-view";
 import Sidebar from "@/components/layout/sidebar";
 import MobileHeader from "@/components/layout/mobile-header";
@@ -34,6 +35,7 @@ function Router() {
           <Route path="/new-quote" component={NewQuote} />
           <Route path="/reviews" component={Reviews} />
           <Route path="/plans" component={Plans} />
+          <Route path="/settings" component={Settings} />
         </>
       )}
       <Route component={NotFound} />
