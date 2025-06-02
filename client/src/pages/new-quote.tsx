@@ -98,7 +98,7 @@ export default function NewQuote() {
     setLocation("/quotes");
   };
 
-  if (authLoading || clientsLoading) {
+  if (authLoading || clientsLoading || (isEditing && quoteLoading)) {
     return <LoadingSpinner />;
   }
 
@@ -106,8 +106,8 @@ export default function NewQuote() {
     <div className="space-y-8">
       {/* Header */}
       <Header 
-        title="Novo Orçamento"
-        subtitle="Crie um novo orçamento para seu cliente"
+        title={isEditing ? "Editar Orçamento" : "Novo Orçamento"}
+        subtitle={isEditing ? "Edite os dados do seu orçamento" : "Crie um novo orçamento para seu cliente"}
         backTo="/quotes"
       />
 
