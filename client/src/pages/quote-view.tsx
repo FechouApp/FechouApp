@@ -26,7 +26,7 @@ export default function QuoteView() {
 
   const approveMutation = useMutation({
     mutationFn: async () => {
-      await apiRequest(`/api/quotes/${quote?.id}/approve`, "POST");
+      await apiRequest("POST", `/api/quotes/${quote?.id}/approve`);
     },
     onSuccess: () => {
       toast({
@@ -46,7 +46,7 @@ export default function QuoteView() {
 
   const rejectMutation = useMutation({
     mutationFn: async () => {
-      await apiRequest(`/api/quotes/${quote?.id}/reject`, "POST");
+      await apiRequest("POST", `/api/quotes/${quote?.id}/reject`);
     },
     onSuccess: () => {
       toast({
@@ -66,7 +66,7 @@ export default function QuoteView() {
 
   const reviewMutation = useMutation({
     mutationFn: async () => {
-      await apiRequest("/api/reviews", "POST", {
+      await apiRequest("POST", "/api/reviews", {
         clientId: quote?.clientId,
         quoteId: quote?.id,
         rating,

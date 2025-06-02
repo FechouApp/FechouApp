@@ -53,7 +53,7 @@ export default function NewQuote() {
 
   const createQuoteMutation = useMutation({
     mutationFn: async (quoteData: CreateQuoteRequest) => {
-      await apiRequest("/api/quotes", "POST", quoteData);
+      await apiRequest("POST", "/api/quotes", quoteData);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/quotes"] });

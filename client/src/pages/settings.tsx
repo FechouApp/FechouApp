@@ -31,7 +31,7 @@ export default function Settings() {
 
   const updateUserMutation = useMutation({
     mutationFn: async (data: Partial<UserType>) => {
-      await apiRequest("/api/auth/user", "PUT", data);
+      await apiRequest("PUT", "/api/auth/user", data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
