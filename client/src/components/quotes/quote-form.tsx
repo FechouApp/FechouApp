@@ -43,6 +43,8 @@ export default function QuoteForm({
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [observations, setObservations] = useState("");
+  const [paymentTerms, setPaymentTerms] = useState("");
+  const [executionDeadline, setExecutionDeadline] = useState("");
   const [validityDays, setValidityDays] = useState(30);
   const [sendByWhatsapp, setSendByWhatsapp] = useState(true);
   const [sendByEmail, setSendByEmail] = useState(false);
@@ -114,6 +116,8 @@ export default function QuoteForm({
         title,
         description,
         observations,
+        paymentTerms,
+        executionDeadline,
         subtotal: totals.subtotal,
         discount: totals.discountAmount,
         total: totals.total,
