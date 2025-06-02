@@ -42,7 +42,7 @@ export default function Dashboard() {
     }
   }, [isAuthenticated, authLoading, toast]);
 
-  const { data: stats, isLoading: statsLoading } = useQuery<DashboardStats>({
+  const { data: stats, isLoading: statsLoading, error: statsError } = useQuery<DashboardStats>({
     queryKey: ["/api/dashboard/stats"],
     retry: false,
   });
