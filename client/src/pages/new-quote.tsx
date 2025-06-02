@@ -18,6 +18,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import LoadingSpinner from "@/components/common/loading-spinner";
 import QuoteForm from "@/components/quotes/quote-form";
 import QuickSetup from "@/components/quick-setup";
+import Header from "@/components/layout/header";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useLocation } from "wouter";
@@ -93,21 +94,11 @@ export default function NewQuote() {
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div className="flex items-center gap-4">
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          onClick={handleBack}
-          className="text-white hover:bg-white/10"
-        >
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Voltar
-        </Button>
-        <div>
-          <h1 className="text-3xl font-bold text-white mb-2">Novo Orçamento</h1>
-          <p className="text-white/70">Crie um novo orçamento para seu cliente</p>
-        </div>
-      </div>
+      <Header 
+        title="Novo Orçamento"
+        subtitle="Crie um novo orçamento para seu cliente"
+        backTo="/quotes"
+      />
 
       <div className="max-w-5xl">
         {/* Step Indicator */}

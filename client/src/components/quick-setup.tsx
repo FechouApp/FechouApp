@@ -10,41 +10,46 @@ export default function QuickSetup() {
 
   const createSampleClientsMutation = useMutation({
     mutationFn: async () => {
-      const sampleClients = [
-        {
-          name: "João Silva",
-          email: "joao.silva@email.com",
-          phone: "(11) 99999-1234",
-          address: "Rua das Flores, 123",
-          city: "São Paulo",
-          state: "SP",
-          zipCode: "01234-567",
-          notes: "Cliente frequente, prefere orçamentos detalhados"
-        },
-        {
-          name: "Maria Santos",
-          email: "maria.santos@email.com", 
-          phone: "(11) 98888-5678",
-          address: "Av. Paulista, 456",
-          city: "São Paulo",
-          state: "SP",
-          zipCode: "01311-000",
-          notes: "Trabalhos de reforma residencial"
-        },
-        {
-          name: "Carlos Ferreira",
-          email: "carlos.ferreira@email.com",
-          phone: "(11) 97777-9012",
-          address: "Rua Augusta, 789",
-          city: "São Paulo", 
-          state: "SP",
-          zipCode: "01305-100",
-          notes: "Serviços elétricos comerciais"
-        }
-      ];
+      try {
+        const sampleClients = [
+          {
+            name: "João Silva",
+            email: "joao.silva@email.com",
+            phone: "(11) 99999-1234",
+            address: "Rua das Flores, 123",
+            city: "São Paulo",
+            state: "SP",
+            zipCode: "01234-567",
+            notes: "Cliente frequente, prefere orçamentos detalhados"
+          },
+          {
+            name: "Maria Santos",
+            email: "maria.santos@email.com", 
+            phone: "(11) 98888-5678",
+            address: "Av. Paulista, 456",
+            city: "São Paulo",
+            state: "SP",
+            zipCode: "01311-000",
+            notes: "Trabalhos de reforma residencial"
+          },
+          {
+            name: "Carlos Ferreira",
+            email: "carlos.ferreira@email.com",
+            phone: "(11) 97777-9012",
+            address: "Rua Augusta, 789",
+            city: "São Paulo", 
+            state: "SP",
+            zipCode: "01305-100",
+            notes: "Serviços elétricos comerciais"
+          }
+        ];
 
-      for (const client of sampleClients) {
-        await apiRequest("/api/clients", "POST", client);
+        for (const client of sampleClients) {
+          await apiRequest("/api/clients", "POST", client);
+        }
+      } catch (error) {
+        console.error("Error creating clients:", error);
+        throw error;
       }
     },
     onSuccess: () => {
@@ -73,7 +78,7 @@ export default function QuickSetup() {
       </CardHeader>
       <CardContent className="space-y-4">
         <p className="text-gray-700">
-          Para começar a criar orçamentos, você precisa ter alguns clientes cadastrados.
+          Para começar a criar orçamentos, você precisa ter pelo menos um cliente cadastrado.
         </p>
         
         <div className="flex flex-col sm:flex-row gap-3">
@@ -83,7 +88,7 @@ export default function QuickSetup() {
             className="flex items-center gap-2"
           >
             <Users className="w-4 h-4" />
-            {createSampleClientsMutation.isPending ? "Criando..." : "Criar Clientes de Exemplo"}
+            {createSampleClientsMutation.isPending ? "Criando..." : "Criar Cliente"}
           </Button>
           
           <Button variant="outline" asChild>
