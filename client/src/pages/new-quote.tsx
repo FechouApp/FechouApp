@@ -17,6 +17,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import LoadingSpinner from "@/components/common/loading-spinner";
 import QuoteForm from "@/components/quotes/quote-form";
+import QuickSetup from "@/components/quick-setup";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useLocation } from "wouter";
@@ -51,7 +52,7 @@ export default function NewQuote() {
 
   const createQuoteMutation = useMutation({
     mutationFn: async (quoteData: CreateQuoteRequest) => {
-      await apiRequest("POST", "/api/quotes", quoteData);
+      await apiRequest("/api/quotes", "POST", quoteData);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/quotes"] });
@@ -131,6 +132,13 @@ export default function NewQuote() {
             </div>
           </div>
         </div>
+
+        {/* Show quick setup if no clients */}
+        {(!clients || clients.length === 0) && (
+          <div className="mb-8">
+            <QuickSetup />
+          </div>
+        )}
 
         {/* Quote Form */}
         <QuoteForm
