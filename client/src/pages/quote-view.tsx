@@ -6,20 +6,21 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Star, CheckCircle, XCircle, Calendar, Phone, Mail, MapPin, ArrowLeft } from "lucide-react";
+import { Star, CheckCircle, XCircle, Calendar, Phone, Mail, MapPin, ArrowLeft, Download } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import type { QuoteWithDetails } from "@/types";
 import { apiRequest } from "@/lib/queryClient";
-import { useToast } from "@/hooks/use-toast";
+import { generateQuotePDF, downloadPDF } from "@/lib/pdfGenerator";
 import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
 import LoadingSpinner from "@/components/common/loading-spinner";
 import { isUnauthorizedError } from "@/lib/authUtils";
 
 export default function QuoteView() {
   const { quoteNumber } = useParams<{ quoteNumber: string }>();
   const { toast } = useToast();
-  const { isAuthenticated, isLoading: authLoading } = useAuth();
+  const { user, isAuthenticated, isLoading: authLoading } = useAuth();
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
 
@@ -110,6 +111,32 @@ export default function QuoteView() {
       });
     },
   });
+
+  const handleDownloadPDF = async () => {
+    if (!quote || !user) return;
+    
+    try {
+      const isPaidPlan = (user as any)?.plan === 'premium' || (user as any)?.plan === 'paid';
+      const pdfBlob = await generateQuotePDF({
+        quote,
+        user: user as any,
+        isPaidPlan
+      });
+      
+      downloadPDF(pdfBlob, `Orçamento_${quote.quoteNumber}.pdf`);
+      
+      toast({
+        title: "PDF gerado!",
+        description: "O arquivo foi baixado com sucesso.",
+      });
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Não foi possível gerar o PDF.",
+        variant: "destructive",
+      });
+    }
+  };
 
   if (authLoading || isLoading) {
     return <LoadingSpinner />;
