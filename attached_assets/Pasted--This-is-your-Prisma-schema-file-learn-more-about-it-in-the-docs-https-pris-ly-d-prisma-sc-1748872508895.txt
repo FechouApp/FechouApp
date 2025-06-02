@@ -1,0 +1,405 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserPlan {
+  FREE
+  PREMIUM
+}
+
+enum QuoteStatus {
+  DRAFT      // Rascunho
+  SENT       // Enviado
+  VIEWED     // Visualizado
+  APPROVED   // Aprovado
+  PAID       // Pago
+  EXPIRED    // Expirado
+  REJECTED   // Rejeitado
+}
+
+enum PaymentStatus {
+  PENDING    // Pendente
+  PAID       // Pago
+  FAILED     // Falhou
+  REFUNDED   // Estornado
+}
+
+enum PaymentMethod {
+  PIX
+  CREDIT_CARD
+  BANK_SLIP
+}
+
+enum NotificationType {
+  QUOTE_VIEWED
+  QUOTE_APPROVED
+  QUOTE_PAID
+  QUOTE_EXPIRED
+  PAYMENT_RECEIVED
+  NEW_REVIEW
+  SYSTEM_UPDATE
+}
+
+// Tabela de usuários (profissionais)
+model User {
+  id              String   @id @default(cuid())
+  email           String   @unique
+  phone           String   @unique
+  name            String
+  cpfCnpj         String?  @unique
+  profession      String?
+  businessName    String?
+  logoUrl         String?
+  customDomain    String?  @unique
+  plan            UserPlan @default(FREE)
+  planExpiresAt   DateTime?
+  
+  // Configurações de pagamento
+  pixKey          String?
+  paymentGatewayId String?
+  
+  // Limites do plano
+  monthlyQuotes   Int      @default(0)
+  quotesLimit     Int      @default(5)
+  
+  // Configurações de notificação
+  whatsappNotifications Boolean @default(true)
+  emailNotifications    Boolean @default(true)
+  
+  // Timestamps
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  lastLoginAt     DateTime?
+  
+  // Relacionamentos
+  clients         Client[]
+  quotes          Quote[]
+  payments        Payment[]
+  notifications   Notification[]
+  reviews         Review[]
+  referrals       Referral[]
+  
+  @@map("users")
+}
+
+// Tabela de clientes
+model Client {
+  id        String   @id @default(cuid())
+  userId    String
+  name      String
+  email     String?
+  phone     String
+  address   String?
+  city      String?
+  state     String?
+  zipCode   String?
+  notes     String?
+  
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relacionamentos
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  quotes    Quote[]
+  reviews   Review[]
+  
+  @@map("clients")
+}
+
+// Tabela de orçamentos
+model Quote {
+  id              String      @id @default(cuid())
+  userId          String
+  clientId        String
+  quoteNumber     String      @unique // FH000001, FH000002, etc.
+  title           String
+  description     String?
+  observations    String?
+  
+  // Valores
+  subtotal        Decimal     @db.Decimal(10, 2)
+  discount        Decimal     @default(0) @db.Decimal(10, 2)
+  total           Decimal     @db.Decimal(10, 2)
+  
+  // Status e controle
+  status          QuoteStatus @default(DRAFT)
+  validUntil      DateTime
+  
+  // Visualização e aprovação
+  viewedAt        DateTime?
+  approvedAt      DateTime?
+  rejectedAt      DateTime?
+  rejectionReason String?
+  
+  // Configurações de envio
+  sendByWhatsapp  Boolean     @default(true)
+  sendByEmail     Boolean     @default(false)
+  
+  // Links e documentos
+  publicUrl       String?     @unique
+  pdfUrl          String?
+  contractUrl     String?
+  
+  // Timestamps
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  
+  // Relacionamentos
+  user            User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  client          Client      @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  items           QuoteItem[]
+  attachments     QuoteAttachment[]
+  payments        Payment[]
+  activities      QuoteActivity[]
+  
+  @@map("quotes")
+}
+
+// Itens do orçamento
+model QuoteItem {
+  id          String  @id @default(cuid())
+  quoteId     String
+  description String
+  quantity    Int     @default(1)
+  unitPrice   Decimal @db.Decimal(10, 2)
+  total       Decimal @db.Decimal(10, 2)
+  order       Int     @default(0)
+  
+  // Relacionamentos
+  quote       Quote   @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+  
+  @@map("quote_items")
+}
+
+// Anexos do orçamento
+model QuoteAttachment {
+  id          String   @id @default(cuid())
+  quoteId     String
+  filename    String
+  originalName String
+  mimeType    String
+  size        Int
+  url         String
+  
+  // Timestamps
+  createdAt   DateTime @default(now())
+  
+  // Relacionamentos
+  quote       Quote    @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+  
+  @@map("quote_attachments")
+}
+
+// Atividades do orçamento (log de ações)
+model QuoteActivity {
+  id          String   @id @default(cuid())
+  quoteId     String
+  action      String   // "created", "sent", "viewed", "approved", etc.
+  description String?
+  metadata    Json?    // Dados adicionais em JSON
+  ipAddress   String?
+  userAgent   String?
+  
+  // Timestamps
+  createdAt   DateTime @default(now())
+  
+  // Relacionamentos
+  quote       Quote    @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+  
+  @@map("quote_activities")
+}
+
+// Tabela de pagamentos
+model Payment {
+  id              String        @id @default(cuid())
+  userId          String
+  quoteId         String?
+  
+  // Informações do pagamento
+  amount          Decimal       @db.Decimal(10, 2)
+  method          PaymentMethod
+  status          PaymentStatus @default(PENDING)
+  
+  // Gateway de pagamento
+  gatewayId       String?       // ID no gateway de pagamento
+  gatewayResponse Json?         // Resposta completa do gateway
+  
+  // PIX específico
+  pixCode         String?       // Código PIX
+  pixQrCode       String?       // QR Code para pagamento
+  pixExpiresAt    DateTime?
+  
+  // Cartão específico
+  cardLast4       String?       // Últimos 4 dígitos do cartão
+  cardBrand       String?       // Visa, Mastercard, etc.
+  installments    Int?          // Número de parcelas
+  
+  // Timestamps
+  paidAt          DateTime?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  
+  // Relacionamentos
+  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  quote           Quote?        @relation(fields: [quoteId], references: [id], onDelete: SetNull)
+  
+  @@map("payments")
+}
+
+// Sistema de avaliações
+model Review {
+  id        String   @id @default(cuid())
+  userId    String   // Profissional avaliado
+  clientId  String   // Cliente que avaliou
+  quoteId   String?  // Orçamento relacionado (opcional)
+  
+  rating    Int      // 1 a 5
+  comment   String?
+  isPublic  Boolean  @default(true)
+  
+  // Resposta do profissional
+  response  String?
+  respondedAt DateTime?
+  
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relacionamentos
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  client    Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  
+  @@map("reviews")
+}
+
+// Sistema de indicações
+model Referral {
+  id            String   @id @default(cuid())
+  referrerId    String   // Quem indicou
+  referredEmail String   // Email do indicado
+  referredId    String?  // ID do usuário indicado (após cadastro)
+  
+  // Recompensas
+  bonusQuotes   Int      @default(1) // Orçamentos bônus para o referrer
+  isRedeemed    Boolean  @default(false)
+  redeemedAt    DateTime?
+  
+  // Timestamps
+  createdAt     DateTime @default(now())
+  
+  // Relacionamentos
+  referrer      User     @relation(fields: [referrerId], references: [id], onDelete: Cascade)
+  
+  @@map("referrals")
+}
+
+// Sistema de notificações
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  title     String
+  message   String
+  type      NotificationType
+  data      Json?            // Dados adicionais
+  
+  isRead    Boolean          @default(false)
+  readAt    DateTime?
+  
+  // Timestamps
+  createdAt DateTime         @default(now())
+  
+  // Relacionamentos
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("notifications")
+}
+
+// Configurações do sistema
+model SystemConfig {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String
+  
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@map("system_configs")
+}
+
+// Logs do sistema
+model SystemLog {
+  id        String   @id @default(cuid())
+  level     String   // info, warning, error
+  message   String
+  context   String?  // user_id, quote_id, etc.
+  metadata  Json?
+  
+  // Timestamps
+  createdAt DateTime @default(now())
+  
+  @@map("system_logs")
+}
+
+// Templates de email/WhatsApp
+model MessageTemplate {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  subject     String?  // Para emails
+  content     String   // Template com variáveis
+  type        String   // "email", "whatsapp", "sms"
+  isActive    Boolean  @default(true)
+  
+  // Timestamps
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@map("message_templates")
+}
+
+// Webhooks para integrações
+model Webhook {
+  id          String   @id @default(cuid())
+  userId      String   // Opcional, para webhooks específicos do usuário
+  url         String
+  events      String[] // Array de eventos que disparam o webhook
+  secret      String?  // Para validação de assinatura
+  isActive    Boolean  @default(true)
+  
+  // Estatísticas
+  lastTriggeredAt DateTime?
+  successCount    Int       @default(0)
+  failureCount    Int       @default(0)
+  
+  // Timestamps
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@map("webhooks")
+}
+
+// Histórico de webhooks
+model WebhookDelivery {
+  id          String   @id @default(cuid())
+  webhookId   String
+  event       String
+  payload     Json
+  response    String?
+  statusCode  Int?
+  success     Boolean  @default(false)
+  attempts    Int      @default(1)
+  
+  // Timestamps
+  createdAt   DateTime @default(now())
+  
+  @@map("webhook_deliveries")
+}

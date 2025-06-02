@@ -1,0 +1,49 @@
+flowchart TD
+  A[Início: Tela de Login / Cadastro] --> B{Usuário já cadastrado?}
+  B -- Sim --> C[Login]
+  B -- Não --> D[Cadastro: dados pessoais + profissão]
+
+  C --> E[Dashboard: resumo de orçamentos, botão Criar Novo]
+  D --> E
+
+  E --> F[Botão: Criar Novo Orçamento]
+  E --> G[Ver histórico de orçamentos]
+  E --> H[Ver avaliações recebidas]
+  E --> I[Configurações da Conta]
+
+  F --> F1[Selecionar cliente (novo ou existente)]
+  F1 --> F2[Inserir serviços, valores e observações]
+  F2 --> F3[Definir validade do orçamento]
+  F3 --> F4[Adicionar anexos (imagem ou PDF)]
+  F4 --> F5{Plano gratuito ou pago?}
+
+  F5 -- Gratuito --> F6[Gerar PDF com marca d'água + link padrão]
+  F5 -- Pago --> F7[Gerar PDF sem marca + link personalizado]
+
+  F6 --> F8[Selecionar forma de envio: WhatsApp]
+  F7 --> F9[Selecionar envio: WhatsApp e/ou e-mail]
+  F8 --> J[Cliente recebe orçamento]
+  F9 --> J
+
+  J --> K{Cliente aprova?}
+  K -- Sim --> L[Notificar profissional em tempo real]
+  L --> M[Cliente realiza pagamento (Pix / cartão)]
+  M --> N[Profissional recebe notificação de pagamento]
+
+  K -- Não --> O[Orçamento aguardando ou expirado]
+
+  J --> P[Cliente pode avaliar profissional]
+
+  I --> I1[Editar perfil]
+  I1 --> I2[Inserir logotipo (se plano pago)]
+  I1 --> I3[Ver plano atual e mudar para versão paga]
+  I1 --> I4[Ver recibos ou contrato anexado (pagos)]
+
+  G --> G1[Lista com filtros: enviado, aprovado, pago, expirado]
+  H --> H1[Ver notas e comentários recebidos]
+
+  subgraph Cliente (via link)
+    J --> Q[Ver orçamento]
+    Q --> R[Botões: Aprovar, Pagar, Avaliar]
+    Q --> S[Ver prazo de validade e anexos]
+  end
