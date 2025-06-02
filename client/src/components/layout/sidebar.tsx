@@ -63,16 +63,8 @@ export default function Sidebar() {
   return (
     <aside className="w-64 bg-white/10 backdrop-blur-md border-r border-white/20 hidden lg:block">
       <div className="p-6 h-full flex flex-col">
-        {/* Logo Section */}
-        <div className="flex items-center gap-3 mb-8">
-          <div className="w-10 h-10 bg-green-500 rounded-xl flex items-center justify-center">
-            <CheckCircle className="w-6 h-6 text-white" />
-          </div>
-          <div>
-            <h1 className="text-white font-bold text-xl">Fechou!</h1>
-            <p className="text-white/70 text-xs">Feche negócios</p>
-          </div>
-        </div>
+        {/* Spacer */}
+        <div className="mb-8"></div>
 
         {/* Navigation Menu */}
         <nav className="space-y-2 flex-1">

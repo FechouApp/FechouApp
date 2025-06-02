@@ -69,7 +69,7 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="max-w-6xl mx-auto space-y-8">
       {/* Welcome Section */}
       <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-8 rounded-xl">
         <h1 className="text-3xl font-bold mb-2">
@@ -82,57 +82,57 @@ export default function Dashboard() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card>
-          <CardContent className="p-6">
+        <Card className="shadow-md hover:shadow-lg transition-shadow">
+          <CardContent className="p-8">
             <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Total de Orçamentos</p>
-                <p className="text-3xl font-bold text-gray-900">{dashboardStats.totalQuotes}</p>
+              <div className="space-y-2">
+                <p className="text-base font-medium text-gray-600">Total de Orçamentos</p>
+                <p className="text-4xl font-bold text-gray-900">{dashboardStats.totalQuotes}</p>
               </div>
-              <FileText className="w-8 h-8 text-blue-600" />
+              <FileText className="w-12 h-12 text-blue-600" />
             </div>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardContent className="p-6">
+        <Card className="shadow-md hover:shadow-lg transition-shadow">
+          <CardContent className="p-8">
             <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Aprovados</p>
-                <p className="text-3xl font-bold text-green-600">{dashboardStats.approvedQuotes}</p>
+              <div className="space-y-2">
+                <p className="text-base font-medium text-gray-600">Aprovados</p>
+                <p className="text-4xl font-bold text-green-600">{dashboardStats.approvedQuotes}</p>
               </div>
-              <CheckCircle className="w-8 h-8 text-green-600" />
+              <CheckCircle className="w-12 h-12 text-green-600" />
             </div>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardContent className="p-6">
+        <Card className="shadow-md hover:shadow-lg transition-shadow">
+          <CardContent className="p-8">
             <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Faturamento</p>
+              <div className="space-y-2">
+                <p className="text-base font-medium text-gray-600">Faturamento</p>
                 <p className="text-3xl font-bold text-purple-600">
                   {formatCurrency(dashboardStats.totalRevenue)}
                 </p>
               </div>
-              <DollarSign className="w-8 h-8 text-purple-600" />
+              <DollarSign className="w-12 h-12 text-purple-600" />
             </div>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardContent className="p-6">
+        <Card className="shadow-md hover:shadow-lg transition-shadow">
+          <CardContent className="p-8">
             <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Avaliação Média</p>
+              <div className="space-y-2">
+                <p className="text-base font-medium text-gray-600">Avaliação Média</p>
                 <div className="flex items-center gap-2">
-                  <p className="text-3xl font-bold text-yellow-600">
+                  <p className="text-4xl font-bold text-yellow-600">
                     {dashboardStats.averageRating.toFixed(1)}
                   </p>
-                  <Star className="w-6 h-6 text-yellow-400 fill-current" />
+                  <Star className="w-8 h-8 text-yellow-400 fill-current" />
                 </div>
               </div>
-              <Star className="w-8 h-8 text-yellow-600" />
+              <Star className="w-12 h-12 text-yellow-600" />
             </div>
           </CardContent>
         </Card>
