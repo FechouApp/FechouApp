@@ -75,6 +75,8 @@ export const quotes = pgTable("quotes", {
   title: varchar("title").notNull(),
   description: text("description"),
   observations: text("observations"),
+  paymentTerms: text("payment_terms"),
+  executionDeadline: text("execution_deadline"),
   subtotal: decimal("subtotal", { precision: 10, scale: 2 }).notNull(),
   discount: decimal("discount", { precision: 10, scale: 2 }).notNull().default("0"),
   total: decimal("total", { precision: 10, scale: 2 }).notNull(),

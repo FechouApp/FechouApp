@@ -203,16 +203,7 @@ export default function QuoteForm({
             </div>
           </div>
           
-          <div>
-            <Label className="text-sm font-medium text-gray-700">Descrição</Label>
-            <Textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Descrição detalhada do projeto..."
-              rows={3}
-              className="mt-2"
-            />
-          </div>
+
         </CardContent>
       </Card>
 
@@ -241,6 +232,24 @@ export default function QuoteForm({
         </CardContent>
       </Card>
 
+      {/* Description */}
+      <Card className="bg-white shadow-lg">
+        <CardHeader>
+          <CardTitle className="text-lg font-semibold text-gray-800">
+            Descrição
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Textarea
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder="Descrição detalhada do projeto..."
+            rows={3}
+            className="w-full"
+          />
+        </CardContent>
+      </Card>
+
       {/* Summary and Settings */}
       <div className="grid lg:grid-cols-2 gap-6">
         {/* Additional Info */}
@@ -252,12 +261,34 @@ export default function QuoteForm({
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <Label className="text-sm font-medium text-gray-700">Observações</Label>
+              <Label className="text-sm font-medium text-gray-700">Condições de Pagamento</Label>
+              <Textarea
+                value={paymentTerms}
+                onChange={(e) => setPaymentTerms(e.target.value)}
+                placeholder="Ex: 50% na assinatura do contrato, 50% na entrega..."
+                rows={3}
+                className="mt-2"
+              />
+            </div>
+            
+            <div>
+              <Label className="text-sm font-medium text-gray-700">Prazo de Execução</Label>
+              <Textarea
+                value={executionDeadline}
+                onChange={(e) => setExecutionDeadline(e.target.value)}
+                placeholder="Ex: 30 dias corridos após aprovação do projeto..."
+                rows={3}
+                className="mt-2"
+              />
+            </div>
+            
+            <div>
+              <Label className="text-sm font-medium text-gray-700">Observações Gerais</Label>
               <Textarea
                 value={observations}
                 onChange={(e) => setObservations(e.target.value)}
-                placeholder="Condições de pagamento, prazo de execução, etc..."
-                rows={4}
+                placeholder="Informações adicionais, termos e condições..."
+                rows={3}
                 className="mt-2"
               />
             </div>

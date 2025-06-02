@@ -45,6 +45,8 @@ export interface Quote {
   title: string;
   description: string | null;
   observations: string | null;
+  paymentTerms: string | null;
+  executionDeadline: string | null;
   subtotal: string;
   discount: string;
   total: string;
@@ -127,6 +129,8 @@ export interface CreateQuoteRequest {
     title: string;
     description?: string;
     observations?: string;
+    paymentTerms?: string;
+    executionDeadline?: string;
     subtotal: string;
     discount: string;
     total: string;
