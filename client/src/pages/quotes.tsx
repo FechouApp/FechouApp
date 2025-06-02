@@ -102,10 +102,12 @@ export default function Quotes() {
   };
 
   const handleViewQuote = (quoteId: string) => {
-    toast({
-      title: "Funcionalidade em desenvolvimento",
-      description: "A visualização detalhada de orçamentos será implementada em breve.",
-    });
+    // Encontrar o orçamento específico
+    const quote = quotes?.find(q => q.id === quoteId);
+    if (!quote) return;
+    
+    // Navegar para a página de visualização usando o número do orçamento
+    setLocation(`/quote/${quote.quoteNumber}`);
   };
 
   const handleEditQuote = (quoteId: string) => {
@@ -114,9 +116,19 @@ export default function Quotes() {
   };
 
   const handleSendQuote = (quoteId: string) => {
+    // Encontrar o orçamento específico
+    const quote = quotes?.find(q => q.id === quoteId);
+    if (!quote) return;
+
     toast({
-      title: "Funcionalidade em desenvolvimento",
-      description: "O envio de orçamentos será implementado em breve.",
+      title: "Opções de Envio",
+      description: `Para enviar orçamentos precisamos configurar:
+      • Email SMTP para envio automático
+      • API do WhatsApp Business para mensagens
+      • Servidor para gerar PDFs profissionais
+      
+      Você gostaria de configurar essas integrações?`,
+      duration: 8000,
     });
   };
 

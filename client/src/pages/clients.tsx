@@ -197,7 +197,7 @@ export default function Clients() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium mb-2">Telefone *</label>
-                  <Input name="phone" required placeholder="(13) 98111-6464" />
+                  <Input name="phone" required placeholder="(00) 00000-0000" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-2">CPF</label>

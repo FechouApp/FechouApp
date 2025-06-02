@@ -23,13 +23,17 @@ import { isUnauthorizedError } from "@/lib/authUtils";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useLocation } from "wouter";
 import { ArrowLeft, Plus, Eye, Send } from "lucide-react";
-import type { Client, CreateQuoteRequest } from "@/types";
+import type { Client, CreateQuoteRequest, QuoteWithDetails } from "@/types";
 
 export default function NewQuote() {
   const { toast } = useToast();
   const { isAuthenticated, isLoading: authLoading } = useAuth();
-  const [, setLocation] = useLocation();
+  const [location, setLocation] = useLocation();
   const [step, setStep] = useState(1);
+  
+  // Extract quote ID from URL for editing
+  const quoteId = location.includes('/edit') ? location.split('/')[2] : null;
+  const isEditing = !!quoteId;
 
   // Redirect to home if not authenticated
   useEffect(() => {
@@ -48,6 +52,13 @@ export default function NewQuote() {
 
   const { data: clients, isLoading: clientsLoading } = useQuery<Client[]>({
     queryKey: ["/api/clients"],
+    retry: false,
+  });
+
+  // Load quote data for editing
+  const { data: quoteData, isLoading: quoteLoading } = useQuery<QuoteWithDetails>({
+    queryKey: ["/api/quotes", quoteId],
+    enabled: !!quoteId,
     retry: false,
   });
 
