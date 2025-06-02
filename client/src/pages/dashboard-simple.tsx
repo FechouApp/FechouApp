@@ -215,7 +215,7 @@ export default function Dashboard() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            {recentReviews.length === 0 ? (
+            {(recentReviews as any[]).length === 0 ? (
               <div className="text-center py-8 text-gray-500">
                 <Star className="w-12 h-12 mx-auto mb-3 opacity-30" />
                 <p>Nenhuma avaliação ainda</p>
@@ -223,7 +223,7 @@ export default function Dashboard() {
               </div>
             ) : (
               <div className="space-y-3">
-                {recentReviews.slice(0, 5).map((review: any) => (
+                {(recentReviews as any[]).slice(0, 5).map((review: any) => (
                   <div key={review.id} className="p-3 bg-gray-50 rounded-lg">
                     <div className="flex items-center justify-between mb-2">
                       <p className="font-medium">{review.client?.name}</p>
