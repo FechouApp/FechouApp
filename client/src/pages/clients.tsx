@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
-import { useEffect } from "react";
+import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -42,8 +42,10 @@ import type { Client } from "@/types";
 export default function Clients() {
   const { toast } = useToast();
   const { isAuthenticated, isLoading: authLoading } = useAuth();
+  const [, setLocation] = useLocation();
   const [searchTerm, setSearchTerm] = useState("");
   const [isNewClientModalOpen, setIsNewClientModalOpen] = useState(false);
+  const [editingClient, setEditingClient] = useState<Client | null>(null);
 
   // Redirect to home if not authenticated
   useEffect(() => {
@@ -353,13 +355,31 @@ export default function Clients() {
                     </TableCell>
                     <TableCell>
                       <div className="flex gap-2">
-                        <Button size="sm" variant="ghost" title="Ver perfil">
+                        <Button 
+                          size="sm" 
+                          variant="ghost" 
+                          title="Ver perfil"
+                          onClick={() => toast({
+                            title: "Funcionalidade em desenvolvimento",
+                            description: "Visualização de perfil será implementada em breve.",
+                          })}
+                        >
                           <Eye className="w-4 h-4" />
                         </Button>
-                        <Button size="sm" variant="ghost" title="Editar">
+                        <Button 
+                          size="sm" 
+                          variant="ghost" 
+                          title="Editar"
+                          onClick={() => setEditingClient(client)}
+                        >
                           <Edit className="w-4 h-4" />
                         </Button>
-                        <Button size="sm" variant="ghost" title="Novo orçamento">
+                        <Button 
+                          size="sm" 
+                          variant="ghost" 
+                          title="Novo orçamento"
+                          onClick={() => setLocation(`/new-quote?clientId=${client.id}`)}
+                        >
                           <FileText className="w-4 h-4" />
                         </Button>
                         <Button 

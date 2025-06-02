@@ -17,7 +17,7 @@ import LoadingSpinner from "@/components/common/loading-spinner";
 import { isUnauthorizedError } from "@/lib/authUtils";
 
 export default function QuoteView() {
-  const { id } = useParams<{ id: string }>();
+  const { quoteNumber } = useParams<{ quoteNumber: string }>();
   const { toast } = useToast();
   const { isAuthenticated, isLoading: authLoading } = useAuth();
   const [rating, setRating] = useState(0);
@@ -39,8 +39,8 @@ export default function QuoteView() {
   }, [isAuthenticated, authLoading, toast]);
 
   const { data: quote, isLoading, error } = useQuery<QuoteWithDetails>({
-    queryKey: ["/api/quotes", id],
-    enabled: !!id && isAuthenticated,
+    queryKey: ["/api/quotes/number", quoteNumber],
+    enabled: !!quoteNumber && isAuthenticated,
     retry: false,
   });
 
