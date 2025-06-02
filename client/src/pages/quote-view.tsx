@@ -46,9 +46,7 @@ export default function QuoteView() {
 
   const rejectMutation = useMutation({
     mutationFn: async () => {
-      await apiRequest(`/api/quotes/${quote?.id}/reject`, {
-        method: "POST",
-      });
+      await apiRequest(`/api/quotes/${quote?.id}/reject`, "POST");
     },
     onSuccess: () => {
       toast({
@@ -68,15 +66,12 @@ export default function QuoteView() {
 
   const reviewMutation = useMutation({
     mutationFn: async () => {
-      await apiRequest("/api/reviews", {
-        method: "POST",
-        body: JSON.stringify({
-          clientId: quote?.clientId,
-          quoteId: quote?.id,
-          rating,
-          comment: comment.trim() || null,
-          isPublic: true,
-        }),
+      await apiRequest("/api/reviews", "POST", {
+        clientId: quote?.clientId,
+        quoteId: quote?.id,
+        rating,
+        comment: comment.trim() || null,
+        isPublic: true,
       });
     },
     onSuccess: () => {

@@ -134,6 +134,69 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Public quote view (no authentication required)
+  app.get('/api/quotes/public/:quoteNumber', async (req, res) => {
+    try {
+      const { quoteNumber } = req.params;
+      const quote = await storage.getQuoteByNumber(quoteNumber);
+      
+      if (!quote) {
+        return res.status(404).json({ message: "Quote not found" });
+      }
+
+      // Mark as viewed if not already
+      if (!quote.viewedAt) {
+        await storage.updateQuoteStatus(quote.id, quote.status, { viewedAt: new Date() });
+      }
+
+      res.json(quote);
+    } catch (error) {
+      console.error("Error fetching public quote:", error);
+      res.status(500).json({ message: "Failed to fetch quote" });
+    }
+  });
+
+  // Approve quote (public)
+  app.post('/api/quotes/:id/approve', async (req, res) => {
+    try {
+      const { id } = req.params;
+      const success = await storage.updateQuoteStatus(id, 'approved', { 
+        approvedAt: new Date() 
+      });
+      
+      if (!success) {
+        return res.status(404).json({ message: "Quote not found" });
+      }
+
+      res.json({ message: "Quote approved successfully" });
+    } catch (error) {
+      console.error("Error approving quote:", error);
+      res.status(500).json({ message: "Failed to approve quote" });
+    }
+  });
+
+  // Reject quote (public)
+  app.post('/api/quotes/:id/reject', async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { reason } = req.body;
+      
+      const success = await storage.updateQuoteStatus(id, 'rejected', { 
+        rejectedAt: new Date(),
+        rejectionReason: reason || null
+      });
+      
+      if (!success) {
+        return res.status(404).json({ message: "Quote not found" });
+      }
+
+      res.json({ message: "Quote rejected successfully" });
+    } catch (error) {
+      console.error("Error rejecting quote:", error);
+      res.status(500).json({ message: "Failed to reject quote" });
+    }
+  });
+
   app.get('/api/quotes/:id', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;

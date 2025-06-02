@@ -137,7 +137,7 @@ export class DatabaseStorage implements IStorage {
     const result = await db
       .delete(clients)
       .where(and(eq(clients.id, id), eq(clients.userId, userId)));
-    return result.rowCount > 0;
+    return (result.rowCount ?? 0) > 0;
   }
 
   async searchClients(userId: string, searchTerm: string): Promise<Client[]> {
@@ -270,7 +270,7 @@ export class DatabaseStorage implements IStorage {
     const result = await db
       .delete(quotes)
       .where(and(eq(quotes.id, id), eq(quotes.userId, userId)));
-    return result.rowCount > 0;
+    return (result.rowCount ?? 0) > 0;
   }
 
   async updateQuoteStatus(id: string, status: string, metadata?: any): Promise<boolean> {
@@ -293,7 +293,7 @@ export class DatabaseStorage implements IStorage {
       .update(quotes)
       .set(updateData)
       .where(eq(quotes.id, id));
-    return result.rowCount > 0;
+    return (result.rowCount ?? 0) > 0;
   }
 
   // Quote item operations
@@ -316,7 +316,7 @@ export class DatabaseStorage implements IStorage {
 
   async deleteQuoteItem(id: string): Promise<boolean> {
     const result = await db.delete(quoteItems).where(eq(quoteItems.id, id));
-    return result.rowCount > 0;
+    return (result.rowCount ?? 0) > 0;
   }
 
   // Review operations
@@ -399,7 +399,7 @@ export class DatabaseStorage implements IStorage {
       .update(notifications)
       .set({ isRead: true, readAt: new Date() })
       .where(and(eq(notifications.id, id), eq(notifications.userId, userId)));
-    return result.rowCount > 0;
+    return (result.rowCount ?? 0) > 0;
   }
 
   // Statistics
