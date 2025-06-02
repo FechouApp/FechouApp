@@ -22,6 +22,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import LoadingSpinner from "@/components/common/loading-spinner";
+import Header from "@/components/layout/header";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { 
@@ -160,16 +161,19 @@ export default function Clients() {
   ) || [];
 
   return (
-    <div className="space-y-8">
-      {/* Header */}
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold text-white mb-2">Clientes</h1>
-          <p className="text-white/70">Gerencie seus clientes</p>
-        </div>
+    <div className="space-y-6">
+      <Header 
+        title="Clientes" 
+        subtitle="Gerencie seus clientes"
+        showBackButton={true}
+        backTo="/"
+      />
+
+      {/* Novo Cliente Button */}
+      <div className="flex justify-end">
         <Dialog open={isNewClientModalOpen} onOpenChange={setIsNewClientModalOpen}>
           <DialogTrigger asChild>
-            <Button className="bg-white text-brand-primary hover:bg-gray-50">
+            <Button className="bg-blue-600 text-white hover:bg-blue-700">
               <Plus className="w-4 h-4 mr-2" />
               Novo Cliente
             </Button>
