@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useParams } from "wouter";
 import { Button } from "@/components/ui/button";
@@ -12,16 +12,36 @@ import { ptBR } from "date-fns/locale";
 import type { QuoteWithDetails } from "@/types";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
+import LoadingSpinner from "@/components/common/loading-spinner";
+import { isUnauthorizedError } from "@/lib/authUtils";
 
 export default function QuoteView() {
-  const { quoteNumber } = useParams<{ quoteNumber: string }>();
+  const { id } = useParams<{ id: string }>();
   const { toast } = useToast();
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
 
+  // Redirect to home if not authenticated
+  useEffect(() => {
+    if (!authLoading && !isAuthenticated) {
+      toast({
+        title: "Unauthorized",
+        description: "You are logged out. Logging in again...",
+        variant: "destructive",
+      });
+      setTimeout(() => {
+        window.location.href = "/api/login";
+      }, 500);
+      return;
+    }
+  }, [isAuthenticated, authLoading, toast]);
+
   const { data: quote, isLoading } = useQuery<QuoteWithDetails>({
-    queryKey: ["/api/quotes/public", quoteNumber],
-    enabled: !!quoteNumber,
+    queryKey: ["/api/quotes", id],
+    enabled: !!id && isAuthenticated,
+    retry: false,
   });
 
   const approveMutation = useMutation({
