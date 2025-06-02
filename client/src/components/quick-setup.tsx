@@ -45,7 +45,7 @@ export default function QuickSetup() {
         ];
 
         for (const client of sampleClients) {
-          await apiRequest("/api/clients", "POST", client);
+          await apiRequest("POST", "/api/clients", client);
         }
       } catch (error) {
         console.error("Error creating clients:", error);
