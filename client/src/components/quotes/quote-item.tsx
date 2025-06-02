@@ -40,12 +40,12 @@ export default function QuoteItem({
   return (
     <div className="grid grid-cols-1 md:grid-cols-12 gap-4 p-4 bg-gray-50 rounded-lg">
       {/* Item Number */}
-      <div className="md:col-span-1 flex items-center">
-        <span className="text-sm font-medium text-gray-500">#{index}</span>
+      <div className="md:col-span-1 flex items-center justify-center">
+        <span className="text-lg font-semibold text-gray-700 bg-white rounded-full w-8 h-8 flex items-center justify-center">#{index}</span>
       </div>
 
       {/* Description */}
-      <div className="md:col-span-6">
+      <div className="md:col-span-5">
         <label className="block text-sm font-medium text-gray-700 mb-1">
           Descrição *
         </label>
@@ -85,7 +85,7 @@ export default function QuoteItem({
       </div>
 
       {/* Total */}
-      <div className="md:col-span-1">
+      <div className="md:col-span-2">
         <label className="block text-sm font-medium text-gray-700 mb-1">
           Total
         </label>

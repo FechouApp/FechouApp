@@ -306,7 +306,7 @@ export default function QuoteForm({
                   <Checkbox
                     id="whatsapp"
                     checked={sendByWhatsapp}
-                    onCheckedChange={setSendByWhatsapp}
+                    onCheckedChange={(checked) => setSendByWhatsapp(checked === true)}
                   />
                   <Label htmlFor="whatsapp" className="text-sm text-gray-700">
                     Enviar via WhatsApp
@@ -316,7 +316,7 @@ export default function QuoteForm({
                   <Checkbox
                     id="email"
                     checked={sendByEmail}
-                    onCheckedChange={setSendByEmail}
+                    onCheckedChange={(checked) => setSendByEmail(checked === true)}
                   />
                   <Label htmlFor="email" className="text-sm text-gray-700">
                     Enviar via E-mail
