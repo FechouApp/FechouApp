@@ -38,7 +38,7 @@ export default function QuoteView() {
     }
   }, [isAuthenticated, authLoading, toast]);
 
-  const { data: quote, isLoading } = useQuery<QuoteWithDetails>({
+  const { data: quote, isLoading, error } = useQuery<QuoteWithDetails>({
     queryKey: ["/api/quotes", id],
     enabled: !!id && isAuthenticated,
     retry: false,
@@ -179,17 +179,19 @@ export default function QuoteView() {
             <div className="mb-6">
               <h3 className="font-semibold mb-3">Informações do Cliente</h3>
               <div className="space-y-2 text-sm text-gray-600">
-                <div className="flex items-center gap-2">
-                  <Phone className="w-4 h-4" />
-                  <span>{quote.client.phone}</span>
-                </div>
-                {quote.client.email && (
+                {quote.client?.phone && (
+                  <div className="flex items-center gap-2">
+                    <Phone className="w-4 h-4" />
+                    <span>{quote.client.phone}</span>
+                  </div>
+                )}
+                {quote.client?.email && (
                   <div className="flex items-center gap-2">
                     <Mail className="w-4 h-4" />
                     <span>{quote.client.email}</span>
                   </div>
                 )}
-                {quote.client.address && (
+                {quote.client?.address && (
                   <div className="flex items-center gap-2">
                     <MapPin className="w-4 h-4" />
                     <span>
@@ -206,7 +208,7 @@ export default function QuoteView() {
             <div className="mb-6">
               <h3 className="font-semibold mb-3">Itens do Orçamento</h3>
               <div className="space-y-3">
-                {quote.items.map((item) => (
+                {quote.items?.map((item) => (
                   <div key={item.id} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
                     <div className="flex-1">
                       <p className="font-medium">{item.description}</p>
