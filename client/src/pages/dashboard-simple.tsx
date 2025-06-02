@@ -129,7 +129,7 @@ export default function Dashboard() {
                   <p className="text-4xl font-bold text-yellow-600">
                     {dashboardStats.averageRating.toFixed(1)}
                   </p>
-                  <Star className="w-8 h-8 text-yellow-400 fill-current" />
+                  <Star className="w-6 h-6 text-yellow-400 fill-current" />
                 </div>
               </div>
               <Star className="w-10 h-10 text-yellow-600" />
