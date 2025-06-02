@@ -139,6 +139,8 @@ export default function Clients() {
       phone: formData.get('phone') as string,
       cpf: formData.get('cpf') as string,
       address: formData.get('address') as string,
+      number: formData.get('number') as string,
+      complement: formData.get('complement') as string,
       city: formData.get('city') as string,
       state: formData.get('state') as string,
       zipCode: formData.get('zipCode') as string,
@@ -222,11 +224,11 @@ export default function Clients() {
               Novo Cliente
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-2xl">
+          <DialogContent className="max-w-lg max-h-[80vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Novo Cliente</DialogTitle>
             </DialogHeader>
-            <form onSubmit={handleCreateClient} className="space-y-4">
+            <form onSubmit={handleCreateClient} className="space-y-3">
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium mb-2">Nome *</label>
@@ -260,23 +262,30 @@ export default function Clients() {
                   />
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium mb-2">CEP</label>
-                  <Input 
-                    name="zipCode" 
-                    placeholder="00000-000"
-                    onChange={(e) => {
-                      const form = e.target.closest('form') as HTMLFormElement;
-                      handleCEPChange(e.target.value, form);
-                    }}
-                  />
+              <div>
+                <label className="block text-sm font-medium mb-2">CEP</label>
+                <Input 
+                  name="zipCode" 
+                  placeholder="00000-000"
+                  onChange={(e) => {
+                    const form = e.target.closest('form') as HTMLFormElement;
+                    handleCEPChange(e.target.value, form);
+                  }}
+                />
+              </div>
+              <div className="grid grid-cols-3 gap-3">
+                <div className="col-span-2">
+                  <label className="block text-sm font-medium mb-2">Endereço</label>
+                  <Input name="address" placeholder="Rua, avenida, praça" />
                 </div>
-                <div></div>
+                <div>
+                  <label className="block text-sm font-medium mb-2">Número</label>
+                  <Input name="number" placeholder="123" />
+                </div>
               </div>
               <div>
-                <label className="block text-sm font-medium mb-2">Endereço</label>
-                <Input name="address" placeholder="Rua, número, complemento" />
+                <label className="block text-sm font-medium mb-2">Complemento</label>
+                <Input name="complement" placeholder="Apto, casa, bloco, etc." />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>

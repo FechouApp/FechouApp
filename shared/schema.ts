@@ -59,6 +59,8 @@ export const clients = pgTable("clients", {
   phone: varchar("phone").notNull(),
   cpf: varchar("cpf"),
   address: text("address"),
+  number: varchar("number"),
+  complement: varchar("complement"),
   city: varchar("city"),
   state: varchar("state"),
   zipCode: varchar("zip_code"),

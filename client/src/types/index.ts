@@ -30,6 +30,8 @@ export interface Client {
   phone: string;
   cpf: string | null;
   address: string | null;
+  number: string | null;
+  complement: string | null;
   city: string | null;
   state: string | null;
   zipCode: string | null;
