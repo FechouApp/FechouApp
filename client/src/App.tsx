@@ -52,13 +52,32 @@ function AppLayout() {
   }
 
   return (
-    <div className="flex h-screen overflow-hidden bg-gradient-to-br from-brand-primary to-brand-secondary">
-      <Sidebar />
-      <div className="flex-1 flex flex-col">
-        <MobileHeader />
-        <main className="flex-1 overflow-y-auto p-6">
-          <Router />
-        </main>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+      {/* Cabeçalho Fixo */}
+      <div className="fixed top-0 left-0 right-0 bg-white shadow-md z-50 border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            <div className="flex items-center space-x-4">
+              <img 
+                src="/attached_assets/Imagem do WhatsApp de 2025-06-02 à(s) 10.57.31_271fccf2.jpg" 
+                alt="Fechou!" 
+                className="h-10 w-auto"
+              />
+              <span className="text-xl font-bold text-gray-800">Fechou!</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      {/* Layout Responsivo */}
+      <div className="pt-16 flex min-h-screen">
+        <Sidebar />
+        <div className="flex-1 flex flex-col">
+          <MobileHeader />
+          <main className="flex-1 p-6">
+            <Router />
+          </main>
+        </div>
       </div>
     </div>
   );
