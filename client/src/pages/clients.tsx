@@ -135,6 +135,7 @@ export default function Clients() {
       name: formData.get('name') as string,
       email: formData.get('email') as string,
       phone: formData.get('phone') as string,
+      cpf: formData.get('cpf') as string,
       address: formData.get('address') as string,
       city: formData.get('city') as string,
       state: formData.get('state') as string,
@@ -196,12 +197,19 @@ export default function Clients() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium mb-2">Telefone *</label>
-                  <Input name="phone" required placeholder="(11) 99999-9999" />
+                  <Input name="phone" required placeholder="(13) 98111-6464" />
                 </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2">CPF</label>
+                  <Input name="cpf" placeholder="000.000.000-00" />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium mb-2">CEP</label>
                   <Input name="zipCode" placeholder="00000-000" />
                 </div>
+                <div></div>
               </div>
               <div>
                 <label className="block text-sm font-medium mb-2">Endereço</label>
