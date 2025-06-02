@@ -15,6 +15,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import LoadingSpinner from "@/components/common/loading-spinner";
+import Header from "@/components/layout/header";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useLocation } from "wouter";
@@ -101,8 +102,10 @@ export default function Quotes() {
   };
 
   const handleViewQuote = (quoteId: string) => {
-    console.log('Tentando navegar para:', `/quotes/${quoteId}`);
-    setLocation(`/quotes/${quoteId}`);
+    toast({
+      title: "Funcionalidade em desenvolvimento",
+      description: "A visualização detalhada de orçamentos será implementada em breve.",
+    });
   };
 
   const handleEditQuote = (quoteId: string) => {
@@ -195,16 +198,19 @@ export default function Quotes() {
   }) || [];
 
   return (
-    <div className="space-y-8">
-      {/* Header */}
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold text-white mb-2">Orçamentos</h1>
-          <p className="text-white/70">Gerencie todos os seus orçamentos</p>
-        </div>
+    <div className="space-y-6">
+      <Header 
+        title="Orçamentos" 
+        subtitle="Gerencie todos os seus orçamentos"
+        showBackButton={true}
+        backTo="/"
+      />
+
+      {/* Novo Orçamento Button */}
+      <div className="flex justify-end">
         <Button 
           onClick={handleNewQuote}
-          className="bg-white text-brand-primary hover:bg-gray-50"
+          className="bg-blue-600 text-white hover:bg-blue-700"
         >
           <Plus className="w-4 h-4 mr-2" />
           Novo Orçamento
@@ -274,18 +280,19 @@ export default function Quotes() {
               )}
             </div>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Orçamento</TableHead>
-                  <TableHead>Cliente</TableHead>
-                  <TableHead>Valor</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Validade</TableHead>
-                  <TableHead>Ações</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Orçamento</TableHead>
+                    <TableHead className="hidden sm:table-cell">Cliente</TableHead>
+                    <TableHead>Valor</TableHead>
+                    <TableHead className="hidden md:table-cell">Status</TableHead>
+                    <TableHead className="hidden md:table-cell">Validade</TableHead>
+                    <TableHead>Ações</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
                 {filteredQuotes.map((quote) => {
                   const validityStatus = getValidityStatus(quote.validUntil);
                   
@@ -369,8 +376,97 @@ export default function Quotes() {
                     </TableRow>
                   );
                 })}
-              </TableBody>
-            </Table>
+                  </TableBody>
+                </Table>
+              </div>
+
+              {/* Mobile Cards */}
+              <div className="md:hidden space-y-4">
+                {filteredQuotes.map((quote) => {
+                  const validityStatus = getValidityStatus(quote.validUntil);
+                  
+                  return (
+                    <Card key={quote.id} className="p-4">
+                      <div className="space-y-3">
+                        {/* Header */}
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <p className="font-medium text-gray-800">{quote.quoteNumber}</p>
+                            <p className="text-sm text-gray-600">{quote.title}</p>
+                          </div>
+                          <span
+                            className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(quote.status)}`}
+                          >
+                            {getStatusText(quote.status)}
+                          </span>
+                        </div>
+
+                        {/* Cliente */}
+                        <div>
+                          <p className="text-sm text-gray-500">Cliente</p>
+                          <p className="text-gray-800">{quote.client.name}</p>
+                        </div>
+
+                        {/* Valor e Validade */}
+                        <div className="flex justify-between">
+                          <div>
+                            <p className="text-sm text-gray-500">Valor</p>
+                            <p className="font-semibold text-gray-800">
+                              {formatCurrency(quote.total)}
+                            </p>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-sm text-gray-500">Validade</p>
+                            <p className={`text-sm ${validityStatus.color}`}>
+                              {validityStatus.text}
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Ações */}
+                        <div className="flex justify-between pt-3 border-t">
+                          <div className="flex gap-2">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              title="Ver"
+                              onClick={() => handleViewQuote(quote.id)}
+                            >
+                              <Eye className="w-4 h-4 text-blue-500" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              title="Editar"
+                              onClick={() => handleEditQuote(quote.id)}
+                            >
+                              <Edit className="w-4 h-4 text-green-500" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              title="Enviar"
+                              onClick={() => handleSendQuote(quote.id)}
+                            >
+                              <Send className="w-4 h-4 text-orange-500" />
+                            </Button>
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            title="Excluir"
+                            onClick={() => handleDeleteQuote(quote.id)}
+                            disabled={deleteQuoteMutation.isPending}
+                          >
+                            <Trash2 className="w-4 h-4 text-red-500" />
+                          </Button>
+                        </div>
+                      </div>
+                    </Card>
+                  );
+                })}
+              </div>
+            </>
           )}
         </CardContent>
       </Card>
