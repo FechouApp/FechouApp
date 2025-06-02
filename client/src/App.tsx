@@ -12,6 +12,7 @@ import Quotes from "@/pages/quotes";
 import NewQuote from "@/pages/new-quote";
 import Reviews from "@/pages/reviews";
 import Plans from "@/pages/plans";
+import QuoteView from "@/pages/quote-view";
 import Sidebar from "@/components/layout/sidebar";
 import MobileHeader from "@/components/layout/mobile-header";
 
@@ -20,6 +21,9 @@ function Router() {
 
   return (
     <Switch>
+      {/* Public route for quote viewing */}
+      <Route path="/quote/:quoteNumber" component={QuoteView} />
+      
       {isLoading || !isAuthenticated ? (
         <Route path="/" component={Landing} />
       ) : (

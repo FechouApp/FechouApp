@@ -442,7 +442,7 @@ export class DatabaseStorage implements IStorage {
       totalQuotes: quoteStats.totalQuotes,
       approvedQuotes: quoteStats.approvedQuotes,
       totalRevenue: quoteStats.totalRevenue,
-      averageRating: Number(reviewStats.averageRating.toFixed(1)),
+      averageRating: reviewStats.averageRating ? Number(reviewStats.averageRating.toFixed(1)) : 0,
       thisMonthQuotes: thisMonthStats.thisMonthQuotes,
     };
   }
