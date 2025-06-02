@@ -54,10 +54,14 @@ export default function Dashboard() {
 
   const getStatusBadge = (status: string) => {
     const statusMap: { [key: string]: { label: string; variant: any } } = {
-      'pending': { label: 'Pendente', variant: 'secondary' },
-      'approved': { label: 'Aprovado', variant: 'default' },
-      'rejected': { label: 'Rejeitado', variant: 'destructive' },
-      'paid': { label: 'Pago', variant: 'default' },
+      'DRAFT': { label: 'Rascunho', variant: 'secondary' },
+      'PENDING': { label: 'Pendente', variant: 'secondary' },
+      'SENT': { label: 'Enviado', variant: 'default' },
+      'VIEWED': { label: 'Visualizado', variant: 'default' },
+      'APPROVED': { label: 'Aprovado', variant: 'default' },
+      'REJECTED': { label: 'Rejeitado', variant: 'destructive' },
+      'PAID': { label: 'Pago', variant: 'default' },
+      'EXPIRED': { label: 'Expirado', variant: 'destructive' },
     };
     
     const statusInfo = statusMap[status] || { label: status, variant: 'secondary' };
@@ -137,8 +141,8 @@ export default function Dashboard() {
       {/* Quick Actions */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Link href="/new-quote">
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-            <CardContent className="p-6 text-center">
+          <Card className="hover:shadow-lg transition-shadow cursor-pointer h-full">
+            <CardContent className="p-6 text-center h-full flex flex-col justify-center">
               <Plus className="w-12 h-12 text-blue-600 mx-auto mb-4" />
               <h3 className="font-semibold text-lg mb-2">Novo Orçamento</h3>
               <p className="text-gray-600 text-sm">Criar um novo orçamento para cliente</p>
@@ -147,8 +151,8 @@ export default function Dashboard() {
         </Link>
 
         <Link href="/clients">
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-            <CardContent className="p-6 text-center">
+          <Card className="hover:shadow-lg transition-shadow cursor-pointer h-full">
+            <CardContent className="p-6 text-center h-full flex flex-col justify-center">
               <Users className="w-12 h-12 text-green-600 mx-auto mb-4" />
               <h3 className="font-semibold text-lg mb-2">Gerenciar Clientes</h3>
               <p className="text-gray-600 text-sm">Adicionar e organizar clientes</p>
@@ -157,8 +161,8 @@ export default function Dashboard() {
         </Link>
 
         <Link href="/quotes">
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-            <CardContent className="p-6 text-center">
+          <Card className="hover:shadow-lg transition-shadow cursor-pointer h-full">
+            <CardContent className="p-6 text-center h-full flex flex-col justify-center">
               <FileText className="w-12 h-12 text-purple-600 mx-auto mb-4" />
               <h3 className="font-semibold text-lg mb-2">Ver Orçamentos</h3>
               <p className="text-gray-600 text-sm">Acompanhar status dos orçamentos</p>
