@@ -62,12 +62,12 @@ export default function Sidebar() {
   };
 
   return (
-    <aside className="w-64 bg-gray-900 border-r border-gray-700 hidden lg:block">
+    <aside className="w-64 bg-gradient-to-b from-blue-600 to-purple-600 border-r border-blue-500/30 hidden lg:block">
       <div className="p-6 h-full flex flex-col">
         {/* Logo/Brand Section */}
         <div className="mb-8">
           <h2 className="text-xl font-bold text-white">Fechou!</h2>
-          <p className="text-gray-400 text-sm">Gerencie seus orçamentos</p>
+          <p className="text-blue-100 text-sm">Gerencie seus orçamentos</p>
         </div>
 
         {/* Navigation Menu */}
@@ -82,8 +82,8 @@ export default function Sidebar() {
                 onClick={() => setLocation(item.href)}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
                   active
-                    ? 'bg-blue-600 text-white shadow-lg'
-                    : 'text-gray-300 hover:bg-gray-700 hover:text-white'
+                    ? 'bg-white/20 text-white shadow-lg backdrop-blur-sm'
+                    : 'text-blue-100 hover:bg-white/10 hover:text-white'
                 }`}
               >
                 <Icon className="w-5 h-5" />
@@ -94,8 +94,8 @@ export default function Sidebar() {
         </nav>
 
         {/* User Profile Section */}
-        <div className="mt-8 pt-6 border-t border-gray-700">
-          <div className="bg-gray-800 rounded-xl p-4">
+        <div className="mt-8 pt-6 border-t border-white/20">
+          <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
             <div className="flex items-center gap-3 mb-3">
               {(user as any)?.profileImageUrl ? (
                 <img
@@ -104,7 +104,7 @@ export default function Sidebar() {
                   className="w-12 h-12 rounded-full object-cover"
                 />
               ) : (
-                <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center">
+                <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
                   <span className="text-white font-semibold text-sm">
                     {getUserInitials()}
                   </span>
@@ -114,7 +114,7 @@ export default function Sidebar() {
                 <p className="text-white font-medium text-sm truncate">
                   {getUserDisplayName()}
                 </p>
-                <p className="text-gray-400 text-xs truncate">
+                <p className="text-blue-100 text-xs truncate">
                   {(user as any)?.profession || "Profissional"}
                 </p>
               </div>
@@ -125,7 +125,7 @@ export default function Sidebar() {
                 variant="ghost"
                 size="sm"
                 onClick={() => setLocation("/settings")}
-                className="w-full justify-start text-gray-300 hover:text-white hover:bg-gray-700 h-8"
+                className="w-full justify-start text-blue-100 hover:text-white hover:bg-white/10 h-8"
               >
                 <Settings className="w-4 h-4 mr-2" />
                 Configurações
@@ -135,7 +135,7 @@ export default function Sidebar() {
                 variant="ghost"
                 size="sm"
                 onClick={handleLogout}
-                className="w-full justify-start text-gray-300 hover:text-white hover:bg-gray-700 h-8"
+                className="w-full justify-start text-blue-100 hover:text-white hover:bg-white/10 h-8"
               >
                 <LogOut className="w-4 h-4 mr-2" />
                 Sair
