@@ -8,7 +8,7 @@ export default function Landing() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-brand-primary to-brand-secondary">
+    <div className="min-h-screen bg-gradient-to-br from-blue-600 to-purple-600">
       <div className="container mx-auto px-4 py-12">
         {/* Header */}
         <div className="text-center mb-16">
