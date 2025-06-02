@@ -101,10 +101,12 @@ export default function Quotes() {
   };
 
   const handleViewQuote = (quoteId: string) => {
+    console.log('Tentando navegar para:', `/quotes/${quoteId}`);
     setLocation(`/quotes/${quoteId}`);
   };
 
   const handleEditQuote = (quoteId: string) => {
+    console.log('Tentando editar:', `/quotes/${quoteId}/edit`);
     setLocation(`/quotes/${quoteId}/edit`);
   };
 
