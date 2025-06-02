@@ -100,6 +100,21 @@ export default function Quotes() {
     setLocation("/new-quote");
   };
 
+  const handleViewQuote = (quoteId: string) => {
+    setLocation(`/quotes/${quoteId}`);
+  };
+
+  const handleEditQuote = (quoteId: string) => {
+    setLocation(`/quotes/${quoteId}/edit`);
+  };
+
+  const handleSendQuote = (quoteId: string) => {
+    toast({
+      title: "Funcionalidade em desenvolvimento",
+      description: "O envio de orçamentos será implementado em breve.",
+    });
+  };
+
   if (authLoading || isLoading) {
     return <LoadingSpinner />;
   }
@@ -314,13 +329,28 @@ export default function Quotes() {
                       </TableCell>
                       <TableCell>
                         <div className="flex gap-2">
-                          <Button size="sm" variant="ghost" title="Ver orçamento">
+                          <Button 
+                            size="sm" 
+                            variant="ghost" 
+                            title="Ver orçamento"
+                            onClick={() => handleViewQuote(quote.id)}
+                          >
                             <Eye className="w-4 h-4" />
                           </Button>
-                          <Button size="sm" variant="ghost" title="Editar">
+                          <Button 
+                            size="sm" 
+                            variant="ghost" 
+                            title="Editar"
+                            onClick={() => handleEditQuote(quote.id)}
+                          >
                             <Edit className="w-4 h-4" />
                           </Button>
-                          <Button size="sm" variant="ghost" title="Enviar">
+                          <Button 
+                            size="sm" 
+                            variant="ghost" 
+                            title="Enviar"
+                            onClick={() => handleSendQuote(quote.id)}
+                          >
                             <Send className="w-4 h-4" />
                           </Button>
                           <Button 
