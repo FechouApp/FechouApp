@@ -1,0 +1,252 @@
+import {
+  pgTable,
+  text,
+  varchar,
+  timestamp,
+  jsonb,
+  index,
+  decimal,
+  integer,
+  boolean,
+  date,
+} from "drizzle-orm/pg-core";
+import { createInsertSchema } from "drizzle-zod";
+import { relations } from "drizzle-orm";
+import { z } from "zod";
+
+// Session storage table - mandatory for Replit Auth
+export const sessions = pgTable(
+  "sessions",
+  {
+    sid: varchar("sid").primaryKey(),
+    sess: jsonb("sess").notNull(),
+    expire: timestamp("expire").notNull(),
+  },
+  (table) => [index("IDX_session_expire").on(table.expire)],
+);
+
+// User storage table - mandatory for Replit Auth
+export const users = pgTable("users", {
+  id: varchar("id").primaryKey().notNull(),
+  email: varchar("email").unique(),
+  firstName: varchar("first_name"),
+  lastName: varchar("last_name"),
+  profileImageUrl: varchar("profile_image_url"),
+  cpfCnpj: varchar("cpf_cnpj").unique(),
+  profession: varchar("profession"),
+  businessName: varchar("business_name"),
+  logoUrl: varchar("logo_url"),
+  customDomain: varchar("custom_domain").unique(),
+  plan: varchar("plan").notNull().default("FREE"), // FREE, PREMIUM
+  planExpiresAt: timestamp("plan_expires_at"),
+  pixKey: varchar("pix_key"),
+  paymentGatewayId: varchar("payment_gateway_id"),
+  monthlyQuotes: integer("monthly_quotes").notNull().default(0),
+  quotesLimit: integer("quotes_limit").notNull().default(5),
+  whatsappNotifications: boolean("whatsapp_notifications").notNull().default(true),
+  emailNotifications: boolean("email_notifications").notNull().default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+  lastLoginAt: timestamp("last_login_at"),
+});
+
+// Clients table
+export const clients = pgTable("clients", {
+  id: varchar("id").primaryKey().notNull(),
+  userId: varchar("user_id").notNull(),
+  name: varchar("name").notNull(),
+  email: varchar("email"),
+  phone: varchar("phone").notNull(),
+  address: text("address"),
+  city: varchar("city"),
+  state: varchar("state"),
+  zipCode: varchar("zip_code"),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Quotes table
+export const quotes = pgTable("quotes", {
+  id: varchar("id").primaryKey().notNull(),
+  userId: varchar("user_id").notNull(),
+  clientId: varchar("client_id").notNull(),
+  quoteNumber: varchar("quote_number").notNull().unique(),
+  title: varchar("title").notNull(),
+  description: text("description"),
+  observations: text("observations"),
+  subtotal: decimal("subtotal", { precision: 10, scale: 2 }).notNull(),
+  discount: decimal("discount", { precision: 10, scale: 2 }).notNull().default("0"),
+  total: decimal("total", { precision: 10, scale: 2 }).notNull(),
+  status: varchar("status").notNull().default("DRAFT"), // DRAFT, SENT, VIEWED, APPROVED, PAID, EXPIRED, REJECTED
+  validUntil: date("valid_until").notNull(),
+  viewedAt: timestamp("viewed_at"),
+  approvedAt: timestamp("approved_at"),
+  rejectedAt: timestamp("rejected_at"),
+  rejectionReason: text("rejection_reason"),
+  sendByWhatsapp: boolean("send_by_whatsapp").notNull().default(true),
+  sendByEmail: boolean("send_by_email").notNull().default(false),
+  publicUrl: varchar("public_url").unique(),
+  pdfUrl: varchar("pdf_url"),
+  contractUrl: varchar("contract_url"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Quote items table
+export const quoteItems = pgTable("quote_items", {
+  id: varchar("id").primaryKey().notNull(),
+  quoteId: varchar("quote_id").notNull(),
+  description: text("description").notNull(),
+  quantity: integer("quantity").notNull().default(1),
+  unitPrice: decimal("unit_price", { precision: 10, scale: 2 }).notNull(),
+  total: decimal("total", { precision: 10, scale: 2 }).notNull(),
+  order: integer("order").notNull().default(0),
+});
+
+// Reviews table
+export const reviews = pgTable("reviews", {
+  id: varchar("id").primaryKey().notNull(),
+  userId: varchar("user_id").notNull(),
+  clientId: varchar("client_id").notNull(),
+  quoteId: varchar("quote_id"),
+  rating: integer("rating").notNull(), // 1 to 5
+  comment: text("comment"),
+  isPublic: boolean("is_public").notNull().default(true),
+  response: text("response"),
+  respondedAt: timestamp("responded_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Payments table
+export const payments = pgTable("payments", {
+  id: varchar("id").primaryKey().notNull(),
+  userId: varchar("user_id").notNull(),
+  quoteId: varchar("quote_id"),
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  method: varchar("method").notNull(), // PIX, CREDIT_CARD, BANK_SLIP
+  status: varchar("status").notNull().default("PENDING"), // PENDING, PAID, FAILED, REFUNDED
+  gatewayId: varchar("gateway_id"),
+  gatewayResponse: jsonb("gateway_response"),
+  pixCode: varchar("pix_code"),
+  pixQrCode: varchar("pix_qr_code"),
+  pixExpiresAt: timestamp("pix_expires_at"),
+  cardLast4: varchar("card_last4"),
+  cardBrand: varchar("card_brand"),
+  installments: integer("installments"),
+  paidAt: timestamp("paid_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Notifications table
+export const notifications = pgTable("notifications", {
+  id: varchar("id").primaryKey().notNull(),
+  userId: varchar("user_id").notNull(),
+  title: varchar("title").notNull(),
+  message: text("message").notNull(),
+  type: varchar("type").notNull(), // QUOTE_VIEWED, QUOTE_APPROVED, etc.
+  data: jsonb("data"),
+  isRead: boolean("is_read").notNull().default(false),
+  readAt: timestamp("read_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Relations
+export const usersRelations = relations(users, ({ many }) => ({
+  clients: many(clients),
+  quotes: many(quotes),
+  reviews: many(reviews),
+  payments: many(payments),
+  notifications: many(notifications),
+}));
+
+export const clientsRelations = relations(clients, ({ one, many }) => ({
+  user: one(users, { fields: [clients.userId], references: [users.id] }),
+  quotes: many(quotes),
+  reviews: many(reviews),
+}));
+
+export const quotesRelations = relations(quotes, ({ one, many }) => ({
+  user: one(users, { fields: [quotes.userId], references: [users.id] }),
+  client: one(clients, { fields: [quotes.clientId], references: [clients.id] }),
+  items: many(quoteItems),
+  payments: many(payments),
+}));
+
+export const quoteItemsRelations = relations(quoteItems, ({ one }) => ({
+  quote: one(quotes, { fields: [quoteItems.quoteId], references: [quotes.id] }),
+}));
+
+export const reviewsRelations = relations(reviews, ({ one }) => ({
+  user: one(users, { fields: [reviews.userId], references: [users.id] }),
+  client: one(clients, { fields: [reviews.clientId], references: [clients.id] }),
+}));
+
+export const paymentsRelations = relations(payments, ({ one }) => ({
+  user: one(users, { fields: [payments.userId], references: [users.id] }),
+  quote: one(quotes, { fields: [payments.quoteId], references: [quotes.id] }),
+}));
+
+export const notificationsRelations = relations(notifications, ({ one }) => ({
+  user: one(users, { fields: [notifications.userId], references: [users.id] }),
+}));
+
+// Insert schemas
+export const insertUserSchema = createInsertSchema(users).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertClientSchema = createInsertSchema(clients).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertQuoteSchema = createInsertSchema(quotes).omit({
+  id: true,
+  quoteNumber: true,
+  publicUrl: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertQuoteItemSchema = createInsertSchema(quoteItems).omit({
+  id: true,
+});
+
+export const insertReviewSchema = createInsertSchema(reviews).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertPaymentSchema = createInsertSchema(payments).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertNotificationSchema = createInsertSchema(notifications).omit({
+  id: true,
+  createdAt: true,
+});
+
+// Types
+export type UpsertUser = typeof users.$inferInsert;
+export type User = typeof users.$inferSelect;
+export type InsertClient = z.infer<typeof insertClientSchema>;
+export type Client = typeof clients.$inferSelect;
+export type InsertQuote = z.infer<typeof insertQuoteSchema>;
+export type Quote = typeof quotes.$inferSelect;
+export type InsertQuoteItem = z.infer<typeof insertQuoteItemSchema>;
+export type QuoteItem = typeof quoteItems.$inferSelect;
+export type InsertReview = z.infer<typeof insertReviewSchema>;
+export type Review = typeof reviews.$inferSelect;
+export type InsertPayment = z.infer<typeof insertPaymentSchema>;
+export type Payment = typeof payments.$inferSelect;
+export type InsertNotification = z.infer<typeof insertNotificationSchema>;
+export type Notification = typeof notifications.$inferSelect;

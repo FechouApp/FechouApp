@@ -1,0 +1,393 @@
+import { useState } from "react";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { useAuth } from "@/hooks/useAuth";
+import { useEffect } from "react";
+import { useToast } from "@/hooks/use-toast";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import LoadingSpinner from "@/components/common/loading-spinner";
+import { isUnauthorizedError } from "@/lib/authUtils";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { 
+  Users, 
+  Plus, 
+  Search, 
+  Mail, 
+  Phone, 
+  MapPin, 
+  Eye, 
+  Edit, 
+  FileText,
+  Trash2
+} from "lucide-react";
+import type { Client } from "@/types";
+
+export default function Clients() {
+  const { toast } = useToast();
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [isNewClientModalOpen, setIsNewClientModalOpen] = useState(false);
+
+  // Redirect to home if not authenticated
+  useEffect(() => {
+    if (!authLoading && !isAuthenticated) {
+      toast({
+        title: "Unauthorized",
+        description: "You are logged out. Logging in again...",
+        variant: "destructive",
+      });
+      setTimeout(() => {
+        window.location.href = "/api/login";
+      }, 500);
+      return;
+    }
+  }, [isAuthenticated, authLoading, toast]);
+
+  const { data: clients, isLoading } = useQuery<Client[]>({
+    queryKey: ["/api/clients", searchTerm],
+    retry: false,
+  });
+
+  const createClientMutation = useMutation({
+    mutationFn: async (clientData: any) => {
+      await apiRequest("POST", "/api/clients", clientData);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/clients"] });
+      toast({
+        title: "Sucesso",
+        description: "Cliente criado com sucesso!",
+      });
+      setIsNewClientModalOpen(false);
+    },
+    onError: (error) => {
+      if (isUnauthorizedError(error)) {
+        toast({
+          title: "Unauthorized",
+          description: "You are logged out. Logging in again...",
+          variant: "destructive",
+        });
+        setTimeout(() => {
+          window.location.href = "/api/login";
+        }, 500);
+        return;
+      }
+      toast({
+        title: "Erro",
+        description: "Erro ao criar cliente. Tente novamente.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const deleteClientMutation = useMutation({
+    mutationFn: async (clientId: string) => {
+      await apiRequest("DELETE", `/api/clients/${clientId}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/clients"] });
+      toast({
+        title: "Sucesso",
+        description: "Cliente removido com sucesso!",
+      });
+    },
+    onError: (error) => {
+      if (isUnauthorizedError(error)) {
+        toast({
+          title: "Unauthorized",
+          description: "You are logged out. Logging in again...",
+          variant: "destructive",
+        });
+        setTimeout(() => {
+          window.location.href = "/api/login";
+        }, 500);
+        return;
+      }
+      toast({
+        title: "Erro",
+        description: "Erro ao remover cliente. Tente novamente.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleCreateClient = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const clientData = {
+      name: formData.get('name') as string,
+      email: formData.get('email') as string,
+      phone: formData.get('phone') as string,
+      address: formData.get('address') as string,
+      city: formData.get('city') as string,
+      state: formData.get('state') as string,
+      zipCode: formData.get('zipCode') as string,
+      notes: formData.get('notes') as string,
+    };
+    createClientMutation.mutate(clientData);
+  };
+
+  const handleDeleteClient = (clientId: string) => {
+    if (confirm('Tem certeza que deseja remover este cliente?')) {
+      deleteClientMutation.mutate(clientId);
+    }
+  };
+
+  if (authLoading || isLoading) {
+    return <LoadingSpinner />;
+  }
+
+  const filteredClients = clients?.filter(client =>
+    client.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    client.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    client.phone.includes(searchTerm)
+  ) || [];
+
+  return (
+    <div className="space-y-8">
+      {/* Header */}
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold text-white mb-2">Clientes</h1>
+          <p className="text-white/70">Gerencie seus clientes</p>
+        </div>
+        <Dialog open={isNewClientModalOpen} onOpenChange={setIsNewClientModalOpen}>
+          <DialogTrigger asChild>
+            <Button className="bg-white text-brand-primary hover:bg-gray-50">
+              <Plus className="w-4 h-4 mr-2" />
+              Novo Cliente
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Novo Cliente</DialogTitle>
+            </DialogHeader>
+            <form onSubmit={handleCreateClient} className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium mb-2">Nome *</label>
+                  <Input name="name" required placeholder="Nome completo" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2">E-mail</label>
+                  <Input name="email" type="email" placeholder="email@exemplo.com" />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium mb-2">Telefone *</label>
+                  <Input name="phone" required placeholder="(11) 99999-9999" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2">CEP</label>
+                  <Input name="zipCode" placeholder="00000-000" />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">Endereço</label>
+                <Input name="address" placeholder="Rua, número, complemento" />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium mb-2">Cidade</label>
+                  <Input name="city" placeholder="Cidade" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2">Estado</label>
+                  <Input name="state" placeholder="SP" />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">Observações</label>
+                <textarea
+                  name="notes"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-brand-primary focus:border-transparent"
+                  rows={3}
+                  placeholder="Notas sobre o cliente..."
+                />
+              </div>
+              <div className="flex justify-end gap-3">
+                <Button type="button" variant="outline" onClick={() => setIsNewClientModalOpen(false)}>
+                  Cancelar
+                </Button>
+                <Button type="submit" className="brand-gradient text-white" disabled={createClientMutation.isPending}>
+                  {createClientMutation.isPending ? "Criando..." : "Criar Cliente"}
+                </Button>
+              </div>
+            </form>
+          </DialogContent>
+        </Dialog>
+      </div>
+
+      {/* Search and Filters */}
+      <Card className="bg-white shadow-lg">
+        <CardContent className="p-6">
+          <div className="flex flex-col md:flex-row gap-4">
+            <div className="flex-1 relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <Input
+                placeholder="Buscar clientes..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            <div className="flex gap-2">
+              <select className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-primary">
+                <option>Todos os clientes</option>
+                <option>Clientes ativos</option>
+                <option>Últimos 30 dias</option>
+              </select>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Clients Table */}
+      <Card className="bg-white shadow-lg">
+        <CardContent className="p-0">
+          {filteredClients.length === 0 ? (
+            <div className="text-center py-12">
+              <Users className="w-16 h-16 mx-auto mb-4 text-gray-300" />
+              <h3 className="text-xl font-semibold text-gray-600 mb-2">
+                {searchTerm ? "Nenhum cliente encontrado" : "Nenhum cliente cadastrado"}
+              </h3>
+              <p className="text-gray-500 mb-6">
+                {searchTerm 
+                  ? "Tente ajustar os termos de busca" 
+                  : "Adicione seu primeiro cliente para começar"
+                }
+              </p>
+              {!searchTerm && (
+                <Button onClick={() => setIsNewClientModalOpen(true)} className="brand-gradient text-white">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Adicionar Cliente
+                </Button>
+              )}
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Cliente</TableHead>
+                  <TableHead>Contato</TableHead>
+                  <TableHead>Localização</TableHead>
+                  <TableHead>Orçamentos</TableHead>
+                  <TableHead>Ações</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredClients.map((client) => (
+                  <TableRow key={client.id} className="hover:bg-gray-50">
+                    <TableCell>
+                      <div className="flex items-center">
+                        <div className="w-10 h-10 bg-brand-primary/10 rounded-full flex items-center justify-center mr-3">
+                          <span className="text-brand-primary font-semibold">
+                            {client.name.charAt(0).toUpperCase()}
+                          </span>
+                        </div>
+                        <div>
+                          <p className="font-medium text-gray-800">{client.name}</p>
+                          <p className="text-sm text-gray-600">
+                            Cliente desde {new Date(client.createdAt || '').getFullYear()}
+                          </p>
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="space-y-1">
+                        {client.email && (
+                          <div className="flex items-center gap-2 text-sm">
+                            <Mail className="w-4 h-4 text-gray-400" />
+                            <span>{client.email}</span>
+                          </div>
+                        )}
+                        <div className="flex items-center gap-2 text-sm">
+                          <Phone className="w-4 h-4 text-gray-400" />
+                          <span>{client.phone}</span>
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      {client.city && client.state ? (
+                        <div className="flex items-center gap-2 text-sm">
+                          <MapPin className="w-4 h-4 text-gray-400" />
+                          <span>{client.city}, {client.state}</span>
+                        </div>
+                      ) : (
+                        <span className="text-gray-400">-</span>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      <span className="inline-block px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
+                        0 orçamentos
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex gap-2">
+                        <Button size="sm" variant="ghost" title="Ver perfil">
+                          <Eye className="w-4 h-4" />
+                        </Button>
+                        <Button size="sm" variant="ghost" title="Editar">
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                        <Button size="sm" variant="ghost" title="Novo orçamento">
+                          <FileText className="w-4 h-4" />
+                        </Button>
+                        <Button 
+                          size="sm" 
+                          variant="ghost" 
+                          title="Excluir"
+                          onClick={() => handleDeleteClient(client.id)}
+                          disabled={deleteClientMutation.isPending}
+                        >
+                          <Trash2 className="w-4 h-4 text-red-500" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Pagination */}
+      {filteredClients.length > 10 && (
+        <div className="flex items-center justify-between">
+          <p className="text-sm text-white/70">
+            Mostrando 1-{Math.min(10, filteredClients.length)} de {filteredClients.length} clientes
+          </p>
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" disabled>
+              Anterior
+            </Button>
+            <Button className="brand-gradient text-white" size="sm">
+              1
+            </Button>
+            <Button variant="outline" size="sm" disabled>
+              Próximo
+            </Button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
