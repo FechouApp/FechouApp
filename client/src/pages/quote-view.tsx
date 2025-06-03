@@ -86,9 +86,14 @@ export default function QuoteView() {
   }
 
   const copyPixKey = async () => {
-    // Use a sample PIX key for demo - in production this would come from user settings
-    const pixKey = "marcenaria.estrela@exemplo.com";
+    if (!quote) return;
+    
     try {
+      // Fetch user data to get the real PIX key
+      const userResponse = await fetch(`/api/users/${quote.userId}`);
+      const userData = await userResponse.json();
+      const pixKey = userData.pixKey || "13981116464"; // Use the PIX key from user data
+      
       await navigator.clipboard.writeText(pixKey);
       toast({
         title: "Chave PIX copiada!",
@@ -454,8 +459,8 @@ export default function QuoteView() {
               )}
             </div>
 
-            {/* WhatsApp Buttons - Only for professional when not in public view */}
-            {user && !isPublicView && quote.userId === (user as any)?.id && quote.client?.phone && (
+            {/* WhatsApp Buttons - Only for quote owner */}
+            {user && quote.userId === (user as any)?.id && quote.client?.phone && !window.location.pathname.includes('/quote/') && (
               <div className="mb-4 space-y-2">
                 <Button 
                   onClick={sendViaWhatsApp}
@@ -477,7 +482,7 @@ export default function QuoteView() {
             )}
             
             {/* Manual Approve button for quote owner */}
-            {user && !isPublicView && quote.userId === (user as any)?.id && quote.status === "pending" && (
+            {user && quote.userId === (user as any)?.id && quote.status === "pending" && !window.location.pathname.includes('/quote/') && (
               <div className="mb-4">
                 <Button 
                   onClick={() => approveMutation.mutate()}
