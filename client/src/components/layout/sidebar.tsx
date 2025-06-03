@@ -75,7 +75,7 @@ export default function Sidebar() {
           {navigation.map((item) => {
             const Icon = item.icon;
             const active = isActive(item.href);
-            
+
             return (
               <button
                 key={item.name}
@@ -123,7 +123,7 @@ export default function Sidebar() {
                 </p>
               </div>
             </div>
-            
+
             <div className="space-y-1">
               <Button
                 variant="ghost"
@@ -134,7 +134,7 @@ export default function Sidebar() {
                 <Settings className="w-4 h-4 mr-2" />
                 Configurações
               </Button>
-              
+
               <Button
                 variant="ghost"
                 size="sm"

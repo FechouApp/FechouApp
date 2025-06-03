@@ -19,6 +19,7 @@ import PublicQuote from "@/pages/public-quote";
 import Sidebar from "@/components/layout/sidebar";
 import MobileHeader from "@/components/layout/mobile-header";
 import LoadingSpinner from "@/components/common/loading-spinner";
+import Reports from "@/pages/reports";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -27,7 +28,7 @@ function Router() {
     <Switch>
       {/* Public route for client quote viewing */}
       <Route path="/quote/:quoteNumber" component={PublicQuote} />
-      
+
       {isLoading || !isAuthenticated ? (
         <Route path="/" component={Landing} />
       ) : (
@@ -39,8 +40,8 @@ function Router() {
           <Route path="/quotes/view/:quoteId" component={QuoteView} />
           <Route path="/new-quote" component={NewQuote} />
           <Route path="/reviews" component={Reviews} />
-          <Route path="/plans" component={Plans} />
-          <Route path="/plan-comparison" component={PlanComparison} />
+          <Route path="/reports" component={Reports} />
+          <Route path="/plans" component={PlanComparison} />
           <Route path="/settings" component={Settings} />
         </>
       )}
