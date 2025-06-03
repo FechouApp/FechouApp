@@ -13,7 +13,9 @@ import {
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import QuoteItem from "./quote-item";
-import { Plus, Save, Eye, Send, Trash2 } from "lucide-react";
+import { Plus, Save, Eye, Send, Trash2, Crown } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
 import type { Client, CreateQuoteRequest } from "@/types";
 
 interface QuoteFormProps {
@@ -41,6 +43,10 @@ export default function QuoteForm({
   onStepChange,
   existingQuote
 }: QuoteFormProps) {
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const isUserPremium = (user as any)?.plan === "PREMIUM";
+  const maxItemsForFreeUser = 3;
   const [selectedClientId, setSelectedClientId] = useState(existingQuote?.clientId || "");
   const [title, setTitle] = useState(existingQuote?.title || "");
   const [description, setDescription] = useState(existingQuote?.description || "");
@@ -64,6 +70,16 @@ export default function QuoteForm({
   const [discount, setDiscount] = useState(existingQuote?.discount || "0");
 
   const addItem = () => {
+    // Verificar limitação do plano gratuito
+    if (!isUserPremium && items.length >= maxItemsForFreeUser) {
+      toast({
+        title: "Limite atingido",
+        description: `Plano gratuito permite apenas ${maxItemsForFreeUser} itens por orçamento. Faça upgrade para Premium.`,
+        variant: "destructive",
+      });
+      return;
+    }
+
     const newItem: QuoteItemData = {
       id: Date.now().toString(),
       description: "",
@@ -224,12 +240,24 @@ export default function QuoteForm({
       {/* Items */}
       <Card className="bg-white shadow-lg">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-          <CardTitle className="text-lg font-semibold text-gray-800">
+          <CardTitle className="text-lg font-semibold text-gray-800 flex items-center gap-2">
             Serviços e Produtos
+            {!isUserPremium && (
+              <span className="text-xs text-amber-600 bg-amber-50 px-2 py-1 rounded">
+                Máx. {maxItemsForFreeUser} itens (Gratuito)
+              </span>
+            )}
           </CardTitle>
-          <Button onClick={addItem} className="brand-gradient text-white">
+          <Button 
+            onClick={addItem} 
+            className="brand-gradient text-white"
+            disabled={!isUserPremium && items.length >= maxItemsForFreeUser}
+          >
             <Plus className="w-4 h-4 mr-2" />
             Adicionar Item
+            {!isUserPremium && items.length >= maxItemsForFreeUser && (
+              <Crown className="w-4 h-4 ml-2" />
+            )}
           </Button>
         </CardHeader>
         <CardContent className="space-y-4">

@@ -11,6 +11,7 @@ interface PDFGeneratorOptions {
 }
 
 export async function generateQuotePDF({ quote, user, isPaidPlan }: PDFGeneratorOptions): Promise<Blob> {
+  const isUserPremium = (user as any)?.plan === "PREMIUM";
   const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
@@ -260,8 +261,8 @@ export async function generateQuotePDF({ quote, user, isPaidPlan }: PDFGenerator
 
   yPosition += 5;
 
-  // Marca d'água posicionada em área livre (canto direito/inferior)
-  if (!isPaidPlan && !watermarkAdded) {
+  // Marca d'água para plano gratuito
+  if (!isUserPremium) {
     doc.setGState(doc.GState({ opacity: 0.1 }));
     doc.setTextColor(100, 100, 100);
     doc.setFontSize(24);
