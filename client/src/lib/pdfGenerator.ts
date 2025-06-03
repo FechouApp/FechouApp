@@ -7,11 +7,10 @@ import { formatPhone, formatCPF, formatCEP } from './utils';
 interface PDFGeneratorOptions {
   quote: QuoteWithDetails;
   user: User;
-  isPaidPlan: boolean;
+  isUserPremium: boolean;
 }
 
-export async function generateQuotePDF({ quote, user, isPaidPlan }: PDFGeneratorOptions): Promise<Blob> {
-  const isUserPremium = (user as any)?.plan === "PREMIUM";
+export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGeneratorOptions): Promise<Blob> {
   const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();

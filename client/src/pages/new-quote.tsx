@@ -70,6 +70,10 @@ export default function NewQuote() {
 
   const createQuoteMutation = useMutation({
     mutationFn: async (quoteData: CreateQuoteRequest) => {
+      // Verificar limite de orçamentos mensais para plano gratuito
+      if (planLimits && !planLimits.canCreateQuote) {
+        throw new Error(`Limite de ${planLimits.monthlyQuoteLimit} orçamentos por mês atingido. Faça upgrade para Premium.`);
+      }
       await apiRequest("POST", "/api/quotes", quoteData);
     },
     onSuccess: () => {
@@ -140,6 +144,24 @@ export default function NewQuote() {
             </div>
           </div>
         </div>
+
+        {/* Plan limit warning */}
+        {planLimits && !planLimits.canCreateQuote && (
+          <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 bg-amber-100 rounded-full flex items-center justify-center">
+                <span className="text-amber-600 font-bold">!</span>
+              </div>
+              <div>
+                <h3 className="font-medium text-amber-800">Limite mensal atingido</h3>
+                <p className="text-sm text-amber-700">
+                  Você atingiu o limite de {planLimits.monthlyQuoteLimit} orçamentos por mês do plano gratuito.
+                  {" "}Faça upgrade para Premium e tenha orçamentos ilimitados.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Show quick setup if no clients */}
         {(!clients || clients.length === 0) && (

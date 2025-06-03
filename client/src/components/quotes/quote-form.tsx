@@ -344,10 +344,22 @@ export default function QuoteForm({
                   <Checkbox
                     id="whatsapp"
                     checked={sendByWhatsapp}
-                    onCheckedChange={(checked) => setSendByWhatsapp(checked === true)}
+                    onCheckedChange={(checked) => {
+                      if (!isUserPremium && checked) {
+                        toast({
+                          title: "Funcionalidade Premium",
+                          description: "Notificações WhatsApp estão disponíveis apenas no plano Premium.",
+                          variant: "destructive",
+                        });
+                        return;
+                      }
+                      setSendByWhatsapp(checked === true);
+                    }}
+                    disabled={!isUserPremium}
                   />
-                  <Label htmlFor="whatsapp" className="text-sm text-gray-700">
+                  <Label htmlFor="whatsapp" className={`text-sm ${!isUserPremium ? 'text-gray-400' : 'text-gray-700'} flex items-center gap-2`}>
                     Enviar via WhatsApp
+                    {!isUserPremium && <Crown className="w-4 h-4 text-amber-500" />}
                   </Label>
                 </div>
                 <div className="flex items-center space-x-2">

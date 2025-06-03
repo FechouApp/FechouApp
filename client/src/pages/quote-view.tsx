@@ -240,13 +240,13 @@ export default function QuoteView() {
     
     try {
       console.log('Starting PDF generation...', { quote: quote.quoteNumber, user: (user as any).id });
-      const isPaidPlan = (user as any)?.plan === 'premium' || (user as any)?.plan === 'paid';
-      console.log('User plan:', (user as any)?.plan, 'isPaidPlan:', isPaidPlan);
+      const isUserPremium = (user as any)?.plan === 'PREMIUM';
+      console.log('User plan:', (user as any)?.plan, 'isUserPremium:', isUserPremium);
       
       const pdfBlob = await generateQuotePDF({
         quote,
         user: user as any,
-        isPaidPlan
+        isUserPremium
       });
       
       console.log('PDF generated successfully, blob size:', pdfBlob.size);
