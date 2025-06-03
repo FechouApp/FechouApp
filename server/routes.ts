@@ -154,8 +154,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const isPremium = user.plan === "PREMIUM";
-      const monthlyQuoteLimit = isPremium ? null : 5; // null = unlimited
-      const itemsPerQuoteLimit = isPremium ? null : 3; // null = unlimited
+      const isExpired = user.planExpiresAt && new Date() > user.planExpiresAt;
+      
+      let monthlyQuoteLimit, itemsPerQuoteLimit;
+      
+      if (isPremium && !isExpired) {
+        monthlyQuoteLimit = null; // Unlimited
+        itemsPerQuoteLimit = null; // Unlimited
+      } else {
+        // Plano gratuito: 5 orçamentos base + orçamentos bônus de indicações
+        const baseLimit = user.quotesLimit || 5;
+        const bonusQuotes = user.bonusQuotes || 0;
+        monthlyQuoteLimit = baseLimit + bonusQuotes;
+        itemsPerQuoteLimit = 10;
+      }
 
       // Count current month quotes
       const now = new Date();
@@ -166,11 +178,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.json({
         plan: user.plan,
-        isPremium,
+        isPremium: isPremium && !isExpired,
         monthlyQuoteLimit,
         itemsPerQuoteLimit,
         currentMonthQuotes: monthlyQuotes.length,
-        canCreateQuote: isPremium || monthlyQuotes.length < (monthlyQuoteLimit || 0)
+        canCreateQuote: (isPremium && !isExpired) || monthlyQuotes.length < (monthlyQuoteLimit || 0),
+        bonusQuotes: user.bonusQuotes || 0,
+        referralCount: user.referralCount || 0
       });
     } catch (error) {
       console.error("Error fetching plan limits:", error);

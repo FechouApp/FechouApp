@@ -31,6 +31,8 @@ export default function Settings() {
     pixKey: "",
     logoUrl: "",
     profileImageUrl: "",
+    primaryColor: "#3B82F6",
+    secondaryColor: "#10B981",
     whatsappNotifications: false,
     emailNotifications: true,
   });
@@ -49,6 +51,8 @@ export default function Settings() {
         pixKey: typedUser.pixKey || "",
         logoUrl: (typedUser as any)?.logoUrl || "",
         profileImageUrl: typedUser.profileImageUrl || "",
+        primaryColor: (typedUser as any)?.primaryColor || "#3B82F6",
+        secondaryColor: (typedUser as any)?.secondaryColor || "#10B981",
         whatsappNotifications: typedUser.whatsappNotifications || false,
         emailNotifications: typedUser.emailNotifications || true,
       });

@@ -12,6 +12,7 @@ import Quotes from "@/pages/quotes";
 import NewQuote from "@/pages/new-quote";
 import Reviews from "@/pages/reviews";
 import Plans from "@/pages/plans";
+import PlanComparison from "@/pages/plan-comparison";
 import Settings from "@/pages/settings";
 import QuoteView from "@/pages/quote-view";
 import PublicQuote from "@/pages/public-quote";
