@@ -381,10 +381,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Quote approval/rejection/sending
   app.post('/api/quotes/:id/approve', async (req, res) => {
     try {
-      const success = await storage.updateQuoteStatus(req.params.id, 'approved');
+      const success = await storage.updateQuoteStatus(req.params.id, 'approved', {
+        approvedAt: new Date().toISOString()
+      });
       
       if (!success) {
         return res.status(404).json({ message: "Quote not found" });
+      }
+
+      // Create approval notification
+      try {
+        const quote = await storage.getQuote(req.params.id, 'public');
+        if (quote) {
+          await storage.createNotification({
+            userId: quote.userId,
+            title: 'Orçamento Aprovado!',
+            message: `O orçamento #${quote.quoteNumber} foi aprovado pelo cliente ${quote.client.name}`,
+            type: 'quote_approved',
+            data: { quoteId: quote.id, quoteNumber: quote.quoteNumber },
+            isRead: false,
+          });
+        }
+      } catch (notificationError) {
+        console.error("Error creating notification:", notificationError);
+        // Don't fail the approval if notification fails
       }
       
       res.json({ success: true });

@@ -53,7 +53,7 @@ export default function QuoteView() {
     const phoneNumber = cleanPhone.startsWith('55') ? cleanPhone : `55${cleanPhone}`;
     const currentUrl = window.location.href;
     
-    const profesionalName = user ? (user as any)?.email?.split('@')[0] || 'Profissional' : 'Profissional';
+    const profesionalName = user ? (user as any)?.businessName || (user as any)?.email?.split('@')[0] || 'Profissional' : 'Profissional';
     const message = `Olá, ${quote.client.name}! Aqui está o seu orçamento gerado via *Fechou!*.
 ✅ Profissional: ${profesionalName}
 📄 Orçamento válido até: ${format(new Date(quote.validUntil), 'dd/MM/yyyy', { locale: ptBR })}
@@ -162,6 +162,7 @@ export default function QuoteView() {
   const reviewMutation = useMutation({
     mutationFn: async () => {
       await apiRequest("POST", "/api/reviews", {
+        userId: quote?.userId,
         clientId: quote?.clientId,
         quoteId: quote?.id,
         rating,
@@ -424,33 +425,27 @@ export default function QuoteView() {
               </Button>
             </div>
 
-            {/* WhatsApp Buttons - Always visible for testing */}
-            <div className="mb-4 space-y-2">
-              {quote.client?.phone ? (
-                <>
-                  <Button 
-                    onClick={sendViaWhatsApp}
-                    disabled={markAsSentMutation.isPending}
-                    className="w-full bg-green-600 hover:bg-green-700"
-                  >
-                    <MessageCircle className="w-4 h-4 mr-2" />
-                    Enviar por WhatsApp
-                  </Button>
-                  <Button 
-                    onClick={copyWhatsAppLink}
-                    variant="outline"
-                    className="w-full"
-                  >
-                    <Copy className="w-4 h-4 mr-2" />
-                    Copiar Link do WhatsApp
-                  </Button>
-                </>
-              ) : (
-                <div className="text-sm text-gray-500">
-                  Cliente sem telefone cadastrado: {quote.client?.phone || 'undefined'}
-                </div>
-              )}
-            </div>
+            {/* WhatsApp Buttons - Only for authenticated users (professionals) */}
+            {isAuthenticated && quote.client?.phone && (
+              <div className="mb-4 space-y-2">
+                <Button 
+                  onClick={sendViaWhatsApp}
+                  disabled={markAsSentMutation.isPending}
+                  className="w-full bg-green-600 hover:bg-green-700"
+                >
+                  <MessageCircle className="w-4 h-4 mr-2" />
+                  Enviar por WhatsApp
+                </Button>
+                <Button 
+                  onClick={copyWhatsAppLink}
+                  variant="outline"
+                  className="w-full"
+                >
+                  <Copy className="w-4 h-4 mr-2" />
+                  Copiar Link do WhatsApp
+                </Button>
+              </div>
+            )}
             
             {/* Approve/Reject buttons - Only for pending quotes */}
             {canApprove && (
