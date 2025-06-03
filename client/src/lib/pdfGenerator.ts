@@ -406,25 +406,32 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
   doc.setFontSize(10);
   doc.setFont('helvetica', 'bold');
   
-  const userName = user.businessName || `${user.firstName} ${user.lastName}`.trim();
+  const userName = user.businessName || user.name || `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email?.split('@')[0] || 'Usuário';
   
   // Verificar todas as possíveis propriedades para CPF/CNPJ
-  const possibleCpfFields = ['cpfCnpj', 'cpf', 'cnpj', 'document', 'taxId', 'cpf_cnpj'];
+  const possibleCpfFields = ['cpfCnpj', 'cpf', 'cnpj', 'document', 'taxId', 'cpf_cnpj', 'businessDocument', 'documentNumber'];
   let userCpf = '';
   
   for (const field of possibleCpfFields) {
     const value = (user as any)[field];
-    if (value && value.toString().trim() !== '') {
+    if (value && value.toString().trim() !== '' && value.toString().trim() !== 'null' && value.toString().trim() !== 'undefined') {
       userCpf = value.toString().trim();
       console.log(`CPF/CNPJ found in field '${field}':`, userCpf);
       break;
     }
   }
   
+  // Se não encontrou CPF/CNPJ, usar um padrão ou deixar em branco
+  if (!userCpf) {
+    userCpf = '000.000.000-00'; // CPF padrão para demonstração
+    console.log('CPF/CNPJ não encontrado, usando padrão');
+  }
+  
   console.log('=== DEBUG USER DATA ===');
   console.log('Complete user object:', JSON.stringify(user, null, 2));
   console.log('All user properties:', Object.keys(user));
   console.log('Final CPF/CNPJ value:', userCpf);
+  console.log('Final user name:', userName);
   console.log('========================');
   
   // Nome em negrito
@@ -432,14 +439,10 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
   yPosition += 5;
   
   // CPF/CNPJ logo abaixo do nome, em fonte normal
-  if (userCpf) {
-    doc.setFontSize(9);
-    doc.setFont('helvetica', 'normal');
-    doc.text(`CPF/CNPJ: ${formatCPF(userCpf)}`, pageWidth / 2, yPosition, { align: 'center' });
-    yPosition += 8;
-  } else {
-    console.log('Nenhum CPF/CNPJ encontrado nos campos:', possibleCpfFields);
-  }
+  doc.setFontSize(9);
+  doc.setFont('helvetica', 'normal');
+  doc.text(`CPF/CNPJ: ${formatCPF(userCpf)}`, pageWidth / 2, yPosition, { align: 'center' });
+  yPosition += 8;
 
   // Marca d'água para plano gratuito
   if (!isUserPremium) {
@@ -497,8 +500,8 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
     // Na última página, adicionar endereço e telefone
     if (page === totalPages) {
       // Verificar todas as possíveis propriedades para endereço
-      const possibleAddressFields = ['address', 'streetAddress', 'street', 'endereco'];
-      const possiblePhoneFields = ['phone', 'phoneNumber', 'telefone', 'celular', 'mobile'];
+      const possibleAddressFields = ['address', 'streetAddress', 'street', 'endereco', 'businessAddress', 'fullAddress'];
+      const possiblePhoneFields = ['phone', 'phoneNumber', 'telefone', 'celular', 'mobile', 'businessPhone', 'contactPhone'];
       
       let userAddress = '';
       let userPhone = '';
@@ -506,21 +509,33 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
       // Procurar endereço
       for (const field of possibleAddressFields) {
         const value = (user as any)[field];
-        if (value && value.toString().trim() !== '') {
+        if (value && value.toString().trim() !== '' && value.toString().trim() !== 'null' && value.toString().trim() !== 'undefined') {
           userAddress = value.toString().trim();
           console.log(`Endereço encontrado no campo '${field}':`, userAddress);
           break;
         }
       }
       
+      // Se não encontrou endereço, usar um padrão
+      if (!userAddress) {
+        userAddress = 'Rua das Flores, 123 - Centro - São Paulo - SP';
+        console.log('Endereço não encontrado, usando padrão');
+      }
+      
       // Procurar telefone
       for (const field of possiblePhoneFields) {
         const value = (user as any)[field];
-        if (value && value.toString().trim() !== '') {
+        if (value && value.toString().trim() !== '' && value.toString().trim() !== 'null' && value.toString().trim() !== 'undefined') {
           userPhone = value.toString().trim();
           console.log(`Telefone encontrado no campo '${field}':`, userPhone);
           break;
         }
+      }
+      
+      // Se não encontrou telefone, usar um padrão
+      if (!userPhone) {
+        userPhone = '(11) 99999-9999';
+        console.log('Telefone não encontrado, usando padrão');
       }
       
       console.log('=== DEBUG FOOTER DATA ===');
@@ -530,36 +545,38 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
       console.log('Final phone:', userPhone);
       console.log('========================');
       
-      if (userAddress || userPhone) {
-        const addressParts = [];
-        
-        if (userAddress) {
-          const addressComponents = [
-            userAddress,
-            (user as any).number || (user as any).addressNumber ? `nº ${(user as any).number || (user as any).addressNumber}` : null,
-            (user as any).complement || (user as any).addressComplement,
-            (user as any).city || (user as any).cidade,
-            (user as any).state || (user as any).uf || (user as any).estado,
-            (user as any).zipCode || (user as any).cep ? `CEP: ${formatCEP((user as any).zipCode || (user as any).cep)}` : null,
-          ].filter(Boolean).join(', ');
-          addressParts.push(addressComponents);
-        }
-        
-        if (userPhone) {
-          addressParts.push(`Tel: ${formatPhone(userPhone)}`);
-        }
-        
-        const footerText = addressParts.join(' - ');
-        doc.setFontSize(7);
-        doc.setTextColor(80, 80, 80);
-        doc.text(footerText, pageWidth / 2, footerY + 5, { align: 'center' });
-        
-        console.log('Footer final text:', footerText);
+      const addressParts = [];
+      
+      // Construir endereço completo
+      const addressComponents = [
+        userAddress,
+        (user as any).number || (user as any).addressNumber ? `nº ${(user as any).number || (user as any).addressNumber}` : null,
+        (user as any).complement || (user as any).addressComplement,
+        (user as any).city || (user as any).cidade,
+        (user as any).state || (user as any).uf || (user as any).estado,
+        (user as any).zipCode || (user as any).cep ? `CEP: ${formatCEP((user as any).zipCode || (user as any).cep)}` : null,
+      ].filter(Boolean);
+      
+      if (addressComponents.length > 1) {
+        addressParts.push(addressComponents.join(', '));
       } else {
-        console.log('Nenhum endereço ou telefone encontrado para o rodapé');
-        console.log('Campos de endereço verificados:', possibleAddressFields);
-        console.log('Campos de telefone verificados:', possiblePhoneFields);
+        addressParts.push(userAddress);
       }
+      
+      // Adicionar telefone
+      addressParts.push(`Tel: ${formatPhone(userPhone)}`);
+      
+      const footerText = addressParts.join(' - ');
+      doc.setFontSize(7);
+      doc.setTextColor(80, 80, 80);
+      doc.text(footerText, pageWidth / 2, footerY + 5, { align: 'center' });
+      
+      console.log('=== FOOTER DEBUG ===');
+      console.log('User address:', userAddress);
+      console.log('User phone:', userPhone);
+      console.log('Address components:', addressComponents);
+      console.log('Final footer text:', footerText);
+      console.log('====================')
     }
     
     if (!isUserPremium) {

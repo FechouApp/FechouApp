@@ -279,9 +279,13 @@ export default function QuoteView() {
       console.log('=== COMPLETE USER DATA FOR PDF ===');
       console.log('Raw user data:', JSON.stringify(userData, null, 2));
       console.log('All properties:', Object.keys(userData));
-      console.log('Searching for CPF/CNPJ in:', ['cpfCnpj', 'cpf', 'cnpj', 'document', 'taxId']);
-      console.log('Searching for address in:', ['address', 'streetAddress', 'street', 'endereco']);
-      console.log('Searching for phone in:', ['phone', 'phoneNumber', 'telefone', 'celular']);
+      console.log('Business name:', userData.businessName);
+      console.log('First name:', userData.firstName);
+      console.log('Last name:', userData.lastName);
+      console.log('Email:', userData.email);
+      console.log('Searching for CPF/CNPJ in:', ['cpfCnpj', 'cpf', 'cnpj', 'document', 'taxId', 'businessDocument']);
+      console.log('Searching for address in:', ['address', 'streetAddress', 'street', 'endereco', 'businessAddress']);
+      console.log('Searching for phone in:', ['phone', 'phoneNumber', 'telefone', 'celular', 'businessPhone']);
       console.log('==================================');
       
       const isUserPremium = userData?.plan === 'PREMIUM';
