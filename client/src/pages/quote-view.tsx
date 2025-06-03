@@ -55,13 +55,15 @@ export default function QuoteView() {
     
     const cleanPhone = quote.client.phone.replace(/\D/g, '');
     const phoneNumber = cleanPhone.startsWith('55') ? cleanPhone : `55${cleanPhone}`;
-    const currentUrl = window.location.href;
+    
+    // Always use public URL for clients
+    const publicUrl = `${window.location.origin}/quote/${quote.quoteNumber}`;
     
     const profesionalName = user ? (user as any)?.businessName || (user as any)?.email?.split('@')[0] || 'Profissional' : 'Profissional';
     const message = `Olá, ${quote.client.name}! Aqui está o seu orçamento gerado via *Fechou!*.
 ✅ Profissional: ${profesionalName}
 📄 Orçamento válido até: ${format(new Date(quote.validUntil), 'dd/MM/yyyy', { locale: ptBR })}
-🔗 Acesse os detalhes aqui: ${currentUrl}`;
+🔗 Acesse os detalhes aqui: ${publicUrl}`;
     
     return `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
   };
