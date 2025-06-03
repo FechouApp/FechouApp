@@ -1,4 +1,3 @@
-
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -85,15 +84,53 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-8">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-800">
-            Olá, {(user as any)?.firstName || user?.name || 'Usuário'}! 👋
-          </h1>
-          <p className="text-gray-600 mt-1">
-            Aqui está um resumo do seu negócio hoje.
-          </p>
+      {/* Welcome Section */}
+      <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-6 rounded-xl shadow-lg">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
+          <div>
+            <h1 className="text-3xl font-bold mb-2">
+              Bem-vindo de volta, {(user as any)?.firstName || 'Usuário'}!
+            </h1>
+            <p className="text-blue-100">
+              Gerencie seus orçamentos e acompanhe seu progresso
+            </p>
+          </div>
+          <div className="mt-4 md:mt-0">
+            <Badge 
+              variant={(user as any)?.plan === "PREMIUM" ? "default" : "secondary"}
+              className={`${(user as any)?.plan === "PREMIUM" ? "bg-yellow-500 text-black" : "bg-gray-500 text-white"}`}
+            >
+              {(user as any)?.plan === "PREMIUM" ? "Premium" : "Gratuito"}
+            </Badge>
+          </div>
+        </div>
+
+        {/* Título das Ações */}
+        <div className="mb-4">
+          <h3 className="text-white font-semibold text-lg opacity-100">Ações Rápidas</h3>
+        </div>
+
+        {/* Quick Actions */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <Button className="bg-white/10 hover:bg-white/20 text-white border border-white/20 justify-start h-12">
+            <Plus className="w-5 h-5 mr-3" />
+            Novo Orçamento
+          </Button>
+
+          <Button className="bg-white/10 hover:bg-white/20 text-white border border-white/20 justify-start h-12">
+            <Users className="w-5 h-5 mr-3" />
+            Adicionar Cliente
+          </Button>
+
+          <Button className="bg-white/10 hover:bg-white/20 text-white border border-white/20 justify-start h-12">
+            <FileText className="w-5 h-5 mr-3" />
+            Ver Orçamentos
+          </Button>
+
+          <Button className="bg-white/10 hover:bg-white/20 text-white border border-white/20 justify-start h-12">
+            <BarChart3 className="w-5 h-5 mr-3" />
+            Relatórios
+          </Button>
         </div>
       </div>
 
@@ -107,7 +144,7 @@ export default function Dashboard() {
           trendUp={dashboardStats.quoteTrendUp}
           className="bg-white"
         />
-        
+
         <StatsCard
           title="Orçamentos Aprovados"
           value={dashboardStats.approvedQuotes.toString()}
@@ -116,7 +153,7 @@ export default function Dashboard() {
           trendUp={dashboardStats.approvalTrendUp}
           className="bg-white"
         />
-        
+
         <StatsCard
           title="Faturamento Total"
           value={formatCurrency(dashboardStats.totalRevenue)}
@@ -125,7 +162,7 @@ export default function Dashboard() {
           trendUp={dashboardStats.revenueTrendUp}
           className="bg-white"
         />
-        
+
         <StatsCard
           title="Avaliação Média"
           value={`${dashboardStats.averageRating.toFixed(1)}/5`}
@@ -155,7 +192,7 @@ export default function Dashboard() {
                 </div>
               </Button>
             </Link>
-            
+
             <Link href="/clients">
               <Button className="w-full h-16 bg-blue-600 hover:bg-blue-700 text-white flex flex-col items-center justify-center gap-2">
                 <Users className="w-5 h-5" />
@@ -165,7 +202,7 @@ export default function Dashboard() {
                 </div>
               </Button>
             </Link>
-            
+
             {(user as any)?.plan === "PREMIUM" ? (
               <Link href="/reports">
                 <Button className="w-full h-16 bg-green-600 hover:bg-green-700 text-white flex flex-col items-center justify-center gap-2">
