@@ -1,8 +1,12 @@
-
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import LoadingSpinner from "@/components/common/loading-spinner";
+import { useAuth } from "@/hooks/useAuth";
+import { Link } from "wouter";
+import { Crown, Lock } from "lucide-react";
 import { 
   FileText, 
   CheckCircle, 
@@ -21,28 +25,83 @@ import {
 import type { DashboardStats, QuoteWithClient, ReviewWithClient } from "@/types";
 
 export default function Reports() {
-  const { isAuthenticated, isLoading: authLoading } = useAuth();
+  const { user, isLoading: userLoading } = useAuth();
 
-  const { data: stats, isLoading: statsLoading } = useQuery<DashboardStats>({
+  const { data: stats, isLoading: statsLoading } = useQuery({
     queryKey: ["/api/dashboard/stats"],
     retry: false,
   });
 
-  const { data: quotes } = useQuery<QuoteWithClient[]>({
+  if (userLoading) {
+    return <LoadingSpinner />;
+  }
+
+  // Verificar se o usuário tem plano premium
+  const isPremium = (user as any)?.plan === "PREMIUM";
+
+  if (!isPremium) {
+    return (
+      <div className="space-y-8">
+        <div className="text-center">
+          <h1 className="text-3xl font-bold text-white mb-2">Relatórios Avançados</h1>
+          <p className="text-white/70">Análises detalhadas para o seu negócio</p>
+        </div>
+
+        <Card className="bg-white/10 backdrop-blur-sm border-white/20">
+          <CardContent className="p-12 text-center">
+            <div className="flex justify-center mb-6">
+              <div className="bg-gradient-to-r from-yellow-500 to-orange-500 p-4 rounded-full">
+                <Lock className="w-12 h-12 text-white" />
+              </div>
+            </div>
+
+            <h2 className="text-2xl font-bold text-white mb-4">
+              Recurso Exclusivo Premium
+            </h2>
+
+            <p className="text-white/80 mb-6 max-w-md mx-auto">
+              Os relatórios avançados são exclusivos para usuários do Plano Premium. 
+              Faça upgrade e tenha acesso a métricas detalhadas do seu negócio.
+            </p>
+
+            <div className="bg-white/10 rounded-lg p-4 mb-6">
+              <h3 className="text-white font-semibold mb-3">O que você terá acesso:</h3>
+              <ul className="text-white/80 text-sm space-y-2">
+                <li>• Análise de tendências mensais</li>
+                <li>• Gráficos de conversão</li>
+                <li>• Relatórios de faturamento</li>
+                <li>• Análise de clientes</li>
+                <li>• Métricas de performance</li>
+              </ul>
+            </div>
+
+            <Link href="/plans">
+              <Button className="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white font-semibold px-8 py-3">
+                <Crown className="w-5 h-5 mr-2" />
+                Fazer Upgrade para Premium
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  const { data: quotes } = useQuery({
     queryKey: ["/api/quotes"],
     retry: false,
   });
 
-  const { data: reviews } = useQuery<ReviewWithClient[]>({
+  const { data: reviews } = useQuery({
     queryKey: ["/api/reviews"],
     retry: false,
   });
 
-  if (authLoading || statsLoading) {
+  if (statsLoading) {
     return <LoadingSpinner />;
   }
 
-  const formatCurrency = (value: string | number) => {
+  const formatCurrency = (value) => {
     const num = typeof value === 'string' ? parseFloat(value) : value;
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
@@ -52,7 +111,7 @@ export default function Reports() {
 
   const calculateMonthlyData = () => {
     if (!quotes) return [];
-    
+
     const monthlyData = {};
     quotes.forEach(quote => {
       if (quote.createdAt) {
@@ -67,7 +126,7 @@ export default function Reports() {
         }
       }
     });
-    
+
     return Object.entries(monthlyData).map(([month, data]) => ({
       month,
       ...data
@@ -76,18 +135,18 @@ export default function Reports() {
 
   const getStatusStats = () => {
     if (!quotes) return {};
-    
+
     const statusCount = {};
     quotes.forEach(quote => {
       statusCount[quote.status] = (statusCount[quote.status] || 0) + 1;
     });
-    
+
     return statusCount;
   };
 
   const getTopClients = () => {
     if (!quotes) return [];
-    
+
     const clientStats = {};
     quotes.forEach(quote => {
       const clientId = quote.clientId;
@@ -105,7 +164,7 @@ export default function Reports() {
         clientStats[clientId].approvedCount++;
       }
     });
-    
+
     return Object.values(clientStats)
       .sort((a, b) => b.totalValue - a.totalValue)
       .slice(0, 5);
@@ -251,10 +310,10 @@ export default function Reports() {
                       return { label: status, color: 'text-gray-600', bg: 'bg-gray-100' };
                   }
                 };
-                
+
                 const statusInfo = getStatusInfo(status);
                 const percentage = quotes ? ((count / quotes.length) * 100).toFixed(1) : 0;
-                
+
                 return (
                   <div key={status} className="flex items-center justify-between p-3 rounded-lg border">
                     <div className="flex items-center gap-3">
