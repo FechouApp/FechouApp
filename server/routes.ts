@@ -4,8 +4,28 @@ import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { insertClientSchema, insertQuoteSchema, insertQuoteItemSchema, insertReviewSchema } from "@shared/schema";
 import { z } from "zod";
+import { checkDatabaseHealth } from "./healthcheck";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Health check endpoint
+  app.get('/api/health', async (req, res) => {
+    try {
+      const dbHealthy = await checkDatabaseHealth();
+      const status = dbHealthy ? 200 : 503;
+      res.status(status).json({
+        status: dbHealthy ? 'healthy' : 'unhealthy',
+        database: dbHealthy ? 'connected' : 'disconnected',
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      res.status(503).json({
+        status: 'unhealthy',
+        database: 'error',
+        timestamp: new Date().toISOString()
+      });
+    }
+  });
+
   // Auth middleware
   await setupAuth(app);
 
