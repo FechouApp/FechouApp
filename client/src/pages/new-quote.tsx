@@ -55,6 +55,12 @@ export default function NewQuote() {
     retry: false,
   });
 
+  // Check plan limits
+  const { data: planLimits } = useQuery({
+    queryKey: ["/api/user/plan-limits"],
+    retry: false,
+  });
+
   // Load quote data for editing
   const { data: quoteData, isLoading: quoteLoading } = useQuery<QuoteWithDetails>({
     queryKey: [`/api/quotes/${quoteId}`],

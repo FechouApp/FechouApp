@@ -22,7 +22,7 @@ import {
   type Notification,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc, count, sql, and, or, like, asc } from "drizzle-orm";
+import { eq, desc, count, sql, and, or, like, asc, gte, lte } from "drizzle-orm";
 import { nanoid } from "nanoid";
 
 export interface IStorage {
@@ -43,6 +43,7 @@ export interface IStorage {
   getQuotes(userId: string): Promise<(Quote & { client: Client; itemCount: number })[]>;
   getQuote(id: string, userId: string): Promise<(Quote & { client: Client; items: QuoteItem[] }) | undefined>;
   getQuoteByNumber(quoteNumber: string): Promise<(Quote & { client: Client; items: QuoteItem[] }) | undefined>;
+  getQuotesInDateRange(userId: string, startDate: Date, endDate: Date): Promise<Quote[]>;
   createQuote(quote: InsertQuote, items: InsertQuoteItem[]): Promise<Quote>;
   updateQuote(id: string, quote: Partial<InsertQuote>, userId: string): Promise<Quote | undefined>;
   deleteQuote(id: string, userId: string): Promise<boolean>;
@@ -252,6 +253,21 @@ export class DatabaseStorage implements IStorage {
       client: quote.clients!,
       items,
     };
+  }
+
+  async getQuotesInDateRange(userId: string, startDate: Date, endDate: Date): Promise<Quote[]> {
+    const result = await db
+      .select()
+      .from(quotes)
+      .where(
+        and(
+          eq(quotes.userId, userId),
+          gte(quotes.createdAt, startDate),
+          lte(quotes.createdAt, endDate)
+        )
+      );
+
+    return result;
   }
 
   async createQuote(quote: InsertQuote, items: InsertQuoteItem[]): Promise<Quote> {

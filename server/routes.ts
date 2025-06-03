@@ -109,6 +109,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // User plan limits
+  app.get('/api/user/plan-limits', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      const isPremium = user.plan === "PREMIUM";
+      const monthlyQuoteLimit = isPremium ? null : 5; // null = unlimited
+      const itemsPerQuoteLimit = isPremium ? null : 3; // null = unlimited
+
+      // Count current month quotes
+      const now = new Date();
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+      const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+      
+      const monthlyQuotes = await storage.getQuotesInDateRange(userId, startOfMonth, endOfMonth);
+
+      res.json({
+        plan: user.plan,
+        isPremium,
+        monthlyQuoteLimit,
+        itemsPerQuoteLimit,
+        currentMonthQuotes: monthlyQuotes.length,
+        canCreateQuote: isPremium || monthlyQuotes.length < (monthlyQuoteLimit || 0)
+      });
+    } catch (error) {
+      console.error("Error fetching plan limits:", error);
+      res.status(500).json({ message: "Failed to fetch plan limits" });
+    }
+  });
+
   // Client routes
   app.get('/api/clients', isAuthenticated, async (req: any, res) => {
     try {
