@@ -53,8 +53,9 @@ export default function QuoteView() {
     const phoneNumber = cleanPhone.startsWith('55') ? cleanPhone : `55${cleanPhone}`;
     const currentUrl = window.location.href;
     
+    const profesionalName = user ? (user as any)?.email?.split('@')[0] || 'Profissional' : 'Profissional';
     const message = `Olá, ${quote.client.name}! Aqui está o seu orçamento gerado via *Fechou!*.
-✅ Profissional: Fechou!
+✅ Profissional: ${profesionalName}
 📄 Orçamento válido até: ${format(new Date(quote.validUntil), 'dd/MM/yyyy', { locale: ptBR })}
 🔗 Acesse os detalhes aqui: ${currentUrl}`;
     
@@ -94,9 +95,12 @@ export default function QuoteView() {
     }
   };
 
-  // Redirect to home if not authenticated
+  // Only redirect to login if this is not a public quote view
+  // Public quotes don't require authentication
   useEffect(() => {
-    if (!authLoading && !isAuthenticated) {
+    // Don't require authentication for public quote viewing
+    const isPublicView = window.location.pathname.includes('/quote/');
+    if (!authLoading && !isAuthenticated && !isPublicView) {
       toast({
         title: "Unauthorized",
         description: "You are logged out. Logging in again...",
