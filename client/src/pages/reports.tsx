@@ -601,7 +601,7 @@ export default function Reports() {
                 <span className="text-gray-600">Visualizações</span>
               </div>
               <span className="font-semibold text-gray-800">
-                {quotes?.filter(q => q.status === 'viewed' || q.viewedAt).length || 0}
+                {quotes?.filter(q => q.status !== 'draft').length || 0}
               </span>
             </div>
             <div className="flex items-center justify-between">
@@ -610,7 +610,7 @@ export default function Reports() {
                 <span className="text-gray-600">Aprovações</span>
               </div>
               <span className="font-semibold text-gray-800">
-                {stats?.approvedQuotes || 0}
+                {quotes?.filter(q => q.status === 'approved' || q.status === 'paid').length || 0}
               </span>
             </div>
             <div className="flex items-center justify-between">
@@ -657,13 +657,30 @@ export default function Reports() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="text-center">
-              <p className="text-3xl font-bold text-brand-primary">{stats?.thisMonthQuotes || 0}</p>
+              <p className="text-3xl font-bold text-brand-primary">
+                {(() => {
+                  const currentMonth = new Date().getMonth();
+                  const currentYear = new Date().getFullYear();
+                  return quotes?.filter(q => {
+                    const quoteDate = new Date(q.createdAt);
+                    return quoteDate.getMonth() === currentMonth && quoteDate.getFullYear() === currentYear;
+                  }).length || 0;
+                })()}
+              </p>
               <p className="text-gray-600">orçamentos este mês</p>
             </div>
             <div className="w-full bg-gray-200 rounded-full h-2">
               <div 
                 className="brand-gradient h-2 rounded-full" 
-                style={{ width: `${Math.min(((stats?.thisMonthQuotes || 0) / 20) * 100, 100)}%` }}
+                style={{ width: `${Math.min(((() => {
+                  const currentMonth = new Date().getMonth();
+                  const currentYear = new Date().getFullYear();
+                  const thisMonthQuotes = quotes?.filter(q => {
+                    const quoteDate = new Date(q.createdAt);
+                    return quoteDate.getMonth() === currentMonth && quoteDate.getFullYear() === currentYear;
+                  }).length || 0;
+                  return (thisMonthQuotes / 20) * 100;
+                })(), 100)}%` }}
               ></div>
             </div>
             <p className="text-sm text-gray-600 text-center">
