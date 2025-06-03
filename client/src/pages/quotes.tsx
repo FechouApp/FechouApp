@@ -15,7 +15,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import LoadingSpinner from "@/components/common/loading-spinner";
-import Header from "@/components/layout/header";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useLocation } from "wouter";
@@ -29,7 +28,8 @@ import {
   MoreHorizontal,
   Calendar,
   Filter,
-  Trash2
+  Trash2,
+  ArrowLeft
 } from "lucide-react";
 import type { QuoteWithClient } from "@/types";
 
@@ -200,12 +200,22 @@ export default function Quotes() {
 
   return (
     <div className="space-y-6">
-      <Header 
-        title="Orçamentos" 
-        subtitle="Gerencie todos os seus orçamentos"
-        showBackButton={true}
-        backTo="/"
-      />
+      <div className="mb-6">
+        <div className="flex items-center gap-4 mb-2">
+          <Button
+            variant="ghost"
+            onClick={() => setLocation("/")}
+            className="flex items-center gap-2 text-gray-600 hover:text-gray-900"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Voltar
+          </Button>
+        </div>
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Orçamentos</h1>
+          <p className="text-gray-600">Gerencie todos os seus orçamentos</p>
+        </div>
+      </div>
 
       {/* Novo Orçamento Button */}
       <div className="flex justify-end">
