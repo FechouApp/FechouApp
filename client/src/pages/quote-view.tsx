@@ -459,8 +459,8 @@ export default function QuoteView() {
               )}
             </div>
 
-            {/* WhatsApp Buttons - Only for quote owner */}
-            {user && quote.userId === (user as any)?.id && quote.client?.phone && !window.location.pathname.includes('/quote/') && (
+            {/* WhatsApp Buttons - Show for authenticated professionals */}
+            {user && quote.userId === (user as any)?.id && quote.client?.phone && (
               <div className="mb-4 space-y-2">
                 <Button 
                   onClick={sendViaWhatsApp}
@@ -482,7 +482,7 @@ export default function QuoteView() {
             )}
             
             {/* Manual Approve button for quote owner */}
-            {user && quote.userId === (user as any)?.id && quote.status === "pending" && !window.location.pathname.includes('/quote/') && (
+            {user && quote.userId === (user as any)?.id && quote.status === "pending" && (
               <div className="mb-4">
                 <Button 
                   onClick={() => approveMutation.mutate()}
@@ -520,66 +520,7 @@ export default function QuoteView() {
           </CardContent>
         </Card>
 
-        {/* Review Section */}
-        <Card>
-          <CardContent className="p-6">
-            {reviewSubmitted ? (
-              <div className="text-center py-8">
-                <div className="mb-4">
-                  <CheckCircle className="w-16 h-16 text-green-500 mx-auto" />
-                </div>
-                <h3 className="font-semibold text-lg mb-2">Obrigado pela sua avaliação!</h3>
-                <p className="text-gray-600">
-                  Seu feedback é muito importante para nós e ajuda outros clientes.
-                </p>
-              </div>
-            ) : (
-              <>
-                <h3 className="font-semibold mb-4">Avaliar Profissional</h3>
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium mb-2">
-                      Sua avaliação (1-5 estrelas)
-                    </label>
-                    <div className="flex gap-1">
-                      {[1, 2, 3, 4, 5].map((star) => (
-                        <button
-                          key={star}
-                          onClick={() => setRating(star)}
-                          className={`w-8 h-8 ${
-                            star <= rating ? "text-yellow-500" : "text-gray-300"
-                          } hover:text-yellow-400 transition-colors`}
-                        >
-                          <Star className="w-6 h-6 fill-current" />
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm font-medium mb-2">
-                      Comentário (opcional)
-                    </label>
-                    <Textarea
-                      value={comment}
-                      onChange={(e) => setComment(e.target.value)}
-                      placeholder="Conte como foi sua experiência..."
-                      rows={3}
-                    />
-                  </div>
-                  
-                  <Button 
-                    onClick={() => reviewMutation.mutate()}
-                    disabled={rating === 0 || reviewMutation.isPending}
-                    className="w-full"
-                  >
-                    {reviewMutation.isPending ? "Enviando..." : "Enviar Avaliação"}
-                  </Button>
-                </div>
-              </>
-            )}
-          </CardContent>
-        </Card>
+
       </div>
     </div>
   );

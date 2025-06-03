@@ -14,6 +14,7 @@ import Reviews from "@/pages/reviews";
 import Plans from "@/pages/plans";
 import Settings from "@/pages/settings";
 import QuoteView from "@/pages/quote-view";
+import PublicQuote from "@/pages/public-quote";
 import Sidebar from "@/components/layout/sidebar";
 import MobileHeader from "@/components/layout/mobile-header";
 
@@ -22,8 +23,8 @@ function Router() {
 
   return (
     <Switch>
-      {/* Public route for quote viewing */}
-      <Route path="/quote/:quoteNumber" component={QuoteView} />
+      {/* Public route for client quote viewing */}
+      <Route path="/quote/:quoteNumber" component={PublicQuote} />
       
       {isLoading || !isAuthenticated ? (
         <Route path="/" component={Landing} />
@@ -33,6 +34,7 @@ function Router() {
           <Route path="/clients" component={Clients} />
           <Route path="/quotes" component={Quotes} />
           <Route path="/quotes/:id/edit" component={NewQuote} />
+          <Route path="/quotes/view/:quoteNumber" component={QuoteView} />
           <Route path="/new-quote" component={NewQuote} />
           <Route path="/reviews" component={Reviews} />
           <Route path="/plans" component={Plans} />
