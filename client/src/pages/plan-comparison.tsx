@@ -16,9 +16,7 @@ export default function PlanComparison() {
 
   const togglePlanMutation = useMutation({
     mutationFn: async () => {
-      return await apiRequest("/api/auth/toggle-plan", {
-        method: "POST",
-      });
+      return await apiRequest("/api/auth/toggle-plan", "POST");
     },
     onSuccess: () => {
       toast({
@@ -39,9 +37,7 @@ export default function PlanComparison() {
 
   const addReferralMutation = useMutation({
     mutationFn: async () => {
-      return await apiRequest("/api/user/referral", {
-        method: "POST",
-      });
+      return await apiRequest("/api/user/referral", "POST");
     },
     onSuccess: () => {
       toast({

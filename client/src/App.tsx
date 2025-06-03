@@ -39,6 +39,7 @@ function Router() {
           <Route path="/new-quote" component={NewQuote} />
           <Route path="/reviews" component={Reviews} />
           <Route path="/plans" component={Plans} />
+          <Route path="/plan-comparison" component={PlanComparison} />
           <Route path="/settings" component={Settings} />
         </>
       )}
