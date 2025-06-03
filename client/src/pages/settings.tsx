@@ -19,7 +19,7 @@ export default function Settings() {
   const { user, isLoading } = useAuth();
   const { toast } = useToast();
   const typedUser = user as UserType;
-  
+
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -132,7 +132,7 @@ export default function Settings() {
 
   const handleInputChange = (field: string, value: string | boolean) => {
     let formattedValue = value;
-    
+
     // Aplicar formatação automática nos campos específicos
     if (typeof value === "string") {
       if (field === "cpfCnpj") {
@@ -141,7 +141,7 @@ export default function Settings() {
         formattedValue = formatPhone(value);
       }
     }
-    
+
     setFormData(prev => ({ ...prev, [field]: formattedValue }));
   };
 
@@ -184,34 +184,11 @@ export default function Settings() {
   const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      // Verificar tamanho do arquivo (máx. 2MB)
-      if (file.size > 2 * 1024 * 1024) {
-        toast({
-          title: "Erro",
-          description: "A imagem deve ter no máximo 2MB.",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      // Verificar tipo do arquivo
-      if (!file.type.startsWith('image/')) {
-        toast({
-          title: "Erro",
-          description: "Por favor, selecione um arquivo de imagem válido.",
-          variant: "destructive",
-        });
-        return;
-      }
-
+      // Convert to base64
       const reader = new FileReader();
       reader.onload = (event) => {
         const base64String = event.target?.result as string;
         handleInputChange("logoUrl", base64String);
-        toast({
-          title: "Sucesso",
-          description: "Logo carregado com sucesso!",
-        });
       };
       reader.readAsDataURL(file);
     }
@@ -531,7 +508,7 @@ export default function Settings() {
                 disabled={user?.plan !== "premium"}
               />
             </div>
-            
+
             {user?.plan !== "premium" && (
               <p className="text-xs text-amber-600">
                 Notificações por WhatsApp disponíveis apenas no plano Premium

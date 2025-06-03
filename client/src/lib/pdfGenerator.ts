@@ -25,8 +25,12 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
       const logoX = pageWidth - logoSize - 20;
       const logoY = 15;
       
-      // Adicionar logo (URL da imagem)
-      doc.addImage((user as any).logoUrl, 'JPEG', logoX, logoY, logoSize, logoSize);
+      // Verificar se é uma URL válida ou base64
+      const logoUrl = (user as any).logoUrl;
+      if (logoUrl.startsWith('data:') || logoUrl.startsWith('http')) {
+        // Adicionar logo (URL da imagem ou base64)
+        doc.addImage(logoUrl, 'JPEG', logoX, logoY, logoSize, logoSize);
+      }
     } catch (error) {
       console.log('Erro ao carregar logo:', error);
     }
@@ -43,7 +47,7 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
     doc.setFontSize(20);
     doc.setTextColor(59, 130, 246);
     doc.setFont('helvetica', 'bold');
-    doc.text('ORÇAMENTO PROFISSIONAL', pageWidth / 2, yPosition, { align: 'center' });
+    doc.text('ORÇAMENTO', pageWidth / 2, yPosition, { align: 'center' });
     yPosition += 8;
     
     doc.setFontSize(11);
