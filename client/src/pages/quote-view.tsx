@@ -25,8 +25,8 @@ export default function QuoteView() {
   const [comment, setComment] = useState("");
   const [reviewSubmitted, setReviewSubmitted] = useState(false);
   
-  // Check if this is a public view based on URL pattern
-  const isPublicView = window.location.pathname.includes('/quote/');
+  // Check if this is a public view (client accessing without login)
+  const isPublicView = !user && !isAuthenticated;
 
   // Mutations
   const markAsSentMutation = useMutation({
@@ -82,6 +82,24 @@ export default function QuoteView() {
           variant: "destructive",
         });
       }
+    }
+  }
+
+  const copyPixKey = async () => {
+    // Use a sample PIX key for demo - in production this would come from user settings
+    const pixKey = "marcenaria.estrela@exemplo.com";
+    try {
+      await navigator.clipboard.writeText(pixKey);
+      toast({
+        title: "Chave PIX copiada!",
+        description: "A chave PIX foi copiada para a área de transferência.",
+      });
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Não foi possível copiar a chave PIX.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -414,7 +432,7 @@ export default function QuoteView() {
             <h3 className="font-semibold mb-4">Ações</h3>
             
             {/* Download PDF Button - Always visible */}
-            <div className="mb-4">
+            <div className="mb-4 space-y-2">
               <Button 
                 onClick={handleDownloadPDF}
                 variant="outline"
@@ -423,10 +441,21 @@ export default function QuoteView() {
                 <Download className="w-4 h-4 mr-2" />
                 Baixar PDF do Orçamento
               </Button>
+              
+              {/* PIX Button - Only for public view (clients) */}
+              {isPublicView && (
+                <Button 
+                  onClick={copyPixKey}
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                >
+                  <Copy className="w-4 h-4 mr-2" />
+                  Copiar Chave PIX para Pagamento
+                </Button>
+              )}
             </div>
 
-            {/* WhatsApp Buttons - Never show in public view (/quote/ URL) */}
-            {!isPublicView && user && isAuthenticated && quote.userId === (user as any)?.id && quote.client?.phone && (
+            {/* WhatsApp Buttons - Only show for authenticated quote owners */}
+            {user && isAuthenticated && quote.userId === (user as any)?.id && quote.client?.phone && (
               <div className="mb-4 space-y-2">
                 <Button 
                   onClick={sendViaWhatsApp}
