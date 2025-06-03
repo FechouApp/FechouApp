@@ -25,14 +25,23 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
       const logoX = pageWidth - logoSize - 20;
       const logoY = 15;
       
-      // Verificar se é uma URL válida ou base64
+      // Verificar se existe logo e não está vazio
       const logoUrl = (user as any).logoUrl;
-      if (logoUrl.startsWith('data:') || logoUrl.startsWith('http')) {
-        // Adicionar logo (URL da imagem ou base64)
-        doc.addImage(logoUrl, 'JPEG', logoX, logoY, logoSize, logoSize);
+      if (logoUrl && logoUrl.trim() !== '') {
+        console.log('Adding logo to PDF:', logoUrl.substring(0, 50) + '...');
+        // Detectar formato da imagem
+        let format = 'JPEG';
+        if (logoUrl.includes('data:image/png')) {
+          format = 'PNG';
+        } else if (logoUrl.includes('data:image/gif')) {
+          format = 'GIF';
+        }
+        
+        // Adicionar logo
+        doc.addImage(logoUrl, format, logoX, logoY, logoSize, logoSize);
       }
     } catch (error) {
-      console.log('Erro ao carregar logo:', error);
+      console.error('Erro ao carregar logo:', error);
     }
   }
 
@@ -45,13 +54,13 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
     yPosition += 12;
     
     doc.setFontSize(20);
-    doc.setTextColor(59, 130, 246);
+    doc.setTextColor(0, 0, 0);
     doc.setFont('helvetica', 'bold');
     doc.text('ORÇAMENTO', pageWidth / 2, yPosition, { align: 'center' });
     yPosition += 8;
     
     doc.setFontSize(11);
-    doc.setTextColor(100, 100, 100);
+    doc.setTextColor(0, 0, 0);
     doc.setFont('helvetica', 'normal');
     doc.text(`Nº ${quote.quoteNumber} • ${format(new Date(), 'dd/MM/yyyy', { locale: ptBR })}`, pageWidth / 2, yPosition, { align: 'center' });
     yPosition += 12;
@@ -64,11 +73,13 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
   } else {
     // Layout padrão para plano gratuito
     doc.setFontSize(18);
+    doc.setTextColor(0, 0, 0);
     doc.setFont('helvetica', 'bold');
     doc.text('ORÇAMENTO', pageWidth / 2, yPosition, { align: 'center' });
     yPosition += 8;
 
     doc.setFontSize(10);
+    doc.setTextColor(0, 0, 0);
     doc.setFont('helvetica', 'normal');
     doc.text(`Orçamento nº ${quote.quoteNumber} – ${format(new Date(), 'dd/MM/yyyy', { locale: ptBR })}`, pageWidth / 2, yPosition, { align: 'center' });
     yPosition += 15;
@@ -79,13 +90,15 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
 
   yPosition += 5;
 
-  // Seção de dados do cliente
+  // Seção de dados do cliente - garantir cor preta
+  doc.setTextColor(0, 0, 0);
   doc.setFontSize(12);
   doc.setFont('helvetica', 'bold');
   doc.text('DADOS DO CLIENTE', 20, yPosition);
   yPosition += 6;
 
   doc.setFontSize(10);
+  doc.setTextColor(0, 0, 0);
   doc.setFont('helvetica', 'normal');
   doc.text(`Nome: ${quote.client.name}`, 20, yPosition);
   yPosition += 5;
@@ -132,6 +145,7 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
   }
 
   // Tabela de serviços
+  doc.setTextColor(0, 0, 0);
   doc.setFontSize(12);
   doc.setFont('helvetica', 'bold');
   doc.text('SERVIÇOS', 20, yPosition);
@@ -147,6 +161,7 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
   doc.rect(20, yPosition - 2, tableWidth, rowHeight, 'F');
   doc.rect(20, yPosition - 2, tableWidth, rowHeight, 'S');
   
+  doc.setTextColor(0, 0, 0);
   doc.setFontSize(10);
   doc.setFont('helvetica', 'bold');
   doc.text('Descrição', 22, yPosition + 3);

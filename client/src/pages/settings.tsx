@@ -172,6 +172,15 @@ export default function Settings() {
       reader.onload = (event) => {
         const base64String = event.target?.result as string;
         handleInputChange("profileImageUrl", base64String);
+        
+        // Auto-salvar após upload
+        setTimeout(() => {
+          updateUserMutation.mutate({
+            ...formData,
+            profileImageUrl: base64String
+          });
+        }, 500);
+        
         toast({
           title: "Sucesso",
           description: "Foto de perfil carregada com sucesso!",
@@ -184,11 +193,43 @@ export default function Settings() {
   const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      // Convert to base64
+      // Verificar tamanho do arquivo (máx. 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        toast({
+          title: "Erro",
+          description: "A imagem deve ter no máximo 5MB.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Verificar tipo do arquivo
+      if (!file.type.startsWith('image/')) {
+        toast({
+          title: "Erro",
+          description: "Por favor, selecione um arquivo de imagem válido.",
+          variant: "destructive",
+        });
+        return;
+      }
+
       const reader = new FileReader();
       reader.onload = (event) => {
         const base64String = event.target?.result as string;
         handleInputChange("logoUrl", base64String);
+        
+        // Auto-salvar após upload
+        setTimeout(() => {
+          updateUserMutation.mutate({
+            ...formData,
+            logoUrl: base64String
+          });
+        }, 500);
+        
+        toast({
+          title: "Sucesso",
+          description: "Logo carregado com sucesso!",
+        });
       };
       reader.readAsDataURL(file);
     }
