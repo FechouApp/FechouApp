@@ -68,12 +68,11 @@ export default function Reports() {
             </div>
 
             <h2 className="text-2xl font-bold text-white mb-4">
-              Recurso Exclusivo Premium
+              OS RELATÓRIOS ESTÃO DISPONÍVEIS PARA O PLANO PREMIUM
             </h2>
 
             <p className="text-white/80 mb-6 max-w-md mx-auto">
-              Os relatórios avançados são exclusivos para usuários do Plano Premium. 
-              Faça upgrade e tenha acesso a métricas detalhadas do seu negócio.
+              CONHEÇA AS VANTAGENS DE SE TORNAR PREMIUM.
             </p>
 
             <div className="bg-white/10 rounded-lg p-4 mb-6">
