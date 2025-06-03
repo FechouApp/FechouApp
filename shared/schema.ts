@@ -35,6 +35,8 @@ export const users = pgTable("users", {
   cpfCnpj: varchar("cpf_cnpj").unique(),
   profession: varchar("profession"),
   businessName: varchar("business_name"),
+  phone: varchar("phone"),
+  address: varchar("address"),
   logoUrl: varchar("logo_url"),
   customDomain: varchar("custom_domain").unique(),
   plan: varchar("plan").notNull().default("FREE"), // FREE, PREMIUM

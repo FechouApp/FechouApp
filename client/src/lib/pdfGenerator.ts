@@ -20,79 +20,74 @@ export async function generateQuotePDF({ quote, user, isPaidPlan }: PDFGenerator
   doc.setFontSize(16);
   doc.setFont('helvetica', 'bold');
   doc.text(user.businessName || `${user.firstName} ${user.lastName}`.trim(), 20, yPosition);
-  yPosition += 10;
+  yPosition += 12;
 
   // Informações do profissional
   doc.setFontSize(9);
   doc.setFont('helvetica', 'normal');
   if (user.email) {
     doc.text(`Email: ${user.email}`, 20, yPosition);
-    yPosition += 5;
+    yPosition += 6;
   }
   if (user.profession) {
     doc.text(`Profissão: ${user.profession}`, 20, yPosition);
-    yPosition += 5;
+    yPosition += 6;
   }
 
-  yPosition += 15;
+  // Dados pessoais do profissional (se disponíveis)
+  if ((user as any).cpfCnpj) {
+    doc.text(`CPF/CNPJ: ${(user as any).cpfCnpj}`, 20, yPosition);
+    yPosition += 6;
+  }
+
+  yPosition += 20;
 
   // Título do orçamento centralizado
-  doc.setFontSize(20);
+  doc.setFontSize(18);
   doc.setFont('helvetica', 'bold');
   doc.text('ORÇAMENTO', pageWidth / 2, yPosition, { align: 'center' });
-  yPosition += 10;
-
-  // Linha decorativa
-  doc.setDrawColor(66, 126, 234);
-  doc.setLineWidth(0.5);
-  doc.line(60, yPosition, pageWidth - 60, yPosition);
-  yPosition += 8;
+  yPosition += 15;
 
   // Número do orçamento e data centralizados
   doc.setFontSize(11);
   doc.setFont('helvetica', 'normal');
-  doc.text(`Nº ${quote.quoteNumber} | ${format(new Date(), 'dd/MM/yyyy', { locale: ptBR })}`, pageWidth / 2, yPosition, { align: 'center' });
-  yPosition += 8;
+  doc.text(`No ${quote.quoteNumber} | ${format(new Date(), 'dd/MM/yyyy', { locale: ptBR })}`, pageWidth / 2, yPosition, { align: 'center' });
+  yPosition += 20;
 
-  // Linha decorativa
-  doc.line(60, yPosition, pageWidth - 60, yPosition);
-  yPosition += 15;
-
-  // Caixa de informações do cliente
-  doc.setFillColor(245, 247, 250); // Cinza claro
-  doc.rect(20, yPosition - 3, pageWidth - 40, 45, 'F');
-  doc.setDrawColor(200, 200, 200);
-  doc.rect(20, yPosition - 3, pageWidth - 40, 45);
-
+  // Seção de dados do cliente
   doc.setFontSize(12);
   doc.setFont('helvetica', 'bold');
-  doc.setTextColor(66, 126, 234); // Azul
-  doc.text('👤 DADOS DO CLIENTE', 25, yPosition + 5);
-  doc.setTextColor(0, 0, 0); // Voltar para preto
-  yPosition += 12;
+  doc.text('DADOS DO CLIENTE', 20, yPosition);
+  yPosition += 10;
+
+  // Linha de separação
+  doc.setDrawColor(0, 0, 0);
+  doc.setLineWidth(0.3);
+  doc.line(20, yPosition, pageWidth - 20, yPosition);
+  yPosition += 8;
 
   doc.setFontSize(10);
   doc.setFont('helvetica', 'normal');
-  doc.text(`Nome: ${quote.client.name}`, 25, yPosition);
+  doc.text(`Nome: ${quote.client.name}`, 20, yPosition);
   yPosition += 6;
   
   if (quote.client.email) {
-    doc.text(`Email: ${quote.client.email}`, 25, yPosition);
+    doc.text(`Email: ${quote.client.email}`, 20, yPosition);
     yPosition += 6;
   }
   
   if (quote.client.phone) {
-    doc.text(`Telefone: ${quote.client.phone}`, 25, yPosition);
+    doc.text(`Telefone: ${quote.client.phone}`, 20, yPosition);
     yPosition += 6;
   }
 
   if (quote.client.address) {
     const address = `${quote.client.address}${quote.client.number ? `, ${quote.client.number}` : ''}${quote.client.complement ? `, ${quote.client.complement}` : ''}`;
-    doc.text(`Endereço: ${address}`, 25, yPosition);
+    doc.text(`Endereco: ${address}`, 20, yPosition);
     yPosition += 6;
     
     if (quote.client.city && quote.client.state) {
-      doc.text(`${quote.client.city} - ${quote.client.state}`, 25, yPosition);
+      doc.text(`${quote.client.city} - ${quote.client.state}`, 20, yPosition);
       yPosition += 6;
     }
   }
@@ -117,147 +112,117 @@ export async function generateQuotePDF({ quote, user, isPaidPlan }: PDFGenerator
     yPosition += splitDescription.length * 5 + 10;
   }
 
-  // Seção de serviços com caixa
-  doc.setFillColor(250, 252, 255); // Azul muito claro
-  const servicesBoxHeight = (quote.items.length * 8) + 25;
-  doc.rect(20, yPosition - 3, pageWidth - 40, servicesBoxHeight, 'F');
-  doc.setDrawColor(66, 126, 234);
-  doc.rect(20, yPosition - 3, pageWidth - 40, servicesBoxHeight);
-
+  // Seção de serviços
   doc.setFontSize(12);
   doc.setFont('helvetica', 'bold');
-  doc.setTextColor(66, 126, 234);
-  doc.text('🛠 SERVIÇOS', 25, yPosition + 5);
-  doc.setTextColor(0, 0, 0);
-  yPosition += 15;
-
-  // Cabeçalho da tabela melhorado
-  doc.setFillColor(66, 126, 234);
-  doc.rect(25, yPosition - 2, pageWidth - 50, 8, 'F');
-  
-  doc.setFontSize(9);
-  doc.setFont('helvetica', 'bold');
-  doc.setTextColor(255, 255, 255);
-  doc.text('Descrição', 30, yPosition + 3);
-  doc.text('Qtd', 125, yPosition + 3, { align: 'center' });
-  doc.text('Valor Unit.', 150, yPosition + 3, { align: 'right' });
-  doc.text('Total', 170, yPosition + 3, { align: 'right' });
-  doc.setTextColor(0, 0, 0);
+  doc.text('SERVICOS', 20, yPosition);
   yPosition += 10;
 
-  // Itens da tabela com formatação melhorada
+  // Linha de separação
+  doc.setDrawColor(0, 0, 0);
+  doc.setLineWidth(0.3);
+  doc.line(20, yPosition, pageWidth - 20, yPosition);
+  yPosition += 10;
+
+  // Cabeçalho da tabela simples
+  doc.setFontSize(10);
+  doc.setFont('helvetica', 'bold');
+  doc.text('Descricao', 20, yPosition);
+  doc.text('Qtd', 120, yPosition);
+  doc.text('Valor Unit.', 140, yPosition);
+  doc.text('Total', 170, yPosition);
+  yPosition += 8;
+
+  // Linha de separação do cabeçalho
+  doc.line(20, yPosition - 2, pageWidth - 20, yPosition - 2);
+
+  // Itens da tabela
   doc.setFont('helvetica', 'normal');
-  quote.items.forEach((item, index) => {
+  quote.items.forEach((item) => {
     // Verificar se precisa de nova página
     if (yPosition > pageHeight - 30) {
       doc.addPage();
       yPosition = 20;
     }
 
-    // Linha alternada para melhor visualização
-    if (index % 2 === 0) {
-      doc.setFillColor(248, 249, 250);
-      doc.rect(25, yPosition - 2, pageWidth - 50, 8, 'F');
-    }
-
-    const description = doc.splitTextToSize(item.description, 85);
-    doc.text(description, 30, yPosition + 3);
-    doc.text(item.quantity.toString(), 125, yPosition + 3, { align: 'center' });
+    const description = doc.splitTextToSize(item.description, 90);
+    doc.text(description, 20, yPosition);
+    doc.text(item.quantity.toString(), 120, yPosition);
     
-    // Formatação de valores com separador de milhar
+    // Formatação de valores simples
     const unitPrice = parseFloat(item.unitPrice);
     const total = parseFloat(item.total);
-    doc.text(`R$ ${unitPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`, 150, yPosition + 3, { align: 'right' });
-    doc.text(`R$ ${total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`, 170, yPosition + 3, { align: 'right' });
+    doc.text(`R$ ${unitPrice.toFixed(2).replace('.', ',')}`, 140, yPosition);
+    doc.text(`R$ ${total.toFixed(2).replace('.', ',')}`, 170, yPosition);
     
-    yPosition += Math.max(description.length * 4, 8);
+    yPosition += Math.max(description.length * 5, 8);
   });
 
-  yPosition += 10;
+  // Linha de separação final
+  doc.line(20, yPosition, pageWidth - 20, yPosition);
+  yPosition += 15;
 
-  // Totais com destaque
+  // Totais simples
   const subtotal = parseFloat(quote.subtotal);
   const discount = parseFloat(quote.discount);
   const total = parseFloat(quote.total);
 
-  // Caixa de totais
-  doc.setFillColor(245, 247, 250);
-  doc.rect(pageWidth - 80, yPosition - 5, 75, 25, 'F');
-  doc.setDrawColor(200, 200, 200);
-  doc.rect(pageWidth - 80, yPosition - 5, 75, 25);
-
   doc.setFontSize(10);
   doc.setFont('helvetica', 'normal');
   
-  const totalsX = pageWidth - 75;
-  doc.text(`Subtotal: R$ ${subtotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`, totalsX, yPosition);
+  const totalsX = pageWidth - 80;
+  doc.text(`Subtotal: R$ ${subtotal.toFixed(2).replace('.', ',')}`, totalsX, yPosition);
   yPosition += 6;
   
   if (discount > 0) {
-    doc.text(`Desconto: R$ ${discount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`, totalsX, yPosition);
+    doc.text(`Desconto: R$ ${discount.toFixed(2).replace('.', ',')}`, totalsX, yPosition);
     yPosition += 6;
   }
   
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(12);
-  doc.setTextColor(66, 126, 234);
-  doc.text(`TOTAL: R$ ${total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`, totalsX, yPosition);
-  doc.setTextColor(0, 0, 0);
+  doc.text(`TOTAL: R$ ${total.toFixed(2).replace('.', ',')}`, totalsX, yPosition);
   yPosition += 20;
-
-  // Seção de condições e informações em caixa
-  const infoBoxHeight = 50;
-  doc.setFillColor(252, 254, 255); // Azul muito claro
-  doc.rect(20, yPosition - 3, pageWidth - 40, infoBoxHeight, 'F');
-  doc.setDrawColor(200, 200, 200);
-  doc.rect(20, yPosition - 3, pageWidth - 40, infoBoxHeight);
 
   // Condições de pagamento
   if (quote.paymentTerms) {
     doc.setFontSize(10);
     doc.setFont('helvetica', 'bold');
-    doc.setTextColor(66, 126, 234);
-    doc.text('💳 Condições de Pagamento:', 25, yPosition + 5);
-    doc.setTextColor(0, 0, 0);
+    doc.text('Condicoes de Pagamento:', 20, yPosition);
     yPosition += 8;
     
     doc.setFont('helvetica', 'normal');
-    const splitPayment = doc.splitTextToSize(quote.paymentTerms, pageWidth - 50);
-    doc.text(splitPayment, 25, yPosition);
-    yPosition += splitPayment.length * 4 + 6;
+    const splitPayment = doc.splitTextToSize(quote.paymentTerms, pageWidth - 40);
+    doc.text(splitPayment, 20, yPosition);
+    yPosition += splitPayment.length * 5 + 10;
   }
 
   // Prazo de execução
   if (quote.executionDeadline) {
     doc.setFont('helvetica', 'bold');
-    doc.setTextColor(66, 126, 234);
-    doc.text('🕒 Prazo de Execução:', 25, yPosition);
-    doc.setTextColor(0, 0, 0);
-    yPosition += 6;
+    doc.text('Prazo de Execucao:', 20, yPosition);
+    yPosition += 8;
     
     doc.setFont('helvetica', 'normal');
-    doc.text(quote.executionDeadline, 25, yPosition);
-    yPosition += 8;
+    doc.text(quote.executionDeadline, 20, yPosition);
+    yPosition += 10;
   }
 
   // Validade
   doc.setFont('helvetica', 'bold');
-  doc.setTextColor(66, 126, 234);
-  doc.text('📆 Validade:', 25, yPosition);
-  doc.setTextColor(0, 0, 0);
-  yPosition += 6;
+  doc.text('Validade:', 20, yPosition);
+  yPosition += 8;
   
   doc.setFont('helvetica', 'normal');
-  doc.text(`até ${format(new Date(quote.validUntil), 'dd/MM/yyyy', { locale: ptBR })}`, 25, yPosition);
+  doc.text(`ate ${format(new Date(quote.validUntil), 'dd/MM/yyyy', { locale: ptBR })}`, 20, yPosition);
   yPosition += 15;
 
   // Observações
   if (quote.observations) {
-    yPosition += 10;
     doc.setFontSize(10);
     doc.setFont('helvetica', 'bold');
-    doc.text('Observações:', 20, yPosition);
-    yPosition += 6;
+    doc.text('Observacoes:', 20, yPosition);
+    yPosition += 8;
     
     doc.setFont('helvetica', 'normal');
     const splitObservations = doc.splitTextToSize(quote.observations, pageWidth - 40);
@@ -267,8 +232,8 @@ export async function generateQuotePDF({ quote, user, isPaidPlan }: PDFGenerator
 
   // Marca d'água menor para plano gratuito
   if (!isPaidPlan) {
-    doc.setFontSize(24);
-    doc.setTextColor(230, 230, 230);
+    doc.setFontSize(20);
+    doc.setTextColor(240, 240, 240);
     doc.setFont('helvetica', 'bold');
     
     // Girar texto para diagonal - menor e mais discreta
@@ -284,31 +249,15 @@ export async function generateQuotePDF({ quote, user, isPaidPlan }: PDFGenerator
     doc.setTextColor(0, 0, 0);
   }
 
-  // Rodapé melhorado
-  yPosition = pageHeight - 20;
-  
-  // Linha decorativa no rodapé
-  doc.setDrawColor(66, 126, 234);
-  doc.setLineWidth(0.3);
-  doc.line(20, yPosition, pageWidth - 20, yPosition);
-  yPosition += 8;
+  // Rodapé simples
+  yPosition = pageHeight - 15;
   
   if (!isPaidPlan) {
     doc.setFontSize(8);
-    doc.setTextColor(120, 120, 120);
-    doc.text('Gerado por Fechou! - Sistema de Orçamentos', pageWidth / 2, yPosition, {
+    doc.setTextColor(100, 100, 100);
+    doc.text('Gerado por Fechou! - Sistema de Orcamentos', pageWidth / 2, yPosition, {
       align: 'center'
     });
-    doc.setTextColor(0, 0, 0);
-  } else {
-    // Para planos pagos, pode incluir informações de contato do profissional
-    doc.setFontSize(8);
-    doc.setTextColor(120, 120, 120);
-    if (user.email) {
-      doc.text(`Contato: ${user.email}`, pageWidth / 2, yPosition, {
-        align: 'center'
-      });
-    }
     doc.setTextColor(0, 0, 0);
   }
 
