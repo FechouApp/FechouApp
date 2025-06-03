@@ -2,6 +2,7 @@ import jsPDF from 'jspdf';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import type { QuoteWithDetails, User } from '@/types';
+import { formatPhone, formatCPF, formatCEP } from './utils';
 
 interface PDFGeneratorOptions {
   quote: QuoteWithDetails;
@@ -243,14 +244,12 @@ export async function generateQuotePDF({ quote, user, isPaidPlan }: PDFGenerator
   }
 
   if ((user as any).cpfCnpj) {
-    const cpfCnpj = (user as any).cpfCnpj.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
-    doc.text(`CPF/CNPJ: ${cpfCnpj}`, pageWidth / 2, yPosition, { align: 'center' });
+    doc.text(`CPF/CNPJ: ${formatCPF((user as any).cpfCnpj)}`, pageWidth / 2, yPosition, { align: 'center' });
     yPosition += 4;
   }
   
   if ((user as any).phone) {
-    const phone = (user as any).phone.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
-    doc.text(`Telefone: ${phone}`, pageWidth / 2, yPosition, { align: 'center' });
+    doc.text(`Telefone: ${formatPhone((user as any).phone)}`, pageWidth / 2, yPosition, { align: 'center' });
     yPosition += 4;
   }
   

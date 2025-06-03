@@ -360,7 +360,7 @@ export default function QuoteView() {
                 {quote.client?.phone && (
                   <div className="flex items-center gap-2">
                     <Phone className="w-4 h-4" />
-                    <span>{quote.client.phone}</span>
+                    <span>{formatPhone(quote.client.phone)}</span>
                   </div>
                 )}
                 {quote.client?.email && (
@@ -372,11 +372,20 @@ export default function QuoteView() {
                 {quote.client?.address && (
                   <div className="flex items-center gap-2">
                     <MapPin className="w-4 h-4" />
-                    <span>
-                      {quote.client.address}
-                      {quote.client.city && `, ${quote.client.city}`}
-                      {quote.client.state && ` - ${quote.client.state}`}
-                    </span>
+                    <div>
+                      <div>{quote.client.address}</div>
+                      <div>
+                        {quote.client.city && `${quote.client.city}`}
+                        {quote.client.state && `, ${quote.client.state}`}
+                        {quote.client.zipCode && ` - CEP: ${formatCEP(quote.client.zipCode)}`}
+                      </div>
+                    </div>
+                  </div>
+                )}
+                {quote.client?.cpf && (
+                  <div className="flex items-center gap-2">
+                    <span className="w-4 h-4 text-center text-xs font-bold">ID</span>
+                    <span>CPF: {formatCPF(quote.client.cpf)}</span>
                   </div>
                 )}
               </div>
