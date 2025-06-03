@@ -16,7 +16,7 @@ export default function Landing() {
             <img 
               src="/fechou-logo-new.png" 
               alt="Fechou!" 
-              className="w-20 h-20 object-contain"
+              className="w-64 h-32 object-contain"
             />
           </div>
           <p className="text-white/90 text-xl max-w-2xl mx-auto">

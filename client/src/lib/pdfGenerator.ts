@@ -105,7 +105,7 @@ export async function generateQuotePDF({ quote, user, isPaidPlan }: PDFGenerator
   doc.setFont('helvetica', 'bold');
   doc.text('Descrição', 22, yPosition + 3);
   doc.text('Qtd', 100, yPosition + 3, { align: 'center' });
-  doc.text('Valor Unit.', 140, yPosition + 3, { align: 'center' });
+  doc.text('Valor Unit.', 150, yPosition + 3, { align: 'right' });
   doc.text('Total', 185, yPosition + 3, { align: 'right' });
   
   // Linhas verticais do cabeçalho - bem espaçadas
