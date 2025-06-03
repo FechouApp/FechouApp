@@ -88,10 +88,10 @@ export default function Dashboard() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-white">
-            Olá, {user?.name || 'Usuário'}! 👋
+          <h1 className="text-3xl font-bold text-gray-800">
+            Olá, {(user as any)?.firstName || user?.name || 'Usuário'}! 👋
           </h1>
-          <p className="text-white/80 mt-1">
+          <p className="text-gray-600 mt-1">
             Aqui está um resumo do seu negócio hoje.
           </p>
         </div>
