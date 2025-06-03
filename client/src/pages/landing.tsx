@@ -124,6 +124,48 @@ export default function Landing() {
           </Card>
         </div>
 
+        {/* Instructions Section */}
+        <div className="bg-white/10 backdrop-blur-sm rounded-xl p-8 mb-12 max-w-4xl mx-auto">
+          <h3 className="text-2xl font-bold text-white mb-4 text-center">
+            Como começar a usar o Fechou!
+          </h3>
+          <div className="grid md:grid-cols-3 gap-6 text-white/90">
+            <div className="text-center">
+              <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-3">
+                <span className="text-xl font-bold text-white">1</span>
+              </div>
+              <h4 className="font-semibold mb-2">Criar conta</h4>
+              <p className="text-sm">
+                Clique em "Começar Agora" e você será redirecionado para criar uma conta gratuita no Replit
+              </p>
+            </div>
+            <div className="text-center">
+              <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-3">
+                <span className="text-xl font-bold text-white">2</span>
+              </div>
+              <h4 className="font-semibold mb-2">Fazer login</h4>
+              <p className="text-sm">
+                Após criar sua conta, faça login e você será automaticamente direcionado para o Fechou!
+              </p>
+            </div>
+            <div className="text-center">
+              <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-3">
+                <span className="text-xl font-bold text-white">3</span>
+              </div>
+              <h4 className="font-semibold mb-2">Começar a usar</h4>
+              <p className="text-sm">
+                Configure seus dados nas configurações e comece a criar orçamentos profissionais
+              </p>
+            </div>
+          </div>
+          <div className="mt-6 p-4 bg-white/10 rounded-lg">
+            <p className="text-white/80 text-sm text-center">
+              <strong>Importante:</strong> As páginas de login e cadastro do Replit estão em inglês, 
+              mas não se preocupe - é muito simples! Você precisará apenas criar um usuário e senha.
+            </p>
+          </div>
+        </div>
+
         {/* CTA */}
         <div className="text-center">
           <h2 className="text-3xl font-bold text-white mb-4">
