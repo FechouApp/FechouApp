@@ -69,27 +69,27 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto space-y-8">
+    <div className="max-w-6xl mx-auto space-y-6 sm:space-y-8 p-4 sm:p-0">
       {/* Welcome Section */}
-      <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-8 rounded-xl">
-        <h1 className="text-3xl font-bold mb-2">
+      <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-4 sm:p-6 lg:p-8 rounded-xl">
+        <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-2">
           Bem-vindo, {(user as any)?.firstName || 'Usuário'}!
         </h1>
-        <p className="text-blue-100 text-lg">
+        <p className="text-blue-100 text-sm sm:text-base lg:text-lg">
           Gerencie seus orçamentos e acompanhe seu progresso
         </p>
-        <div className="flex items-center gap-4 mt-4">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 mt-4">
           <div className="flex items-center gap-2">
-            <span className="text-blue-100">Plano:</span>
+            <span className="text-blue-100 text-sm sm:text-base">Plano:</span>
             <Badge 
               variant={(user as any)?.plan === "PREMIUM" ? "default" : "secondary"}
-              className={(user as any)?.plan === "PREMIUM" ? "bg-yellow-500 text-black" : "bg-gray-500 text-white"}
+              className={`${(user as any)?.plan === "PREMIUM" ? "bg-yellow-500 text-black" : "bg-gray-500 text-white"} text-xs sm:text-sm`}
             >
               {(user as any)?.plan === "PREMIUM" ? "Premium" : "Gratuito"}
             </Badge>
           </div>
           {(user as any)?.plan === "PREMIUM" && (user as any)?.planExpiresAt && (
-            <span className="text-blue-100 text-sm">
+            <span className="text-blue-100 text-xs sm:text-sm">
               Válido até: {new Date((user as any).planExpiresAt).toLocaleDateString('pt-BR')}
             </span>
           )}
@@ -97,58 +97,58 @@ export default function Dashboard() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         <Card className="shadow-md hover:shadow-lg transition-shadow">
-          <CardContent className="p-8">
+          <CardContent className="p-4 sm:p-6 lg:p-8">
             <div className="flex items-center justify-between">
-              <div className="space-y-2">
-                <p className="text-base font-medium text-gray-600">Total de Orçamentos</p>
-                <p className="text-4xl font-bold text-gray-900">{dashboardStats.totalQuotes}</p>
+              <div className="space-y-1 sm:space-y-2">
+                <p className="text-xs sm:text-sm lg:text-base font-medium text-gray-600">Total de Orçamentos</p>
+                <p className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900">{dashboardStats.totalQuotes}</p>
               </div>
-              <FileText className="w-10 h-10 text-blue-600" />
+              <FileText className="w-6 h-6 sm:w-8 sm:h-8 lg:w-10 lg:h-10 text-blue-600" />
             </div>
           </CardContent>
         </Card>
 
         <Card className="shadow-md hover:shadow-lg transition-shadow">
-          <CardContent className="p-8">
+          <CardContent className="p-4 sm:p-6 lg:p-8">
             <div className="flex items-center justify-between">
-              <div className="space-y-2">
-                <p className="text-base font-medium text-gray-600">Aprovados</p>
-                <p className="text-4xl font-bold text-green-600">{dashboardStats.approvedQuotes}</p>
+              <div className="space-y-1 sm:space-y-2">
+                <p className="text-xs sm:text-sm lg:text-base font-medium text-gray-600">Aprovados</p>
+                <p className="text-2xl sm:text-3xl lg:text-4xl font-bold text-green-600">{dashboardStats.approvedQuotes}</p>
               </div>
-              <CheckCircle className="w-10 h-10 text-green-600" />
+              <CheckCircle className="w-6 h-6 sm:w-8 sm:h-8 lg:w-10 lg:h-10 text-green-600" />
             </div>
           </CardContent>
         </Card>
 
         <Card className="shadow-md hover:shadow-lg transition-shadow">
-          <CardContent className="p-8">
+          <CardContent className="p-4 sm:p-6 lg:p-8">
             <div className="flex items-center justify-between">
-              <div className="space-y-2">
-                <p className="text-base font-medium text-gray-600">Faturamento</p>
-                <p className="text-3xl font-bold text-purple-600">
+              <div className="space-y-1 sm:space-y-2">
+                <p className="text-xs sm:text-sm lg:text-base font-medium text-gray-600">Faturamento</p>
+                <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-purple-600">
                   {formatCurrency(dashboardStats.totalRevenue)}
                 </p>
               </div>
-              <DollarSign className="w-10 h-10 text-purple-600" />
+              <DollarSign className="w-6 h-6 sm:w-8 sm:h-8 lg:w-10 lg:h-10 text-purple-600" />
             </div>
           </CardContent>
         </Card>
 
         <Card className="shadow-md hover:shadow-lg transition-shadow">
-          <CardContent className="p-8">
+          <CardContent className="p-4 sm:p-6 lg:p-8">
             <div className="flex items-center justify-between">
-              <div className="space-y-2">
-                <p className="text-base font-medium text-gray-600">Avaliação Média</p>
-                <div className="flex items-center gap-2">
-                  <p className="text-4xl font-bold text-yellow-600">
+              <div className="space-y-1 sm:space-y-2">
+                <p className="text-xs sm:text-sm lg:text-base font-medium text-gray-600">Avaliação Média</p>
+                <div className="flex items-center gap-1 sm:gap-2">
+                  <p className="text-2xl sm:text-3xl lg:text-4xl font-bold text-yellow-600">
                     {dashboardStats.averageRating.toFixed(1)}
                   </p>
-                  <Star className="w-6 h-6 text-yellow-400 fill-current" />
+                  <Star className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-yellow-400 fill-current" />
                 </div>
               </div>
-              <Star className="w-10 h-10 text-yellow-600" />
+              <Star className="w-6 h-6 sm:w-8 sm:h-8 lg:w-10 lg:h-10 text-yellow-600" />
             </div>
           </CardContent>
         </Card>
