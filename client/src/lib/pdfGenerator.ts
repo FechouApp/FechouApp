@@ -21,6 +21,8 @@ interface User {
   phone?: string;
   address?: string;
   cpfCnpj?: string;
+  businessName?: string;
+  pixKey?: string;
 }
 
 interface Quote {
@@ -31,6 +33,17 @@ interface Quote {
   notes?: string;
   createdAt: string;
   validUntil?: string;
+}
+
+export function downloadPDF(blob: Blob, filename: string) {
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
 }
 
 export function generateQuotePDF(quote: Quote, user: User) {
@@ -201,6 +214,6 @@ export function generateQuotePDF(quote: Quote, user: User) {
     doc.text(`Válido até: ${validDate}`, margin, yPosition);
   }
 
-  // Salvar o PDF
-  doc.save(`Orçamento_${quote.quoteNumber}.pdf`);
+  // Retornar o PDF como blob
+  return doc.output('blob');
 }
