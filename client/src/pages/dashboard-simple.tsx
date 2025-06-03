@@ -155,7 +155,7 @@ export default function Dashboard() {
       </div>
 
       {/* Quick Actions */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         <Link href="/new-quote">
           <Card className="hover:shadow-lg transition-shadow cursor-pointer h-full">
             <CardContent className="p-6 text-center h-full flex flex-col justify-center">

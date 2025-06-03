@@ -117,10 +117,10 @@ export default function PlanComparison() {
   ];
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-6xl">
-      <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold text-gray-800 mb-4">Planos do Fechou!</h1>
-        <p className="text-gray-600 text-lg">
+    <div className="container mx-auto px-4 py-6 sm:py-8 max-w-6xl">
+      <div className="text-center mb-6 sm:mb-8">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-4">Planos do Fechou!</h1>
+        <p className="text-sm sm:text-base lg:text-lg text-gray-600">
           Escolha o plano ideal para o seu negócio
         </p>
         
@@ -180,7 +180,7 @@ export default function PlanComparison() {
       )}
 
       {/* Comparação de Planos */}
-      <div className="grid md:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
         {/* Plano Gratuito */}
         <Card className={`relative ${!isPremium ? 'ring-2 ring-blue-500 ring-offset-2' : ''}`}>
           <CardHeader className="text-center">
