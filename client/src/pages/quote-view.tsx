@@ -25,8 +25,8 @@ export default function QuoteView() {
   const [comment, setComment] = useState("");
   const [reviewSubmitted, setReviewSubmitted] = useState(false);
   
-  // Check if this is a public view based on URL and authentication status
-  const isPublicView = window.location.pathname.startsWith('/quote/') && !user;
+  // Check if this is a public view based on URL pattern
+  const isPublicView = window.location.pathname.startsWith('/quote/');
 
   // Mutations
   const markAsSentMutation = useMutation({
@@ -454,10 +454,30 @@ export default function QuoteView() {
               )}
             </div>
 
-
+            {/* WhatsApp Buttons - Only for professional when not in public view */}
+            {user && !isPublicView && quote.userId === (user as any)?.id && quote.client?.phone && (
+              <div className="mb-4 space-y-2">
+                <Button 
+                  onClick={sendViaWhatsApp}
+                  disabled={markAsSentMutation.isPending}
+                  className="w-full bg-green-600 hover:bg-green-700"
+                >
+                  <MessageCircle className="w-4 h-4 mr-2" />
+                  Enviar por WhatsApp
+                </Button>
+                <Button 
+                  onClick={copyWhatsAppLink}
+                  variant="outline"
+                  className="w-full"
+                >
+                  <Copy className="w-4 h-4 mr-2" />
+                  Copiar Link do WhatsApp
+                </Button>
+              </div>
+            )}
             
             {/* Manual Approve button for quote owner */}
-            {!isPublicView && user && quote.userId === (user as any)?.id && quote.status === "pending" && (
+            {user && !isPublicView && quote.userId === (user as any)?.id && quote.status === "pending" && (
               <div className="mb-4">
                 <Button 
                   onClick={() => approveMutation.mutate()}
