@@ -4,8 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import LoadingSpinner from "@/components/common/loading-spinner";
-import { Link } from "wouter";
-import { Crown, Lock } from "lucide-react";
+import { Link, useLocation } from "wouter";
+import { Crown, Lock, ArrowLeft } from "lucide-react";
 import { 
   FileText, 
   CheckCircle, 
@@ -25,6 +25,7 @@ import type { DashboardStats, QuoteWithClient, ReviewWithClient } from "@/types"
 
 export default function Reports() {
   const { user, isLoading: userLoading } = useAuth();
+  const [, setLocation] = useLocation();
 
   const { data: stats, isLoading: statsLoading } = useQuery({
     queryKey: ["/api/dashboard/stats"],
@@ -41,6 +42,18 @@ export default function Reports() {
   if (!isPremium) {
     return (
       <div className="space-y-8">
+        {/* Botão de Voltar */}
+        <div className="flex items-center mb-6">
+          <Button
+            variant="ghost"
+            onClick={() => setLocation("/")}
+            className="flex items-center gap-2 text-white hover:text-white hover:bg-white/10"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Voltar
+          </Button>
+        </div>
+
         <div className="text-center">
           <h1 className="text-3xl font-bold text-white mb-2">Relatórios Avançados</h1>
           <p className="text-white/70">Análises detalhadas para o seu negócio</p>
@@ -189,6 +202,18 @@ export default function Reports() {
 
   return (
     <div className="space-y-8">
+      {/* Botão de Voltar */}
+      <div className="flex items-center mb-6">
+        <Button
+          variant="ghost"
+          onClick={() => setLocation("/")}
+          className="flex items-center gap-2 text-gray-600 hover:text-gray-900"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Voltar
+        </Button>
+      </div>
+
       {/* Header */}
       <div>
         <h1 className="text-3xl font-bold text-gray-800 mb-2">Relatórios</h1>
