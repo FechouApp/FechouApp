@@ -266,6 +266,7 @@ export default function QuoteView() {
 
     try {
       console.log('Starting PDF generation...', { quote: quote.quoteNumber, user: (user as any).id });
+      console.log('Complete user data:', user); // Debug log para ver todos os dados do usuário
       const isUserPremium = (user as any)?.plan === 'PREMIUM';
       console.log('User plan:', (user as any)?.plan, 'isUserPremium:', isUserPremium);
 

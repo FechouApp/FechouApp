@@ -411,11 +411,28 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
   doc.setFontSize(9);
   doc.setFont('helvetica', 'normal');
   
+  // Criar interface expandida para acessar todos os campos do usuário
+  interface ExtendedUser {
+    email?: string;
+    cpfCnpj?: string;
+    phone?: string;
+    address?: string;
+    number?: string;
+    complement?: string;
+    city?: string;
+    state?: string;
+    zipCode?: string;
+  }
+
+  const extendedUser = user as ExtendedUser;
+
   const userInfo = [
-    user.email ? `Email: ${user.email}` : null,
-    (user as any).cpfCnpj ? `CPF/CNPJ: ${formatCPF((user as any).cpfCnpj)}` : null,
-    (user as any).phone ? `Telefone: ${formatPhone((user as any).phone)}` : null,
+    extendedUser.email ? `Email: ${extendedUser.email}` : null,
+    extendedUser.cpfCnpj ? `CPF/CNPJ: ${formatCPF(extendedUser.cpfCnpj)}` : null,
+    extendedUser.phone ? `Telefone: ${formatPhone(extendedUser.phone)}` : null,
   ].filter(Boolean);
+
+  console.log('User data for PDF:', extendedUser); // Debug log
 
   userInfo.forEach(info => {
     if (info) {
@@ -425,17 +442,17 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
   });
 
   // Endereço completo em linha separada
-  if ((user as any).address) {
+  if (extendedUser.address) {
     const fullAddress = [
-      (user as any).address,
-      (user as any).number ? `nº ${(user as any).number}` : null,
-      (user as any).complement,
+      extendedUser.address,
+      extendedUser.number ? `nº ${extendedUser.number}` : null,
+      extendedUser.complement,
     ].filter(Boolean).join(', ');
     
     const cityStateZip = [
-      (user as any).city,
-      (user as any).state,
-      (user as any).zipCode ? `CEP: ${formatCEP((user as any).zipCode)}` : null,
+      extendedUser.city,
+      extendedUser.state,
+      extendedUser.zipCode ? `CEP: ${formatCEP(extendedUser.zipCode)}` : null,
     ].filter(Boolean).join(' - ');
 
     doc.text(`Endereço: ${fullAddress}`, pageWidth / 2, yPosition, { align: 'center' });
