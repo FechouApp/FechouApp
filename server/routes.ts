@@ -378,6 +378,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Quote approval/rejection/sending
+  app.post('/api/quotes/:id/approve', async (req, res) => {
+    try {
+      const success = await storage.updateQuoteStatus(req.params.id, 'approved');
+      
+      if (!success) {
+        return res.status(404).json({ message: "Quote not found" });
+      }
+      
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error approving quote:", error);
+      res.status(500).json({ message: "Failed to approve quote" });
+    }
+  });
+
+  app.post('/api/quotes/:id/reject', async (req, res) => {
+    try {
+      const success = await storage.updateQuoteStatus(req.params.id, 'rejected');
+      
+      if (!success) {
+        return res.status(404).json({ message: "Quote not found" });
+      }
+      
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error rejecting quote:", error);
+      res.status(500).json({ message: "Failed to reject quote" });
+    }
+  });
+
+  app.post('/api/quotes/:id/mark-sent', async (req, res) => {
+    try {
+      const sentAt = new Date();
+      const success = await storage.updateQuoteStatus(req.params.id, 'pending', { 
+        sentViaWhatsApp: true, 
+        sentAt: sentAt.toISOString() 
+      });
+      
+      if (!success) {
+        return res.status(404).json({ message: "Quote not found" });
+      }
+      
+      res.json({ success: true, sentAt });
+    } catch (error) {
+      console.error("Error marking quote as sent:", error);
+      res.status(500).json({ message: "Failed to mark quote as sent" });
+    }
+  });
+
   // Review routes
   app.get('/api/reviews', isAuthenticated, async (req: any, res) => {
     try {

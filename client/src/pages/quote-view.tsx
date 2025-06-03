@@ -24,6 +24,76 @@ export default function QuoteView() {
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
 
+  // Mutations
+  const markAsSentMutation = useMutation({
+    mutationFn: async () => {
+      await apiRequest("POST", `/api/quotes/${quote?.id}/mark-sent`);
+    },
+    onSuccess: () => {
+      toast({
+        title: "Enviado!",
+        description: "O orçamento foi marcado como enviado via WhatsApp.",
+      });
+      window.location.reload();
+    },
+    onError: () => {
+      toast({
+        title: "Erro",
+        description: "Não foi possível registrar o envio.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Funções do WhatsApp
+  const generateWhatsAppLink = () => {
+    if (!quote || !quote.client.phone) return "";
+    
+    const cleanPhone = quote.client.phone.replace(/\D/g, '');
+    const phoneNumber = cleanPhone.startsWith('55') ? cleanPhone : `55${cleanPhone}`;
+    const currentUrl = window.location.href;
+    
+    const message = `Olá, ${quote.client.name}! Aqui está o seu orçamento gerado via *Fechou!*.
+✅ Profissional: Fechou!
+📄 Orçamento válido até: ${format(new Date(quote.validUntil), 'dd/MM/yyyy', { locale: ptBR })}
+🔗 Acesse os detalhes aqui: ${currentUrl}`;
+    
+    return `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+  };
+
+  const copyWhatsAppLink = async () => {
+    const link = generateWhatsAppLink();
+    if (link) {
+      try {
+        await navigator.clipboard.writeText(link);
+        toast({
+          title: "Link copiado!",
+          description: "O link do WhatsApp foi copiado para a área de transferência.",
+        });
+      } catch (error) {
+        toast({
+          title: "Erro",
+          description: "Não foi possível copiar o link.",
+          variant: "destructive",
+        });
+      }
+    }
+  };
+
+  const sendViaWhatsApp = () => {
+    const link = generateWhatsAppLink();
+    if (link) {
+      window.open(link, '_blank');
+      markAsSentMutation.mutate();
+    } else {
+      toast({
+        title: "Erro",
+        description: "Número do WhatsApp não encontrado para este cliente.",
+        variant: "destructive",
+      });
+    }
+  };
+
   // Redirect to home if not authenticated
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
@@ -349,6 +419,28 @@ export default function QuoteView() {
                 Baixar PDF do Orçamento
               </Button>
             </div>
+
+            {/* WhatsApp Buttons - Only if client has phone */}
+            {quote.client?.phone && (
+              <div className="mb-4 space-y-2">
+                <Button 
+                  onClick={sendViaWhatsApp}
+                  disabled={markAsSentMutation.isPending}
+                  className="w-full bg-green-600 hover:bg-green-700"
+                >
+                  <MessageCircle className="w-4 h-4 mr-2" />
+                  Enviar por WhatsApp
+                </Button>
+                <Button 
+                  onClick={copyWhatsAppLink}
+                  variant="outline"
+                  className="w-full"
+                >
+                  <Copy className="w-4 h-4 mr-2" />
+                  Copiar Link do WhatsApp
+                </Button>
+              </div>
+            )}
             
             {/* Approve/Reject buttons - Only for pending quotes */}
             {canApprove && (
