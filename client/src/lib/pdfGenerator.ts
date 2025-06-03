@@ -28,34 +28,8 @@ export async function generateQuotePDF({ quote, user, isPaidPlan }: PDFGenerator
   doc.text(`Orçamento nº ${quote.quoteNumber} – ${format(new Date(), 'dd/MM/yyyy', { locale: ptBR })}`, pageWidth / 2, yPosition, { align: 'center' });
   yPosition += 15;
 
-  // Marca d'água com logotipo para plano gratuito
-  if (!isPaidPlan) {
-    // Criar marca d'água discreta com texto estilizado
-    doc.setGState(doc.GState({ opacity: 0.15 }));
-    doc.setTextColor(150, 150, 150);
-    doc.setFontSize(28);
-    doc.setFont('helvetica', 'bold');
-    
-    // Posicionar no centro da página com rotação
-    const centerX = pageWidth / 2;
-    const centerY = pageHeight / 2;
-    
-    doc.text('Fechou!', centerX, centerY - 5, { 
-      align: 'center',
-      angle: 45
-    });
-    
-    doc.setFontSize(12);
-    doc.setFont('helvetica', 'normal');
-    doc.text('O jeito moderno de fechar negócios', centerX, centerY + 10, { 
-      align: 'center',
-      angle: 45
-    });
-    
-    // Restaurar opacidade normal
-    doc.setGState(doc.GState({ opacity: 1.0 }));
-    doc.setTextColor(0, 0, 0);
-  }
+  // Marca d'água posicionada na área em branco (será adicionada no final)
+  let watermarkAdded = false;
 
   yPosition += 5;
 
@@ -117,7 +91,7 @@ export async function generateQuotePDF({ quote, user, isPaidPlan }: PDFGenerator
   doc.text('SERVIÇOS', 20, yPosition);
   yPosition += 8;
 
-  // Configuração da tabela com posições corrigidas
+  // Configuração da tabela com posições corrigidas para evitar sobreposição
   const tableStartY = yPosition;
   const tableWidth = pageWidth - 40;
   const rowHeight = 8;
@@ -130,14 +104,14 @@ export async function generateQuotePDF({ quote, user, isPaidPlan }: PDFGenerator
   doc.setFontSize(10);
   doc.setFont('helvetica', 'bold');
   doc.text('Descrição', 22, yPosition + 3);
-  doc.text('Qtd', 115, yPosition + 3, { align: 'center' });
-  doc.text('Valor Unit.', 155, yPosition + 3, { align: 'center' });
-  doc.text('Total', 190, yPosition + 3, { align: 'right' });
+  doc.text('Qtd', 100, yPosition + 3, { align: 'center' });
+  doc.text('Valor Unit.', 140, yPosition + 3, { align: 'center' });
+  doc.text('Total', 185, yPosition + 3, { align: 'right' });
   
-  // Linhas verticais do cabeçalho - ajustadas
-  doc.line(105, tableStartY - 2, 105, yPosition + 6);
-  doc.line(135, tableStartY - 2, 135, yPosition + 6);
-  doc.line(175, tableStartY - 2, 175, yPosition + 6);
+  // Linhas verticais do cabeçalho - bem espaçadas
+  doc.line(90, tableStartY - 2, 90, yPosition + 6);
+  doc.line(120, tableStartY - 2, 120, yPosition + 6);
+  doc.line(160, tableStartY - 2, 160, yPosition + 6);
   
   yPosition += rowHeight;
 
@@ -159,20 +133,20 @@ export async function generateQuotePDF({ quote, user, isPaidPlan }: PDFGenerator
     // Bordas da linha
     doc.rect(20, yPosition - 2, tableWidth, rowHeight, 'S');
     
-    const description = doc.splitTextToSize(item.description, 80);
+    const description = doc.splitTextToSize(item.description, 65);
     doc.text(description, 22, yPosition + 3);
-    doc.text(item.quantity.toString(), 115, yPosition + 3, { align: 'center' });
+    doc.text(item.quantity.toString(), 100, yPosition + 3, { align: 'center' });
     
     // Formatação de valores com alinhamento correto
     const unitPrice = parseFloat(item.unitPrice);
     const total = parseFloat(item.total);
-    doc.text(`R$ ${unitPrice.toFixed(2).replace('.', ',')}`, 165, yPosition + 3, { align: 'right' });
-    doc.text(`R$ ${total.toFixed(2).replace('.', ',')}`, 190, yPosition + 3, { align: 'right' });
+    doc.text(`R$ ${unitPrice.toFixed(2).replace('.', ',')}`, 150, yPosition + 3, { align: 'right' });
+    doc.text(`R$ ${total.toFixed(2).replace('.', ',')}`, 185, yPosition + 3, { align: 'right' });
     
-    // Linhas verticais - ajustadas
-    doc.line(105, yPosition - 2, 105, yPosition + 6);
-    doc.line(135, yPosition - 2, 135, yPosition + 6);
-    doc.line(175, yPosition - 2, 175, yPosition + 6);
+    // Linhas verticais - bem espaçadas
+    doc.line(90, yPosition - 2, 90, yPosition + 6);
+    doc.line(120, yPosition - 2, 120, yPosition + 6);
+    doc.line(160, yPosition - 2, 160, yPosition + 6);
     
     yPosition += rowHeight;
   });
@@ -184,15 +158,15 @@ export async function generateQuotePDF({ quote, user, isPaidPlan }: PDFGenerator
   const discount = parseFloat(quote.discount);
   const total = parseFloat(quote.total);
 
-  // Linha do total final destacada
+  // Linha do total final destacada - alinhada com a tabela
   doc.setFillColor(220, 220, 220);
-  doc.rect(120, yPosition - 2, 80, 10, 'F');
-  doc.rect(120, yPosition - 2, 80, 10, 'S');
+  doc.rect(110, yPosition - 2, 90, 10, 'F');
+  doc.rect(110, yPosition - 2, 90, 10, 'S');
   
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(12);
-  doc.text('TOTAL GERAL:', 122, yPosition + 4);
-  doc.text(`R$ ${total.toFixed(2).replace('.', ',')}`, 190, yPosition + 4, { align: 'right' });
+  doc.text('TOTAL GERAL:', 112, yPosition + 4);
+  doc.text(`R$ ${total.toFixed(2).replace('.', ',')}`, 185, yPosition + 4, { align: 'right' });
   yPosition += 20;
 
   // Seção de condições organizadas
@@ -286,6 +260,39 @@ export async function generateQuotePDF({ quote, user, isPaidPlan }: PDFGenerator
   }
 
   yPosition += 5;
+
+  // Marca d'água posicionada em área livre (canto direito/inferior)
+  if (!isPaidPlan && !watermarkAdded) {
+    doc.setGState(doc.GState({ opacity: 0.1 }));
+    doc.setTextColor(100, 100, 100);
+    doc.setFontSize(24);
+    doc.setFont('helvetica', 'bold');
+    
+    // Posicionar no canto inferior direito em área livre
+    const watermarkX = pageWidth - 50;
+    const watermarkY = pageHeight - 80;
+    
+    doc.text('Fechou!', watermarkX, watermarkY, { 
+      align: 'center',
+      angle: 45
+    });
+    
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    doc.text('O jeito moderno', watermarkX, watermarkY + 8, { 
+      align: 'center',
+      angle: 45
+    });
+    doc.text('de fechar negócios', watermarkX, watermarkY + 15, { 
+      align: 'center',
+      angle: 45
+    });
+    
+    // Restaurar opacidade normal
+    doc.setGState(doc.GState({ opacity: 1.0 }));
+    doc.setTextColor(0, 0, 0);
+    watermarkAdded = true;
+  }
 
   // Rodapé discreto para plano gratuito
   if (!isPaidPlan) {
