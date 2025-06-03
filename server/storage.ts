@@ -30,6 +30,8 @@ export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
   upsertUser(user: UpsertUser): Promise<User>;
   updateUserPlan(id: string, plan: string, planExpiresAt: Date | null): Promise<User>;
+  addReferralBonus(userId: string): Promise<User>;
+  updateUserColors(id: string, primaryColor: string, secondaryColor: string): Promise<User>;
   
   // Client operations
   getClients(userId: string): Promise<Client[]>;
@@ -112,6 +114,35 @@ export class DatabaseStorage implements IStorage {
       .where(eq(users.id, id))
       .returning();
     return user;
+  }
+
+  async addReferralBonus(userId: string): Promise<User> {
+    const user = await this.getUser(userId);
+    if (!user) throw new Error("User not found");
+    
+    const [updatedUser] = await db
+      .update(users)
+      .set({ 
+        referralCount: user.referralCount + 1,
+        bonusQuotes: user.bonusQuotes + 1,
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, userId))
+      .returning();
+    return updatedUser;
+  }
+
+  async updateUserColors(id: string, primaryColor: string, secondaryColor: string): Promise<User> {
+    const [updatedUser] = await db
+      .update(users)
+      .set({ 
+        primaryColor,
+        secondaryColor,
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, id))
+      .returning();
+    return updatedUser;
   }
 
   // Client operations

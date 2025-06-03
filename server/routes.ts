@@ -79,6 +79,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Rota para adicionar bônus de indicação
+  app.post('/api/user/referral', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.addReferralBonus(userId);
+      res.json(user);
+    } catch (error) {
+      console.error("Error adding referral bonus:", error);
+      res.status(500).json({ message: "Erro ao adicionar bônus de indicação" });
+    }
+  });
+
+  // Rota para atualizar cores personalizadas (Premium apenas)
+  app.post('/api/user/colors', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { primaryColor, secondaryColor } = req.body;
+
+      // Verificar se é Premium
+      const user = await storage.getUser(userId);
+      const isPremium = user?.plan === "PREMIUM";
+      
+      if (!isPremium) {
+        return res.status(403).json({ message: "Funcionalidade exclusiva do plano Premium" });
+      }
+
+      const updatedUser = await storage.updateUserColors(userId, primaryColor, secondaryColor);
+      res.json(updatedUser);
+    } catch (error) {
+      console.error("Error updating user colors:", error);
+      res.status(500).json({ message: "Erro ao atualizar cores" });
+    }
+  });
+
   app.put('/api/auth/user', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;

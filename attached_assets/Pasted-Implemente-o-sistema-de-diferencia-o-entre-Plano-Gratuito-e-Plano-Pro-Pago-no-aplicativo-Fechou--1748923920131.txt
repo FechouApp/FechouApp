@@ -1,0 +1,78 @@
+Implemente o sistema de diferenciação entre Plano Gratuito e Plano Pro (Pago) no aplicativo Fechou!.
+A seguir estão todas as funcionalidades que devem ser habilitadas ou limitadas conforme o plano do profissional.
+
+🔐 Controle de plano:
+O plano do usuário deve ser salvo na base de dados (ex: plan: "free" ou plan: "pro").
+
+Exibir na área de configurações qual plano está ativo.
+
+Para testes, crie um botão que alterna entre gratuito e Pro (modo dev).
+
+🆓 Plano Gratuito:
+Limite de até 5 orçamentos por mês (com possibilidade de ganhar +1 por cada indicação).
+
+PDF gerado deve incluir:
+
+Marca d’água do app “Fechou!” visível.
+
+Sem logotipo do profissional.
+
+Sem envio por e-mail (somente WhatsApp).
+
+Não pode anexar imagens ou documentos extras (ex: nota fiscal).
+
+Sem integração com link de pagamento.
+
+Sem contrato personalizado.
+
+Página de orçamento com identidade visual padrão do Fechou!.
+
+Avaliação do profissional pelo cliente: ativada.
+
+Validade do orçamento: pode ser configurada.
+
+Sem notificações em tempo real.
+
+Sem automação de lembretes de pagamento.
+
+💼 Plano Pro (Pago):
+Orçamentos ilimitados por mês.
+
+PDF gerado deve permitir:
+
+Inserção do logotipo do profissional (campo no cadastro).
+
+Sem marca d’água do Fechou!
+
+Envio por WhatsApp e e-mail.
+
+Pode anexar fotos e documentos ao orçamento.
+
+Integração com link de pagamento via cartão ou Pix.
+
+Permite anexar contrato em PDF (manual, sem preenchimento automático).
+
+Página do orçamento é personalizada com logotipo e cores do profissional.
+
+Avaliação do profissional pelo cliente: ativada.
+
+Validade do orçamento: pode ser configurada.
+
+Notificações em tempo real (ex: cliente visualizou, aprovou etc).
+
+Automação de lembretes de pagamento.
+
+Suporte prioritário (incluir tag no sistema para futuras interações).
+
+🎁 Indicação:
+No plano gratuito:
+
+Cada novo usuário indicado gera +1 orçamento gratuito no mês (até o máximo de 10).
+
+No plano Pro:
+
+Cada nova indicação que virar usuário (gratuito ou pago) gera desconto progressivo na mensalidade.
+
+Atualize todas as telas, controles e permissões do app de acordo com essas regras.
+Exiba claramente o plano ativo e, se possível, crie um pequeno painel comparativo visual no app.
+

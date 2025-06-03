@@ -45,8 +45,12 @@ export const users = pgTable("users", {
   paymentGatewayId: varchar("payment_gateway_id"),
   monthlyQuotes: integer("monthly_quotes").notNull().default(0),
   quotesLimit: integer("quotes_limit").notNull().default(5),
+  bonusQuotes: integer("bonus_quotes").notNull().default(0), // Orçamentos bonus por indicações
+  referralCount: integer("referral_count").notNull().default(0), // Contador de indicações
   whatsappNotifications: boolean("whatsapp_notifications").notNull().default(true),
   emailNotifications: boolean("email_notifications").notNull().default(true),
+  primaryColor: varchar("primary_color").default("#3B82F6"), // Cor personalizada Premium
+  secondaryColor: varchar("secondary_color").default("#10B981"), // Cor secundária Premium
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
   lastLoginAt: timestamp("last_login_at"),
