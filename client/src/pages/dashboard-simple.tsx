@@ -97,7 +97,7 @@ export default function Dashboard() {
 
         {/* Título das Ações */}
         <div className="mt-6 mb-3">
-          <h3 className="text-white font-semibold text-lg">Ações</h3>
+          <h3 className="text-white font-semibold text-lg opacity-100">Ações Rápidas</h3>
         </div>
 
         {/* Quick Actions - Buttons with icons beside text */}
