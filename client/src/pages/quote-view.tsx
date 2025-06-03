@@ -145,6 +145,15 @@ export default function QuoteView() {
   const queryKey = isPublicRoute ? `/api/quotes/public/${quoteNumber}` : `/api/quotes/${quoteId}`;
   const queryEnabled = isPublicRoute ? !!quoteNumber : !!quoteId;
 
+  console.log('Debug Quote View:', {
+    pathname: window.location.pathname,
+    isPublicRoute,
+    quoteNumber,
+    quoteId,
+    queryKey,
+    queryEnabled
+  });
+
   const { data: quote, isLoading, error } = useQuery<QuoteWithDetails>({
     queryKey: [queryKey],
     enabled: queryEnabled,
