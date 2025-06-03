@@ -28,16 +28,33 @@ export async function generateQuotePDF({ quote, user, isPaidPlan }: PDFGenerator
   doc.text(`Orçamento nº ${quote.quoteNumber} – ${format(new Date(), 'dd/MM/yyyy', { locale: ptBR })}`, pageWidth / 2, yPosition, { align: 'center' });
   yPosition += 15;
 
-  // Marca d'água para plano gratuito
+  // Marca d'água com logotipo para plano gratuito
   if (!isPaidPlan) {
-    doc.setTextColor(200, 200, 200);
-    doc.setFontSize(50);
+    // Criar marca d'água discreta com texto estilizado
+    doc.setGState(doc.GState({ opacity: 0.15 }));
+    doc.setTextColor(150, 150, 150);
+    doc.setFontSize(28);
     doc.setFont('helvetica', 'bold');
-    doc.text('Fechou!', pageWidth / 2, pageHeight / 2, { 
+    
+    // Posicionar no centro da página com rotação
+    const centerX = pageWidth / 2;
+    const centerY = pageHeight / 2;
+    
+    doc.text('Fechou!', centerX, centerY - 5, { 
       align: 'center',
       angle: 45
     });
-    doc.setTextColor(0, 0, 0); // Volta para preto
+    
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'normal');
+    doc.text('O jeito moderno de fechar negócios', centerX, centerY + 10, { 
+      align: 'center',
+      angle: 45
+    });
+    
+    // Restaurar opacidade normal
+    doc.setGState(doc.GState({ opacity: 1.0 }));
+    doc.setTextColor(0, 0, 0);
   }
 
   yPosition += 5;
