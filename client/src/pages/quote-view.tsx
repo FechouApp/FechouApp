@@ -420,27 +420,33 @@ export default function QuoteView() {
               </Button>
             </div>
 
-            {/* WhatsApp Buttons - Only if client has phone */}
-            {quote.client?.phone && (
-              <div className="mb-4 space-y-2">
-                <Button 
-                  onClick={sendViaWhatsApp}
-                  disabled={markAsSentMutation.isPending}
-                  className="w-full bg-green-600 hover:bg-green-700"
-                >
-                  <MessageCircle className="w-4 h-4 mr-2" />
-                  Enviar por WhatsApp
-                </Button>
-                <Button 
-                  onClick={copyWhatsAppLink}
-                  variant="outline"
-                  className="w-full"
-                >
-                  <Copy className="w-4 h-4 mr-2" />
-                  Copiar Link do WhatsApp
-                </Button>
-              </div>
-            )}
+            {/* WhatsApp Buttons - Always visible for testing */}
+            <div className="mb-4 space-y-2">
+              {quote.client?.phone ? (
+                <>
+                  <Button 
+                    onClick={sendViaWhatsApp}
+                    disabled={markAsSentMutation.isPending}
+                    className="w-full bg-green-600 hover:bg-green-700"
+                  >
+                    <MessageCircle className="w-4 h-4 mr-2" />
+                    Enviar por WhatsApp
+                  </Button>
+                  <Button 
+                    onClick={copyWhatsAppLink}
+                    variant="outline"
+                    className="w-full"
+                  >
+                    <Copy className="w-4 h-4 mr-2" />
+                    Copiar Link do WhatsApp
+                  </Button>
+                </>
+              ) : (
+                <div className="text-sm text-gray-500">
+                  Cliente sem telefone cadastrado: {quote.client?.phone || 'undefined'}
+                </div>
+              )}
+            </div>
             
             {/* Approve/Reject buttons - Only for pending quotes */}
             {canApprove && (
