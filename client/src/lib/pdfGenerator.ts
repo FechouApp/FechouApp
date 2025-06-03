@@ -315,6 +315,13 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
 
   yPosition += 5;
 
+  // Verificar se há espaço suficiente para o rodapé, caso contrário criar nova página
+  const minBottomMargin = 40; // Margem mínima inferior
+  if (yPosition > pageHeight - minBottomMargin) {
+    doc.addPage();
+    yPosition = 20;
+  }
+
   // Marca d'água para plano gratuito
   if (!isUserPremium) {
     doc.setGState(doc.GState({ opacity: 0.1 }));
@@ -324,7 +331,7 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
     
     // Posicionar no canto inferior direito em área livre
     const watermarkX = pageWidth - 50;
-    const watermarkY = pageHeight - 80;
+    const watermarkY = pageHeight - 60; // Ajustado para dar mais espaço
     
     doc.text('Fechou!', watermarkX, watermarkY, { 
       align: 'center',
@@ -348,10 +355,10 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
     watermarkAdded = true;
   }
 
-  // Rodapé discreto para plano gratuito
+  // Rodapé discreto para plano gratuito com margem adequada
   if (!isUserPremium) {
-    // Adicionar o rodapé na parte inferior da página atual sem criar nova página
-    const footerY = pageHeight - 15;
+    // Posicionar o rodapé com margem de 25px da borda inferior
+    const footerY = pageHeight - 25;
     doc.setFontSize(8);
     doc.setTextColor(150, 150, 150);
     doc.text('Gerado com Fechou!', pageWidth / 2, footerY, {
