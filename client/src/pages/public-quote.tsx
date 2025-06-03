@@ -24,8 +24,9 @@ export default function PublicQuote() {
   const { data: quote, isLoading, error } = useQuery<QuoteWithDetails>({
     queryKey: [`/api/quotes/public/${quoteNumber}`],
     enabled: !!quoteNumber,
-    retry: 3,
-    retryDelay: 1000,
+    retry: 1,
+    retryDelay: 500,
+    staleTime: 5 * 60 * 1000,
   });
 
   const approveMutation = useMutation({
@@ -167,8 +168,8 @@ export default function PublicQuote() {
   const canApprove = quote.status === "pending" && !isExpired;
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="container mx-auto px-4 py-6 max-w-md sm:max-w-2xl lg:max-w-4xl">
+    <div className="min-h-screen bg-gray-50 flex justify-center">
+      <div className="w-full max-w-md sm:max-w-2xl lg:max-w-4xl px-4 py-6">
         {/* Header */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-3 mb-4">
