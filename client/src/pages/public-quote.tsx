@@ -195,8 +195,8 @@ export default function PublicQuote() {
   const canApprove = quote.status === "pending" && !isExpired;
 
   return (
-    <div className="min-h-screen bg-gray-50 flex justify-center">
-      <div className="w-full max-w-md sm:max-w-2xl lg:max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <div className="min-h-screen bg-gray-50">
+      <div className="w-full max-w-md sm:max-w-2xl lg:max-w-4xl mx-auto px-6 sm:px-8 lg:px-12 py-6">
         {/* Header */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-3 mb-4">
