@@ -18,7 +18,7 @@ import LoadingSpinner from "@/components/common/loading-spinner";
 import { isUnauthorizedError } from "@/lib/authUtils";
 
 export default function QuoteView() {
-  const { quoteNumber } = useParams<{ quoteNumber: string }>();
+  const { quoteNumber, quoteId } = useParams<{ quoteNumber?: string; quoteId?: string }>();
   const { toast } = useToast();
   const { user, isAuthenticated, isLoading: authLoading } = useAuth();
   const [rating, setRating] = useState(0);
@@ -140,9 +140,14 @@ export default function QuoteView() {
     }
   }, [isAuthenticated, authLoading, toast]);
 
+  // Determine query based on route type
+  const isPublicRoute = window.location.pathname.startsWith('/quote/');
+  const queryKey = isPublicRoute ? `/api/quotes/public/${quoteNumber}` : `/api/quotes/${quoteId}`;
+  const queryEnabled = isPublicRoute ? !!quoteNumber : !!quoteId;
+
   const { data: quote, isLoading, error } = useQuery<QuoteWithDetails>({
-    queryKey: [`/api/quotes/public/${quoteNumber}`],
-    enabled: !!quoteNumber,
+    queryKey: [queryKey],
+    enabled: queryEnabled,
     retry: false,
   });
 
