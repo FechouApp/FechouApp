@@ -4,7 +4,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import LoadingSpinner from "@/components/common/loading-spinner";
-import { useAuth } from "@/hooks/useAuth";
 import { Link } from "wouter";
 import { Crown, Lock } from "lucide-react";
 import { 
