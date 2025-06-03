@@ -27,28 +27,28 @@ export async function generateQuotePDF({ quote, user, isPaidPlan }: PDFGenerator
   doc.setFont('helvetica', 'normal');
   if (user.email) {
     doc.text(`Email: ${user.email}`, 20, yPosition);
-    yPosition += 6;
-  }
-  if (user.profession) {
-    doc.text(`Profissão: ${user.profession}`, 20, yPosition);
-    yPosition += 6;
+    yPosition += 5;
   }
 
   // Dados pessoais do profissional (se disponíveis)
   if ((user as any).cpfCnpj) {
-    doc.text(`CPF/CNPJ: ${(user as any).cpfCnpj}`, 20, yPosition);
-    yPosition += 6;
+    // Formatar CPF/CNPJ
+    const cpfCnpj = (user as any).cpfCnpj.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+    doc.text(`CPF/CNPJ: ${cpfCnpj}`, 20, yPosition);
+    yPosition += 5;
   }
   if ((user as any).phone) {
-    doc.text(`Telefone: ${(user as any).phone}`, 20, yPosition);
-    yPosition += 6;
+    // Formatar telefone
+    const phone = (user as any).phone.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+    doc.text(`Telefone: ${phone}`, 20, yPosition);
+    yPosition += 5;
   }
   if ((user as any).address) {
     doc.text(`Endereco: ${(user as any).address}`, 20, yPosition);
-    yPosition += 6;
+    yPosition += 5;
   }
 
-  yPosition += 20;
+  yPosition += 15;
 
   // Título do orçamento centralizado
   doc.setFontSize(18);
@@ -66,12 +66,6 @@ export async function generateQuotePDF({ quote, user, isPaidPlan }: PDFGenerator
   doc.setFontSize(12);
   doc.setFont('helvetica', 'bold');
   doc.text('DADOS DO CLIENTE', 20, yPosition);
-  yPosition += 10;
-
-  // Linha de separação
-  doc.setDrawColor(0, 0, 0);
-  doc.setLineWidth(0.3);
-  doc.line(20, yPosition, pageWidth - 20, yPosition);
   yPosition += 8;
 
   doc.setFontSize(10);
@@ -124,13 +118,7 @@ export async function generateQuotePDF({ quote, user, isPaidPlan }: PDFGenerator
   doc.setFontSize(12);
   doc.setFont('helvetica', 'bold');
   doc.text('SERVICOS', 20, yPosition);
-  yPosition += 10;
-
-  // Linha de separação
-  doc.setDrawColor(0, 0, 0);
-  doc.setLineWidth(0.3);
-  doc.line(20, yPosition, pageWidth - 20, yPosition);
-  yPosition += 10;
+  yPosition += 12;
 
   // Cabeçalho da tabela simples
   doc.setFontSize(10);
@@ -140,9 +128,6 @@ export async function generateQuotePDF({ quote, user, isPaidPlan }: PDFGenerator
   doc.text('Valor Unit.', 140, yPosition);
   doc.text('Total', 170, yPosition);
   yPosition += 8;
-
-  // Linha de separação do cabeçalho
-  doc.line(20, yPosition - 2, pageWidth - 20, yPosition - 2);
 
   // Itens da tabela
   doc.setFont('helvetica', 'normal');
@@ -166,9 +151,7 @@ export async function generateQuotePDF({ quote, user, isPaidPlan }: PDFGenerator
     yPosition += Math.max(description.length * 5, 8);
   });
 
-  // Linha de separação final
-  doc.line(20, yPosition, pageWidth - 20, yPosition);
-  yPosition += 15;
+  yPosition += 10;
 
   // Totais simples
   const subtotal = parseFloat(quote.subtotal);
@@ -257,13 +240,12 @@ export async function generateQuotePDF({ quote, user, isPaidPlan }: PDFGenerator
     doc.setTextColor(0, 0, 0);
   }
 
-  // Rodapé simples
-  yPosition = pageHeight - 15;
-  
+  // Rodapé simples - mais espaço do conteúdo
   if (!isPaidPlan) {
+    yPosition += 20;
     doc.setFontSize(8);
     doc.setTextColor(100, 100, 100);
-    doc.text('Gerado por Fechou! - Sistema de Orcamentos', pageWidth / 2, yPosition, {
+    doc.text('Gerado por Fechou! - Sistema de Orcamentos', pageWidth / 2, pageHeight - 15, {
       align: 'center'
     });
     doc.setTextColor(0, 0, 0);

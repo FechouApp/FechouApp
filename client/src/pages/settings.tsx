@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { User, Building, Bell, Crown, Mail, Phone, MapPin, Save, Upload } from "lucide-react";
+import { User, Building, Bell, Crown, Mail, Phone, MapPin, Save, Upload, Lock } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -300,6 +300,32 @@ export default function Settings() {
                 Notificações por WhatsApp disponíveis apenas no plano Premium
               </p>
             )}
+          </CardContent>
+        </Card>
+
+        {/* Password Change */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Lock className="w-5 h-5" />
+              Segurança da Conta
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="bg-blue-50 p-4 rounded-lg">
+              <h4 className="font-medium text-blue-900 mb-2">Alteração de Senha</h4>
+              <p className="text-sm text-blue-700 mb-4">
+                Para alterar sua senha, você precisa fazer logout e usar a opção "Esqueci minha senha" 
+                na tela de login, ou acessar as configurações da sua conta Replit.
+              </p>
+              <Button 
+                variant="outline" 
+                onClick={() => window.open('https://replit.com/account', '_blank')}
+                className="w-full md:w-auto"
+              >
+                Gerenciar Conta Replit
+              </Button>
+            </div>
           </CardContent>
         </Card>
 
