@@ -211,8 +211,6 @@ export default function Clients() {
       <Header 
         title="Clientes" 
         subtitle="Gerencie seus clientes"
-        showBackButton={true}
-        backTo="/"
       />
 
       {/* Novo Cliente Button */}
