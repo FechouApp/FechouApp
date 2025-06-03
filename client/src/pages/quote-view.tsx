@@ -25,8 +25,8 @@ export default function QuoteView() {
   const [comment, setComment] = useState("");
   const [reviewSubmitted, setReviewSubmitted] = useState(false);
   
-  // Check if this is a public view (client accessing without login)
-  const isPublicView = !user && !isAuthenticated;
+  // Check if this is a public view based on URL and authentication status
+  const isPublicView = window.location.pathname.startsWith('/quote/') && !user;
 
   // Mutations
   const markAsSentMutation = useMutation({
@@ -285,7 +285,7 @@ export default function QuoteView() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="w-full mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8 max-w-sm sm:max-w-2xl lg:max-w-4xl">
+      <div className="container mx-auto px-4 py-6 max-w-md sm:max-w-2xl lg:max-w-4xl">
 
 
         {/* Header */}
@@ -454,8 +454,8 @@ export default function QuoteView() {
               )}
             </div>
 
-            {/* WhatsApp Buttons - Only show for authenticated quote owners */}
-            {user && isAuthenticated && quote.userId === (user as any)?.id && quote.client?.phone && (
+            {/* WhatsApp Buttons - Only show for authenticated quote owners, not in public view */}
+            {!isPublicView && user && isAuthenticated && quote.userId === (user as any)?.id && quote.client?.phone && (
               <div className="mb-4 space-y-2">
                 <Button 
                   onClick={sendViaWhatsApp}
@@ -476,8 +476,22 @@ export default function QuoteView() {
               </div>
             )}
             
-            {/* Approve/Reject buttons - Only for pending quotes */}
-            {canApprove && (
+            {/* Manual Approve button for quote owner */}
+            {!isPublicView && user && quote.userId === (user as any)?.id && quote.status === "pending" && (
+              <div className="mb-4">
+                <Button 
+                  onClick={() => approveMutation.mutate()}
+                  disabled={approveMutation.isPending}
+                  className="w-full bg-green-600 hover:bg-green-700 text-white"
+                >
+                  <CheckCircle className="w-4 h-4 mr-2" />
+                  {approveMutation.isPending ? "Aprovando..." : "Aprovar Manualmente"}
+                </Button>
+              </div>
+            )}
+
+            {/* Approve/Reject buttons - Only for pending quotes in public view */}
+            {isPublicView && canApprove && (
               <div className="flex gap-4">
                 <Button 
                   onClick={() => approveMutation.mutate()}
