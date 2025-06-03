@@ -13,6 +13,7 @@ import type { QuoteWithDetails } from "@/types";
 import { apiRequest } from "@/lib/queryClient";
 import { generateQuotePDF, downloadPDF } from "@/lib/pdfGenerator";
 import { useToast } from "@/hooks/use-toast";
+import { formatPhone, formatCPF, formatCEP } from "@/lib/utils";
 
 export default function PublicQuote() {
   const { quoteNumber } = useParams<{ quoteNumber: string }>();
@@ -285,14 +286,28 @@ export default function PublicQuote() {
               {quote.client.phone && (
                 <div className="flex items-center gap-3 text-gray-600">
                   <Phone className="w-4 h-4" />
-                  <span>{quote.client.phone}</span>
+                  <span>{formatPhone(quote.client.phone)}</span>
                 </div>
               )}
               
               {quote.client.address && (
                 <div className="flex items-center gap-3 text-gray-600">
                   <MapPin className="w-4 h-4" />
-                  <span>{quote.client.address}</span>
+                  <div>
+                    <div>{quote.client.address}</div>
+                    {quote.client.city && quote.client.state && quote.client.zipCode && (
+                      <div className="text-sm">
+                        {quote.client.city}, {quote.client.state} - CEP: {formatCEP(quote.client.zipCode)}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+              
+              {quote.client.cpf && (
+                <div className="flex items-center gap-3 text-gray-600">
+                  <span className="w-4 h-4 text-center text-xs font-bold">ID</span>
+                  <span>CPF: {formatCPF(quote.client.cpf)}</span>
                 </div>
               )}
             </div>

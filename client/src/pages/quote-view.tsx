@@ -16,6 +16,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import LoadingSpinner from "@/components/common/loading-spinner";
 import { isUnauthorizedError } from "@/lib/authUtils";
+import { formatPhone, formatCPF, formatCEP } from "@/lib/utils";
 
 export default function QuoteView() {
   const { quoteNumber, quoteId } = useParams<{ quoteNumber?: string; quoteId?: string }>();
