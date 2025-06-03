@@ -548,10 +548,7 @@ export default function Clients() {
                           size="sm" 
                           variant="ghost" 
                           title="Ver perfil"
-                          onClick={() => toast({
-                            title: "Funcionalidade em desenvolvimento",
-                            description: "Visualização de perfil será implementada em breve.",
-                          })}
+                          onClick={() => setLocation(`/clients/${client.id}`)}
                         >
                           <Eye className="w-4 h-4" />
                         </Button>
