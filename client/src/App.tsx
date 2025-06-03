@@ -21,7 +21,7 @@ import MobileHeader from "@/components/layout/mobile-header";
 import LoadingSpinner from "@/components/common/loading-spinner";
 import Reports from "@/pages/reports";
 import SavedItemsPage from "@/pages/saved-items";
-import { lazy } from "react";
+import ClientProfile from "@/pages/client-profile";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -37,7 +37,7 @@ function Router() {
         <>
           <Route path="/" component={Dashboard} />
           <Route path="/clients" component={Clients} />
-          <Route path="/clients/:clientId" component={lazy(() => import("./pages/client-profile"))} />
+          <Route path="/clients/:clientId" component={ClientProfile} />
           <Route path="/quotes" component={Quotes} />
           <Route path="/new-quote" component={NewQuote} />
           <Route path="/quotes/:quoteId/edit" component={NewQuote} />
