@@ -267,7 +267,7 @@ export default function QuoteView() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
+      <div className="max-w-4xl mx-auto px-4 py-8">
         {/* Botão de Voltar */}
         <div className="mb-6">
           <Button
@@ -288,7 +288,12 @@ export default function QuoteView() {
             </div>
             <h1 className="text-3xl font-bold text-gray-800">Fechou!</h1>
           </div>
-          <p className="text-gray-600">Você recebeu um orçamento</p>
+          <p className="text-gray-600">
+            {quote.client ? 
+              `Orçamento da ${(user as any)?.businessName || 'Marcenaria Estrela'}` : 
+              'Você recebeu um orçamento'
+            }
+          </p>
         </div>
 
         {/* Quote Details */}
