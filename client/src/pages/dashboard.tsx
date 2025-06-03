@@ -123,8 +123,8 @@ export default function Dashboard() {
     <div className="space-y-8">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-white mb-2">Dashboard</h1>
-        <p className="text-white/70">Visão geral dos seus negócios</p>
+        <h1 className="text-3xl font-bold text-gray-800 mb-2">Dashboard</h1>
+        <p className="text-gray-600">Visão geral dos seus negócios</p>
       </div>
 
       {/* Stats Cards */}

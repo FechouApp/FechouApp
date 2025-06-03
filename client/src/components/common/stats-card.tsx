@@ -11,31 +11,23 @@ interface StatsCardProps {
 
 export default function StatsCard({ title, value, icon, trend, trendUp }: StatsCardProps) {
   return (
-    <Card className="glassmorphism border-white/20 shadow-lg card-hover">
+    <Card className="bg-white shadow-lg">
       <CardContent className="p-6">
         <div className="flex items-center justify-between">
-          <div>
-            <p className="text-white/70 text-sm">{title}</p>
-            <p className="text-white text-2xl font-bold">{value}</p>
+          <div className="space-y-1">
+            <p className="text-sm font-medium text-gray-600">{title}</p>
+            <p className="text-2xl font-bold text-gray-900">{value}</p>
+            {trend && (
+              <p className={`text-xs ${trendUp ? 'text-green-600' : 'text-red-600'} flex items-center gap-1`}>
+                {trendUp ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />}
+                {trend}
+              </p>
+            )}
           </div>
-          <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
-            <div className="text-white">
-              {icon}
-            </div>
+          <div className="w-10 h-10 brand-gradient rounded-lg flex items-center justify-center text-white">
+            {icon}
           </div>
         </div>
-        {trend && (
-          <div className={`mt-4 flex items-center gap-1 text-sm ${
-            trendUp ? 'text-green-300' : 'text-red-300'
-          }`}>
-            {trendUp ? (
-              <ArrowUp className="w-4 h-4" />
-            ) : (
-              <ArrowDown className="w-4 h-4" />
-            )}
-            <span>{trend}</span>
-          </div>
-        )}
       </CardContent>
     </Card>
   );
