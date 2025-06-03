@@ -3,9 +3,6 @@ import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import type { QuoteWithDetails, User } from '@/types';
 
-// Importar jspdf-autotable para adicionar a funcionalidade de tabela
-require('jspdf-autotable');
-
 interface PDFGeneratorOptions {
   quote: QuoteWithDetails;
   user: User;
