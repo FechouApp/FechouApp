@@ -145,6 +145,78 @@ export default function Settings() {
     setFormData(prev => ({ ...prev, [field]: formattedValue }));
   };
 
+  const handleProfileImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Verificar tamanho do arquivo (máx. 2MB)
+      if (file.size > 2 * 1024 * 1024) {
+        toast({
+          title: "Erro",
+          description: "A imagem deve ter no máximo 2MB.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Verificar tipo do arquivo
+      if (!file.type.startsWith('image/')) {
+        toast({
+          title: "Erro",
+          description: "Por favor, selecione um arquivo de imagem válido.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const base64String = event.target?.result as string;
+        handleInputChange("profileImageUrl", base64String);
+        toast({
+          title: "Sucesso",
+          description: "Foto de perfil carregada com sucesso!",
+        });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Verificar tamanho do arquivo (máx. 2MB)
+      if (file.size > 2 * 1024 * 1024) {
+        toast({
+          title: "Erro",
+          description: "A imagem deve ter no máximo 2MB.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Verificar tipo do arquivo
+      if (!file.type.startsWith('image/')) {
+        toast({
+          title: "Erro",
+          description: "Por favor, selecione um arquivo de imagem válido.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const base64String = event.target?.result as string;
+        handleInputChange("logoUrl", base64String);
+        toast({
+          title: "Sucesso",
+          description: "Logo carregado com sucesso!",
+        });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   // Mostrar loading enquanto dados do usuário estão carregando
   if (isLoading) {
     return (
@@ -179,16 +251,36 @@ export default function Settings() {
             <form onSubmit={handleSubmit} className="space-y-4">
               {/* Profile Photo */}
               <div>
-                <Label htmlFor="profileImageUrl">Foto de Perfil</Label>
-                <Input
-                  id="profileImageUrl"
-                  value={formData.profileImageUrl || ""}
-                  onChange={(e) => handleInputChange("profileImageUrl", e.target.value)}
-                  placeholder="URL da sua foto de perfil (ex: https://...)"
-                />
-                <p className="text-sm text-gray-500 mt-1">
-                  Aparecerá em seus orçamentos e perfil público
-                </p>
+                <Label htmlFor="profileImage">Foto de Perfil</Label>
+                <div className="mt-2 space-y-3">
+                  {formData.profileImageUrl && (
+                    <div className="flex items-center gap-3">
+                      <img
+                        src={formData.profileImageUrl}
+                        alt="Foto atual"
+                        className="w-16 h-16 rounded-full object-cover"
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleInputChange("profileImageUrl", "")}
+                      >
+                        Remover Foto
+                      </Button>
+                    </div>
+                  )}
+                  <input
+                    type="file"
+                    id="profileImage"
+                    accept="image/*"
+                    onChange={handleProfileImageUpload}
+                    className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                  />
+                  <p className="text-sm text-gray-500">
+                    Aparecerá em seus orçamentos e perfil público. Formatos aceitos: JPG, PNG (máx. 2MB)
+                  </p>
+                </div>
               </div>
 
               <div className="grid md:grid-cols-2 gap-4">
@@ -300,28 +392,45 @@ export default function Settings() {
 
             {(user as any)?.plan === "PREMIUM" && (
               <div>
-                <Label htmlFor="logoUrl">Logo da Empresa (Premium)</Label>
-                <Input
-                  id="logoUrl"
-                  value={formData.logoUrl}
-                  onChange={(e) => handleInputChange("logoUrl", e.target.value)}
-                  placeholder="URL da imagem do logo (ex: https://...)"
-                />
-                <p className="text-sm text-gray-500 mt-1">
-                  Logo aparecerá no canto superior direito dos orçamentos Premium
-                </p>
-              </div>
-            )}
-
-            {(user as any)?.plan === "PREMIUM" && (
-              <div>
-                <Label>Logo do Negócio</Label>
-                <div className="mt-2 p-4 border-2 border-dashed border-gray-300 rounded-lg text-center">
-                  <Upload className="w-8 h-8 mx-auto mb-2 text-gray-400" />
-                  <p className="text-sm text-gray-600">
-                    Clique para fazer upload do seu logo
+                <Label htmlFor="logoUpload">Logo da Empresa (Premium)</Label>
+                <div className="mt-2 space-y-3">
+                  {formData.logoUrl && (
+                    <div className="flex items-center gap-3">
+                      <img
+                        src={formData.logoUrl}
+                        alt="Logo atual"
+                        className="w-16 h-16 object-contain border rounded"
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleInputChange("logoUrl", "")}
+                      >
+                        Remover Logo
+                      </Button>
+                    </div>
+                  )}
+                  <div className="p-4 border-2 border-dashed border-gray-300 rounded-lg text-center">
+                    <Upload className="w-8 h-8 mx-auto mb-2 text-gray-400" />
+                    <input
+                      type="file"
+                      id="logoUpload"
+                      accept="image/*"
+                      onChange={handleLogoUpload}
+                      className="hidden"
+                    />
+                    <label
+                      htmlFor="logoUpload"
+                      className="cursor-pointer text-sm text-gray-600 hover:text-gray-800"
+                    >
+                      Clique para fazer upload do seu logo
+                    </label>
+                    <p className="text-xs text-gray-400 mt-1">PNG, JPG até 2MB</p>
+                  </div>
+                  <p className="text-sm text-gray-500">
+                    Logo aparecerá no canto superior direito dos orçamentos Premium
                   </p>
-                  <p className="text-xs text-gray-400">PNG, JPG até 2MB</p>
                 </div>
               </div>
             )}

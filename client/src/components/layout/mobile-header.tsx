@@ -111,6 +111,10 @@ export default function MobileHeader() {
                       src={user.profileImageUrl}
                       alt="Foto do usuário"
                       className="w-12 h-12 rounded-full object-cover"
+                      onError={(e) => {
+                        // Fallback se a imagem falhar ao carregar
+                        e.currentTarget.style.display = 'none';
+                      }}
                     />
                   ) : (
                     <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
