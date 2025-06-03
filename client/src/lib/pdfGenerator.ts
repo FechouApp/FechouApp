@@ -402,55 +402,27 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
   doc.text('Fico à disposição para dúvidas e aguardo sua aprovação.', marginLeft, yPosition);
   yPosition += 25;
 
-  // Assinatura centralizada
+  // Assinatura centralizada com nome e CPF
   doc.setFontSize(10);
   doc.setFont('helvetica', 'bold');
-  doc.text(user.businessName || `${user.firstName} ${user.lastName}`.trim(), pageWidth / 2, yPosition, { align: 'center' });
-  yPosition += 6;
-
-  doc.setFontSize(9);
-  doc.setFont('helvetica', 'normal');
   
-  // Acessar campos do usuário com múltiplas tentativas de propriedades
-  const userInfo = [
-    user.email ? `Email: ${user.email}` : null,
-    (user as any).cpf || (user as any).document ? `CPF/CNPJ: ${formatCPF((user as any).cpf || (user as any).document)}` : null,
-    (user as any).phone || (user as any).phoneNumber ? `Telefone: ${formatPhone((user as any).phone || (user as any).phoneNumber)}` : null,
-  ].filter(Boolean);
+  const userName = user.businessName || `${user.firstName} ${user.lastName}`.trim();
+  const userCpf = (user as any).cpf || (user as any).document;
+  
+  // Nome em negrito
+  doc.text(userName, pageWidth / 2, yPosition, { align: 'center' });
+  yPosition += 5;
+  
+  // CPF/CNPJ logo abaixo do nome, em fonte normal
+  if (userCpf) {
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`CPF/CNPJ: ${formatCPF(userCpf)}`, pageWidth / 2, yPosition, { align: 'center' });
+    yPosition += 8;
+  }
 
   console.log('User data for PDF:', user); // Debug log
   console.log('Available user properties:', Object.keys(user)); // Debug log
-
-  userInfo.forEach(info => {
-    if (info) {
-      doc.text(info, pageWidth / 2, yPosition, { align: 'center' });
-      yPosition += 4;
-    }
-  });
-
-  // Endereço completo em linha separada
-  const address = (user as any).address || (user as any).streetAddress;
-  if (address) {
-    const fullAddress = [
-      address,
-      (user as any).number || (user as any).addressNumber ? `nº ${(user as any).number || (user as any).addressNumber}` : null,
-      (user as any).complement || (user as any).addressComplement,
-    ].filter(Boolean).join(', ');
-    
-    const cityStateZip = [
-      (user as any).city,
-      (user as any).state || (user as any).uf,
-      (user as any).zipCode || (user as any).cep ? `CEP: ${formatCEP((user as any).zipCode || (user as any).cep)}` : null,
-    ].filter(Boolean).join(' - ');
-
-    doc.text(`Endereço: ${fullAddress}`, pageWidth / 2, yPosition, { align: 'center' });
-    yPosition += 4;
-    
-    if (cityStateZip) {
-      doc.text(cityStateZip, pageWidth / 2, yPosition, { align: 'center' });
-      yPosition += 4;
-    }
-  }
 
   // Marca d'água para plano gratuito
   if (!isUserPremium) {
@@ -501,9 +473,40 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
     
     // Limpar área do rodapé e reescrever
     doc.setFillColor(255, 255, 255);
-    doc.rect(0, footerY - 3, pageWidth, 10, 'F');
+    doc.rect(0, footerY - 3, pageWidth, 15, 'F');
     
     doc.text(`Página ${page} de ${totalPages}`, pageWidth / 2, footerY, { align: 'center' });
+    
+    // Na última página, adicionar endereço e telefone
+    if (page === totalPages) {
+      const address = (user as any).address || (user as any).streetAddress;
+      const phone = (user as any).phone || (user as any).phoneNumber;
+      
+      if (address || phone) {
+        const addressParts = [];
+        
+        if (address) {
+          const fullAddress = [
+            address,
+            (user as any).number || (user as any).addressNumber ? `nº ${(user as any).number || (user as any).addressNumber}` : null,
+            (user as any).complement || (user as any).addressComplement,
+            (user as any).city,
+            (user as any).state || (user as any).uf,
+            (user as any).zipCode || (user as any).cep ? `CEP: ${formatCEP((user as any).zipCode || (user as any).cep)}` : null,
+          ].filter(Boolean).join(', ');
+          addressParts.push(fullAddress);
+        }
+        
+        if (phone) {
+          addressParts.push(`Tel: ${formatPhone(phone)}`);
+        }
+        
+        const footerText = addressParts.join(' - ');
+        doc.setFontSize(7);
+        doc.setTextColor(80, 80, 80);
+        doc.text(footerText, pageWidth / 2, footerY + 5, { align: 'center' });
+      }
+    }
     
     if (!isUserPremium) {
       doc.setTextColor(150, 150, 150);
