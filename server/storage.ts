@@ -191,6 +191,10 @@ export class DatabaseStorage implements IStorage {
 
   // Quote operations
   async getQuotes(userId: string): Promise<(Quote & { client: Client; itemCount: number })[]> {
+    const user = await this.getUser(userId);
+    const isPremium = user?.plan === "PREMIUM";
+    const isExpired = user?.planExpiresAt && new Date() > user.planExpiresAt;
+    
     const result = await db
       .select({
         quote: quotes,
@@ -204,11 +208,18 @@ export class DatabaseStorage implements IStorage {
       .groupBy(quotes.id, clients.id)
       .orderBy(desc(quotes.createdAt));
 
-    return result.map(row => ({
+    const mappedResult = result.map(row => ({
       ...row.quote,
       client: row.client!,
       itemCount: row.itemCount,
     }));
+
+    // Se não é Premium ou plano expirou, limitar aos 5 orçamentos mais recentes
+    if (!isPremium || isExpired) {
+      return mappedResult.slice(0, 5);
+    }
+
+    return mappedResult;
   }
 
   async getQuote(id: string, userId: string): Promise<(Quote & { client: Client; items: QuoteItem[] }) | undefined> {

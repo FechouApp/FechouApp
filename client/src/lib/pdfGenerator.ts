@@ -17,17 +17,58 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
   
   let yPosition = 20;
 
-  // Título do orçamento centralizado no topo
-  doc.setFontSize(18);
-  doc.setFont('helvetica', 'bold');
-  doc.text('ORÇAMENTO', pageWidth / 2, yPosition, { align: 'center' });
-  yPosition += 8;
+  // Logo Premium no canto superior direito
+  if (isUserPremium && (user as any)?.logoUrl) {
+    try {
+      // Reservar espaço para o logo (30x30)
+      const logoSize = 25;
+      const logoX = pageWidth - logoSize - 20;
+      const logoY = 15;
+      
+      // Adicionar logo (URL da imagem)
+      doc.addImage((user as any).logoUrl, 'JPEG', logoX, logoY, logoSize, logoSize);
+    } catch (error) {
+      console.log('Erro ao carregar logo:', error);
+    }
+  }
 
-  // Número do orçamento e data centralizados
-  doc.setFontSize(10);
-  doc.setFont('helvetica', 'normal');
-  doc.text(`Orçamento nº ${quote.quoteNumber} – ${format(new Date(), 'dd/MM/yyyy', { locale: ptBR })}`, pageWidth / 2, yPosition, { align: 'center' });
-  yPosition += 15;
+  // Layout Premium mais elegante
+  if (isUserPremium) {
+    // Cabeçalho Premium com linha decorativa
+    doc.setDrawColor(59, 130, 246); // Azul elegante
+    doc.setLineWidth(2);
+    doc.line(20, yPosition + 5, pageWidth - 20, yPosition + 5);
+    yPosition += 12;
+    
+    doc.setFontSize(20);
+    doc.setTextColor(59, 130, 246);
+    doc.setFont('helvetica', 'bold');
+    doc.text('ORÇAMENTO PROFISSIONAL', pageWidth / 2, yPosition, { align: 'center' });
+    yPosition += 8;
+    
+    doc.setFontSize(11);
+    doc.setTextColor(100, 100, 100);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Nº ${quote.quoteNumber} • ${format(new Date(), 'dd/MM/yyyy', { locale: ptBR })}`, pageWidth / 2, yPosition, { align: 'center' });
+    yPosition += 12;
+    
+    // Linha decorativa inferior
+    doc.setDrawColor(59, 130, 246);
+    doc.setLineWidth(1);
+    doc.line(pageWidth / 2 - 30, yPosition, pageWidth / 2 + 30, yPosition);
+    yPosition += 15;
+  } else {
+    // Layout padrão para plano gratuito
+    doc.setFontSize(18);
+    doc.setFont('helvetica', 'bold');
+    doc.text('ORÇAMENTO', pageWidth / 2, yPosition, { align: 'center' });
+    yPosition += 8;
+
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Orçamento nº ${quote.quoteNumber} – ${format(new Date(), 'dd/MM/yyyy', { locale: ptBR })}`, pageWidth / 2, yPosition, { align: 'center' });
+    yPosition += 15;
+  }
 
   // Marca d'água posicionada na área em branco (será adicionada no final)
   let watermarkAdded = false;

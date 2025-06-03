@@ -30,6 +30,7 @@ export default function Settings() {
     address: "",
     pixKey: "",
     logoUrl: "",
+    profileImageUrl: "",
     whatsappNotifications: false,
     emailNotifications: true,
   });
@@ -47,6 +48,7 @@ export default function Settings() {
         address: (typedUser as any)?.address || "",
         pixKey: typedUser.pixKey || "",
         logoUrl: (typedUser as any)?.logoUrl || "",
+        profileImageUrl: typedUser.profileImageUrl || "",
         whatsappNotifications: typedUser.whatsappNotifications || false,
         emailNotifications: typedUser.emailNotifications || true,
       });
@@ -171,6 +173,20 @@ export default function Settings() {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
+              {/* Profile Photo */}
+              <div>
+                <Label htmlFor="profileImageUrl">Foto de Perfil</Label>
+                <Input
+                  id="profileImageUrl"
+                  value={formData.profileImageUrl || ""}
+                  onChange={(e) => handleInputChange("profileImageUrl", e.target.value)}
+                  placeholder="URL da sua foto de perfil (ex: https://...)"
+                />
+                <p className="text-sm text-gray-500 mt-1">
+                  Aparecerá em seus orçamentos e perfil público
+                </p>
+              </div>
+
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="firstName">Nome</Label>
