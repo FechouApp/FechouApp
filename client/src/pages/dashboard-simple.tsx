@@ -138,38 +138,38 @@ export default function Dashboard() {
       </div>
 
       {/* Quick Action Menu */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
+      <div className="grid grid-cols-1 gap-3 mb-6 sm:mb-8">
         <Link href="/new-quote">
-          <Button className="w-full h-16 sm:h-20 bg-purple-600 hover:bg-purple-700 text-white rounded-xl shadow-lg transition-all duration-200 hover:shadow-xl">
-            <div className="flex items-center justify-center gap-3 sm:gap-4">
-              <Plus className="w-6 h-6 sm:w-7 sm:h-7" />
-              <div className="text-left">
-                <div className="font-semibold text-sm sm:text-base">Novo Orçamento</div>
-                <div className="text-xs sm:text-sm text-purple-100">Criar orçamento para cliente</div>
+          <Button className="w-full h-14 bg-purple-600 hover:bg-purple-700 text-white rounded-xl shadow-lg transition-all duration-200 hover:shadow-xl">
+            <div className="flex items-center justify-center gap-3">
+              <Plus className="w-5 h-5" />
+              <div className="text-center">
+                <div className="font-semibold text-base">Novo Orçamento</div>
+                <div className="text-xs text-purple-100">Criar orçamento para cliente</div>
               </div>
             </div>
           </Button>
         </Link>
 
         <Link href="/clients">
-          <Button className="w-full h-16 sm:h-20 bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-lg transition-all duration-200 hover:shadow-xl">
-            <div className="flex items-center justify-center gap-3 sm:gap-4">
-              <Users className="w-6 h-6 sm:w-7 sm:h-7" />
-              <div className="text-left">
-                <div className="font-semibold text-sm sm:text-base">Adicionar Cliente</div>
-                <div className="text-xs sm:text-sm text-blue-100">Cadastrar novo cliente</div>
+          <Button className="w-full h-14 bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-lg transition-all duration-200 hover:shadow-xl">
+            <div className="flex items-center justify-center gap-3">
+              <Users className="w-5 h-5" />
+              <div className="text-center">
+                <div className="font-semibold text-base">Adicionar Cliente</div>
+                <div className="text-xs text-blue-100">Cadastrar novo cliente</div>
               </div>
             </div>
           </Button>
         </Link>
 
         <Link href="/quotes">
-          <Button className="w-full h-16 sm:h-20 bg-green-600 hover:bg-green-700 text-white rounded-xl shadow-lg transition-all duration-200 hover:shadow-xl">
-            <div className="flex items-center justify-center gap-3 sm:gap-4">
-              <FileText className="w-6 h-6 sm:w-7 sm:h-7" />
-              <div className="text-left">
-                <div className="font-semibold text-sm sm:text-base">Relatórios</div>
-                <div className="text-xs sm:text-sm text-green-100">Ver relatórios detalhados</div>
+          <Button className="w-full h-14 bg-green-600 hover:bg-green-700 text-white rounded-xl shadow-lg transition-all duration-200 hover:shadow-xl">
+            <div className="flex items-center justify-center gap-3">
+              <FileText className="w-5 h-5" />
+              <div className="text-center">
+                <div className="font-semibold text-base">Relatórios</div>
+                <div className="text-xs text-green-100">Ver relatórios detalhados</div>
               </div>
             </div>
           </Button>
