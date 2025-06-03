@@ -1,3 +1,5 @@
+import { useQuery } from "@tanstack/react-query";
+
 export const useAuth = () => {
   const { data: user, isLoading, error, refetch } = useQuery({
     queryKey: ['/api/auth/user'],
