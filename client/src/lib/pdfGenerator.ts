@@ -1,14 +1,10 @@
 import jsPDF from 'jspdf';
-import 'jspdf-autotable';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import type { QuoteWithDetails, User } from '@/types';
 
-declare module 'jspdf' {
-  interface jsPDF {
-    autoTable: (options: any) => jsPDF;
-  }
-}
+// Importar jspdf-autotable para adicionar a funcionalidade de tabela
+require('jspdf-autotable');
 
 interface PDFGeneratorOptions {
   quote: QuoteWithDetails;
@@ -24,28 +20,10 @@ export async function generateQuotePDF({ quote, user, isPaidPlan }: PDFGenerator
   let yPosition = 20;
 
   // Cabeçalho
-  if (isPaidPlan && user.logoUrl) {
-    // Se é plano pago e tem logo, adiciona o logo
-    try {
-      // Carregar e adicionar logo (implementação simplificada)
-      doc.setFontSize(20);
-      doc.setFont('helvetica', 'bold');
-      doc.text(user.businessName || `${user.firstName} ${user.lastName}`.trim(), 20, yPosition);
-      yPosition += 15;
-    } catch (error) {
-      // Fallback para nome sem logo
-      doc.setFontSize(20);
-      doc.setFont('helvetica', 'bold');
-      doc.text(user.businessName || `${user.firstName} ${user.lastName}`.trim(), 20, yPosition);
-      yPosition += 15;
-    }
-  } else {
-    // Plano gratuito ou sem logo
-    doc.setFontSize(20);
-    doc.setFont('helvetica', 'bold');
-    doc.text(user.businessName || `${user.firstName} ${user.lastName}`.trim(), 20, yPosition);
-    yPosition += 15;
-  }
+  doc.setFontSize(20);
+  doc.setFont('helvetica', 'bold');
+  doc.text(user.businessName || `${user.firstName} ${user.lastName}`.trim(), 20, yPosition);
+  yPosition += 15;
 
   // Informações do profissional
   doc.setFontSize(10);
@@ -126,37 +104,45 @@ export async function generateQuotePDF({ quote, user, isPaidPlan }: PDFGenerator
     yPosition += splitDescription.length * 5 + 10;
   }
 
-  // Tabela de itens
-  const tableData = quote.items.map(item => [
-    item.description,
-    item.quantity.toString(),
-    `R$ ${parseFloat(item.unitPrice).toFixed(2).replace('.', ',')}`,
-    `R$ ${parseFloat(item.total).toFixed(2).replace('.', ',')}`
-  ]);
+  // Tabela de itens usando uma implementação manual
+  doc.setFontSize(12);
+  doc.setFont('helvetica', 'bold');
+  doc.text('ITENS/SERVIÇOS', 20, yPosition);
+  yPosition += 10;
 
-  doc.autoTable({
-    startY: yPosition,
-    head: [['Descrição', 'Qtd', 'Valor Unit.', 'Total']],
-    body: tableData,
-    theme: 'grid',
-    styles: {
-      fontSize: 9,
-      cellPadding: 3,
-    },
-    headStyles: {
-      fillColor: [66, 126, 234], // Azul
-      textColor: 255,
-      fontStyle: 'bold'
-    },
-    columnStyles: {
-      0: { cellWidth: 80 },
-      1: { cellWidth: 20, halign: 'center' },
-      2: { cellWidth: 30, halign: 'right' },
-      3: { cellWidth: 30, halign: 'right' }
+  // Cabeçalho da tabela
+  doc.setFontSize(9);
+  doc.setFont('helvetica', 'bold');
+  doc.text('Descrição', 20, yPosition);
+  doc.text('Qtd', 120, yPosition);
+  doc.text('Valor Unit.', 140, yPosition);
+  doc.text('Total', 170, yPosition);
+  yPosition += 8;
+
+  // Linha de separação
+  doc.line(20, yPosition - 2, 190, yPosition - 2);
+
+  // Itens da tabela
+  doc.setFont('helvetica', 'normal');
+  quote.items.forEach((item) => {
+    // Verificar se precisa de nova página
+    if (yPosition > pageHeight - 30) {
+      doc.addPage();
+      yPosition = 20;
     }
+
+    const description = doc.splitTextToSize(item.description, 90);
+    doc.text(description, 20, yPosition);
+    doc.text(item.quantity.toString(), 120, yPosition);
+    doc.text(`R$ ${parseFloat(item.unitPrice).toFixed(2).replace('.', ',')}`, 140, yPosition);
+    doc.text(`R$ ${parseFloat(item.total).toFixed(2).replace('.', ',')}`, 170, yPosition);
+    
+    yPosition += Math.max(description.length * 4, 6) + 2;
   });
 
-  yPosition = (doc as any).lastAutoTable.finalY + 10;
+  // Linha de separação final
+  doc.line(20, yPosition, 190, yPosition);
+  yPosition += 10;
 
   // Totais
   const subtotal = parseFloat(quote.subtotal);

@@ -119,7 +119,7 @@ export default function QuoteView() {
     }
     
     try {
-      console.log('Starting PDF generation...', { quote: quote.quoteNumber, user: user.id });
+      console.log('Starting PDF generation...', { quote: quote.quoteNumber, user: (user as any).id });
       const isPaidPlan = (user as any)?.plan === 'premium' || (user as any)?.plan === 'paid';
       console.log('User plan:', (user as any)?.plan, 'isPaidPlan:', isPaidPlan);
       
@@ -140,7 +140,7 @@ export default function QuoteView() {
       console.error('PDF generation error:', error);
       toast({
         title: "Erro",
-        description: `Não foi possível gerar o PDF: ${error.message}`,
+        description: `Não foi possível gerar o PDF: ${(error as Error).message}`,
         variant: "destructive",
       });
     }
