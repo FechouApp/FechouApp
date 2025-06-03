@@ -132,7 +132,7 @@ export default function Reports() {
           monthlyData[month] = { total: 0, approved: 0, revenue: 0 };
         }
         monthlyData[month].total++;
-        if (quote.status === 'APPROVED' || quote.status === 'PAID') {
+        if (quote.status === 'approved' || quote.status === 'paid') {
           monthlyData[month].approved++;
           monthlyData[month].revenue += parseFloat(quote.total);
         }
@@ -172,7 +172,7 @@ export default function Reports() {
       }
       clientStats[clientId].quotesCount++;
       clientStats[clientId].totalValue += parseFloat(quote.total);
-      if (quote.status === 'APPROVED' || quote.status === 'PAID') {
+      if (quote.status === 'approved' || quote.status === 'paid') {
         clientStats[clientId].approvedCount++;
       }
     });
@@ -184,14 +184,16 @@ export default function Reports() {
 
   const getConversionRate = () => {
     if (!quotes || quotes.length === 0) return 0;
-    const approved = quotes.filter(q => q.status === 'APPROVED' || q.status === 'PAID').length;
+    const approved = quotes.filter(q => q.status === 'approved' || q.status === 'paid').length;
     return (approved / quotes.length * 100).toFixed(1);
   };
 
   const getAverageQuoteValue = () => {
     if (!quotes || quotes.length === 0) return 0;
-    const total = quotes.reduce((sum, quote) => sum + parseFloat(quote.total), 0);
-    return total / quotes.length;
+    const approvedQuotes = quotes.filter(q => q.status === 'approved' || q.status === 'paid');
+    if (approvedQuotes.length === 0) return 0;
+    const total = approvedQuotes.reduce((sum, quote) => sum + parseFloat(quote.total), 0);
+    return total / approvedQuotes.length;
   };
 
   const monthlyData = calculateMonthlyData();
@@ -317,19 +319,19 @@ export default function Reports() {
             <div className="space-y-4">
               {Object.entries(statusStats).map(([status, count]) => {
                 const getStatusInfo = (status) => {
-                  switch (status) {
-                    case 'APPROVED':
+                  switch (status.toLowerCase()) {
+                    case 'approved':
                       return { label: 'Aprovados', color: 'text-green-600', bg: 'bg-green-100' };
-                    case 'PAID':
+                    case 'paid':
                       return { label: 'Pagos', color: 'text-green-700', bg: 'bg-green-200' };
-                    case 'SENT':
-                      return { label: 'Enviados', color: 'text-blue-600', bg: 'bg-blue-100' };
-                    case 'VIEWED':
+                    case 'pending':
+                      return { label: 'Pendentes', color: 'text-blue-600', bg: 'bg-blue-100' };
+                    case 'viewed':
                       return { label: 'Visualizados', color: 'text-yellow-600', bg: 'bg-yellow-100' };
-                    case 'DRAFT':
+                    case 'draft':
                       return { label: 'Rascunhos', color: 'text-gray-600', bg: 'bg-gray-100' };
-                    case 'EXPIRED':
-                      return { label: 'Expirados', color: 'text-red-600', bg: 'bg-red-100' };
+                    case 'rejected':
+                      return { label: 'Rejeitados', color: 'text-red-600', bg: 'bg-red-100' };
                     default:
                       return { label: status, color: 'text-gray-600', bg: 'bg-gray-100' };
                   }
@@ -414,7 +416,7 @@ export default function Reports() {
                 <span className="text-gray-600">Visualizações</span>
               </div>
               <span className="font-semibold text-gray-800">
-                {quotes?.filter(q => q.viewedAt).length || 0}
+                {quotes?.filter(q => q.status === 'viewed' || q.viewedAt).length || 0}
               </span>
             </div>
             <div className="flex items-center justify-between">

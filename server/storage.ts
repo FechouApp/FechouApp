@@ -551,8 +551,8 @@ export class DatabaseStorage implements IStorage {
     const [quoteStats] = await db
       .select({
         totalQuotes: count(),
-        approvedQuotes: count(sql`CASE WHEN status IN ('APPROVED', 'PAID') THEN 1 END`),
-        totalRevenue: sql<string>`COALESCE(SUM(CASE WHEN status IN ('APPROVED', 'PAID') THEN total ELSE 0 END), 0)`,
+        approvedQuotes: count(sql`CASE WHEN status IN ('approved', 'paid') THEN 1 END`),
+        totalRevenue: sql<string>`COALESCE(SUM(CASE WHEN status IN ('approved', 'paid') THEN total ELSE 0 END), 0)`,
       })
       .from(quotes)
       .where(eq(quotes.userId, userId));
@@ -568,8 +568,8 @@ export class DatabaseStorage implements IStorage {
     const [thisMonthStats] = await db
       .select({
         thisMonthQuotes: count(),
-        thisMonthApproved: count(sql`CASE WHEN status IN ('APPROVED', 'PAID') THEN 1 END`),
-        thisMonthRevenue: sql<string>`COALESCE(SUM(CASE WHEN status IN ('APPROVED', 'PAID') THEN total ELSE 0 END), 0)`,
+        thisMonthApproved: count(sql`CASE WHEN status IN ('approved', 'paid') THEN 1 END`),
+        thisMonthRevenue: sql<string>`COALESCE(SUM(CASE WHEN status IN ('approved', 'paid') THEN total ELSE 0 END), 0)`,
       })
       .from(quotes)
       .where(
@@ -583,8 +583,8 @@ export class DatabaseStorage implements IStorage {
     const [lastMonthStats] = await db
       .select({
         lastMonthQuotes: count(),
-        lastMonthApproved: count(sql`CASE WHEN status IN ('APPROVED', 'PAID') THEN 1 END`),
-        lastMonthRevenue: sql<string>`COALESCE(SUM(CASE WHEN status IN ('APPROVED', 'PAID') THEN total ELSE 0 END), 0)`,
+        lastMonthApproved: count(sql`CASE WHEN status IN ('approved', 'paid') THEN 1 END`),
+        lastMonthRevenue: sql<string>`COALESCE(SUM(CASE WHEN status IN ('approved', 'paid') THEN total ELSE 0 END), 0)`,
       })
       .from(quotes)
       .where(
