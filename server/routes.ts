@@ -445,15 +445,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put('/api/quotes/:id', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      const quoteData = insertQuoteSchema.partial().parse(req.body);
+      const { quote: quoteData, items } = req.body;
       
-      const quote = await storage.updateQuote(req.params.id, quoteData, userId);
-      
-      if (!quote) {
+      // Verificar se o orçamento existe e pertence ao usuário
+      const existingQuote = await storage.getQuote(req.params.id, userId);
+      if (!existingQuote) {
         return res.status(404).json({ message: "Quote not found" });
       }
       
-      res.json(quote);
+      // Atualizar orçamento
+      const updatedQuote = await storage.updateQuote(req.params.id, quoteData, userId);
+      
+      if (!updatedQuote) {
+        return res.status(404).json({ message: "Failed to update quote" });
+      }
+      
+      // Deletar itens existentes e criar novos
+      await storage.deleteQuoteItems(req.params.id);
+      
+      if (items && items.length > 0) {
+        await storage.createQuoteItems(
+          items.map((item: any, index: number) => ({
+            quoteId: req.params.id,
+            description: item.description,
+            quantity: item.quantity,
+            unitPrice: item.unitPrice,
+            total: item.total,
+            order: index,
+          }))
+        );
+      }
+      
+      // Buscar o orçamento atualizado com os itens
+      const completeQuote = await storage.getQuote(req.params.id, userId);
+      
+      res.json(completeQuote);
     } catch (error) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: "Invalid quote data", errors: error.errors });

@@ -70,17 +70,25 @@ export default function NewQuote() {
 
   const createQuoteMutation = useMutation({
     mutationFn: async (quoteData: CreateQuoteRequest) => {
-      // Verificar limite de orçamentos mensais apenas para plano gratuito
-      if (planLimits && !planLimits.isPremium && !planLimits.canCreateQuote) {
-        throw new Error(`Limite de ${planLimits.monthlyQuoteLimit} orçamentos por mês atingido. Faça upgrade para Premium.`);
+      if (isEditing) {
+        // Para edição, usar PUT
+        await apiRequest("PUT", `/api/quotes/${quoteId}`, quoteData);
+      } else {
+        // Verificar limite de orçamentos mensais apenas para plano gratuito
+        if (planLimits && !planLimits.isPremium && !planLimits.canCreateQuote) {
+          throw new Error(`Limite de ${planLimits.monthlyQuoteLimit} orçamentos por mês atingido. Faça upgrade para Premium.`);
+        }
+        await apiRequest("POST", "/api/quotes", quoteData);
       }
-      await apiRequest("POST", "/api/quotes", quoteData);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/quotes"] });
+      if (isEditing) {
+        queryClient.invalidateQueries({ queryKey: [`/api/quotes/${quoteId}`] });
+      }
       toast({
         title: "Sucesso",
-        description: "Orçamento criado com sucesso!",
+        description: isEditing ? "Orçamento atualizado com sucesso!" : "Orçamento criado com sucesso!",
       });
       setLocation("/quotes");
     },
@@ -98,7 +106,7 @@ export default function NewQuote() {
       }
       toast({
         title: "Erro",
-        description: "Erro ao criar orçamento. Tente novamente.",
+        description: isEditing ? "Erro ao atualizar orçamento. Tente novamente." : "Erro ao criar orçamento. Tente novamente.",
         variant: "destructive",
       });
     },

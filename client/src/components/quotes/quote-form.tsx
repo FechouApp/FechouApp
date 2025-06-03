@@ -128,7 +128,7 @@ export default function QuoteForm({
 
   const totals = calculateTotals();
 
-  const handleSubmit = (action: 'draft' | 'preview' | 'send') => {
+  const handleSubmit = (action: 'preview' | 'save') => {
     if (!selectedClientId || !title || items.some(item => !item.description)) {
       return;
     }
@@ -421,14 +421,6 @@ export default function QuoteForm({
         <CardContent className="p-6">
           <div className="flex flex-col sm:flex-row gap-4 justify-end">
             <Button 
-              variant="outline" 
-              onClick={() => handleSubmit('draft')}
-              disabled={!canProceed || isSubmitting}
-            >
-              <Save className="w-4 h-4 mr-2" />
-              Salvar Rascunho
-            </Button>
-            <Button 
               variant="secondary"
               onClick={() => handleSubmit('preview')}
               disabled={!canProceed || isSubmitting}
@@ -437,12 +429,12 @@ export default function QuoteForm({
               Visualizar
             </Button>
             <Button 
-              onClick={() => handleSubmit('send')}
+              onClick={() => handleSubmit('save')}
               disabled={!canProceed || isSubmitting}
               className="brand-gradient text-white"
             >
-              <Send className="w-4 h-4 mr-2" />
-              {isSubmitting ? "Criando..." : "Criar e Enviar"}
+              <Save className="w-4 h-4 mr-2" />
+              {isSubmitting ? (existingQuote ? "Salvando..." : "Criando...") : (existingQuote ? "Salvar" : "Criar e Enviar")}
             </Button>
           </div>
         </CardContent>

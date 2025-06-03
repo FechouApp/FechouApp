@@ -416,6 +416,31 @@ export class DatabaseStorage implements IStorage {
     return (result.rowCount ?? 0) > 0;
   }
 
+  async deleteQuoteItems(quoteId: string): Promise<boolean> {
+    const result = await db.delete(quoteItems).where(eq(quoteItems.quoteId, quoteId));
+    return true; // Sempre retorna true mesmo se não há itens para deletar
+  }
+
+  async createQuoteItems(items: InsertQuoteItem[]): Promise<QuoteItem[]> {
+    if (items.length === 0) return [];
+    
+    const newItems = await db
+      .insert(quoteItems)
+      .values(
+        items.map(item => ({
+          id: nanoid(),
+          quoteId: item.quoteId,
+          description: item.description,
+          quantity: item.quantity || 1,
+          unitPrice: item.unitPrice,
+          total: item.total,
+          order: item.order || 0,
+        }))
+      )
+      .returning();
+    return newItems;
+  }
+
   // Review operations
   async getReviews(userId: string): Promise<(Review & { client: Client })[]> {
     const result = await db
