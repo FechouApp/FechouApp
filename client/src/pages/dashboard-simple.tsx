@@ -98,38 +98,50 @@ export default function Dashboard() {
         {/* Quick Actions - Inside welcome section, right after plan info */}
         <div className="space-y-3 mt-6">
           <Link href="/new-quote">
-            <Button className="w-full bg-purple-600 hover:bg-purple-700 text-white h-14 rounded-lg shadow-md hover:shadow-lg transition-all">
-              <div className="flex items-center gap-3 w-full justify-start px-4">
-                <Plus className="w-5 h-5 flex-shrink-0" />
-                <span className="font-semibold text-base">Novo Orçamento</span>
+            <Button className="w-full bg-purple-600 hover:bg-purple-700 text-white h-16 rounded-xl shadow-lg hover:shadow-xl transition-all">
+              <div className="flex items-center justify-center gap-3">
+                <Plus className="w-6 h-6" />
+                <div className="text-center">
+                  <div className="font-semibold text-base">Novo Orçamento</div>
+                  <div className="text-xs text-purple-100">Criar orçamento para cliente</div>
+                </div>
               </div>
             </Button>
           </Link>
 
           <Link href="/clients">
-            <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white h-14 rounded-lg shadow-md hover:shadow-lg transition-all">
-              <div className="flex items-center gap-3 w-full justify-start px-4">
-                <Users className="w-5 h-5 flex-shrink-0" />
-                <span className="font-semibold text-base">Adicionar Cliente</span>
+            <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white h-16 rounded-xl shadow-lg hover:shadow-xl transition-all">
+              <div className="flex items-center justify-center gap-3">
+                <Users className="w-6 h-6" />
+                <div className="text-center">
+                  <div className="font-semibold text-base">Adicionar Cliente</div>
+                  <div className="text-xs text-blue-100">Cadastrar novo cliente</div>
+                </div>
               </div>
             </Button>
           </Link>
 
           {(user as any)?.plan === "PREMIUM" ? (
-            <Link href="/reports">
-              <Button className="w-full bg-green-600 hover:bg-green-700 text-white h-14 rounded-lg shadow-md hover:shadow-lg transition-all">
-                <div className="flex items-center gap-3 w-full justify-start px-4">
-                  <TrendingUp className="w-5 h-5 flex-shrink-0" />
-                  <span className="font-semibold text-base">Relatórios</span>
+            <Link href="/quotes">
+              <Button className="w-full bg-green-600 hover:bg-green-700 text-white h-16 rounded-xl shadow-lg hover:shadow-xl transition-all">
+                <div className="flex items-center justify-center gap-3">
+                  <FileText className="w-6 h-6" />
+                  <div className="text-center">
+                    <div className="font-semibold text-base">Relatórios</div>
+                    <div className="text-xs text-green-100">Ver métricas detalhadas</div>
+                  </div>
                 </div>
               </Button>
             </Link>
           ) : (
             <Link href="/plans">
-              <Button className="w-full bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white h-14 rounded-lg shadow-md hover:shadow-lg transition-all">
-                <div className="flex items-center gap-3 w-full justify-start px-4">
-                  <TrendingUp className="w-5 h-5 flex-shrink-0" />
-                  <span className="font-semibold text-base">Relatórios Premium</span>
+              <Button className="w-full bg-green-600 hover:bg-green-700 text-white h-16 rounded-xl shadow-lg hover:shadow-xl transition-all">
+                <div className="flex items-center justify-center gap-3">
+                  <FileText className="w-6 h-6" />
+                  <div className="text-center">
+                    <div className="font-semibold text-base">Relatórios</div>
+                    <div className="text-xs text-green-100">Ver métricas detalhadas</div>
+                  </div>
                 </div>
               </Button>
             </Link>
@@ -137,44 +149,7 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Quick Action Menu */}
-      <div className="grid grid-cols-1 gap-3 mb-6 sm:mb-8">
-        <Link href="/new-quote">
-          <Button className="w-full h-14 bg-purple-600 hover:bg-purple-700 text-white rounded-xl shadow-lg transition-all duration-200 hover:shadow-xl">
-            <div className="flex items-center justify-center gap-3">
-              <Plus className="w-5 h-5" />
-              <div className="text-center">
-                <div className="font-semibold text-base">Novo Orçamento</div>
-                <div className="text-xs text-purple-100">Criar orçamento para cliente</div>
-              </div>
-            </div>
-          </Button>
-        </Link>
 
-        <Link href="/clients">
-          <Button className="w-full h-14 bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-lg transition-all duration-200 hover:shadow-xl">
-            <div className="flex items-center justify-center gap-3">
-              <Users className="w-5 h-5" />
-              <div className="text-center">
-                <div className="font-semibold text-base">Adicionar Cliente</div>
-                <div className="text-xs text-blue-100">Cadastrar novo cliente</div>
-              </div>
-            </div>
-          </Button>
-        </Link>
-
-        <Link href="/quotes">
-          <Button className="w-full h-14 bg-green-600 hover:bg-green-700 text-white rounded-xl shadow-lg transition-all duration-200 hover:shadow-xl">
-            <div className="flex items-center justify-center gap-3">
-              <FileText className="w-5 h-5" />
-              <div className="text-center">
-                <div className="font-semibold text-base">Relatórios</div>
-                <div className="text-xs text-green-100">Ver relatórios detalhados</div>
-              </div>
-            </div>
-          </Button>
-        </Link>
-      </div>
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
