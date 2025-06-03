@@ -1,6 +1,7 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import path from 'path';
 
 const app = express();
 app.use(express.json({ limit: "50mb" }));
@@ -37,7 +38,20 @@ app.use((req, res, next) => {
 });
 
 (async () => {
+  // Serve static files
+  app.use(express.static(path.join(__dirname, "../client/dist")));
+
   const server = await registerRoutes(app);
+
+  // Catch-all handler: send back React's index.html file for SPA routing
+  app.get('*', (req, res) => {
+    // Don't interfere with API routes
+    if (req.path.startsWith('/api/')) {
+      return res.status(404).json({ message: 'API route not found' });
+    }
+
+    res.sendFile(path.join(__dirname, '../client/dist/index.html'));
+  });
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
