@@ -128,16 +128,6 @@ export default function Sidebar() {
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => setLocation("/settings")}
-                className="w-full justify-start text-blue-100 hover:text-white hover:bg-white/10 h-8"
-              >
-                <Settings className="w-4 h-4 mr-2" />
-                Configurações
-              </Button>
-
-              <Button
-                variant="ghost"
-                size="sm"
                 onClick={handleLogout}
                 className="w-full justify-start text-blue-100 hover:text-white hover:bg-white/10 h-8"
               >
