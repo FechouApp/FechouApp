@@ -680,7 +680,7 @@ export default function Reports() {
                     return quoteDate.getMonth() === currentMonth && quoteDate.getFullYear() === currentYear;
                   }).length || 0;
                   return (thisMonthQuotes / 20) * 100;
-                })(), 100)}%` }}
+                })()), 100)}%` }}
               ></div>
             </div>
             <p className="text-sm text-gray-600 text-center">
