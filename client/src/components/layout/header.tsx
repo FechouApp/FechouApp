@@ -30,25 +30,6 @@ export default function Header({
       <div className="flex items-center gap-4">
         {/* Logo e navegação */}
         <div className="flex items-center gap-3">
-          {backTo !== "/" && (
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={handleHome}
-              className="text-blue-600 hover:text-blue-800 font-bold text-lg"
-            >
-              <Home className="w-5 h-5 mr-2" />
-              Fechou!
-            </Button>
-          )}
-          
-          {backTo === "/" && (
-            <div className="text-blue-600 font-bold text-lg flex items-center">
-              <Home className="w-5 h-5 mr-2" />
-              Fechou!
-            </div>
-          )}
-          
           {showBackButton && (
             <Button 
               variant="ghost" 
