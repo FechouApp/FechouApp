@@ -47,10 +47,7 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
 
   // Layout Premium mais elegante
   if (isUserPremium) {
-    // Cabeçalho Premium com linha decorativa
-    doc.setDrawColor(59, 130, 246); // Azul elegante
-    doc.setLineWidth(2);
-    doc.line(20, yPosition + 5, pageWidth - 20, yPosition + 5);
+    // Cabeçalho Premium sem linhas decorativas
     yPosition += 12;
     
     doc.setFontSize(20);
@@ -63,12 +60,6 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
     doc.setTextColor(0, 0, 0);
     doc.setFont('helvetica', 'normal');
     doc.text(`Nº ${quote.quoteNumber} • ${format(new Date(), 'dd/MM/yyyy', { locale: ptBR })}`, pageWidth / 2, yPosition, { align: 'center' });
-    yPosition += 12;
-    
-    // Linha decorativa inferior
-    doc.setDrawColor(59, 130, 246);
-    doc.setLineWidth(1);
-    doc.line(pageWidth / 2 - 30, yPosition, pageWidth / 2 + 30, yPosition);
     yPosition += 15;
   } else {
     // Layout padrão para plano gratuito
@@ -155,6 +146,10 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
   const tableStartY = yPosition;
   const tableWidth = pageWidth - 40;
   const rowHeight = 8;
+  
+  // Garantir que as linhas da tabela sejam pretas
+  doc.setDrawColor(0, 0, 0);
+  doc.setLineWidth(0.5);
   
   // Cabeçalho da tabela com fundo cinza
   doc.setFillColor(240, 240, 240);
