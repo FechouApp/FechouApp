@@ -29,6 +29,7 @@ export default function Settings() {
     phone: "",
     address: "",
     pixKey: "",
+    logoUrl: "",
     whatsappNotifications: false,
     emailNotifications: true,
   });
@@ -45,6 +46,7 @@ export default function Settings() {
         phone: formatPhone((typedUser as any)?.phone || ""),
         address: (typedUser as any)?.address || "",
         pixKey: typedUser.pixKey || "",
+        logoUrl: (typedUser as any)?.logoUrl || "",
         whatsappNotifications: typedUser.whatsappNotifications || false,
         emailNotifications: typedUser.emailNotifications || true,
       });
@@ -276,7 +278,22 @@ export default function Settings() {
               </p>
             </div>
 
-            {user?.plan === "premium" && (
+            {(user as any)?.plan === "PREMIUM" && (
+              <div>
+                <Label htmlFor="logoUrl">Logo da Empresa (Premium)</Label>
+                <Input
+                  id="logoUrl"
+                  value={formData.logoUrl}
+                  onChange={(e) => handleInputChange("logoUrl", e.target.value)}
+                  placeholder="URL da imagem do logo (ex: https://...)"
+                />
+                <p className="text-sm text-gray-500 mt-1">
+                  Logo aparecerá no canto superior direito dos orçamentos Premium
+                </p>
+              </div>
+            )}
+
+            {(user as any)?.plan === "PREMIUM" && (
               <div>
                 <Label>Logo do Negócio</Label>
                 <div className="mt-2 p-4 border-2 border-dashed border-gray-300 rounded-lg text-center">
