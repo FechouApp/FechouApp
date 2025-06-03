@@ -95,53 +95,41 @@ export default function Dashboard() {
           )}
         </div>
 
-        {/* Quick Actions - Inside welcome section, right after plan info */}
-        <div className="space-y-3 mt-6">
+        {/* Quick Actions - Buttons with icons beside text */}
+        <div className="grid grid-cols-1 gap-3 mt-6">
           <Link href="/new-quote">
-            <Button className="w-full bg-purple-600 hover:bg-purple-700 text-white h-16 rounded-xl shadow-lg hover:shadow-xl transition-all">
-              <div className="flex items-center justify-center gap-3">
-                <Plus className="w-6 h-6" />
-                <div className="text-center">
-                  <div className="font-semibold text-base">Novo Orçamento</div>
-                  <div className="text-xs text-purple-100">Criar orçamento para cliente</div>
-                </div>
+            <Button className="w-full bg-white/10 hover:bg-white/20 text-white h-12 rounded-lg border border-white/20 shadow-sm hover:shadow-md transition-all">
+              <div className="flex items-center gap-3 w-full justify-start">
+                <Plus className="w-5 h-5 flex-shrink-0" />
+                <span className="font-medium">Novo Orçamento</span>
               </div>
             </Button>
           </Link>
 
           <Link href="/clients">
-            <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white h-16 rounded-xl shadow-lg hover:shadow-xl transition-all">
-              <div className="flex items-center justify-center gap-3">
-                <Users className="w-6 h-6" />
-                <div className="text-center">
-                  <div className="font-semibold text-base">Adicionar Cliente</div>
-                  <div className="text-xs text-blue-100">Cadastrar novo cliente</div>
-                </div>
+            <Button className="w-full bg-white/10 hover:bg-white/20 text-white h-12 rounded-lg border border-white/20 shadow-sm hover:shadow-md transition-all">
+              <div className="flex items-center gap-3 w-full justify-start">
+                <Users className="w-5 h-5 flex-shrink-0" />
+                <span className="font-medium">Adicionar Cliente</span>
               </div>
             </Button>
           </Link>
 
           {(user as any)?.plan === "PREMIUM" ? (
-            <Link href="/quotes">
-              <Button className="w-full bg-green-600 hover:bg-green-700 text-white h-16 rounded-xl shadow-lg hover:shadow-xl transition-all">
-                <div className="flex items-center justify-center gap-3">
-                  <FileText className="w-6 h-6" />
-                  <div className="text-center">
-                    <div className="font-semibold text-base">Relatórios</div>
-                    <div className="text-xs text-green-100">Ver métricas detalhadas</div>
-                  </div>
+            <Link href="/reports">
+              <Button className="w-full bg-white/10 hover:bg-white/20 text-white h-12 rounded-lg border border-white/20 shadow-sm hover:shadow-md transition-all">
+                <div className="flex items-center gap-3 w-full justify-start">
+                  <TrendingUp className="w-5 h-5 flex-shrink-0" />
+                  <span className="font-medium">Relatórios</span>
                 </div>
               </Button>
             </Link>
           ) : (
             <Link href="/plans">
-              <Button className="w-full bg-green-600 hover:bg-green-700 text-white h-16 rounded-xl shadow-lg hover:shadow-xl transition-all">
-                <div className="flex items-center justify-center gap-3">
-                  <FileText className="w-6 h-6" />
-                  <div className="text-center">
-                    <div className="font-semibold text-base">Relatórios</div>
-                    <div className="text-xs text-green-100">Ver métricas detalhadas</div>
-                  </div>
+              <Button className="w-full bg-white/10 hover:bg-white/20 text-white h-12 rounded-lg border border-white/20 shadow-sm hover:shadow-md transition-all">
+                <div className="flex items-center gap-3 w-full justify-start">
+                  <TrendingUp className="w-5 h-5 flex-shrink-0" />
+                  <span className="font-medium">Relatórios Premium</span>
                 </div>
               </Button>
             </Link>
