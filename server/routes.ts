@@ -189,24 +189,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get individual quote for editing (authenticated)
-  app.get('/api/quotes/:id', isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = req.user.claims.sub;
-      const quote = await storage.getQuote(req.params.id, userId);
-      
-      if (!quote) {
-        return res.status(404).json({ message: "Quote not found" });
-      }
-      
-      res.json(quote);
-    } catch (error) {
-      console.error("Error fetching quote:", error);
-      res.status(500).json({ message: "Failed to fetch quote" });
-    }
-  });
-
-  // Public quote view (no authentication required)
+  // Public quote view (no authentication required) - MUST come before /api/quotes/:id
   app.get('/api/quotes/public/:quoteNumber', async (req, res) => {
     try {
       const { quoteNumber } = req.params;
@@ -224,6 +207,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(quote);
     } catch (error) {
       console.error("Error fetching public quote:", error);
+      res.status(500).json({ message: "Failed to fetch quote" });
+    }
+  });
+
+  // Get individual quote for editing (authenticated)
+  app.get('/api/quotes/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const quote = await storage.getQuote(req.params.id, userId);
+      
+      if (!quote) {
+        return res.status(404).json({ message: "Quote not found" });
+      }
+      
+      res.json(quote);
+    } catch (error) {
+      console.error("Error fetching quote:", error);
       res.status(500).json({ message: "Failed to fetch quote" });
     }
   });
