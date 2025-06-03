@@ -1,0 +1,71 @@
+Sugestões de melhoria (visuais e funcionais):
+1. Melhorar o layout geral
+Centralizar ou alinhar melhor os blocos de informação
+
+Usar fontes diferentes para títulos, subtítulos e valores (ex: Negrito no total final)
+
+Criar uma estrutura em colunas/caixas para “DADOS DO CLIENTE”, “SERVIÇOS”, “PAGAMENTO”, etc.
+
+2. Separar visualmente os blocos
+Usar linhas ou boxes com fundo cinza-claro para destacar seções
+
+Exemplo: condições de pagamento e prazo de execução podem estar em uma caixa separada
+
+3. Melhorar a tabela de itens
+Adicionar bordas e alinhamento à direita para valores
+
+Colocar “TOTAL” em uma linha separada com destaque (por ex. cor cinza ou fonte maior)
+
+4. Inserir logotipo do profissional (se plano pago)
+Incluir no canto superior direito ou centro
+
+Se o plano for gratuito, a marca d’água “Fechou!” pode ficar no rodapé com opacidade
+
+5. Adicionar assinatura opcional
+Campo para o cliente assinar digitalmente ou manualmente, se impresso
+
+6. Padronizar formatação de valores
+Exibir com duas casas decimais sempre: R$ 1.500,00 e não R$ 1500,00
+
+Usar separador de milhar (ponto) e decimal (vírgula)
+
+7. Melhorar a apresentação do título
+O “ORÇAMENTO” pode ser apresentado como título grande centralizado
+
+Abaixo dele, o número e data do orçamento
+
+8. Sugestão extra: código QR
+Adicionar um QR Code para o cliente abrir o orçamento digitalmente ou aprovar com um clique (versão futura)
+
+Exemplo de formatação visual que pode ser aplicada:
+makefile
+Copiar
+Editar
+──────────────────────────────────────────────
+                  ORÇAMENTO
+           Nº FH196883 | 02/06/2025
+──────────────────────────────────────────────
+
+👤 DADOS DO CLIENTE
+Nome: Andreia Pereira
+Email: coutoandreia@gmail.com
+Telefone: (13) 98111-6064
+Endereço: Rua da Paz, Boqueirão – Santos/SP
+
+🛠 SERVIÇOS
+| Descrição        | Qtd | Unitário | Total     |
+|------------------|-----|----------|-----------|
+| Troca de piso    |  1  | R$1.500,00 | R$1.500,00 |
+| Reparo na pia    |  1  | R$ 200,00 | R$ 200,00  |
+
+Subtotal: R$ 1.700,00  
+**TOTAL: R$ 1.700,00**
+
+💳 Condições de pagamento:
+50% de entrada e o restante em 30 dias
+
+🕒 Prazo de execução: 30 dias  
+📆 Validade: até 16/06/2025
+
+──────────────────────────────────────────────
+Gerado por **Fechou!**
