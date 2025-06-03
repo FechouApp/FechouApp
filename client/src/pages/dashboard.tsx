@@ -184,9 +184,7 @@ export default function Dashboard() {
                   </div>
                 </Button>
               </Link>
-            )}</div>
-        </CardContent>
-      </Card>
+            )}
           </div>
         </CardContent>
       </Card>
