@@ -539,6 +539,14 @@ export class DatabaseStorage implements IStorage {
     totalRevenue: string;
     averageRating: number;
     thisMonthQuotes: number;
+    quoteTrend?: string;
+    quoteTrendUp?: boolean;
+    approvalTrend?: string;
+    approvalTrendUp?: boolean;
+    revenueTrend?: string;
+    revenueTrendUp?: boolean;
+    ratingTrend?: string;
+    ratingTrendUp?: boolean;
   }> {
     const [quoteStats] = await db
       .select({
@@ -556,9 +564,12 @@ export class DatabaseStorage implements IStorage {
       .from(reviews)
       .where(eq(reviews.userId, userId));
 
+    // Stats do mês atual
     const [thisMonthStats] = await db
       .select({
         thisMonthQuotes: count(),
+        thisMonthApproved: count(sql`CASE WHEN status IN ('APPROVED', 'PAID') THEN 1 END`),
+        thisMonthRevenue: sql<string>`COALESCE(SUM(CASE WHEN status IN ('APPROVED', 'PAID') THEN total ELSE 0 END), 0)`,
       })
       .from(quotes)
       .where(
@@ -568,12 +579,85 @@ export class DatabaseStorage implements IStorage {
         )
       );
 
+    // Stats do mês anterior
+    const [lastMonthStats] = await db
+      .select({
+        lastMonthQuotes: count(),
+        lastMonthApproved: count(sql`CASE WHEN status IN ('APPROVED', 'PAID') THEN 1 END`),
+        lastMonthRevenue: sql<string>`COALESCE(SUM(CASE WHEN status IN ('APPROVED', 'PAID') THEN total ELSE 0 END), 0)`,
+      })
+      .from(quotes)
+      .where(
+        and(
+          eq(quotes.userId, userId),
+          sql`created_at >= date_trunc('month', current_date) - interval '1 month'`,
+          sql`created_at < date_trunc('month', current_date)`
+        )
+      );
+
+    // Avaliações do mês atual
+    const [thisMonthRating] = await db
+      .select({
+        thisMonthRating: sql<number>`COALESCE(AVG(rating), 0)`,
+      })
+      .from(reviews)
+      .where(
+        and(
+          eq(reviews.userId, userId),
+          sql`created_at >= date_trunc('month', current_date)`
+        )
+      );
+
+    // Avaliações do mês anterior
+    const [lastMonthRating] = await db
+      .select({
+        lastMonthRating: sql<number>`COALESCE(AVG(rating), 0)`,
+      })
+      .from(reviews)
+      .where(
+        and(
+          eq(reviews.userId, userId),
+          sql`created_at >= date_trunc('month', current_date) - interval '1 month'`,
+          sql`created_at < date_trunc('month', current_date)`
+        )
+      );
+
+    // Calcular trends
+    const calculateTrend = (current: number, previous: number) => {
+      if (previous === 0) return current > 0 ? { trend: "+100%", up: true } : { trend: "", up: false };
+      const percentage = ((current - previous) / previous * 100);
+      const sign = percentage >= 0 ? "+" : "";
+      return {
+        trend: `${sign}${percentage.toFixed(0)}%`,
+        up: percentage >= 0
+      };
+    };
+
+    const quoteTrendData = calculateTrend(thisMonthStats.thisMonthQuotes, lastMonthStats.lastMonthQuotes);
+    const approvalTrendData = calculateTrend(thisMonthStats.thisMonthApproved, lastMonthStats.lastMonthApproved);
+    const revenueTrendData = calculateTrend(
+      parseFloat(thisMonthStats.thisMonthRevenue),
+      parseFloat(lastMonthStats.lastMonthRevenue)
+    );
+    const ratingTrendData = calculateTrend(
+      Number(thisMonthRating.thisMonthRating),
+      Number(lastMonthRating.lastMonthRating)
+    );
+
     return {
       totalQuotes: quoteStats.totalQuotes,
       approvedQuotes: quoteStats.approvedQuotes,
       totalRevenue: quoteStats.totalRevenue,
       averageRating: reviewStats.averageRating ? Number(Number(reviewStats.averageRating).toFixed(1)) : 0,
       thisMonthQuotes: thisMonthStats.thisMonthQuotes,
+      quoteTrend: quoteTrendData.trend,
+      quoteTrendUp: quoteTrendData.up,
+      approvalTrend: approvalTrendData.trend,
+      approvalTrendUp: approvalTrendData.up,
+      revenueTrend: revenueTrendData.trend,
+      revenueTrendUp: revenueTrendData.up,
+      ratingTrend: ratingTrendData.trend,
+      ratingTrendUp: ratingTrendData.up,
     };
   }
 }
