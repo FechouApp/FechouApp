@@ -301,101 +301,173 @@ export default function Reports() {
         </Card>
       </div>
 
-      {/* Gráfico de Linhas - Últimos 12 Meses */}
-      <Card className="bg-white shadow-lg">
-        <CardHeader>
-          <CardTitle className="text-lg font-semibold text-gray-800">
-            Performance dos Últimos 12 Meses
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ChartContainer
-            config={{
-              total: {
-                label: "Orçamentos Emitidos",
-                color: "#3b82f6",
-              },
-              approved: {
-                label: "Orçamentos Fechados",
-                color: "#10b981",
-              },
-              ticketMedio: {
-                label: "Ticket Médio",
-                color: "#f59e0b",
-              },
-            }}
-            className="h-[300px]"
-          >
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={monthlyData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis 
-                  dataKey="month" 
-                  fontSize={12}
-                  tickLine={false}
-                  axisLine={false}
-                />
-                <YAxis 
-                  fontSize={12}
-                  tickLine={false}
-                  axisLine={false}
-                />
-                <ChartTooltip 
-                  content={({ active, payload, label }) => {
-                    if (active && payload && payload.length) {
-                      return (
-                        <div className="rounded-lg border bg-background p-2 shadow-sm">
-                          <div className="grid grid-cols-1 gap-2">
-                            <div className="flex flex-col">
-                              <span className="text-[0.70rem] uppercase text-muted-foreground">
-                                {label}
-                              </span>
-                              {payload.map((entry, index) => (
-                                <span key={index} className="font-bold text-muted-foreground" style={{ color: entry.color }}>
-                                  {entry.dataKey === 'ticketMedio' 
-                                    ? `${entry.name}: ${formatCurrency(entry.value)}`
-                                    : `${entry.name}: ${entry.value}`
-                                  }
+      {/* Gráficos - Últimos 12 Meses */}
+      <div className="grid lg:grid-cols-2 gap-6">
+        <Card className="bg-white shadow-lg">
+          <CardHeader>
+            <CardTitle className="text-lg font-semibold text-gray-800">
+              Performance dos Últimos 12 Meses
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ChartContainer
+              config={{
+                total: {
+                  label: "Orçamentos Emitidos",
+                  color: "#3b82f6",
+                },
+                approved: {
+                  label: "Orçamentos Fechados",
+                  color: "#10b981",
+                },
+                ticketMedio: {
+                  label: "Ticket Médio",
+                  color: "#f59e0b",
+                },
+              }}
+              className="h-[300px]"
+            >
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={monthlyData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis 
+                    dataKey="month" 
+                    fontSize={12}
+                    tickLine={false}
+                    axisLine={false}
+                  />
+                  <YAxis 
+                    fontSize={12}
+                    tickLine={false}
+                    axisLine={false}
+                  />
+                  <ChartTooltip 
+                    content={({ active, payload, label }) => {
+                      if (active && payload && payload.length) {
+                        return (
+                          <div className="rounded-lg border bg-background p-2 shadow-sm">
+                            <div className="grid grid-cols-1 gap-2">
+                              <div className="flex flex-col">
+                                <span className="text-[0.70rem] uppercase text-muted-foreground">
+                                  {label}
                                 </span>
-                              ))}
+                                {payload.map((entry, index) => (
+                                  <span key={index} className="font-bold text-muted-foreground" style={{ color: entry.color }}>
+                                    {entry.dataKey === 'ticketMedio' 
+                                      ? `${entry.name}: ${formatCurrency(entry.value)}`
+                                      : `${entry.name}: ${entry.value}`
+                                    }
+                                  </span>
+                                ))}
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      );
-                    }
-                    return null;
-                  }}
-                />
-                <Line 
-                  type="monotone" 
-                  dataKey="total" 
-                  stroke="#3b82f6" 
-                  strokeWidth={2}
-                  dot={{ fill: "#3b82f6", strokeWidth: 2, r: 4 }}
-                  activeDot={{ r: 6, stroke: "#3b82f6", strokeWidth: 2 }}
-                />
-                <Line 
-                  type="monotone" 
-                  dataKey="approved" 
-                  stroke="#10b981" 
-                  strokeWidth={2}
-                  dot={{ fill: "#10b981", strokeWidth: 2, r: 4 }}
-                  activeDot={{ r: 6, stroke: "#10b981", strokeWidth: 2 }}
-                />
-                <Line 
-                  type="monotone" 
-                  dataKey="ticketMedio" 
-                  stroke="#f59e0b" 
-                  strokeWidth={2}
-                  dot={{ fill: "#f59e0b", strokeWidth: 2, r: 4 }}
-                  activeDot={{ r: 6, stroke: "#f59e0b", strokeWidth: 2 }}
-                />
-                <ChartLegend />
-              </LineChart>
-            </ResponsiveContainer>
-          </ChartContainer>
-        </CardContent>
-      </Card>
+                        );
+                      }
+                      return null;
+                    }}
+                  />
+                  <Line 
+                    type="monotone" 
+                    dataKey="total" 
+                    stroke="#3b82f6" 
+                    strokeWidth={2}
+                    dot={{ fill: "#3b82f6", strokeWidth: 2, r: 4 }}
+                    activeDot={{ r: 6, stroke: "#3b82f6", strokeWidth: 2 }}
+                  />
+                  <Line 
+                    type="monotone" 
+                    dataKey="approved" 
+                    stroke="#10b981" 
+                    strokeWidth={2}
+                    dot={{ fill: "#10b981", strokeWidth: 2, r: 4 }}
+                    activeDot={{ r: 6, stroke: "#10b981", strokeWidth: 2 }}
+                  />
+                  <Line 
+                    type="monotone" 
+                    dataKey="ticketMedio" 
+                    stroke="#f59e0b" 
+                    strokeWidth={2}
+                    dot={{ fill: "#f59e0b", strokeWidth: 2, r: 4 }}
+                    activeDot={{ r: 6, stroke: "#f59e0b", strokeWidth: 2 }}
+                  />
+                  <ChartLegend />
+                </LineChart>
+              </ResponsiveContainer>
+            </ChartContainer>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-white shadow-lg">
+          <CardHeader>
+            <CardTitle className="text-lg font-semibold text-gray-800">
+              Taxa de Conversão por Mês
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ChartContainer
+              config={{
+                conversionRate: {
+                  label: "Taxa de Conversão (%)",
+                  color: "#8b5cf6",
+                },
+              }}
+              className="h-[300px]"
+            >
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={monthlyData.map(month => ({
+                  ...month,
+                  conversionRate: month.total > 0 ? ((month.approved / month.total) * 100).toFixed(1) : 0
+                }))}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis 
+                    dataKey="month" 
+                    fontSize={12}
+                    tickLine={false}
+                    axisLine={false}
+                  />
+                  <YAxis 
+                    fontSize={12}
+                    tickLine={false}
+                    axisLine={false}
+                    domain={[0, 100]}
+                  />
+                  <ChartTooltip 
+                    content={({ active, payload, label }) => {
+                      if (active && payload && payload.length) {
+                        return (
+                          <div className="rounded-lg border bg-background p-2 shadow-sm">
+                            <div className="grid grid-cols-1 gap-2">
+                              <div className="flex flex-col">
+                                <span className="text-[0.70rem] uppercase text-muted-foreground">
+                                  {label}
+                                </span>
+                                <span className="font-bold text-purple-600">
+                                  Taxa de Conversão: {payload[0].value}%
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      }
+                      return null;
+                    }}
+                  />
+                  <Line 
+                    type="monotone" 
+                    dataKey="conversionRate" 
+                    stroke="#8b5cf6" 
+                    strokeWidth={3}
+                    dot={{ fill: "#8b5cf6", strokeWidth: 2, r: 5 }}
+                    activeDot={{ r: 7, stroke: "#8b5cf6", strokeWidth: 2 }}
+                  />
+                  <ChartLegend />
+                </LineChart>
+              </ResponsiveContainer>
+            </ChartContainer>
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Gráficos e Análises */}
       <div className="grid lg:grid-cols-2 gap-6">
