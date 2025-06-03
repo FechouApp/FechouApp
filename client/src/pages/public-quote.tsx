@@ -24,7 +24,8 @@ export default function PublicQuote() {
   const { data: quote, isLoading, error } = useQuery<QuoteWithDetails>({
     queryKey: [`/api/quotes/public/${quoteNumber}`],
     enabled: !!quoteNumber,
-    retry: false,
+    retry: 3,
+    retryDelay: 1000,
   });
 
   const approveMutation = useMutation({

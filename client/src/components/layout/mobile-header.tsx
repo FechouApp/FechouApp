@@ -82,7 +82,6 @@ export default function MobileHeader() {
           </div>
           <div>
             <h1 className="text-white font-bold text-lg">Fechou!</h1>
-            <p className="text-blue-100 text-xs">{getCurrentPageName()}</p>
           </div>
         </div>
         
