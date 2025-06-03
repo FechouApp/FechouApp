@@ -315,9 +315,11 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
 
   yPosition += 5;
 
-  // Verificar se há espaço suficiente para o rodapé, caso contrário criar nova página
-  const minBottomMargin = 40; // Margem mínima inferior
-  if (yPosition > pageHeight - minBottomMargin) {
+  // Verificar se há espaço suficiente na página atual antes de adicionar marca d'água e rodapé
+  const remainingSpace = pageHeight - yPosition;
+  const needsNewPage = remainingSpace < 60; // Só criar nova página se realmente não couber
+  
+  if (needsNewPage) {
     doc.addPage();
     yPosition = 20;
   }
@@ -331,7 +333,7 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
     
     // Posicionar no canto inferior direito em área livre
     const watermarkX = pageWidth - 50;
-    const watermarkY = pageHeight - 60; // Ajustado para dar mais espaço
+    const watermarkY = pageHeight - 60;
     
     doc.text('Fechou!', watermarkX, watermarkY, { 
       align: 'center',
