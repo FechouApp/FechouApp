@@ -25,20 +25,13 @@ import SavedItemsPage from "@/pages/saved-items";
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
 
-  if (isLoading) {
-    return <LoadingSpinner />;
-  }
-
   return (
     <Switch>
       {/* Public route for client quote viewing */}
       <Route path="/quote/:quoteNumber" component={PublicQuote} />
 
-      {!isAuthenticated ? (
-        <>
-          <Route path="/" component={Landing} />
-          <Route component={NotFound} />
-        </>
+      {isLoading || !isAuthenticated ? (
+        <Route path="/" component={Landing} />
       ) : (
         <>
           <Route path="/" component={Dashboard} />
@@ -52,9 +45,9 @@ function Router() {
           <Route path="/reports" component={Reports} />
           <Route path="/plans" component={PlanComparison} />
           <Route path="/settings" component={Settings} />
-          <Route component={NotFound} />
         </>
       )}
+      <Route component={NotFound} />
     </Switch>
   );
 }

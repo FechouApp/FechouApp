@@ -259,41 +259,19 @@ export default function QuoteView() {
   });
 
   const handleDownloadPDF = async () => {
-    if (!quote) {
-      console.error('Quote not available');
+    if (!quote || !user) {
+      console.error('Quote or user not available:', { quote: !!quote, user: !!user });
       return;
     }
 
     try {
-      console.log('Starting PDF generation...', { quote: quote.quoteNumber });
-      
-      // Sempre buscar dados completos do usuário da API para garantir que temos todas as informações
-      console.log('Fetching complete user data from API for quote userId:', quote.userId);
-      const userResponse = await fetch(`/api/users/${quote.userId}`);
-      
-      if (!userResponse.ok) {
-        throw new Error('Não foi possível carregar os dados do usuário');
-      }
-      
-      const userData = await userResponse.json();
-      console.log('=== COMPLETE USER DATA FOR PDF ===');
-      console.log('Raw user data:', JSON.stringify(userData, null, 2));
-      console.log('All properties:', Object.keys(userData));
-      console.log('Business name:', userData.businessName);
-      console.log('First name:', userData.firstName);
-      console.log('Last name:', userData.lastName);
-      console.log('Email:', userData.email);
-      console.log('Searching for CPF/CNPJ in:', ['cpfCnpj', 'cpf', 'cnpj', 'document', 'taxId', 'businessDocument']);
-      console.log('Searching for address in:', ['address', 'streetAddress', 'street', 'endereco', 'businessAddress']);
-      console.log('Searching for phone in:', ['phone', 'phoneNumber', 'telefone', 'celular', 'businessPhone']);
-      console.log('==================================');
-      
-      const isUserPremium = userData?.plan === 'PREMIUM';
-      console.log('User plan:', userData?.plan, 'isUserPremium:', isUserPremium);
+      console.log('Starting PDF generation...', { quote: quote.quoteNumber, user: (user as any).id });
+      const isUserPremium = (user as any)?.plan === 'PREMIUM';
+      console.log('User plan:', (user as any)?.plan, 'isUserPremium:', isUserPremium);
 
       const pdfBlob = await generateQuotePDF({
         quote,
-        user: userData,
+        user: user as any,
         isUserPremium
       });
 
