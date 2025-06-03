@@ -222,6 +222,142 @@ export default function Reports() {
   const conversionRate = getConversionRate();
   const averageQuoteValue = getAverageQuoteValue();
 
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <LoadingSpinner />
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h1 className="text-3xl font-bold text-gray-900">Relatórios</h1>
+      </div>
+
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <StatsCard
+          title="Total de Orçamentos"
+          value={quotes?.length || 0}
+          icon={FileText}
+          color="blue"
+        />
+        <StatsCard
+          title="Taxa de Conversão"
+          value={`${conversionRate}%`}
+          icon={TrendingUp}
+          color="green"
+        />
+        <StatsCard
+          title="Valor Médio"
+          value={`R$ ${averageQuoteValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
+          icon={DollarSign}
+          color="purple"
+        />
+        <StatsCard
+          title="Receita Total"
+          value={`R$ ${totalRevenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
+          icon={BarChart3}
+          color="orange"
+        />
+      </div>
+
+      {/* Charts Row */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Monthly Revenue Chart */}
+        <Card className="bg-white shadow-lg">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <BarChart3 className="w-5 h-5" />
+              Receita Mensal
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={monthlyData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="month" />
+                <YAxis />
+                <Tooltip formatter={(value) => [`R$ ${value.toLocaleString('pt-BR')}`, 'Receita']} />
+                <Bar dataKey="revenue" fill="#8884d8" />
+              </BarChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+
+        {/* Status Distribution */}
+        <Card className="bg-white shadow-lg">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <PieChart className="w-5 h-5" />
+              Status dos Orçamentos
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <PieChart>
+                <Pie
+                  data={statusStats}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={false}
+                  label={({ name, value }) => `${name}: ${value}`}
+                  outerRadius={80}
+                  fill="#8884d8"
+                  dataKey="value"
+                >
+                  {statusStats.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip />
+              </PieChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Top Clients Table */}
+      <Card className="bg-white shadow-lg">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Users className="w-5 h-5" />
+            Top 5 Clientes
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b">
+                  <th className="text-left py-2">Cliente</th>
+                  <th className="text-left py-2">Orçamentos</th>
+                  <th className="text-left py-2">Valor Total</th>
+                  <th className="text-left py-2">Aprovados</th>
+                  <th className="text-left py-2">Taxa</th>
+                </tr>
+              </thead>
+              <tbody>
+                {topClients.map((client, index) => (
+                  <tr key={index} className="border-b">
+                    <td className="py-2">{client.name}</td>
+                    <td className="py-2">{client.quotesCount}</td>
+                    <td className="py-2">R$ {client.totalValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
+                    <td className="py-2">{client.approvedCount}</td>
+                    <td className="py-2">{((client.approvedCount / client.quotesCount) * 100).toFixed(1)}%</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}eValue = getAverageQuoteValue();
+
   return (
     <div className="space-y-8">
       {/* Botão de Voltar */}
