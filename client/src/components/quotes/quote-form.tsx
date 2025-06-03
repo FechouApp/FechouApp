@@ -13,10 +13,12 @@ import {
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import QuoteItem from "./quote-item";
-import { Plus, Save, Eye, Send, Trash2, Crown } from "lucide-react";
+import SavedItemsManager from "../saved-items/saved-items-manager";
+import { Plus, Calendar, Save, Eye, Send, Trash2, Crown, Star } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import type { Client, CreateQuoteRequest } from "@/types";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import type { Client, CreateQuoteRequest, SavedItem } from "@/types";
 
 interface QuoteFormProps {
   clients: Client[];
@@ -68,6 +70,8 @@ export default function QuoteForm({
       : [{ id: "1", description: "", quantity: 1, unitPrice: "0", total: "0" }]
   );
   const [discount, setDiscount] = useState(existingQuote?.discount || "0");
+    const [showSavedItems, setShowSavedItems] = useState(false);
+    const [saveItemAsNew, setSaveItemAsNew] = useState(false);
 
   const addItem = () => {
     // Verificar limitação do plano gratuito
@@ -90,6 +94,18 @@ export default function QuoteForm({
     setItems([...items, newItem]);
   };
 
+    const insertSavedItem = (savedItem: SavedItem) => {
+        const newItem = {
+            id: `item-${Date.now()}`,
+            description: savedItem.name,
+            quantity: 1,
+            unitPrice: savedItem.unitPrice,
+            total: savedItem.unitPrice,
+        };
+        setItems([...items, newItem]);
+        setShowSavedItems(false);
+    };
+
   const removeItem = (id: string) => {
     if (items.length > 1) {
       setItems(items.filter(item => item.id !== id));
@@ -100,14 +116,14 @@ export default function QuoteForm({
     setItems(items.map(item => {
       if (item.id === id) {
         const updatedItem = { ...item, [field]: value };
-        
+
         // Recalculate total when quantity or unitPrice changes
         if (field === 'quantity' || field === 'unitPrice') {
           const quantity = field === 'quantity' ? Number(value) : item.quantity;
           const unitPrice = field === 'unitPrice' ? parseFloat(value.toString()) || 0 : parseFloat(item.unitPrice) || 0;
           updatedItem.total = (quantity * unitPrice).toFixed(2);
         }
-        
+
         return updatedItem;
       }
       return item;
@@ -118,7 +134,7 @@ export default function QuoteForm({
     const subtotal = items.reduce((sum, item) => sum + parseFloat(item.total || "0"), 0);
     const discountAmount = parseFloat(discount) || 0;
     const total = Math.max(0, subtotal - discountAmount);
-    
+
     return {
       subtotal: subtotal.toFixed(2),
       discountAmount: discountAmount.toFixed(2),
@@ -207,7 +223,7 @@ export default function QuoteForm({
                 )}
               </div>
             </div>
-            
+
             <div className="space-y-4">
               <div>
                 <Label className="text-sm font-medium text-gray-700">Título do Orçamento *</Label>
@@ -218,7 +234,7 @@ export default function QuoteForm({
                   className="mt-2"
                 />
               </div>
-              
+
               <div>
                 <Label className="text-sm font-medium text-gray-700">Validade (dias)</Label>
                 <Input
@@ -232,7 +248,7 @@ export default function QuoteForm({
               </div>
             </div>
           </div>
-          
+
 
         </CardContent>
       </Card>
@@ -248,17 +264,27 @@ export default function QuoteForm({
               </span>
             )}
           </CardTitle>
-          <Button 
-            onClick={addItem} 
-            className="brand-gradient text-white"
-            disabled={!isUserPremium && items.length >= maxItemsForFreeUser}
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            Adicionar Item
-            {!isUserPremium && items.length >= maxItemsForFreeUser && (
-              <Crown className="w-4 h-4 ml-2" />
-            )}
-          </Button>
+          <div>
+            <Button
+                onClick={() => setShowSavedItems(true)}
+                variant="outline"
+                className="mr-2"
+            >
+              <Star className="w-4 h-4 mr-2" />
+              Itens Salvos
+            </Button>
+            <Button
+              onClick={addItem}
+              className="brand-gradient text-white"
+              disabled={!isUserPremium && items.length >= maxItemsForFreeUser}
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Adicionar Item
+              {!isUserPremium && items.length >= maxItemsForFreeUser && (
+                <Crown className="w-4 h-4 ml-2" />
+              )}
+            </Button>
+          </div>
         </CardHeader>
         <CardContent className="space-y-4">
           {items.map((item, index) => (
@@ -273,6 +299,19 @@ export default function QuoteForm({
           ))}
         </CardContent>
       </Card>
+
+            {/* Dialog para Itens Salvos */}
+            <Dialog open={showSavedItems} onOpenChange={setShowSavedItems}>
+                <DialogContent className="max-w-2xl">
+                    <DialogHeader>
+                        <DialogTitle>Selecionar Item Salvo</DialogTitle>
+                    </DialogHeader>
+                    <SavedItemsManager
+                        onSelectItem={insertSavedItem}
+                        selectionMode={true}
+                    />
+                </DialogContent>
+            </Dialog>
 
       {/* Description */}
       <Card className="bg-white shadow-lg">
@@ -312,7 +351,7 @@ export default function QuoteForm({
                 className="mt-2"
               />
             </div>
-            
+
             <div>
               <Label className="text-sm font-medium text-gray-700">Prazo de Execução</Label>
               <Textarea
@@ -323,7 +362,7 @@ export default function QuoteForm({
                 className="mt-2"
               />
             </div>
-            
+
             <div>
               <Label className="text-sm font-medium text-gray-700">Observações Gerais</Label>
               <Textarea
@@ -334,7 +373,7 @@ export default function QuoteForm({
                 className="mt-2"
               />
             </div>
-            
+
             <div>
               <Label className="text-sm font-medium text-gray-700 mb-3 block">
                 Opções de Envio
@@ -406,7 +445,7 @@ export default function QuoteForm({
                   </div>
                 </div>
               </div>
-              
+
               <div className="flex justify-between text-lg font-semibold">
                 <span>Total:</span>
                 <span className="text-brand-primary">R$ {totals.total}</span>

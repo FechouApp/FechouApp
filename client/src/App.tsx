@@ -20,6 +20,7 @@ import Sidebar from "@/components/layout/sidebar";
 import MobileHeader from "@/components/layout/mobile-header";
 import LoadingSpinner from "@/components/common/loading-spinner";
 import Reports from "@/pages/reports";
+import SavedItemsPage from "@/pages/saved-items";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -40,6 +41,7 @@ function Router() {
           <Route path="/quotes/view/:quoteId" component={QuoteView} />
           <Route path="/new-quote" component={NewQuote} />
           <Route path="/reviews" component={Reviews} />
+          <Route path="/saved-items" component={SavedItemsPage} />
           <Route path="/reports" component={Reports} />
           <Route path="/plans" component={PlanComparison} />
           <Route path="/settings" component={Settings} />

@@ -6,6 +6,7 @@ import {
   reviews,
   payments,
   notifications,
+  savedItems, // ADDED
   type User,
   type UpsertUser,
   type InsertClient,
@@ -20,6 +21,8 @@ import {
   type Payment,
   type InsertNotification,
   type Notification,
+  type InsertSavedItem, // ADDED
+  type SavedItem, // ADDED
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, count, sql, and, or, like, asc, gte, lte } from "drizzle-orm";
@@ -70,6 +73,12 @@ export interface IStorage {
   getNotifications(userId: string): Promise<Notification[]>;
   createNotification(notification: InsertNotification): Promise<Notification>;
   markNotificationAsRead(id: string, userId: string): Promise<boolean>;
+
+  // Saved Items operations  // ADDED
+  getSavedItems(userId: string): Promise<SavedItem[]>;  // ADDED
+  createSavedItem(savedItem: InsertSavedItem): Promise<SavedItem>;  // ADDED
+  updateSavedItem(id: string, savedItem: Partial<InsertSavedItem>, userId: string): Promise<SavedItem | undefined>;  // ADDED
+  deleteSavedItem(id: string, userId: string): Promise<boolean>; // ADDED
 
   // Statistics
   getUserStats(userId: string): Promise<{
@@ -525,11 +534,46 @@ export class DatabaseStorage implements IStorage {
   }
 
   async markNotificationAsRead(id: string, userId: string): Promise<boolean> {
-    const result = await db
+    const [notification] = await db
       .update(notifications)
       .set({ isRead: true, readAt: new Date() })
-      .where(and(eq(notifications.id, id), eq(notifications.userId, userId)));
-    return (result.rowCount ?? 0) > 0;
+      .where(and(eq(notifications.id, id), eq(notifications.userId, userId)))
+      .returning();
+    return !!notification;
+  }
+
+  // Saved Items operations
+  async getSavedItems(userId: string): Promise<SavedItem[]> {
+    return await db
+      .select()
+      .from(savedItems)
+      .where(eq(savedItems.userId, userId))
+      .orderBy(asc(savedItems.name));
+  }
+
+  async createSavedItem(savedItem: InsertSavedItem): Promise<SavedItem> {
+    const [newSavedItem] = await db
+      .insert(savedItems)
+      .values({ ...savedItem, id: nanoid() })
+      .returning();
+    return newSavedItem;
+  }
+
+  async updateSavedItem(id: string, savedItem: Partial<InsertSavedItem>, userId: string): Promise<SavedItem | undefined> {
+    const [updatedSavedItem] = await db
+      .update(savedItems)
+      .set({ ...savedItem, updatedAt: new Date() })
+      .where(and(eq(savedItems.id, id), eq(savedItems.userId, userId)))
+      .returning();
+    return updatedSavedItem;
+  }
+
+  async deleteSavedItem(id: string, userId: string): Promise<boolean> {
+    const [deletedSavedItem] = await db
+      .delete(savedItems)
+      .where(and(eq(savedItems.id, id), eq(savedItems.userId, userId)))
+      .returning();
+    return !!deletedSavedItem;
   }
 
   // Statistics

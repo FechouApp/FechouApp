@@ -94,14 +94,28 @@ export interface Review {
   id: string;
   userId: string;
   clientId: string;
-  quoteId: string | null;
+  quoteId?: string;
   rating: number;
-  comment: string | null;
+  comment?: string;
   isPublic: boolean;
-  response: string | null;
-  respondedAt: Date | null;
+  response?: string;
+  respondedAt?: string;
   createdAt: Date | null;
   updatedAt: Date | null;
+}
+
+export interface SavedItem {
+  id: string;
+  userId: string;
+  name: string;
+  unitPrice: string;
+  createdAt: Date | null;
+  updatedAt: Date | null;
+}
+
+export interface CreateSavedItemRequest {
+  name: string;
+  unitPrice: string;
 }
 
 export interface ReviewWithClient extends Review {

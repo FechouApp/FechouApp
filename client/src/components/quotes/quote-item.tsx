@@ -1,6 +1,11 @@
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Trash2 } from "lucide-react";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Trash2, Star } from "lucide-react";
+import { useMutation } from "@tanstack/react-query";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 
 interface QuoteItemProps {
   item: {
@@ -16,13 +21,38 @@ interface QuoteItemProps {
   index: number;
 }
 
-export default function QuoteItem({ 
-  item, 
-  onUpdate, 
-  onRemove, 
-  canRemove, 
-  index 
+export default function QuoteItem({
+  item,
+  onUpdate,
+  onRemove,
+  canRemove,
+  index,
 }: QuoteItemProps) {
+  const { toast } = useToast();
+
+  const saveItemMutation = useMutation({
+    mutationFn: async () => {
+      await apiRequest("POST", "/api/saved-items", {
+        name: item.description,
+        unitPrice: item.unitPrice,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/saved-items"] });
+      toast({
+        title: "Item salvo!",
+        description: "Item adicionado aos seus favoritos.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Erro ao salvar",
+        description: error.message || "Erro ao salvar item nos favoritos.",
+        variant: "destructive",
+      });
+    },
+  });
+
   const formatCurrency = (value: string) => {
     const num = parseFloat(value) || 0;
     return new Intl.NumberFormat('pt-BR', {
@@ -109,6 +139,23 @@ export default function QuoteItem({
           </Button>
         </div>
       )}
+       {/* Save Item */}
+       <div className="md:col-span-12 flex justify-end mt-2">
+          {item.description && item.unitPrice && (
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => saveItemMutation.mutate()}
+              disabled={saveItemMutation.isPending}
+              className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+              title="Salvar como favorito"
+            >
+              <Star className="w-4 h-4 mr-1" />
+              Salvar Item
+            </Button>
+          )}
+        </div>
     </div>
   );
 }

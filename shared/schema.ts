@@ -164,6 +164,16 @@ export const notifications = pgTable("notifications", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Saved Items table
+export const savedItems = pgTable("saved_items", {
+  id: varchar("id").primaryKey().notNull(),
+  userId: varchar("user_id").notNull(),
+  name: varchar("name").notNull(),
+  unitPrice: decimal("unit_price", { precision: 10, scale: 2 }).notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   clients: many(clients),
@@ -171,6 +181,7 @@ export const usersRelations = relations(users, ({ many }) => ({
   reviews: many(reviews),
   payments: many(payments),
   notifications: many(notifications),
+  savedItems: many(savedItems),
 }));
 
 export const clientsRelations = relations(clients, ({ one, many }) => ({
@@ -202,6 +213,10 @@ export const paymentsRelations = relations(payments, ({ one }) => ({
 
 export const notificationsRelations = relations(notifications, ({ one }) => ({
   user: one(users, { fields: [notifications.userId], references: [users.id] }),
+}));
+
+export const savedItemsRelations = relations(savedItems, ({ one }) => ({
+  user: one(users, { fields: [savedItems.userId], references: [users.id] }),
 }));
 
 // Insert schemas
@@ -247,6 +262,12 @@ export const insertNotificationSchema = createInsertSchema(notifications).omit({
   createdAt: true,
 });
 
+export const insertSavedItemSchema = createInsertSchema(savedItems).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 // Types
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
@@ -262,3 +283,5 @@ export type InsertPayment = z.infer<typeof insertPaymentSchema>;
 export type Payment = typeof payments.$inferSelect;
 export type InsertNotification = z.infer<typeof insertNotificationSchema>;
 export type Notification = typeof notifications.$inferSelect;
+export type InsertSavedItem = z.infer<typeof insertSavedItemSchema>;
+export type SavedItem = typeof savedItems.$inferSelect;

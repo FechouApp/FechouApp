@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
-import { insertClientSchema, insertQuoteSchema, insertQuoteItemSchema, insertReviewSchema } from "@shared/schema";
+import { insertClientSchema, insertQuoteSchema, insertQuoteItemSchema, insertReviewSchema, insertSavedItemSchema } from "@shared/schema";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -662,6 +662,83 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error checking existing review:", error);
       res.status(500).json({ message: "Failed to check existing review" });
+    }
+  });
+
+  // Saved Items routes
+  app.get('/api/saved-items', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const items = await storage.getSavedItems(userId);
+      res.json(items);
+    } catch (error) {
+      console.error("Error fetching saved items:", error);
+      res.status(500).json({ message: "Failed to fetch saved items" });
+    }
+  });
+
+  app.post('/api/saved-items', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const itemData = insertSavedItemSchema.parse({ ...req.body, userId });
+      
+      // Check plan limits
+      const user = await storage.getUser(userId);
+      const isPremium = user?.plan === "PREMIUM";
+      const currentItems = await storage.getSavedItems(userId);
+      const maxItems = isPremium ? 15 : 3;
+      
+      if (currentItems.length >= maxItems) {
+        return res.status(403).json({ 
+          message: `Limite de ${maxItems} itens salvos atingido. ${!isPremium ? 'Faça upgrade para o plano Pro para salvar mais itens.' : ''}` 
+        });
+      }
+      
+      const item = await storage.createSavedItem(itemData);
+      res.status(201).json(item);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid item data", errors: error.errors });
+      }
+      console.error("Error creating saved item:", error);
+      res.status(500).json({ message: "Failed to create saved item" });
+    }
+  });
+
+  app.put('/api/saved-items/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const itemData = insertSavedItemSchema.partial().parse(req.body);
+      
+      const item = await storage.updateSavedItem(req.params.id, itemData, userId);
+      
+      if (!item) {
+        return res.status(404).json({ message: "Saved item not found" });
+      }
+      
+      res.json(item);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid item data", errors: error.errors });
+      }
+      console.error("Error updating saved item:", error);
+      res.status(500).json({ message: "Failed to update saved item" });
+    }
+  });
+
+  app.delete('/api/saved-items/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const success = await storage.deleteSavedItem(req.params.id, userId);
+      
+      if (!success) {
+        return res.status(404).json({ message: "Saved item not found" });
+      }
+      
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting saved item:", error);
+      res.status(500).json({ message: "Failed to delete saved item" });
     }
   });
 
