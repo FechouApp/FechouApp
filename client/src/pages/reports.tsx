@@ -21,6 +21,8 @@ import {
   Eye,
   ThumbsUp
 } from "lucide-react";
+import { ChartContainer, ChartTooltip, ChartLegend } from "@/components/ui/chart";
+import { Line, LineChart, XAxis, YAxis, CartesianGrid, ResponsiveContainer } from "recharts";
 import type { DashboardStats, QuoteWithClient, ReviewWithClient } from "@/types";
 
 export default function Reports() {
@@ -123,25 +125,44 @@ export default function Reports() {
   const calculateMonthlyData = () => {
     if (!quotes) return [];
 
-    const monthlyData = {};
+    // Gerar últimos 12 meses
+    const months = [];
+    const now = new Date();
+    
+    for (let i = 11; i >= 0; i--) {
+      const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const monthKey = date.toLocaleDateString('pt-BR', { month: 'short', year: 'numeric' });
+      months.push({
+        month: monthKey,
+        monthDate: date,
+        total: 0,
+        approved: 0,
+        revenue: 0
+      });
+    }
+
+    // Processar orçamentos
     quotes.forEach(quote => {
       if (quote.createdAt) {
-        const month = new Date(quote.createdAt).toLocaleDateString('pt-BR', { month: 'short', year: 'numeric' });
-        if (!monthlyData[month]) {
-          monthlyData[month] = { total: 0, approved: 0, revenue: 0 };
-        }
-        monthlyData[month].total++;
-        if (quote.status === 'approved' || quote.status === 'paid') {
-          monthlyData[month].approved++;
-          monthlyData[month].revenue += parseFloat(quote.total);
+        const quoteDate = new Date(quote.createdAt);
+        const monthKey = quoteDate.toLocaleDateString('pt-BR', { month: 'short', year: 'numeric' });
+        
+        const monthData = months.find(m => m.month === monthKey);
+        if (monthData) {
+          monthData.total++;
+          if (quote.status === 'approved' || quote.status === 'paid') {
+            monthData.approved++;
+            monthData.revenue += parseFloat(quote.total);
+          }
         }
       }
     });
 
-    return Object.entries(monthlyData).map(([month, data]) => ({
-      month,
-      ...data
-    })).slice(-6);
+    // Calcular ticket médio
+    return months.map(month => ({
+      ...month,
+      ticketMedio: month.approved > 0 ? month.revenue / month.approved : 0
+    }));
   };
 
   const getStatusStats = () => {
@@ -280,6 +301,103 @@ export default function Reports() {
         </Card>
       </div>
 
+      {/* Gráfico de Linhas - Últimos 12 Meses */}
+      <Card className="bg-white shadow-lg">
+        <CardHeader>
+          <CardTitle className="text-lg font-semibold text-gray-800">
+            Performance dos Últimos 12 Meses
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <ChartContainer
+            config={{
+              total: {
+                label: "Orçamentos Emitidos",
+                color: "#3b82f6",
+              },
+              approved: {
+                label: "Orçamentos Fechados",
+                color: "#10b981",
+              },
+              ticketMedio: {
+                label: "Ticket Médio",
+                color: "#f59e0b",
+              },
+            }}
+            className="h-[300px]"
+          >
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={monthlyData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis 
+                  dataKey="month" 
+                  fontSize={12}
+                  tickLine={false}
+                  axisLine={false}
+                />
+                <YAxis 
+                  fontSize={12}
+                  tickLine={false}
+                  axisLine={false}
+                />
+                <ChartTooltip 
+                  content={({ active, payload, label }) => {
+                    if (active && payload && payload.length) {
+                      return (
+                        <div className="rounded-lg border bg-background p-2 shadow-sm">
+                          <div className="grid grid-cols-1 gap-2">
+                            <div className="flex flex-col">
+                              <span className="text-[0.70rem] uppercase text-muted-foreground">
+                                {label}
+                              </span>
+                              {payload.map((entry, index) => (
+                                <span key={index} className="font-bold text-muted-foreground" style={{ color: entry.color }}>
+                                  {entry.dataKey === 'ticketMedio' 
+                                    ? `${entry.name}: ${formatCurrency(entry.value)}`
+                                    : `${entry.name}: ${entry.value}`
+                                  }
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    }
+                    return null;
+                  }}
+                />
+                <Line 
+                  type="monotone" 
+                  dataKey="total" 
+                  stroke="#3b82f6" 
+                  strokeWidth={2}
+                  dot={{ fill: "#3b82f6", strokeWidth: 2, r: 4 }}
+                  activeDot={{ r: 6, stroke: "#3b82f6", strokeWidth: 2 }}
+                />
+                <Line 
+                  type="monotone" 
+                  dataKey="approved" 
+                  stroke="#10b981" 
+                  strokeWidth={2}
+                  dot={{ fill: "#10b981", strokeWidth: 2, r: 4 }}
+                  activeDot={{ r: 6, stroke: "#10b981", strokeWidth: 2 }}
+                />
+                <Line 
+                  type="monotone" 
+                  dataKey="ticketMedio" 
+                  stroke="#f59e0b" 
+                  strokeWidth={2}
+                  dot={{ fill: "#f59e0b", strokeWidth: 2, r: 4 }}
+                  activeDot={{ r: 6, stroke: "#f59e0b", strokeWidth: 2 }}
+                  yAxisId="right"
+                />
+                <ChartLegend />
+              </LineChart>
+            </ResponsiveContainer>
+          </ChartContainer>
+        </CardContent>
+      </Card>
+
       {/* Gráficos e Análises */}
       <div className="grid lg:grid-cols-2 gap-6">
         {/* Performance Mensal */}
@@ -291,7 +409,7 @@ export default function Reports() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {monthlyData.map((month, index) => (
+              {monthlyData.slice(-6).map((month, index) => (
                 <div key={index} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                   <div>
                     <p className="font-medium text-gray-800">{month.month}</p>
@@ -300,6 +418,7 @@ export default function Reports() {
                   <div className="text-right">
                     <p className="font-semibold text-gray-800">{formatCurrency(month.revenue)}</p>
                     <p className="text-sm text-green-600">{month.approved} aprovados</p>
+                    <p className="text-xs text-blue-600">Ticket: {formatCurrency(month.ticketMedio)}</p>
                   </div>
                 </div>
               ))}
