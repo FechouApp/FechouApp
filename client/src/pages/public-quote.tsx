@@ -209,12 +209,12 @@ export default function PublicQuote() {
         </div>
 
         {/* Quote Details */}
-        <Card className="mb-6">
-          <CardHeader className="brand-gradient text-white rounded-t-lg">
-            <div className="flex justify-between items-start">
+        <Card className="mb-4 sm:mb-6">
+          <CardHeader className="brand-gradient text-white rounded-t-lg p-4 sm:p-6">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3">
               <div>
-                <CardTitle className="text-2xl mb-2">{quote.title}</CardTitle>
-                <p className="text-white/90">Orçamento #{quote.quoteNumber}</p>
+                <CardTitle className="text-lg sm:text-xl lg:text-2xl mb-2">{quote.title}</CardTitle>
+                <p className="text-white/90 text-sm sm:text-base">Orçamento #{quote.quoteNumber}</p>
               </div>
               <Badge 
                 variant={quote.status === "approved" ? "default" : quote.status === "rejected" ? "destructive" : "secondary"}
