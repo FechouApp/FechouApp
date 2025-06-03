@@ -18,6 +18,7 @@ import QuoteView from "@/pages/quote-view";
 import PublicQuote from "@/pages/public-quote";
 import Sidebar from "@/components/layout/sidebar";
 import MobileHeader from "@/components/layout/mobile-header";
+import LoadingSpinner from "@/components/common/loading-spinner";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -51,7 +52,11 @@ function Router() {
 function AppLayout() {
   const { isAuthenticated, isLoading } = useAuth();
 
-  if (isLoading || !isAuthenticated) {
+  if (isLoading) {
+    return <LoadingSpinner />;
+  }
+
+  if (!isAuthenticated) {
     return <Router />;
   }
 
