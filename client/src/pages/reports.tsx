@@ -576,7 +576,7 @@ export default function Reports() {
               </div>
             ))}
             {topClients.length === 0 && (
-              <div className="text-center py-8 text-gray-500">
+              <div <div className="text-center py-8 text-gray-500">
                 <Users className="w-12 h-12 mx-auto mb-4 text-gray-300" />
                 <p className="text-lg font-medium">Nenhum cliente ainda</p>
                 <p className="text-sm">Crie orçamentos para ver seus principais clientes</p>
