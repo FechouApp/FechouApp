@@ -110,27 +110,44 @@ export default function Dashboard() {
           <h3 className="text-white font-semibold text-lg opacity-100">Ações Rápidas</h3>
         </div>
 
-        {/* Quick Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <Button className="bg-white/10 hover:bg-white/20 text-white border border-white/20 justify-start h-12">
-            <Plus className="w-5 h-5 mr-3" />
-            Novo Orçamento
-          </Button>
+        {/* Quick Actions - Responsivo */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          <Link href="/new-quote">
+            <Button className="w-full bg-white/10 hover:bg-white/20 text-white border border-white/20 justify-start h-12">
+              <Plus className="w-5 h-5 mr-3" />
+              Novo Orçamento
+            </Button>
+          </Link>
 
-          <Button className="bg-white/10 hover:bg-white/20 text-white border border-white/20 justify-start h-12">
-            <Users className="w-5 h-5 mr-3" />
-            Adicionar Cliente
-          </Button>
+          <Link href="/clients">
+            <Button className="w-full bg-white/10 hover:bg-white/20 text-white border border-white/20 justify-start h-12">
+              <Users className="w-5 h-5 mr-3" />
+              Adicionar Cliente
+            </Button>
+          </Link>
 
-          <Button className="bg-white/10 hover:bg-white/20 text-white border border-white/20 justify-start h-12">
-            <FileText className="w-5 h-5 mr-3" />
-            Ver Orçamentos
-          </Button>
+          <Link href="/quotes">
+            <Button className="w-full bg-white/10 hover:bg-white/20 text-white border border-white/20 justify-start h-12">
+              <FileText className="w-5 h-5 mr-3" />
+              Ver Orçamentos
+            </Button>
+          </Link>
 
-          <Button className="bg-white/10 hover:bg-white/20 text-white border border-white/20 justify-start h-12">
-            <BarChart3 className="w-5 h-5 mr-3" />
-            Relatórios
-          </Button>
+          {(user as any)?.plan === "PREMIUM" ? (
+            <Link href="/reports">
+              <Button className="w-full bg-white/10 hover:bg-white/20 text-white border border-white/20 justify-start h-12">
+                <BarChart3 className="w-5 h-5 mr-3" />
+                Relatórios
+              </Button>
+            </Link>
+          ) : (
+            <Link href="/plans">
+              <Button className="w-full bg-gradient-to-r from-yellow-500/80 to-orange-500/80 hover:from-yellow-600/80 hover:to-orange-600/80 text-white border border-yellow-400/40 justify-start h-12">
+                <BarChart3 className="w-5 h-5 mr-3" />
+                Relatórios Pro
+              </Button>
+            </Link>
+          )}
         </div>
       </div>
 
@@ -173,60 +190,7 @@ export default function Dashboard() {
         />
       </div>
 
-      {/* Quick Actions */}
-      <Card className="bg-white/10 backdrop-blur-sm border-white/20">
-        <CardHeader>
-          <CardTitle className="text-white flex items-center gap-2">
-            <TrendingUp className="w-5 h-5" />
-            Ações Rápidas
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Link href="/new-quote">
-              <Button className="w-full h-16 bg-purple-600 hover:bg-purple-700 text-white flex flex-col items-center justify-center gap-2">
-                <Plus className="w-5 h-5" />
-                <div className="text-center">
-                  <div className="font-semibold">Novo Orçamento</div>
-                  <div className="text-xs opacity-80">Criar orçamento para cliente</div>
-                </div>
-              </Button>
-            </Link>
-
-            <Link href="/clients">
-              <Button className="w-full h-16 bg-blue-600 hover:bg-blue-700 text-white flex flex-col items-center justify-center gap-2">
-                <Users className="w-5 h-5" />
-                <div className="text-center">
-                  <div className="font-semibold">Adicionar Cliente</div>
-                  <div className="text-xs opacity-80">Cadastrar novo cliente</div>
-                </div>
-              </Button>
-            </Link>
-
-            {(user as any)?.plan === "PREMIUM" ? (
-              <Link href="/reports">
-                <Button className="w-full h-16 bg-green-600 hover:bg-green-700 text-white flex flex-col items-center justify-center gap-2">
-                  <BarChart3 className="w-5 h-5" />
-                  <div className="text-center">
-                    <div className="font-semibold">Relatórios</div>
-                    <div className="text-xs opacity-80">Ver métricas detalhadas</div>
-                  </div>
-                </Button>
-              </Link>
-            ) : (
-              <Link href="/plans">
-                <Button className="w-full h-16 bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white flex flex-col items-center justify-center gap-2">
-                  <BarChart3 className="w-5 h-5" />
-                  <div className="text-center">
-                    <div className="font-semibold">Relatórios</div>
-                    <div className="text-xs opacity-80">Upgrade para Premium</div>
-                  </div>
-                </Button>
-              </Link>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+      
 
       {/* Recent Activity */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
