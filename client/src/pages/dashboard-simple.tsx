@@ -95,58 +95,60 @@ export default function Dashboard() {
           )}
         </div>
 
-        {/* Quick Actions - Moved inside welcome section */}
-        <div className="space-y-3 mt-6">
-          <Link href="/new-quote">
-            <Button className="w-full bg-purple-600 hover:bg-purple-700 text-white h-16 rounded-lg shadow-md hover:shadow-lg transition-all">
-              <div className="flex items-center gap-4 w-full justify-start px-4">
-                <Plus className="w-6 h-6 flex-shrink-0" />
-                <div className="text-left">
-                  <div className="font-semibold text-lg">Novo Orçamento</div>
-                  <div className="text-sm opacity-90">Criar orçamento para cliente</div>
-                </div>
-              </div>
-            </Button>
-          </Link>
-
-          <Link href="/clients">
-            <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white h-16 rounded-lg shadow-md hover:shadow-lg transition-all">
-              <div className="flex items-center gap-4 w-full justify-start px-4">
-                <Users className="w-6 h-6 flex-shrink-0" />
-                <div className="text-left">
-                  <div className="font-semibold text-lg">Adicionar Cliente</div>
-                  <div className="text-sm opacity-90">Cadastrar novo cliente</div>
-                </div>
-              </div>
-            </Button>
-          </Link>
-
-          {(user as any)?.plan === "PREMIUM" ? (
-            <Link href="/reports">
-              <Button className="w-full bg-green-600 hover:bg-green-700 text-white h-16 rounded-lg shadow-md hover:shadow-lg transition-all">
-                <div className="flex items-center gap-4 w-full justify-start px-4">
-                  <TrendingUp className="w-6 h-6 flex-shrink-0" />
-                  <div className="text-left">
-                    <div className="font-semibold text-lg">Relatórios</div>
-                    <div className="text-sm opacity-90">Ver métricas detalhadas</div>
-                  </div>
-                </div>
-              </Button>
-            </Link>
-          ) : (
-            <Link href="/plans">
-              <Button className="w-full bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white h-16 rounded-lg shadow-md hover:shadow-lg transition-all">
-                <div className="flex items-center gap-4 w-full justify-start px-4">
-                  <TrendingUp className="w-6 h-6 flex-shrink-0" />
-                  <div className="text-left">
-                    <div className="font-semibold text-lg">Relatórios</div>
-                    <div className="text-sm opacity-90">Upgrade para Premium</div>
-                  </div>
-                </div>
-              </Button>
-            </Link>
-          )}
         </div>
+      </div>
+
+      {/* Quick Actions - Now separate section, right after welcome */}
+      <div className="space-y-3">
+        <Link href="/new-quote">
+          <Button className="w-full bg-purple-600 hover:bg-purple-700 text-white h-16 rounded-lg shadow-md hover:shadow-lg transition-all">
+            <div className="flex items-center gap-4 w-full justify-start px-4">
+              <Plus className="w-6 h-6 flex-shrink-0" />
+              <div className="text-left">
+                <div className="font-semibold text-lg">Novo Orçamento</div>
+                <div className="text-sm opacity-90">Criar orçamento para cliente</div>
+              </div>
+            </div>
+          </Button>
+        </Link>
+
+        <Link href="/clients">
+          <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white h-16 rounded-lg shadow-md hover:shadow-lg transition-all">
+            <div className="flex items-center gap-4 w-full justify-start px-4">
+              <Users className="w-6 h-6 flex-shrink-0" />
+              <div className="text-left">
+                <div className="font-semibold text-lg">Adicionar Cliente</div>
+                <div className="text-sm opacity-90">Cadastrar novo cliente</div>
+              </div>
+            </div>
+          </Button>
+        </Link>
+
+        {(user as any)?.plan === "PREMIUM" ? (
+          <Link href="/reports">
+            <Button className="w-full bg-green-600 hover:bg-green-700 text-white h-16 rounded-lg shadow-md hover:shadow-lg transition-all">
+              <div className="flex items-center gap-4 w-full justify-start px-4">
+                <TrendingUp className="w-6 h-6 flex-shrink-0" />
+                <div className="text-left">
+                  <div className="font-semibold text-lg">Relatórios</div>
+                  <div className="text-sm opacity-90">Ver métricas detalhadas</div>
+                </div>
+              </div>
+            </Button>
+          </Link>
+        ) : (
+          <Link href="/plans">
+            <Button className="w-full bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white h-16 rounded-lg shadow-md hover:shadow-lg transition-all">
+              <div className="flex items-center gap-4 w-full justify-start px-4">
+                <TrendingUp className="w-6 h-6 flex-shrink-0" />
+                <div className="text-left">
+                  <div className="font-semibold text-lg">Relatórios</div>
+                  <div className="text-sm opacity-90">Upgrade para Premium</div>
+                </div>
+              </div>
+            </Button>
+          </Link>
+        )}
       </div>
 
       {/* Stats Cards */}
