@@ -25,8 +25,8 @@ export default function QuoteView() {
   const [comment, setComment] = useState("");
   const [reviewSubmitted, setReviewSubmitted] = useState(false);
   
-  // Check if this is a public view (no authenticated user)
-  const isPublicView = !user;
+  // Check if this is a public view based on URL pattern
+  const isPublicView = window.location.pathname.includes('/quote/');
 
   // Mutations
   const markAsSentMutation = useMutation({
@@ -267,7 +267,7 @@ export default function QuoteView() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+      <div className="w-full mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8 max-w-sm sm:max-w-2xl lg:max-w-4xl">
 
 
         {/* Header */}
@@ -425,8 +425,8 @@ export default function QuoteView() {
               </Button>
             </div>
 
-            {/* WhatsApp Buttons - Only for the quote owner (professional) */}
-            {user && quote.userId === (user as any)?.id && quote.client?.phone && (
+            {/* WhatsApp Buttons - Never show in public view (/quote/ URL) */}
+            {!isPublicView && user && isAuthenticated && quote.userId === (user as any)?.id && quote.client?.phone && (
               <div className="mb-4 space-y-2">
                 <Button 
                   onClick={sendViaWhatsApp}
