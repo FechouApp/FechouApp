@@ -128,7 +128,7 @@ export default function Reports() {
     // Gerar últimos 12 meses
     const months = [];
     const now = new Date();
-    
+
     for (let i = 11; i >= 0; i--) {
       const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
       const monthKey = date.toLocaleDateString('pt-BR', { month: 'short', year: 'numeric' });
@@ -146,7 +146,7 @@ export default function Reports() {
       if (quote.createdAt) {
         const quoteDate = new Date(quote.createdAt);
         const monthKey = quoteDate.toLocaleDateString('pt-BR', { month: 'short', year: 'numeric' });
-        
+
         const monthData = months.find(m => m.month === monthKey);
         if (monthData) {
           monthData.total++;
