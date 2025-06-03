@@ -267,18 +267,8 @@ export default function QuoteView() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-4xl mx-auto px-4 py-8">
-        {/* Botão de Voltar */}
-        <div className="mb-6">
-          <Button
-            variant="ghost"
-            onClick={() => window.history.back()}
-            className="flex items-center gap-2 text-gray-600 hover:text-gray-900"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Voltar
-          </Button>
-        </div>
+      <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+
 
         {/* Header */}
         <div className="text-center mb-8">
@@ -435,8 +425,8 @@ export default function QuoteView() {
               </Button>
             </div>
 
-            {/* WhatsApp Buttons - Only for authenticated users (professionals) */}
-            {user && !isPublicView && quote.client?.phone && (
+            {/* WhatsApp Buttons - Only for the quote owner (professional) */}
+            {user && quote.userId === (user as any)?.id && quote.client?.phone && (
               <div className="mb-4 space-y-2">
                 <Button 
                   onClick={sendViaWhatsApp}
