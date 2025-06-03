@@ -243,58 +243,58 @@ export default function Reports() {
       </div>
 
       {/* KPIs Principais */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mx-4 md:mx-0">
         <Card className="bg-white shadow-lg">
-          <CardContent className="p-6">
+          <CardContent className="p-4 md:p-6">
             <div className="flex items-center justify-between">
               <div className="space-y-1">
-                <p className="text-sm font-medium text-gray-600">Taxa de Conversão</p>
-                <p className="text-2xl font-bold text-green-600">{conversionRate}%</p>
+                <p className="text-xs md:text-sm font-medium text-gray-600">Taxa de Conversão</p>
+                <p className="text-xl md:text-2xl font-bold text-green-600">{conversionRate}%</p>
               </div>
-              <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                <Target className="w-6 h-6 text-green-600" />
+              <div className="w-8 h-8 md:w-10 md:h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                <Target className="w-4 h-4 md:w-6 md:h-6 text-green-600" />
               </div>
             </div>
           </CardContent>
         </Card>
 
         <Card className="bg-white shadow-lg">
-          <CardContent className="p-6">
+          <CardContent className="p-4 md:p-6">
             <div className="flex items-center justify-between">
               <div className="space-y-1">
-                <p className="text-sm font-medium text-gray-600">Ticket Médio</p>
-                <p className="text-2xl font-bold text-blue-600">{formatCurrency(averageQuoteValue)}</p>
+                <p className="text-xs md:text-sm font-medium text-gray-600">Ticket Médio</p>
+                <p className="text-lg md:text-2xl font-bold text-blue-600">{formatCurrency(averageQuoteValue)}</p>
               </div>
-              <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                <DollarSign className="w-6 h-6 text-blue-600" />
+              <div className="w-8 h-8 md:w-10 md:h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                <DollarSign className="w-4 h-4 md:w-6 md:h-6 text-blue-600" />
               </div>
             </div>
           </CardContent>
         </Card>
 
         <Card className="bg-white shadow-lg">
-          <CardContent className="p-6">
+          <CardContent className="p-4 md:p-6">
             <div className="flex items-center justify-between">
               <div className="space-y-1">
-                <p className="text-sm font-medium text-gray-600">Clientes Únicos</p>
-                <p className="text-2xl font-bold text-purple-600">{topClients.length}</p>
+                <p className="text-xs md:text-sm font-medium text-gray-600">Clientes Únicos</p>
+                <p className="text-xl md:text-2xl font-bold text-purple-600">{topClients.length}</p>
               </div>
-              <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                <Users className="w-6 h-6 text-purple-600" />
+              <div className="w-8 h-8 md:w-10 md:h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                <Users className="w-4 h-4 md:w-6 md:h-6 text-purple-600" />
               </div>
             </div>
           </CardContent>
         </Card>
 
         <Card className="bg-white shadow-lg">
-          <CardContent className="p-6">
+          <CardContent className="p-4 md:p-6">
             <div className="flex items-center justify-between">
               <div className="space-y-1">
-                <p className="text-sm font-medium text-gray-600">Avaliação Média</p>
-                <p className="text-2xl font-bold text-yellow-600">{stats?.averageRating?.toFixed(1) || "0.0"}</p>
+                <p className="text-xs md:text-sm font-medium text-gray-600">Avaliação Média</p>
+                <p className="text-xl md:text-2xl font-bold text-yellow-600">{stats?.averageRating?.toFixed(1) || "0.0"}</p>
               </div>
-              <div className="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center">
-                <Star className="w-6 h-6 text-yellow-600" />
+              <div className="w-8 h-8 md:w-10 md:h-10 bg-yellow-100 rounded-lg flex items-center justify-center">
+                <Star className="w-4 h-4 md:w-6 md:h-6 text-yellow-600" />
               </div>
             </div>
           </CardContent>
@@ -302,14 +302,14 @@ export default function Reports() {
       </div>
 
       {/* Gráficos - Últimos 12 Meses */}
-      <div className="grid lg:grid-cols-2 gap-6">
+      <div className="grid lg:grid-cols-2 gap-4 md:gap-6 mx-4 md:mx-0">
         <Card className="bg-white shadow-lg">
-          <CardHeader>
-            <CardTitle className="text-lg font-semibold text-gray-800">
+          <CardHeader className="p-4 md:p-6">
+            <CardTitle className="text-base md:text-lg font-semibold text-gray-800">
               Performance dos Últimos 12 Meses
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-4 md:p-6">
             <ChartContainer
               config={{
                 total: {
@@ -325,7 +325,7 @@ export default function Reports() {
                   color: "#f59e0b",
                 },
               }}
-              className="h-[300px]"
+              className="h-[250px] md:h-[300px]"
             >
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={monthlyData}>
@@ -399,12 +399,12 @@ export default function Reports() {
         </Card>
 
         <Card className="bg-white shadow-lg">
-          <CardHeader>
-            <CardTitle className="text-lg font-semibold text-gray-800">
+          <CardHeader className="p-4 md:p-6">
+            <CardTitle className="text-base md:text-lg font-semibold text-gray-800">
               Taxa de Conversão por Mês
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-4 md:p-6">
             <ChartContainer
               config={{
                 conversionRate: {
@@ -412,7 +412,7 @@ export default function Reports() {
                   color: "#8b5cf6",
                 },
               }}
-              className="h-[300px]"
+              className="h-[250px] md:h-[300px]"
             >
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={monthlyData.map(month => ({
@@ -470,25 +470,25 @@ export default function Reports() {
       </div>
 
       {/* Gráficos e Análises */}
-      <div className="grid lg:grid-cols-2 gap-6">
+      <div className="grid lg:grid-cols-2 gap-4 md:gap-6 mx-4 md:mx-0">
         {/* Performance Mensal */}
         <Card className="bg-white shadow-lg">
-          <CardHeader>
-            <CardTitle className="text-lg font-semibold text-gray-800">
+          <CardHeader className="p-4 md:p-6">
+            <CardTitle className="text-base md:text-lg font-semibold text-gray-800">
               Performance Mensal (Últimos 6 meses)
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
+          <CardContent className="p-4 md:p-6">
+            <div className="space-y-3 md:space-y-4">
               {monthlyData.slice(-6).map((month, index) => (
-                <div key={index} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                <div key={index} className="flex flex-col md:flex-row md:items-center justify-between p-3 md:p-4 bg-gray-50 rounded-lg space-y-2 md:space-y-0">
                   <div>
-                    <p className="font-medium text-gray-800">{month.month}</p>
-                    <p className="text-sm text-gray-600">{month.total} orçamentos</p>
+                    <p className="font-medium text-gray-800 text-sm md:text-base">{month.month}</p>
+                    <p className="text-xs md:text-sm text-gray-600">{month.total} orçamentos</p>
                   </div>
-                  <div className="text-right">
-                    <p className="font-semibold text-gray-800">{formatCurrency(month.revenue)}</p>
-                    <p className="text-sm text-green-600">{month.approved} aprovados</p>
+                  <div className="md:text-right">
+                    <p className="font-semibold text-gray-800 text-sm md:text-base">{formatCurrency(month.revenue)}</p>
+                    <p className="text-xs md:text-sm text-green-600">{month.approved} aprovados</p>
                     <p className="text-xs text-blue-600">Ticket: {formatCurrency(month.ticketMedio)}</p>
                   </div>
                 </div>
@@ -499,13 +499,13 @@ export default function Reports() {
 
         {/* Status dos Orçamentos */}
         <Card className="bg-white shadow-lg">
-          <CardHeader>
-            <CardTitle className="text-lg font-semibold text-gray-800">
+          <CardHeader className="p-4 md:p-6">
+            <CardTitle className="text-base md:text-lg font-semibold text-gray-800">
               Status dos Orçamentos
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
+          <CardContent className="p-4 md:p-6">
+            <div className="space-y-3 md:space-y-4">
               {Object.entries(statusStats).map(([status, count]) => {
                 const getStatusInfo = (status) => {
                   switch (status.toLowerCase()) {
@@ -546,30 +546,31 @@ export default function Reports() {
       </div>
 
       {/* Top Clientes */}
-      <Card className="bg-white shadow-lg">
-        <CardHeader>
-          <CardTitle className="text-lg font-semibold text-gray-800">
-            Principais Clientes
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
+      <div className="mx-4 md:mx-0">
+        <Card className="bg-white shadow-lg">
+          <CardHeader className="p-4 md:p-6">
+            <CardTitle className="text-base md:text-lg font-semibold text-gray-800">
+              Principais Clientes
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-4 md:p-6">
+            <div className="space-y-3 md:space-y-4">
             {topClients.map((client, index) => (
-              <div key={index} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 brand-gradient rounded-lg flex items-center justify-center text-white font-bold">
+              <div key={index} className="flex flex-col md:flex-row md:items-center justify-between p-3 md:p-4 bg-gray-50 rounded-lg space-y-3 md:space-y-0">
+                <div className="flex items-center gap-3 md:gap-4">
+                  <div className="w-8 h-8 md:w-10 md:h-10 brand-gradient rounded-lg flex items-center justify-center text-white font-bold text-sm md:text-base">
                     #{index + 1}
                   </div>
                   <div>
-                    <p className="font-medium text-gray-800">{client.name}</p>
-                    <p className="text-sm text-gray-600">
+                    <p className="font-medium text-gray-800 text-sm md:text-base">{client.name}</p>
+                    <p className="text-xs md:text-sm text-gray-600">
                       {client.quotesCount} orçamentos • {client.approvedCount} aprovados
                     </p>
                   </div>
                 </div>
-                <div className="text-right">
-                  <p className="font-semibold text-gray-800">{formatCurrency(client.totalValue)}</p>
-                  <p className="text-sm text-green-600">
+                <div className="md:text-right">
+                  <p className="font-semibold text-gray-800 text-sm md:text-base">{formatCurrency(client.totalValue)}</p>
+                  <p className="text-xs md:text-sm text-green-600">
                     Taxa: {client.quotesCount > 0 ? ((client.approvedCount / client.quotesCount) * 100).toFixed(1) : 0}%
                   </p>
                 </div>
@@ -587,14 +588,14 @@ export default function Reports() {
       </Card>
 
       {/* Métricas de Engajamento */}
-      <div className="grid lg:grid-cols-3 gap-6">
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mx-4 md:mx-0">
         <Card className="bg-white shadow-lg">
-          <CardHeader>
-            <CardTitle className="text-lg font-semibold text-gray-800">
+          <CardHeader className="p-4 md:p-6">
+            <CardTitle className="text-base md:text-lg font-semibold text-gray-800">
               Engajamento
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="p-4 md:p-6 space-y-3 md:space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Eye className="w-4 h-4 text-blue-600" />
@@ -626,36 +627,36 @@ export default function Reports() {
         </Card>
 
         <Card className="bg-white shadow-lg">
-          <CardHeader>
-            <CardTitle className="text-lg font-semibold text-gray-800">
+          <CardHeader className="p-4 md:p-6">
+            <CardTitle className="text-base md:text-lg font-semibold text-gray-800">
               Tempo Médio
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="p-4 md:p-6 space-y-3 md:space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Clock className="w-4 h-4 text-purple-600" />
-                <span className="text-gray-600">Para aprovação</span>
+                <span className="text-gray-600 text-sm md:text-base">Para aprovação</span>
               </div>
-              <span className="font-semibold text-gray-800">2-3 dias</span>
+              <span className="font-semibold text-gray-800 text-sm md:text-base">2-3 dias</span>
             </div>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Calendar className="w-4 h-4 text-orange-600" />
-                <span className="text-gray-600">Validade</span>
+                <span className="text-gray-600 text-sm md:text-base">Validade</span>
               </div>
-              <span className="font-semibold text-gray-800">30 dias</span>
+              <span className="font-semibold text-gray-800 text-sm md:text-base">30 dias</span>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-white shadow-lg">
-          <CardHeader>
-            <CardTitle className="text-lg font-semibold text-gray-800">
+        <Card className="bg-white shadow-lg md:col-span-2 lg:col-span-1">
+          <CardHeader className="p-4 md:p-6">
+            <CardTitle className="text-base md:text-lg font-semibold text-gray-800">
               Meta do Mês
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="p-4 md:p-6 space-y-3 md:space-y-4">
             <div className="text-center">
               <p className="text-3xl font-bold text-brand-primary">
                 {(() => {

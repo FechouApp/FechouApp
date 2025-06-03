@@ -218,10 +218,10 @@ export default function Quotes() {
       </div>
 
       {/* Novo Orçamento Button */}
-      <div className="flex justify-end">
+      <div className="flex justify-end px-4 md:px-0">
         <Button 
           onClick={handleNewQuote}
-          className="bg-blue-600 text-white hover:bg-blue-700"
+          className="bg-blue-600 text-white hover:bg-blue-700 w-full md:w-auto"
         >
           <Plus className="w-4 h-4 mr-2" />
           Novo Orçamento
@@ -229,91 +229,95 @@ export default function Quotes() {
       </div>
 
       {/* Search and Filters */}
-      <Card className="bg-white shadow-lg">
-        <CardContent className="p-6">
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-              <Input
-                placeholder="Buscar orçamentos..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
+      <div className="mx-4 md:mx-0">
+        <Card className="bg-white shadow-lg">
+          <CardContent className="p-4 md:p-6">
+            <div className="flex flex-col gap-4">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <Input
+                  placeholder="Buscar orçamentos..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+              <div className="flex flex-col md:flex-row gap-2">
+                <select 
+                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-primary text-sm"
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                >
+                  <option value="all">Todos os status</option>
+                  <option value="draft">Rascunho</option>
+                  <option value="pending">Pendente</option>
+                  <option value="approved">Aprovado</option>
+                  <option value="rejected">Recusado</option>
+                </select>
+                <select className="flex-1 md:flex-none px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-primary text-sm">
+                  <option>Último mês</option>
+                  <option>Últimos 3 meses</option>
+                  <option>Último ano</option>
+                </select>
+              </div>
             </div>
-            <div className="flex gap-2">
-              <select 
-                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-primary"
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-              >
-                <option value="all">Todos os status</option>
-                <option value="draft">Rascunho</option>
-                <option value="pending">Pendente</option>
-                <option value="approved">Aprovado</option>
-                <option value="rejected">Recusado</option>
-              </select>
-              <select className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-primary">
-                <option>Último mês</option>
-                <option>Últimos 3 meses</option>
-                <option>Último ano</option>
-              </select>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Quotes Table */}
-      <Card className="bg-white shadow-lg">
-        <CardContent className="p-0">
-          {filteredQuotes.length === 0 ? (
-            <div className="text-center py-12">
-              <FileText className="w-16 h-16 mx-auto mb-4 text-gray-300" />
-              <h3 className="text-xl font-semibold text-gray-600 mb-2">
-                {searchTerm || statusFilter !== 'all' 
-                  ? "Nenhum orçamento encontrado" 
-                  : "Nenhum orçamento criado"
-                }
-              </h3>
-              <p className="text-gray-500 mb-6">
-                {searchTerm || statusFilter !== 'all'
-                  ? "Tente ajustar os filtros de busca" 
-                  : "Crie seu primeiro orçamento para começar"
-                }
-              </p>
-              {!searchTerm && statusFilter === 'all' && (
-                <Button onClick={handleNewQuote} className="brand-gradient text-white">
-                  <Plus className="w-4 h-4 mr-2" />
-                  Criar Orçamento
-                </Button>
-              )}
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Orçamento</TableHead>
-                    <TableHead className="hidden sm:table-cell">Cliente</TableHead>
-                    <TableHead>Valor</TableHead>
-                    <TableHead className="hidden md:table-cell">Status</TableHead>
-                    <TableHead className="hidden md:table-cell">Validade</TableHead>
-                    <TableHead>Ações</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
+      <div className="mx-4 md:mx-0">
+        <Card className="bg-white shadow-lg">
+          <CardContent className="p-0">
+            {filteredQuotes.length === 0 ? (
+              <div className="text-center py-12 px-4">
+                <FileText className="w-16 h-16 mx-auto mb-4 text-gray-300" />
+                <h3 className="text-xl font-semibold text-gray-600 mb-2">
+                  {searchTerm || statusFilter !== 'all' 
+                    ? "Nenhum orçamento encontrado" 
+                    : "Nenhum orçamento criado"
+                  }
+                </h3>
+                <p className="text-gray-500 mb-6">
+                  {searchTerm || statusFilter !== 'all'
+                    ? "Tente ajustar os filtros de busca" 
+                    : "Crie seu primeiro orçamento para começar"
+                  }
+                </p>
+                {!searchTerm && statusFilter === 'all' && (
+                  <Button onClick={handleNewQuote} className="brand-gradient text-white">
+                    <Plus className="w-4 h-4 mr-2" />
+                    Criar Orçamento
+                  </Button>
+                )}
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader className="hidden md:table-header-group">
+                    <TableRow>
+                      <TableHead>Orçamento</TableHead>
+                      <TableHead>Cliente</TableHead>
+                      <TableHead>Valor</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Validade</TableHead>
+                      <TableHead>Ações</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
                 {filteredQuotes.map((quote) => {
                   const validityStatus = getValidityStatus(quote.validUntil);
 
                   return (
                     <TableRow key={quote.id} className="hover:bg-gray-50">
-                      <TableCell>
+                      {/* Desktop view */}
+                      <TableCell className="hidden md:table-cell">
                         <div>
                           <p className="font-medium text-gray-800">{quote.quoteNumber}</p>
                           <p className="text-sm text-gray-600">{quote.title}</p>
                         </div>
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="hidden md:table-cell">
                         <div>
                           <p className="text-gray-800">{quote.client.name}</p>
                           {quote.client.email && (
@@ -321,12 +325,12 @@ export default function Quotes() {
                           )}
                         </div>
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="hidden md:table-cell">
                         <p className="font-semibold text-gray-800">
                           {formatCurrency(quote.total)}
                         </p>
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="hidden md:table-cell">
                         <span
                           className={`inline-block px-3 py-1 text-sm rounded-full font-medium ${getStatusColor(
                             quote.status
@@ -335,7 +339,7 @@ export default function Quotes() {
                           {getStatusText(quote.status)}
                         </span>
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="hidden md:table-cell">
                         <div>
                           <p className="text-gray-800">
                             {new Date(quote.validUntil).toLocaleDateString('pt-BR')}
@@ -345,7 +349,7 @@ export default function Quotes() {
                           </p>
                         </div>
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="hidden md:table-cell">
                         <div className="flex gap-2">
                           <Button 
                             size="sm" 
@@ -380,6 +384,84 @@ export default function Quotes() {
                           >
                             <Trash2 className="w-4 h-4 text-red-500" />
                           </Button>
+                        </div>
+                      </TableCell>
+
+                      {/* Mobile view - single cell with card layout */}
+                      <TableCell className="md:hidden" colSpan={6}>
+                        <div className="p-4 space-y-3">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="font-medium text-gray-800">{quote.quoteNumber}</p>
+                              <p className="text-sm text-gray-600">{quote.title}</p>
+                            </div>
+                            <span
+                              className={`inline-block px-2 py-1 text-xs rounded-full font-medium ${getStatusColor(
+                                quote.status
+                              )}`}
+                            >
+                              {getStatusText(quote.status)}
+                            </span>
+                          </div>
+                          
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="text-sm text-gray-600">Cliente</p>
+                              <p className="font-medium text-gray-800">{quote.client.name}</p>
+                            </div>
+                            <div className="text-right">
+                              <p className="text-sm text-gray-600">Valor</p>
+                              <p className="font-semibold text-gray-800">
+                                {formatCurrency(quote.total)}
+                              </p>
+                            </div>
+                          </div>
+
+                          <div className="text-center">
+                            <p className="text-sm text-gray-600">Válido até</p>
+                            <p className="text-gray-800">
+                              {new Date(quote.validUntil).toLocaleDateString('pt-BR')}
+                            </p>
+                            <p className={`text-xs ${validityStatus.color}`}>
+                              {validityStatus.text}
+                            </p>
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-2 pt-2">
+                            <Button 
+                              size="sm" 
+                              variant="outline" 
+                              onClick={() => handleViewQuote(quote.id)}
+                            >
+                              <Eye className="w-4 h-4 mr-1" />
+                              Ver
+                            </Button>
+                            <Button 
+                              size="sm" 
+                              variant="outline" 
+                              onClick={() => handleEditQuote(quote.id)}
+                            >
+                              <Edit className="w-4 h-4 mr-1" />
+                              Editar
+                            </Button>
+                            <Button 
+                              size="sm" 
+                              variant="outline" 
+                              onClick={() => handleSendQuote(quote.id)}
+                            >
+                              <Send className="w-4 h-4 mr-1" />
+                              Enviar
+                            </Button>
+                            <Button 
+                              size="sm" 
+                              variant="outline" 
+                              onClick={() => handleDeleteQuote(quote.id)}
+                              disabled={deleteQuoteMutation.isPending}
+                            >
+                              <Trash2 className="w-4 h-4 mr-1 text-red-500" />
+                              Excluir
+                            </Button>
+                          </div>
                         </div>
                       </TableCell>
                     </TableRow>

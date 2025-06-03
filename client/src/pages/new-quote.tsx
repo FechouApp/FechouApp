@@ -129,23 +129,23 @@ export default function NewQuote() {
         backTo="/quotes"
       />
 
-      <div className="max-w-5xl">
+      <div className="max-w-5xl w-full">
         {/* Step Indicator */}
-        <div className="flex items-center justify-center mb-8">
+        <div className="flex items-center justify-center mb-6 md:mb-8 px-4 md:px-0">
           <div className="flex items-center">
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
+            <div className={`w-6 h-6 md:w-8 md:h-8 rounded-full flex items-center justify-center text-xs md:text-sm font-medium ${
               step >= 1 ? 'bg-white text-brand-primary' : 'bg-white/20 text-white/60'
             }`}>
               1
             </div>
-            <div className={`w-16 h-1 ${step > 1 ? 'bg-white' : 'bg-white/20'}`}></div>
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
+            <div className={`w-8 md:w-16 h-1 ${step > 1 ? 'bg-white' : 'bg-white/20'}`}></div>
+            <div className={`w-6 h-6 md:w-8 md:h-8 rounded-full flex items-center justify-center text-xs md:text-sm font-medium ${
               step >= 2 ? 'bg-white text-brand-primary' : 'bg-white/20 text-white/60'
             }`}>
               2
             </div>
-            <div className={`w-16 h-1 ${step > 2 ? 'bg-white' : 'bg-white/20'}`}></div>
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
+            <div className={`w-8 md:w-16 h-1 ${step > 2 ? 'bg-white' : 'bg-white/20'}`}></div>
+            <div className={`w-6 h-6 md:w-8 md:h-8 rounded-full flex items-center justify-center text-xs md:text-sm font-medium ${
               step >= 3 ? 'bg-white text-brand-primary' : 'bg-white/20 text-white/60'
             }`}>
               3
@@ -155,7 +155,7 @@ export default function NewQuote() {
 
         {/* Plan limit warning */}
         {planLimits && !planLimits.isPremium && !planLimits.canCreateQuote && (
-          <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+          <div className="mb-6 mx-4 md:mx-0 p-4 bg-amber-50 border border-amber-200 rounded-lg">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 bg-amber-100 rounded-full flex items-center justify-center">
                 <span className="text-amber-600 font-bold">!</span>
@@ -173,20 +173,22 @@ export default function NewQuote() {
 
         {/* Show quick setup if no clients */}
         {(!clients || clients.length === 0) && (
-          <div className="mb-8">
+          <div className="mb-8 mx-4 md:mx-0">
             <QuickSetup />
           </div>
         )}
 
         {/* Quote Form */}
-        <QuoteForm
-          clients={clients || []}
-          onSubmit={(data) => createQuoteMutation.mutate(data)}
-          isSubmitting={createQuoteMutation.isPending}
-          step={step}
-          onStepChange={setStep}
-          existingQuote={quoteData}
-        />
+        <div className="px-4 md:px-0">
+          <QuoteForm
+            clients={clients || []}
+            onSubmit={(data) => createQuoteMutation.mutate(data)}
+            isSubmitting={createQuoteMutation.isPending}
+            step={step}
+            onStepChange={setStep}
+            existingQuote={quoteData}
+          />
+        </div>
       </div>
     </div>
   );
