@@ -485,34 +485,39 @@ export default function QuoteView() {
               )}
             </div>
 
-            {/* Action buttons for quote owner - side by side */}
-            {user && quote.userId === (user as any)?.id && (
+            {/* WhatsApp Buttons - Show for authenticated professionals */}
+            {user && quote.userId === (user as any)?.id && quote.client?.phone && (
+              <div className="mb-4 space-y-2">
+                <Button 
+                  onClick={sendViaWhatsApp}
+                  disabled={markAsSentMutation.isPending}
+                  className="w-full bg-green-600 hover:bg-green-700"
+                >
+                  <MessageCircle className="w-4 h-4 mr-2" />
+                  Enviar por WhatsApp
+                </Button>
+                <Button 
+                  onClick={copyWhatsAppLink}
+                  variant="outline"
+                  className="w-full"
+                >
+                  <Copy className="w-4 h-4 mr-2" />
+                  Copiar Link do WhatsApp
+                </Button>
+              </div>
+            )}
+            
+            {/* Manual Approve button for quote owner */}
+            {user && quote.userId === (user as any)?.id && quote.status === "pending" && (
               <div className="mb-4">
-                <div className="flex gap-2">
-                  {/* WhatsApp button - Show only if client has phone */}
-                  {quote.client?.phone && (
-                    <Button 
-                      onClick={sendViaWhatsApp}
-                      disabled={markAsSentMutation.isPending}
-                      className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
-                    >
-                      <MessageCircle className="w-4 h-4 mr-2" />
-                      Enviar por WhatsApp
-                    </Button>
-                  )}
-                  
-                  {/* Manual Approve button - Show only for pending quotes */}
-                  {quote.status === "pending" && (
-                    <Button 
-                      onClick={() => approveMutation.mutate()}
-                      disabled={approveMutation.isPending}
-                      className="flex-1 bg-green-600 hover:bg-green-700 text-white"
-                    >
-                      <CheckCircle className="w-4 h-4 mr-2" />
-                      {approveMutation.isPending ? "Aprovando..." : "Aprovar"}
-                    </Button>
-                  )}
-                </div>
+                <Button 
+                  onClick={() => approveMutation.mutate()}
+                  disabled={approveMutation.isPending}
+                  className="w-full bg-green-600 hover:bg-green-700 text-white"
+                >
+                  <CheckCircle className="w-4 h-4 mr-2" />
+                  {approveMutation.isPending ? "Aprovando..." : "Aprovar"}
+                </Button>
               </div>
             )}
 
