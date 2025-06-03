@@ -259,20 +259,29 @@ export default function QuoteView() {
   });
 
   const handleDownloadPDF = async () => {
-    if (!quote || !user) {
-      console.error('Quote or user not available:', { quote: !!quote, user: !!user });
+    if (!quote) {
+      console.error('Quote not available');
       return;
     }
 
     try {
-      console.log('Starting PDF generation...', { quote: quote.quoteNumber, user: (user as any).id });
-      console.log('Complete user data:', user); // Debug log para ver todos os dados do usuário
-      const isUserPremium = (user as any)?.plan === 'PREMIUM';
-      console.log('User plan:', (user as any)?.plan, 'isUserPremium:', isUserPremium);
+      console.log('Starting PDF generation...', { quote: quote.quoteNumber });
+      
+      // Buscar dados completos do usuário para o PDF
+      let userData = user;
+      if (!user || isPublicView) {
+        console.log('Fetching user data from API for quote userId:', quote.userId);
+        const userResponse = await fetch(`/api/users/${quote.userId}`);
+        userData = await userResponse.json();
+      }
+
+      console.log('Complete user data for PDF:', userData);
+      const isUserPremium = (userData as any)?.plan === 'PREMIUM';
+      console.log('User plan:', (userData as any)?.plan, 'isUserPremium:', isUserPremium);
 
       const pdfBlob = await generateQuotePDF({
         quote,
-        user: user as any,
+        user: userData as any,
         isUserPremium
       });
 

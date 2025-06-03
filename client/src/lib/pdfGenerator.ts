@@ -411,28 +411,14 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
   doc.setFontSize(9);
   doc.setFont('helvetica', 'normal');
   
-  // Criar interface expandida para acessar todos os campos do usuário
-  interface ExtendedUser {
-    email?: string;
-    cpfCnpj?: string;
-    phone?: string;
-    address?: string;
-    number?: string;
-    complement?: string;
-    city?: string;
-    state?: string;
-    zipCode?: string;
-  }
-
-  const extendedUser = user as ExtendedUser;
-
+  // Acessar campos do usuário diretamente
   const userInfo = [
-    extendedUser.email ? `Email: ${extendedUser.email}` : null,
-    extendedUser.cpfCnpj ? `CPF/CNPJ: ${formatCPF(extendedUser.cpfCnpj)}` : null,
-    extendedUser.phone ? `Telefone: ${formatPhone(extendedUser.phone)}` : null,
+    user.email ? `Email: ${user.email}` : null,
+    (user as any).cpf ? `CPF/CNPJ: ${formatCPF((user as any).cpf)}` : null,
+    (user as any).phone ? `Telefone: ${formatPhone((user as any).phone)}` : null,
   ].filter(Boolean);
 
-  console.log('User data for PDF:', extendedUser); // Debug log
+  console.log('User data for PDF:', user); // Debug log
 
   userInfo.forEach(info => {
     if (info) {
@@ -442,17 +428,17 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
   });
 
   // Endereço completo em linha separada
-  if (extendedUser.address) {
+  if ((user as any).address) {
     const fullAddress = [
-      extendedUser.address,
-      extendedUser.number ? `nº ${extendedUser.number}` : null,
-      extendedUser.complement,
+      (user as any).address,
+      (user as any).number ? `nº ${(user as any).number}` : null,
+      (user as any).complement,
     ].filter(Boolean).join(', ');
     
     const cityStateZip = [
-      extendedUser.city,
-      extendedUser.state,
-      extendedUser.zipCode ? `CEP: ${formatCEP(extendedUser.zipCode)}` : null,
+      (user as any).city,
+      (user as any).state,
+      (user as any).zipCode ? `CEP: ${formatCEP((user as any).zipCode)}` : null,
     ].filter(Boolean).join(' - ');
 
     doc.text(`Endereço: ${fullAddress}`, pageWidth / 2, yPosition, { align: 'center' });
