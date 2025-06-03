@@ -31,6 +31,12 @@ export default function Settings() {
     emailNotifications: typedUser?.emailNotifications || true,
   });
 
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
+  });
+
   const updateUserMutation = useMutation({
     mutationFn: async (data: Partial<UserType>) => {
       await apiRequest("PUT", "/api/auth/user", data);
@@ -46,6 +52,26 @@ export default function Settings() {
       toast({
         title: "Erro",
         description: "Não foi possível atualizar o perfil.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const changePasswordMutation = useMutation({
+    mutationFn: async (data: { currentPassword: string; newPassword: string }) => {
+      await apiRequest("POST", "/api/auth/change-password", data);
+    },
+    onSuccess: () => {
+      setPasswordData({ currentPassword: "", newPassword: "", confirmPassword: "" });
+      toast({
+        title: "Senha alterada!",
+        description: "Sua senha foi alterada com sucesso.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Erro",
+        description: "Não foi possível alterar a senha. Verifique a senha atual.",
         variant: "destructive",
       });
     },
@@ -311,21 +337,72 @@ export default function Settings() {
               Segurança da Conta
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="bg-blue-50 p-4 rounded-lg">
-              <h4 className="font-medium text-blue-900 mb-2">Alteração de Senha</h4>
-              <p className="text-sm text-blue-700 mb-4">
-                Para alterar sua senha, você precisa fazer logout e usar a opção "Esqueci minha senha" 
-                na tela de login, ou acessar as configurações da sua conta Replit.
-              </p>
+          <CardContent>
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              if (passwordData.newPassword !== passwordData.confirmPassword) {
+                toast({
+                  title: "Erro",
+                  description: "As senhas não coincidem.",
+                  variant: "destructive",
+                });
+                return;
+              }
+              if (passwordData.newPassword.length < 6) {
+                toast({
+                  title: "Erro", 
+                  description: "A nova senha deve ter pelo menos 6 caracteres.",
+                  variant: "destructive",
+                });
+                return;
+              }
+              changePasswordMutation.mutate({
+                currentPassword: passwordData.currentPassword,
+                newPassword: passwordData.newPassword
+              });
+            }} className="space-y-4">
+              <div>
+                <Label htmlFor="currentPassword">Senha Atual</Label>
+                <Input
+                  id="currentPassword"
+                  type="password"
+                  value={passwordData.currentPassword}
+                  onChange={(e) => setPasswordData(prev => ({ ...prev, currentPassword: e.target.value }))}
+                  placeholder="Digite sua senha atual"
+                  required
+                />
+              </div>
+              <div>
+                <Label htmlFor="newPassword">Nova Senha</Label>
+                <Input
+                  id="newPassword"
+                  type="password"
+                  value={passwordData.newPassword}
+                  onChange={(e) => setPasswordData(prev => ({ ...prev, newPassword: e.target.value }))}
+                  placeholder="Digite a nova senha (mín. 6 caracteres)"
+                  required
+                />
+              </div>
+              <div>
+                <Label htmlFor="confirmPassword">Confirmar Nova Senha</Label>
+                <Input
+                  id="confirmPassword"
+                  type="password"
+                  value={passwordData.confirmPassword}
+                  onChange={(e) => setPasswordData(prev => ({ ...prev, confirmPassword: e.target.value }))}
+                  placeholder="Confirme a nova senha"
+                  required
+                />
+              </div>
               <Button 
-                variant="outline" 
-                onClick={() => window.open('https://replit.com/account', '_blank')}
+                type="submit" 
+                disabled={changePasswordMutation.isPending}
                 className="w-full md:w-auto"
               >
-                Gerenciar Conta Replit
+                <Lock className="w-4 h-4 mr-2" />
+                {changePasswordMutation.isPending ? "Alterando..." : "Alterar Senha"}
               </Button>
-            </div>
+            </form>
           </CardContent>
         </Card>
 

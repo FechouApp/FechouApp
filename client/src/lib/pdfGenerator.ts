@@ -14,20 +14,20 @@ export async function generateQuotePDF({ quote, user, isPaidPlan }: PDFGenerator
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
   
-  let yPosition = 25;
+  let yPosition = 20;
 
   // Cabeçalho com informações do profissional
   doc.setFontSize(16);
   doc.setFont('helvetica', 'bold');
   doc.text(user.businessName || `${user.firstName} ${user.lastName}`.trim(), 20, yPosition);
-  yPosition += 12;
+  yPosition += 8;
 
   // Informações do profissional
   doc.setFontSize(9);
   doc.setFont('helvetica', 'normal');
   if (user.email) {
     doc.text(`Email: ${user.email}`, 20, yPosition);
-    yPosition += 5;
+    yPosition += 4;
   }
 
   // Dados pessoais do profissional (se disponíveis)
@@ -35,66 +35,66 @@ export async function generateQuotePDF({ quote, user, isPaidPlan }: PDFGenerator
     // Formatar CPF/CNPJ
     const cpfCnpj = (user as any).cpfCnpj.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
     doc.text(`CPF/CNPJ: ${cpfCnpj}`, 20, yPosition);
-    yPosition += 5;
+    yPosition += 4;
   }
   if ((user as any).phone) {
     // Formatar telefone
     const phone = (user as any).phone.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
     doc.text(`Telefone: ${phone}`, 20, yPosition);
-    yPosition += 5;
+    yPosition += 4;
   }
   if ((user as any).address) {
     doc.text(`Endereco: ${(user as any).address}`, 20, yPosition);
-    yPosition += 5;
+    yPosition += 4;
   }
 
-  yPosition += 15;
+  yPosition += 10;
 
   // Título do orçamento centralizado
-  doc.setFontSize(18);
+  doc.setFontSize(16);
   doc.setFont('helvetica', 'bold');
   doc.text('ORÇAMENTO', pageWidth / 2, yPosition, { align: 'center' });
-  yPosition += 15;
+  yPosition += 8;
 
   // Número do orçamento e data centralizados
-  doc.setFontSize(11);
+  doc.setFontSize(9);
   doc.setFont('helvetica', 'normal');
   doc.text(`No ${quote.quoteNumber} | ${format(new Date(), 'dd/MM/yyyy', { locale: ptBR })}`, pageWidth / 2, yPosition, { align: 'center' });
-  yPosition += 20;
+  yPosition += 12;
 
   // Seção de dados do cliente
   doc.setFontSize(12);
   doc.setFont('helvetica', 'bold');
   doc.text('DADOS DO CLIENTE', 20, yPosition);
-  yPosition += 8;
+  yPosition += 6;
 
   doc.setFontSize(10);
   doc.setFont('helvetica', 'normal');
   doc.text(`Nome: ${quote.client.name}`, 20, yPosition);
-  yPosition += 6;
+  yPosition += 5;
   
   if (quote.client.email) {
     doc.text(`Email: ${quote.client.email}`, 20, yPosition);
-    yPosition += 6;
+    yPosition += 5;
   }
   
   if (quote.client.phone) {
     doc.text(`Telefone: ${quote.client.phone}`, 20, yPosition);
-    yPosition += 6;
+    yPosition += 5;
   }
 
   if (quote.client.address) {
     const address = `${quote.client.address}${quote.client.number ? `, ${quote.client.number}` : ''}${quote.client.complement ? `, ${quote.client.complement}` : ''}`;
     doc.text(`Endereco: ${address}`, 20, yPosition);
-    yPosition += 6;
+    yPosition += 5;
     
     if (quote.client.city && quote.client.state) {
       doc.text(`${quote.client.city} - ${quote.client.state}`, 20, yPosition);
-      yPosition += 6;
+      yPosition += 5;
     }
   }
 
-  yPosition += 15;
+  yPosition += 8;
 
   // Título do orçamento
   doc.setFontSize(12);
@@ -118,7 +118,7 @@ export async function generateQuotePDF({ quote, user, isPaidPlan }: PDFGenerator
   doc.setFontSize(12);
   doc.setFont('helvetica', 'bold');
   doc.text('SERVICOS', 20, yPosition);
-  yPosition += 12;
+  yPosition += 8;
 
   // Cabeçalho da tabela simples
   doc.setFontSize(10);
@@ -127,7 +127,7 @@ export async function generateQuotePDF({ quote, user, isPaidPlan }: PDFGenerator
   doc.text('Qtd', 120, yPosition);
   doc.text('Valor Unit.', 140, yPosition);
   doc.text('Total', 170, yPosition);
-  yPosition += 8;
+  yPosition += 6;
 
   // Itens da tabela
   doc.setFont('helvetica', 'normal');
