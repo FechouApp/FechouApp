@@ -315,15 +315,6 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
 
   yPosition += 5;
 
-  // Verificar se há espaço suficiente na página atual antes de adicionar marca d'água e rodapé
-  const remainingSpace = pageHeight - yPosition;
-  const needsNewPage = remainingSpace < 60; // Só criar nova página se realmente não couber
-  
-  if (needsNewPage) {
-    doc.addPage();
-    yPosition = 20;
-  }
-
   // Marca d'água para plano gratuito
   if (!isUserPremium) {
     doc.setGState(doc.GState({ opacity: 0.1 }));
