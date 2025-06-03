@@ -21,6 +21,7 @@ export default function PublicQuote() {
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
   const [reviewSubmitted, setReviewSubmitted] = useState(false);
+  const [existingReview, setExistingReview] = useState<any>(null);
 
   const { data: quote, isLoading, error } = useQuery<QuoteWithDetails>({
     queryKey: [`/api/quotes/public/${quoteNumber}`],
@@ -29,6 +30,30 @@ export default function PublicQuote() {
     retryDelay: 500,
     staleTime: 5 * 60 * 1000,
   });
+
+  // Check for existing review when quote loads
+  useEffect(() => {
+    const checkExistingReview = async () => {
+      if (quote && quote.clientId) {
+        try {
+          const response = await fetch(`/api/reviews/check/${quote.id}/${quote.clientId}`);
+          if (response.ok) {
+            const existingReviewData = await response.json();
+            if (existingReviewData) {
+              setExistingReview(existingReviewData);
+              setReviewSubmitted(true);
+            }
+          }
+        } catch (error) {
+          console.error('Error checking existing review:', error);
+        }
+      }
+    };
+
+    if (quote) {
+      checkExistingReview();
+    }
+  }, [quote]);
 
   const approveMutation = useMutation({
     mutationFn: async () => {
@@ -367,15 +392,32 @@ export default function PublicQuote() {
         {/* Review Section */}
         <Card>
           <CardContent className="p-6">
-            {reviewSubmitted ? (
+            {reviewSubmitted || existingReview ? (
               <div className="text-center py-8">
                 <div className="mb-4">
                   <CheckCircle className="w-16 h-16 text-green-500 mx-auto" />
                 </div>
                 <h3 className="font-semibold text-lg mb-2">Obrigado pela sua avaliação!</h3>
-                <p className="text-gray-600">
+                <p className="text-gray-600 mb-4">
                   Seu feedback é muito importante para nós e ajuda outros clientes.
                 </p>
+                {existingReview && (
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <div className="flex justify-center items-center gap-1 mb-2">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <Star
+                          key={star}
+                          className={`w-5 h-5 ${
+                            star <= existingReview.rating ? "text-yellow-500 fill-current" : "text-gray-300"
+                          }`}
+                        />
+                      ))}
+                    </div>
+                    {existingReview.comment && (
+                      <p className="text-gray-700 text-sm italic">"{existingReview.comment}"</p>
+                    )}
+                  </div>
+                )}
               </div>
             ) : (
               <>

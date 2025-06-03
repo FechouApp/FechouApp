@@ -473,6 +473,14 @@ export class DatabaseStorage implements IStorage {
     return updatedReview;
   }
 
+  async getReviewByQuoteAndClient(quoteId: string, clientId: string): Promise<Review | undefined> {
+    const [review] = await db
+      .select()
+      .from(reviews)
+      .where(and(eq(reviews.quoteId, quoteId), eq(reviews.clientId, clientId)));
+    return review;
+  }
+
   // Payment operations
   async getPayments(userId: string): Promise<Payment[]> {
     return await db

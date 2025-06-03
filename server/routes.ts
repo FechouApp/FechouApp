@@ -648,6 +648,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Check if review exists for quote and client
+  app.get('/api/reviews/check/:quoteId/:clientId', async (req, res) => {
+    try {
+      const { quoteId, clientId } = req.params;
+      const existingReview = await storage.getReviewByQuoteAndClient(quoteId, clientId);
+      
+      if (existingReview) {
+        res.json(existingReview);
+      } else {
+        res.status(404).json({ message: "No review found" });
+      }
+    } catch (error) {
+      console.error("Error checking existing review:", error);
+      res.status(500).json({ message: "Failed to check existing review" });
+    }
+  });
+
   // Notification routes
   app.get('/api/notifications', isAuthenticated, async (req: any, res) => {
     try {

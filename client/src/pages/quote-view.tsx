@@ -25,6 +25,7 @@ export default function QuoteView() {
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
   const [reviewSubmitted, setReviewSubmitted] = useState(false);
+  const [existingReview, setExistingReview] = useState<any>(null);
 
   // Check if this is a public view based on URL pattern
   const isPublicView = window.location.pathname.startsWith('/quote/');
@@ -162,6 +163,30 @@ export default function QuoteView() {
     enabled: queryEnabled,
     retry: false,
   });
+
+  // Check for existing review when quote loads (only for public view)
+  useEffect(() => {
+    const checkExistingReview = async () => {
+      if (quote && isPublicView && quote.clientId) {
+        try {
+          const response = await fetch(`/api/reviews/check/${quote.id}/${quote.clientId}`);
+          if (response.ok) {
+            const existingReviewData = await response.json();
+            if (existingReviewData) {
+              setExistingReview(existingReviewData);
+              setReviewSubmitted(true);
+            }
+          }
+        } catch (error) {
+          console.error('Error checking existing review:', error);
+        }
+      }
+    };
+
+    if (quote) {
+      checkExistingReview();
+    }
+  }, [quote, isPublicView]);
 
   const approveMutation = useMutation({
     mutationFn: async () => {
