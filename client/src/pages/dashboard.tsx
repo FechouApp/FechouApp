@@ -133,29 +133,29 @@ export default function Dashboard() {
           title="Orçamentos Enviados"
           value={stats?.totalQuotes?.toString() || "0"}
           icon={<FileText className="w-6 h-6" />}
-          trend="+15% este mês"
-          trendUp={true}
+          trend={stats?.quoteTrend || ""}
+          trendUp={stats?.quoteTrendUp}
         />
         <StatsCard
           title="Aprovados"
           value={stats?.approvedQuotes?.toString() || "0"}
           icon={<CheckCircle className="w-6 h-6" />}
-          trend="+8% este mês"
-          trendUp={true}
+          trend={stats?.approvalTrend || ""}
+          trendUp={stats?.approvalTrendUp}
         />
         <StatsCard
           title="Faturamento"
           value={stats ? formatCurrency(stats.totalRevenue) : "R$ 0,00"}
           icon={<DollarSign className="w-6 h-6" />}
-          trend="+23% este mês"
-          trendUp={true}
+          trend={stats?.revenueTrend || ""}
+          trendUp={stats?.revenueTrendUp}
         />
         <StatsCard
           title="Avaliação Média"
           value={stats?.averageRating?.toFixed(1) || "0.0"}
           icon={<Star className="w-6 h-6" />}
-          trend="+0.2 este mês"
-          trendUp={true}
+          trend={stats?.ratingTrend || ""}
+          trendUp={stats?.ratingTrendUp}
         />
       </div>
 

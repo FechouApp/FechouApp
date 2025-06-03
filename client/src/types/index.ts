@@ -114,6 +114,14 @@ export interface DashboardStats {
   totalRevenue: string;
   averageRating: number;
   thisMonthQuotes: number;
+  quoteTrend?: string;
+  quoteTrendUp?: boolean;
+  approvalTrend?: string;
+  approvalTrendUp?: boolean;
+  revenueTrend?: string;
+  revenueTrendUp?: boolean;
+  ratingTrend?: string;
+  ratingTrendUp?: boolean;
 }
 
 export interface Notification {
