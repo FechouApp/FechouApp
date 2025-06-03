@@ -389,7 +389,6 @@ export default function Reports() {
                   strokeWidth={2}
                   dot={{ fill: "#f59e0b", strokeWidth: 2, r: 4 }}
                   activeDot={{ r: 6, stroke: "#f59e0b", strokeWidth: 2 }}
-                  yAxisId="right"
                 />
                 <ChartLegend />
               </LineChart>
