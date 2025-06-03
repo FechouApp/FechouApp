@@ -25,7 +25,7 @@ export default function QuoteView() {
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
   const [reviewSubmitted, setReviewSubmitted] = useState(false);
-  
+
   // Check if this is a public view based on URL pattern
   const isPublicView = window.location.pathname.startsWith('/quote/');
 
@@ -53,19 +53,19 @@ export default function QuoteView() {
   // Funções do WhatsApp
   const generateWhatsAppLink = () => {
     if (!quote || !quote.client.phone) return "";
-    
+
     const cleanPhone = quote.client.phone.replace(/\D/g, '');
     const phoneNumber = cleanPhone.startsWith('55') ? cleanPhone : `55${cleanPhone}`;
-    
+
     // Always use public URL for clients
     const publicUrl = `${window.location.origin}/quote/${quote.quoteNumber}`;
-    
+
     const profesionalName = user ? (user as any)?.businessName || (user as any)?.email?.split('@')[0] || 'Profissional' : 'Profissional';
     const message = `Olá, ${quote.client.name}! Aqui está o seu orçamento gerado via *Fechou!*.
 ✅ Profissional: ${profesionalName}
 📄 Orçamento válido até: ${format(new Date(quote.validUntil), 'dd/MM/yyyy', { locale: ptBR })}
 🔗 Acesse os detalhes aqui: ${publicUrl}`;
-    
+
     return `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
   };
 
@@ -90,13 +90,13 @@ export default function QuoteView() {
 
   const copyPixKey = async () => {
     if (!quote) return;
-    
+
     try {
       // Fetch user data to get the real PIX key
       const userResponse = await fetch(`/api/users/${quote.userId}`);
       const userData = await userResponse.json();
       const pixKey = userData.pixKey || "13981116464"; // Use the PIX key from user data
-      
+
       await navigator.clipboard.writeText(pixKey);
       toast({
         title: "Chave PIX copiada!",
@@ -237,21 +237,21 @@ export default function QuoteView() {
       console.error('Quote or user not available:', { quote: !!quote, user: !!user });
       return;
     }
-    
+
     try {
       console.log('Starting PDF generation...', { quote: quote.quoteNumber, user: (user as any).id });
       const isUserPremium = (user as any)?.plan === 'PREMIUM';
       console.log('User plan:', (user as any)?.plan, 'isUserPremium:', isUserPremium);
-      
+
       const pdfBlob = await generateQuotePDF({
         quote,
         user: user as any,
         isUserPremium
       });
-      
+
       console.log('PDF generated successfully, blob size:', pdfBlob.size);
       downloadPDF(pdfBlob, `Orçamento_${quote.quoteNumber}.pdf`);
-      
+
       toast({
         title: "PDF gerado!",
         description: "O arquivo foi baixado com sucesso.",
@@ -461,7 +461,7 @@ export default function QuoteView() {
         <Card className="mb-6">
           <CardContent className="p-6">
             <h3 className="font-semibold mb-4">Ações</h3>
-            
+
             {/* Download PDF Button - Always visible */}
             <div className="mb-4 space-y-2">
               <Button 
@@ -472,7 +472,7 @@ export default function QuoteView() {
                 <Download className="w-4 h-4 mr-2" />
                 Baixar PDF do Orçamento
               </Button>
-              
+
               {/* PIX Button - Only for public view (clients) */}
               {isPublicView && (
                 <Button 
@@ -485,39 +485,36 @@ export default function QuoteView() {
               )}
             </div>
 
-            {/* WhatsApp Buttons - Show for authenticated professionals */}
-            {user && quote.userId === (user as any)?.id && quote.client?.phone && (
-              <div className="mb-4 space-y-2">
-                <Button 
-                  onClick={sendViaWhatsApp}
-                  disabled={markAsSentMutation.isPending}
-                  className="w-full bg-green-600 hover:bg-green-700"
-                >
-                  <MessageCircle className="w-4 h-4 mr-2" />
-                  Enviar por WhatsApp
-                </Button>
-                <Button 
-                  onClick={copyWhatsAppLink}
-                  variant="outline"
-                  className="w-full"
-                >
-                  <Copy className="w-4 h-4 mr-2" />
-                  Copiar Link do WhatsApp
-                </Button>
-              </div>
-            )}
-            
-            {/* Manual Approve button for quote owner */}
-            {user && quote.userId === (user as any)?.id && quote.status === "pending" && (
+            {/* Action buttons for quote owner - side by side */}
+            {user && quote.userId === (user as any)?.id && (
               <div className="mb-4">
-                <Button 
-                  onClick={() => approveMutation.mutate()}
-                  disabled={approveMutation.isPending}
-                  className="w-full bg-green-600 hover:bg-green-700 text-white"
-                >
-                  <CheckCircle className="w-4 h-4 mr-2" />
-                  {approveMutation.isPending ? "Aprovando..." : "Aprovar"}
-                </Button>
+                <div className="flex gap-2">
+                  {/* WhatsApp button - Show only if client has phone */}
+                  {quote.client?.phone && (
+                    <Button 
+                      onClick={sendViaWhatsApp}
+                      disabled={markAsSentMutation.isPending}
+                      className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
+                      size="sm"
+                    >
+                      <MessageCircle className="w-4 h-4 mr-2" />
+                      Enviar por WhatsApp
+                    </Button>
+                  )}
+
+                  {/* Manual Approve button - Show only for pending quotes */}
+                  {quote.status === "pending" && (
+                    <Button 
+                      onClick={() => approveMutation.mutate()}
+                      disabled={approveMutation.isPending}
+                      className="flex-1 bg-green-600 hover:bg-green-700 text-white"
+                      size="sm"
+                    >
+                      <CheckCircle className="w-4 h-4 mr-2" />
+                      {approveMutation.isPending ? "Aprovando..." : "Aprovar"}
+                    </Button>
+                  )}
+                </div>
               </div>
             )}
 
