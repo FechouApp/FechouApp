@@ -63,7 +63,7 @@ export default function Dashboard() {
       'PAID': { label: 'Pago', variant: 'default' },
       'EXPIRED': { label: 'Expirado', variant: 'destructive' },
     };
-    
+
     const statusInfo = statusMap[status] || { label: status, variant: 'secondary' };
     return <Badge variant={statusInfo.variant}>{statusInfo.label}</Badge>;
   };
@@ -94,6 +94,59 @@ export default function Dashboard() {
             </span>
           )}
         </div>
+      </div>
+
+      {/* Quick Actions */}
+      <div className="space-y-3">
+        <Link href="/new-quote">
+          <Button className="w-full bg-purple-600 hover:bg-purple-700 text-white h-16 rounded-lg shadow-md hover:shadow-lg transition-all">
+            <div className="flex items-center justify-center gap-4 w-full">
+              <Plus className="w-6 h-6" />
+              <div className="text-left">
+                <div className="font-semibold text-lg">Novo Orçamento</div>
+                <div className="text-sm opacity-90">Criar orçamento para cliente</div>
+              </div>
+            </div>
+          </Button>
+        </Link>
+
+        <Link href="/clients">
+          <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white h-16 rounded-lg shadow-md hover:shadow-lg transition-all">
+            <div className="flex items-center justify-center gap-4 w-full">
+              <Users className="w-6 h-6" />
+              <div className="text-left">
+                <div className="font-semibold text-lg">Adicionar Cliente</div>
+                <div className="text-sm opacity-90">Cadastrar novo cliente</div>
+              </div>
+            </div>
+          </Button>
+        </Link>
+
+        {(user as any)?.plan === "PREMIUM" ? (
+          <Link href="/reports">
+            <Button className="w-full bg-green-600 hover:bg-green-700 text-white h-16 rounded-lg shadow-md hover:shadow-lg transition-all">
+              <div className="flex items-center justify-center gap-4 w-full">
+                <TrendingUp className="w-6 h-6" />
+                <div className="text-left">
+                  <div className="font-semibold text-lg">Relatórios</div>
+                  <div className="text-sm opacity-90">Ver métricas detalhadas</div>
+                </div>
+              </div>
+            </Button>
+          </Link>
+        ) : (
+          <Link href="/plans">
+            <Button className="w-full bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white h-16 rounded-lg shadow-md hover:shadow-lg transition-all">
+              <div className="flex items-center justify-center gap-4 w-full">
+                <TrendingUp className="w-6 h-6" />
+                <div className="text-left">
+                  <div className="font-semibold text-lg">Relatórios</div>
+                  <div className="text-sm opacity-90">Upgrade para Premium</div>
+                </div>
+              </div>
+            </Button>
+          </Link>
+        )}
       </div>
 
       {/* Stats Cards */}
@@ -152,39 +205,6 @@ export default function Dashboard() {
             </div>
           </CardContent>
         </Card>
-      </div>
-
-      {/* Quick Actions */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-        <Link href="/new-quote">
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer h-full">
-            <CardContent className="p-6 text-center h-full flex flex-col justify-center">
-              <Plus className="w-12 h-12 text-blue-600 mx-auto mb-4" />
-              <h3 className="font-semibold text-lg mb-2">Novo Orçamento</h3>
-              <p className="text-gray-600 text-sm">Criar um novo orçamento para cliente</p>
-            </CardContent>
-          </Card>
-        </Link>
-
-        <Link href="/clients">
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer h-full">
-            <CardContent className="p-6 text-center h-full flex flex-col justify-center">
-              <Users className="w-12 h-12 text-green-600 mx-auto mb-4" />
-              <h3 className="font-semibold text-lg mb-2">Gerenciar Clientes</h3>
-              <p className="text-gray-600 text-sm">Adicionar e organizar clientes</p>
-            </CardContent>
-          </Card>
-        </Link>
-
-        <Link href="/quotes">
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer h-full">
-            <CardContent className="p-6 text-center h-full flex flex-col justify-center">
-              <FileText className="w-12 h-12 text-purple-600 mx-auto mb-4" />
-              <h3 className="font-semibold text-lg mb-2">Ver Orçamentos</h3>
-              <p className="text-gray-600 text-sm">Acompanhar status dos orçamentos</p>
-            </CardContent>
-          </Card>
-        </Link>
       </div>
 
       {/* Recent Activity */}
