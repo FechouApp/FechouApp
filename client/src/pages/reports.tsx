@@ -322,16 +322,12 @@ export default function Reports() {
                   switch (status.toLowerCase()) {
                     case 'approved':
                       return { label: 'Aprovados', color: 'text-green-600', bg: 'bg-green-100' };
-                    case 'paid':
-                      return { label: 'Pagos', color: 'text-green-700', bg: 'bg-green-200' };
                     case 'pending':
                       return { label: 'Pendentes', color: 'text-blue-600', bg: 'bg-blue-100' };
-                    case 'viewed':
-                      return { label: 'Visualizados', color: 'text-yellow-600', bg: 'bg-yellow-100' };
                     case 'draft':
                       return { label: 'Rascunhos', color: 'text-gray-600', bg: 'bg-gray-100' };
                     case 'rejected':
-                      return { label: 'Rejeitados', color: 'text-red-600', bg: 'bg-red-100' };
+                      return { label: 'Recusados', color: 'text-red-600', bg: 'bg-red-100' };
                     default:
                       return { label: status, color: 'text-gray-600', bg: 'bg-gray-100' };
                   }

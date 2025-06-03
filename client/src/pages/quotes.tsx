@@ -122,7 +122,7 @@ export default function Quotes() {
       • Email SMTP para envio automático
       • API do WhatsApp Business para mensagens
       • Servidor para gerar PDFs profissionais
-      
+
       Você gostaria de configurar essas integrações?`,
       duration: 8000,
     });
@@ -140,40 +140,33 @@ export default function Quotes() {
     }).format(num);
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'APPROVED':
-      case 'PAID':
-        return 'bg-green-100 text-green-800';
-      case 'SENT':
-        return 'bg-blue-100 text-blue-800';
-      case 'VIEWED':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'DRAFT':
-        return 'bg-gray-100 text-gray-800';
-      case 'EXPIRED':
-        return 'bg-red-100 text-red-800';
+  const getStatusText = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'draft':
+        return 'Rascunho';
+      case 'pending':
+        return 'Pendente';
+      case 'approved':
+        return 'Aprovado';
+      case 'rejected':
+        return 'Recusado';
       default:
-        return 'bg-gray-100 text-gray-800';
+        return status;
     }
   };
 
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case 'APPROVED':
-        return 'Aprovado';
-      case 'PAID':
-        return 'Pago';
-      case 'SENT':
-        return 'Enviado';
-      case 'VIEWED':
-        return 'Visualizado';
-      case 'DRAFT':
-        return 'Rascunho';
-      case 'EXPIRED':
-        return 'Expirado';
+  const getStatusColor = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'draft':
+        return 'bg-gray-100 text-gray-800';
+      case 'pending':
+        return 'bg-blue-100 text-blue-800';
+      case 'approved':
+        return 'bg-green-100 text-green-800';
+      case 'rejected':
+        return 'bg-red-100 text-red-800';
       default:
-        return status;
+        return 'bg-gray-100 text-gray-800';
     }
   };
 
@@ -199,9 +192,9 @@ export default function Quotes() {
       quote.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       quote.quoteNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
       quote.client.name.toLowerCase().includes(searchTerm.toLowerCase());
-    
+
     const matchesStatus = statusFilter === 'all' || quote.status === statusFilter;
-    
+
     return matchesSearch && matchesStatus;
   }) || [];
 
@@ -245,12 +238,10 @@ export default function Quotes() {
                 onChange={(e) => setStatusFilter(e.target.value)}
               >
                 <option value="all">Todos os status</option>
-                <option value="DRAFT">Rascunho</option>
-                <option value="SENT">Enviado</option>
-                <option value="VIEWED">Visualizado</option>
-                <option value="APPROVED">Aprovado</option>
-                <option value="PAID">Pago</option>
-                <option value="EXPIRED">Expirado</option>
+                <option value="draft">Rascunho</option>
+                <option value="pending">Pendente</option>
+                <option value="approved">Aprovado</option>
+                <option value="rejected">Recusado</option>
               </select>
               <select className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-primary">
                 <option>Último mês</option>
@@ -303,7 +294,7 @@ export default function Quotes() {
                 <TableBody>
                 {filteredQuotes.map((quote) => {
                   const validityStatus = getValidityStatus(quote.validUntil);
-                  
+
                   return (
                     <TableRow key={quote.id} className="hover:bg-gray-50">
                       <TableCell>

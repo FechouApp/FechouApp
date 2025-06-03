@@ -89,7 +89,7 @@ export const quotes = pgTable("quotes", {
   subtotal: decimal("subtotal", { precision: 10, scale: 2 }).notNull(),
   discount: decimal("discount", { precision: 10, scale: 2 }).notNull().default("0"),
   total: decimal("total", { precision: 10, scale: 2 }).notNull(),
-  status: varchar("status").notNull().default("DRAFT"), // DRAFT, SENT, VIEWED, APPROVED, PAID, EXPIRED, REJECTED
+  status: varchar("status").notNull().default("draft"), // draft, pending, approved, rejected
   validUntil: date("valid_until").notNull(),
   viewedAt: timestamp("viewed_at"),
   approvedAt: timestamp("approved_at"),
