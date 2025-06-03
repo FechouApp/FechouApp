@@ -454,27 +454,7 @@ export default function QuoteView() {
               )}
             </div>
 
-            {/* WhatsApp Buttons - Only show for authenticated quote owners, not in public view */}
-            {!isPublicView && user && isAuthenticated && quote.userId === (user as any)?.id && quote.client?.phone && (
-              <div className="mb-4 space-y-2">
-                <Button 
-                  onClick={sendViaWhatsApp}
-                  disabled={markAsSentMutation.isPending}
-                  className="w-full bg-green-600 hover:bg-green-700"
-                >
-                  <MessageCircle className="w-4 h-4 mr-2" />
-                  Enviar por WhatsApp
-                </Button>
-                <Button 
-                  onClick={copyWhatsAppLink}
-                  variant="outline"
-                  className="w-full"
-                >
-                  <Copy className="w-4 h-4 mr-2" />
-                  Copiar Link do WhatsApp
-                </Button>
-              </div>
-            )}
+
             
             {/* Manual Approve button for quote owner */}
             {!isPublicView && user && quote.userId === (user as any)?.id && quote.status === "pending" && (
@@ -485,7 +465,7 @@ export default function QuoteView() {
                   className="w-full bg-green-600 hover:bg-green-700 text-white"
                 >
                   <CheckCircle className="w-4 h-4 mr-2" />
-                  {approveMutation.isPending ? "Aprovando..." : "Aprovar Manualmente"}
+                  {approveMutation.isPending ? "Aprovando..." : "Aprovar"}
                 </Button>
               </div>
             )}
