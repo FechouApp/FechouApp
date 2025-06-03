@@ -95,8 +95,13 @@ export default function Dashboard() {
           )}
         </div>
 
+        {/* Título das Ações */}
+        <div className="mt-6 mb-3">
+          <h3 className="text-white font-semibold text-lg">Ações</h3>
+        </div>
+
         {/* Quick Actions - Buttons with icons beside text */}
-        <div className="grid grid-cols-1 gap-3 mt-6">
+        <div className="grid grid-cols-1 gap-3">
           <Link href="/new-quote">
             <Button className="w-full bg-white/10 hover:bg-white/20 text-white h-12 rounded-lg border border-white/20 shadow-sm hover:shadow-md transition-all">
               <div className="flex items-center gap-3 w-full justify-start">
