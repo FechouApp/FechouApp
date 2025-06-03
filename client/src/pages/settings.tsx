@@ -24,6 +24,8 @@ export default function Settings() {
     cpfCnpj: typedUser?.cpfCnpj || "",
     profession: typedUser?.profession || "",
     businessName: typedUser?.businessName || "",
+    phone: (typedUser as any)?.phone || "",
+    address: (typedUser as any)?.address || "",
     pixKey: typedUser?.pixKey || "",
     whatsappNotifications: typedUser?.whatsappNotifications || false,
     emailNotifications: typedUser?.emailNotifications || true,
@@ -126,6 +128,27 @@ export default function Settings() {
                   onChange={(e) => handleInputChange("businessName", e.target.value)}
                   placeholder="Nome da sua empresa ou negócio"
                 />
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="phone">Telefone</Label>
+                  <Input
+                    id="phone"
+                    value={formData.phone}
+                    onChange={(e) => handleInputChange("phone", e.target.value)}
+                    placeholder="(11) 99999-9999"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="address">Endereço</Label>
+                  <Input
+                    id="address"
+                    value={formData.address}
+                    onChange={(e) => handleInputChange("address", e.target.value)}
+                    placeholder="Rua, número, bairro, cidade"
+                  />
+                </div>
               </div>
 
               <Button 

@@ -39,6 +39,14 @@ export async function generateQuotePDF({ quote, user, isPaidPlan }: PDFGenerator
     doc.text(`CPF/CNPJ: ${(user as any).cpfCnpj}`, 20, yPosition);
     yPosition += 6;
   }
+  if ((user as any).phone) {
+    doc.text(`Telefone: ${(user as any).phone}`, 20, yPosition);
+    yPosition += 6;
+  }
+  if ((user as any).address) {
+    doc.text(`Endereco: ${(user as any).address}`, 20, yPosition);
+    yPosition += 6;
+  }
 
   yPosition += 20;
 
