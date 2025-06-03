@@ -267,21 +267,24 @@ export default function QuoteView() {
     try {
       console.log('Starting PDF generation...', { quote: quote.quoteNumber });
       
-      // Buscar dados completos do usuário para o PDF
-      let userData = user;
-      if (!user || isPublicView) {
-        console.log('Fetching user data from API for quote userId:', quote.userId);
-        const userResponse = await fetch(`/api/users/${quote.userId}`);
-        userData = await userResponse.json();
+      // Sempre buscar dados completos do usuário da API para garantir que temos todas as informações
+      console.log('Fetching complete user data from API for quote userId:', quote.userId);
+      const userResponse = await fetch(`/api/users/${quote.userId}`);
+      
+      if (!userResponse.ok) {
+        throw new Error('Não foi possível carregar os dados do usuário');
       }
-
+      
+      const userData = await userResponse.json();
       console.log('Complete user data for PDF:', userData);
-      const isUserPremium = (userData as any)?.plan === 'PREMIUM';
-      console.log('User plan:', (userData as any)?.plan, 'isUserPremium:', isUserPremium);
+      console.log('Available user properties:', Object.keys(userData));
+      
+      const isUserPremium = userData?.plan === 'PREMIUM';
+      console.log('User plan:', userData?.plan, 'isUserPremium:', isUserPremium);
 
       const pdfBlob = await generateQuotePDF({
         quote,
-        user: userData as any,
+        user: userData,
         isUserPremium
       });
 
