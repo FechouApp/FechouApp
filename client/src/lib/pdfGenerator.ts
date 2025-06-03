@@ -294,7 +294,7 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
   }
 
   // Rodapé discreto para plano gratuito
-  if (!isPaidPlan) {
+  if (!isUserPremium) {
     // Adicionar o rodapé na parte inferior da página atual sem criar nova página
     const footerY = pageHeight - 15;
     doc.setFontSize(8);

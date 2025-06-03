@@ -124,7 +124,7 @@ export default function PublicQuote() {
       const pdfBlob = await generateQuotePDF({
         quote,
         user: userData,
-        isPaidPlan: userData.plan !== "FREE",
+        isUserPremium: userData.plan === "PREMIUM",
       });
       
       downloadPDF(pdfBlob, `orcamento-${quote.quoteNumber}.pdf`);
