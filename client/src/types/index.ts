@@ -32,10 +32,12 @@ export interface Client {
   address: string | null;
   number: string | null;
   complement: string | null;
+  neighborhood: string | null;
   city: string | null;
   state: string | null;
   zipCode: string | null;
   notes: string | null;
+  quoteCount?: number;
   createdAt: Date | null;
   updatedAt: Date | null;
 }

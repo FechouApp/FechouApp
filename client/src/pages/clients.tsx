@@ -541,7 +541,7 @@ export default function Clients() {
                     </TableCell>
                     <TableCell>
                       <span className="inline-block px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
-                        0 orçamentos
+                        {client.quoteCount || 0} orçamentos
                       </span>
                     </TableCell>
                     <TableCell>

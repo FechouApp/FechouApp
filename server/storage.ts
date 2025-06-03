@@ -101,11 +101,33 @@ export class DatabaseStorage implements IStorage {
 
   // Client operations
   async getClients(userId: string): Promise<Client[]> {
-    return await db
-      .select()
+    const clientsWithQuoteCount = await db
+      .select({
+        id: clients.id,
+        userId: clients.userId,
+        name: clients.name,
+        email: clients.email,
+        phone: clients.phone,
+        cpf: clients.cpf,
+        address: clients.address,
+        number: clients.number,
+        complement: clients.complement,
+        neighborhood: clients.neighborhood,
+        city: clients.city,
+        state: clients.state,
+        zipCode: clients.zipCode,
+        notes: clients.notes,
+        createdAt: clients.createdAt,
+        updatedAt: clients.updatedAt,
+        quoteCount: count(quotes.id),
+      })
       .from(clients)
+      .leftJoin(quotes, eq(quotes.clientId, clients.id))
       .where(eq(clients.userId, userId))
+      .groupBy(clients.id)
       .orderBy(desc(clients.createdAt));
+    
+    return clientsWithQuoteCount as any;
   }
 
   async getClient(id: string, userId: string): Promise<Client | undefined> {
