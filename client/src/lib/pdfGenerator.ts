@@ -408,8 +408,24 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
   
   const userName = user.businessName || `${user.firstName} ${user.lastName}`.trim();
   
-  // Tentar múltiplas propriedades para CPF/CNPJ
-  const userCpf = (user as any).cpfCnpj || (user as any).cpf || (user as any).document || (user as any).cpfCnpj;
+  // Verificar todas as possíveis propriedades para CPF/CNPJ
+  const possibleCpfFields = ['cpfCnpj', 'cpf', 'cnpj', 'document', 'taxId', 'cpf_cnpj'];
+  let userCpf = '';
+  
+  for (const field of possibleCpfFields) {
+    const value = (user as any)[field];
+    if (value && value.toString().trim() !== '') {
+      userCpf = value.toString().trim();
+      console.log(`CPF/CNPJ found in field '${field}':`, userCpf);
+      break;
+    }
+  }
+  
+  console.log('=== DEBUG USER DATA ===');
+  console.log('Complete user object:', JSON.stringify(user, null, 2));
+  console.log('All user properties:', Object.keys(user));
+  console.log('Final CPF/CNPJ value:', userCpf);
+  console.log('========================');
   
   // Nome em negrito
   doc.text(userName, pageWidth / 2, yPosition, { align: 'center' });
@@ -421,11 +437,9 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
     doc.setFont('helvetica', 'normal');
     doc.text(`CPF/CNPJ: ${formatCPF(userCpf)}`, pageWidth / 2, yPosition, { align: 'center' });
     yPosition += 8;
+  } else {
+    console.log('Nenhum CPF/CNPJ encontrado nos campos:', possibleCpfFields);
   }
-
-  console.log('User data for PDF:', user); // Debug log
-  console.log('Available user properties:', Object.keys(user)); // Debug log
-  console.log('CPF found:', userCpf); // Debug log específico para CPF
 
   // Marca d'água para plano gratuito
   if (!isUserPremium) {
@@ -482,30 +496,57 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
     
     // Na última página, adicionar endereço e telefone
     if (page === totalPages) {
-      // Tentar múltiplas propriedades para endereço e telefone
-      const address = (user as any).address || (user as any).streetAddress;
-      const phone = (user as any).phone || (user as any).phoneNumber;
+      // Verificar todas as possíveis propriedades para endereço
+      const possibleAddressFields = ['address', 'streetAddress', 'street', 'endereco'];
+      const possiblePhoneFields = ['phone', 'phoneNumber', 'telefone', 'celular', 'mobile'];
       
-      console.log('Address found:', address); // Debug log
-      console.log('Phone found:', phone); // Debug log
+      let userAddress = '';
+      let userPhone = '';
       
-      if (address || phone) {
+      // Procurar endereço
+      for (const field of possibleAddressFields) {
+        const value = (user as any)[field];
+        if (value && value.toString().trim() !== '') {
+          userAddress = value.toString().trim();
+          console.log(`Endereço encontrado no campo '${field}':`, userAddress);
+          break;
+        }
+      }
+      
+      // Procurar telefone
+      for (const field of possiblePhoneFields) {
+        const value = (user as any)[field];
+        if (value && value.toString().trim() !== '') {
+          userPhone = value.toString().trim();
+          console.log(`Telefone encontrado no campo '${field}':`, userPhone);
+          break;
+        }
+      }
+      
+      console.log('=== DEBUG FOOTER DATA ===');
+      console.log('Address fields checked:', possibleAddressFields);
+      console.log('Phone fields checked:', possiblePhoneFields);
+      console.log('Final address:', userAddress);
+      console.log('Final phone:', userPhone);
+      console.log('========================');
+      
+      if (userAddress || userPhone) {
         const addressParts = [];
         
-        if (address) {
-          const fullAddress = [
-            address,
+        if (userAddress) {
+          const addressComponents = [
+            userAddress,
             (user as any).number || (user as any).addressNumber ? `nº ${(user as any).number || (user as any).addressNumber}` : null,
             (user as any).complement || (user as any).addressComplement,
-            (user as any).city,
-            (user as any).state || (user as any).uf,
+            (user as any).city || (user as any).cidade,
+            (user as any).state || (user as any).uf || (user as any).estado,
             (user as any).zipCode || (user as any).cep ? `CEP: ${formatCEP((user as any).zipCode || (user as any).cep)}` : null,
           ].filter(Boolean).join(', ');
-          addressParts.push(fullAddress);
+          addressParts.push(addressComponents);
         }
         
-        if (phone) {
-          addressParts.push(`Tel: ${formatPhone(phone)}`);
+        if (userPhone) {
+          addressParts.push(`Tel: ${formatPhone(userPhone)}`);
         }
         
         const footerText = addressParts.join(' - ');
@@ -513,9 +554,11 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
         doc.setTextColor(80, 80, 80);
         doc.text(footerText, pageWidth / 2, footerY + 5, { align: 'center' });
         
-        console.log('Footer text:', footerText); // Debug log
+        console.log('Footer final text:', footerText);
       } else {
-        console.log('No address or phone found for footer'); // Debug log
+        console.log('Nenhum endereço ou telefone encontrado para o rodapé');
+        console.log('Campos de endereço verificados:', possibleAddressFields);
+        console.log('Campos de telefone verificados:', possiblePhoneFields);
       }
     }
     

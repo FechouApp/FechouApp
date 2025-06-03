@@ -276,8 +276,13 @@ export default function QuoteView() {
       }
       
       const userData = await userResponse.json();
-      console.log('Complete user data for PDF:', userData);
-      console.log('Available user properties:', Object.keys(userData));
+      console.log('=== COMPLETE USER DATA FOR PDF ===');
+      console.log('Raw user data:', JSON.stringify(userData, null, 2));
+      console.log('All properties:', Object.keys(userData));
+      console.log('Searching for CPF/CNPJ in:', ['cpfCnpj', 'cpf', 'cnpj', 'document', 'taxId']);
+      console.log('Searching for address in:', ['address', 'streetAddress', 'street', 'endereco']);
+      console.log('Searching for phone in:', ['phone', 'phoneNumber', 'telefone', 'celular']);
+      console.log('==================================');
       
       const isUserPremium = userData?.plan === 'PREMIUM';
       console.log('User plan:', userData?.plan, 'isUserPremium:', isUserPremium);
