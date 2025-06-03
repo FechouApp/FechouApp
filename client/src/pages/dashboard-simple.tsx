@@ -78,6 +78,22 @@ export default function Dashboard() {
         <p className="text-blue-100 text-lg">
           Gerencie seus orçamentos e acompanhe seu progresso
         </p>
+        <div className="flex items-center gap-4 mt-4">
+          <div className="flex items-center gap-2">
+            <span className="text-blue-100">Plano:</span>
+            <Badge 
+              variant={(user as any)?.plan === "PREMIUM" ? "default" : "secondary"}
+              className={(user as any)?.plan === "PREMIUM" ? "bg-yellow-500 text-black" : "bg-gray-500 text-white"}
+            >
+              {(user as any)?.plan === "PREMIUM" ? "Premium" : "Gratuito"}
+            </Badge>
+          </div>
+          {(user as any)?.plan === "PREMIUM" && (user as any)?.planExpiresAt && (
+            <span className="text-blue-100 text-sm">
+              Válido até: {new Date((user as any).planExpiresAt).toLocaleDateString('pt-BR')}
+            </span>
+          )}
+        </div>
       </div>
 
       {/* Stats Cards */}

@@ -58,6 +58,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Rota para alternar plano (apenas para teste)
+  app.post('/api/auth/toggle-plan', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      if (!user) {
+        return res.status(404).json({ message: "Usuário não encontrado" });
+      }
+
+      const newPlan = user.plan === "FREE" ? "PREMIUM" : "FREE";
+      const planExpiresAt = newPlan === "PREMIUM" ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) : null; // 30 dias
+      
+      const updatedUser = await storage.updateUserPlan(userId, newPlan, planExpiresAt);
+      res.json(updatedUser);
+    } catch (error) {
+      console.error("Error toggling plan:", error);
+      res.status(500).json({ message: "Erro ao alterar plano" });
+    }
+  });
+
   app.put('/api/auth/user', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
