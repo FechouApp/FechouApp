@@ -32,7 +32,7 @@ export interface IStorage {
   updateUserPlan(id: string, plan: string, planExpiresAt: Date | null): Promise<User>;
   addReferralBonus(userId: string): Promise<User>;
   updateUserColors(id: string, primaryColor: string, secondaryColor: string): Promise<User>;
-  
+
   // Client operations
   getClients(userId: string): Promise<Client[]>;
   getClient(id: string, userId: string): Promise<Client | undefined>;
@@ -40,7 +40,7 @@ export interface IStorage {
   updateClient(id: string, client: Partial<InsertClient>, userId: string): Promise<Client | undefined>;
   deleteClient(id: string, userId: string): Promise<boolean>;
   searchClients(userId: string, searchTerm: string): Promise<Client[]>;
-  
+
   // Quote operations
   getQuotes(userId: string): Promise<(Quote & { client: Client; itemCount: number })[]>;
   getQuote(id: string, userId: string): Promise<(Quote & { client: Client; items: QuoteItem[] }) | undefined>;
@@ -50,27 +50,27 @@ export interface IStorage {
   updateQuote(id: string, quote: Partial<InsertQuote>, userId: string): Promise<Quote | undefined>;
   deleteQuote(id: string, userId: string): Promise<boolean>;
   updateQuoteStatus(id: string, status: string, metadata?: any): Promise<boolean>;
-  
+
   // Quote item operations
   createQuoteItem(item: InsertQuoteItem): Promise<QuoteItem>;
   updateQuoteItem(id: string, item: Partial<InsertQuoteItem>): Promise<QuoteItem | undefined>;
   deleteQuoteItem(id: string): Promise<boolean>;
-  
+
   // Review operations
   getReviews(userId: string): Promise<(Review & { client: Client })[]>;
   createReview(review: InsertReview): Promise<Review>;
   updateReview(id: string, review: Partial<InsertReview>): Promise<Review | undefined>;
-  
+
   // Payment operations
   getPayments(userId: string): Promise<Payment[]>;
   createPayment(payment: InsertPayment): Promise<Payment>;
   updatePayment(id: string, payment: Partial<InsertPayment>): Promise<Payment | undefined>;
-  
+
   // Notification operations
   getNotifications(userId: string): Promise<Notification[]>;
   createNotification(notification: InsertNotification): Promise<Notification>;
   markNotificationAsRead(id: string, userId: string): Promise<boolean>;
-  
+
   // Statistics
   getUserStats(userId: string): Promise<{
     totalQuotes: number;
@@ -119,7 +119,7 @@ export class DatabaseStorage implements IStorage {
   async addReferralBonus(userId: string): Promise<User> {
     const user = await this.getUser(userId);
     if (!user) throw new Error("User not found");
-    
+
     const [updatedUser] = await db
       .update(users)
       .set({ 
@@ -152,7 +152,7 @@ export class DatabaseStorage implements IStorage {
       .from(clients)
       .where(eq(clients.userId, userId))
       .orderBy(desc(clients.createdAt));
-    
+
     // Get quote count for each client
     const clientsWithQuoteCount = await Promise.all(
       clientsList.map(async (client) => {
@@ -160,14 +160,14 @@ export class DatabaseStorage implements IStorage {
           .select({ count: count(quotes.id) })
           .from(quotes)
           .where(eq(quotes.clientId, client.id));
-        
+
         return {
           ...client,
           quoteCount: quoteCountResult[0]?.count || 0,
         };
       })
     );
-    
+
     return clientsWithQuoteCount as any;
   }
 
@@ -225,7 +225,7 @@ export class DatabaseStorage implements IStorage {
     const user = await this.getUser(userId);
     const isPremium = user?.plan === "PREMIUM";
     const isExpired = user?.planExpiresAt && new Date() > user.planExpiresAt;
-    
+
     const result = await db
       .select({
         quote: quotes,
@@ -354,7 +354,7 @@ export class DatabaseStorage implements IStorage {
   async deleteQuote(id: string, userId: string): Promise<boolean> {
     // Delete quote items first
     await db.delete(quoteItems).where(eq(quoteItems.quoteId, id));
-    
+
     // Delete quote
     const result = await db
       .delete(quotes)
@@ -364,7 +364,7 @@ export class DatabaseStorage implements IStorage {
 
   async updateQuoteStatus(id: string, status: string, metadata?: any): Promise<boolean> {
     const updateData: any = { status, updatedAt: new Date() };
-    
+
     if (status === 'VIEWED' && !metadata?.viewedAt) {
       updateData.viewedAt = new Date();
     }
@@ -423,7 +423,7 @@ export class DatabaseStorage implements IStorage {
 
   async createQuoteItems(items: InsertQuoteItem[]): Promise<QuoteItem[]> {
     if (items.length === 0) return [];
-    
+
     const newItems = await db
       .insert(quoteItems)
       .values(

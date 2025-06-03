@@ -607,6 +607,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/reviews', async (req, res) => {
     try {
       const reviewData = insertReviewSchema.parse(req.body);
+      
+      // Check if a review already exists for this client and quote
+      if (reviewData.quoteId && reviewData.clientId) {
+        const existingReview = await storage.getReviewByQuoteAndClient(reviewData.quoteId, reviewData.clientId);
+        if (existingReview) {
+          return res.status(409).json({ 
+            message: "Você já avaliou este orçamento. Cada cliente pode avaliar apenas uma vez por orçamento." 
+          });
+        }
+      }
+      
       const review = await storage.createReview(reviewData);
       res.status(201).json(review);
     } catch (error) {

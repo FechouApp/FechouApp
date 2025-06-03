@@ -223,10 +223,11 @@ export default function QuoteView() {
       setRating(0);
       setComment("");
     },
-    onError: () => {
+    onError: (error: any) => {
+      const message = error?.message || "Não foi possível enviar a avaliação.";
       toast({
         title: "Erro",
-        description: "Não foi possível enviar a avaliação.",
+        description: message,
         variant: "destructive",
       });
     },
