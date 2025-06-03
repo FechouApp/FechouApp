@@ -113,16 +113,23 @@ export default function QuoteView() {
   });
 
   const handleDownloadPDF = async () => {
-    if (!quote || !user) return;
+    if (!quote || !user) {
+      console.error('Quote or user not available:', { quote: !!quote, user: !!user });
+      return;
+    }
     
     try {
+      console.log('Starting PDF generation...', { quote: quote.quoteNumber, user: user.id });
       const isPaidPlan = (user as any)?.plan === 'premium' || (user as any)?.plan === 'paid';
+      console.log('User plan:', (user as any)?.plan, 'isPaidPlan:', isPaidPlan);
+      
       const pdfBlob = await generateQuotePDF({
         quote,
         user: user as any,
         isPaidPlan
       });
       
+      console.log('PDF generated successfully, blob size:', pdfBlob.size);
       downloadPDF(pdfBlob, `Orçamento_${quote.quoteNumber}.pdf`);
       
       toast({
@@ -130,9 +137,10 @@ export default function QuoteView() {
         description: "O arquivo foi baixado com sucesso.",
       });
     } catch (error) {
+      console.error('PDF generation error:', error);
       toast({
         title: "Erro",
-        description: "Não foi possível gerar o PDF.",
+        description: `Não foi possível gerar o PDF: ${error.message}`,
         variant: "destructive",
       });
     }
