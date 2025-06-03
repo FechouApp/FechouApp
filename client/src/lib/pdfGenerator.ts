@@ -158,15 +158,15 @@ export async function generateQuotePDF({ quote, user, isPaidPlan }: PDFGenerator
   const discount = parseFloat(quote.discount);
   const total = parseFloat(quote.total);
 
-  // Linha do total final destacada - perfeitamente alinhada
+  // Linha do total final destacada - alinhada com a tabela
   doc.setFillColor(220, 220, 220);
-  doc.rect(90, yPosition - 2, 110, 10, 'F');
-  doc.rect(90, yPosition - 2, 110, 10, 'S');
+  doc.rect(90, yPosition - 2, 95, 10, 'F');
+  doc.rect(90, yPosition - 2, 95, 10, 'S');
   
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(12);
   doc.text('TOTAL GERAL:', 92, yPosition + 4);
-  doc.text(`R$ ${total.toFixed(2).replace('.', ',')}`, 185, yPosition + 4, { align: 'right' });
+  doc.text(`R$ ${total.toFixed(2).replace('.', ',')}`, 183, yPosition + 4, { align: 'right' });
   yPosition += 20;
 
   // Seção de condições organizadas
