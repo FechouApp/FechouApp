@@ -406,7 +406,7 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
   doc.setFontSize(10);
   doc.setFont('helvetica', 'bold');
   doc.text(user.businessName || `${user.firstName} ${user.lastName}`.trim(), pageWidth / 2, yPosition, { align: 'center' });
-  yPosition += 5;
+  yPosition += 6;
 
   doc.setFontSize(9);
   doc.setFont('helvetica', 'normal');
@@ -415,7 +415,6 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
     user.email ? `Email: ${user.email}` : null,
     (user as any).cpfCnpj ? `CPF/CNPJ: ${formatCPF((user as any).cpfCnpj)}` : null,
     (user as any).phone ? `Telefone: ${formatPhone((user as any).phone)}` : null,
-    (user as any).address ? `Endereço: ${(user as any).address}` : null,
   ].filter(Boolean);
 
   userInfo.forEach(info => {
@@ -424,6 +423,29 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
       yPosition += 4;
     }
   });
+
+  // Endereço completo em linha separada
+  if ((user as any).address) {
+    const fullAddress = [
+      (user as any).address,
+      (user as any).number ? `nº ${(user as any).number}` : null,
+      (user as any).complement,
+    ].filter(Boolean).join(', ');
+    
+    const cityStateZip = [
+      (user as any).city,
+      (user as any).state,
+      (user as any).zipCode ? `CEP: ${formatCEP((user as any).zipCode)}` : null,
+    ].filter(Boolean).join(' - ');
+
+    doc.text(`Endereço: ${fullAddress}`, pageWidth / 2, yPosition, { align: 'center' });
+    yPosition += 4;
+    
+    if (cityStateZip) {
+      doc.text(cityStateZip, pageWidth / 2, yPosition, { align: 'center' });
+      yPosition += 4;
+    }
+  }
 
   // Marca d'água para plano gratuito
   if (!isUserPremium) {
