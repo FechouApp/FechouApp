@@ -326,10 +326,24 @@ export default function QuoteView() {
         </Card>
 
         {/* Actions */}
-        {canApprove && (
-          <Card className="mb-6">
-            <CardContent className="p-6">
-              <h3 className="font-semibold mb-4">Ações</h3>
+        <Card className="mb-6">
+          <CardContent className="p-6">
+            <h3 className="font-semibold mb-4">Ações</h3>
+            
+            {/* Download PDF Button - Always visible */}
+            <div className="mb-4">
+              <Button 
+                onClick={handleDownloadPDF}
+                variant="outline"
+                className="w-full"
+              >
+                <Download className="w-4 h-4 mr-2" />
+                Baixar PDF do Orçamento
+              </Button>
+            </div>
+            
+            {/* Approve/Reject buttons - Only for pending quotes */}
+            {canApprove && (
               <div className="flex gap-4">
                 <Button 
                   onClick={() => approveMutation.mutate()}
@@ -349,9 +363,9 @@ export default function QuoteView() {
                   Rejeitar
                 </Button>
               </div>
-            </CardContent>
-          </Card>
-        )}
+            )}
+          </CardContent>
+        </Card>
 
         {/* Review Section */}
         <Card>
