@@ -40,39 +40,7 @@ export async function generateQuotePDF({ quote, user, isPaidPlan }: PDFGenerator
     doc.setTextColor(0, 0, 0); // Volta para preto
   }
 
-  // Cabeçalho com informações do profissional
-  doc.setFontSize(14);
-  doc.setFont('helvetica', 'bold');
-  doc.text(user.businessName || `${user.firstName} ${user.lastName}`.trim(), 20, yPosition);
-  yPosition += 6;
-
-  // Informações do profissional
-  doc.setFontSize(9);
-  doc.setFont('helvetica', 'normal');
-  if (user.email) {
-    doc.text(`Email: ${user.email}`, 20, yPosition);
-    yPosition += 4;
-  }
-
-  // Dados pessoais do profissional (se disponíveis)
-  if ((user as any).cpfCnpj) {
-    // Formatar CPF/CNPJ
-    const cpfCnpj = (user as any).cpfCnpj.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
-    doc.text(`CPF/CNPJ: ${cpfCnpj}`, 20, yPosition);
-    yPosition += 4;
-  }
-  if ((user as any).phone) {
-    // Formatar telefone
-    const phone = (user as any).phone.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
-    doc.text(`Telefone: ${phone}`, 20, yPosition);
-    yPosition += 4;
-  }
-  if ((user as any).address) {
-    doc.text(`Endereco: ${(user as any).address}`, 20, yPosition);
-    yPosition += 4;
-  }
-
-  yPosition += 10;
+  yPosition += 5;
 
   // Seção de dados do cliente
   doc.setFontSize(12);
@@ -132,10 +100,9 @@ export async function generateQuotePDF({ quote, user, isPaidPlan }: PDFGenerator
   doc.text('SERVIÇOS', 20, yPosition);
   yPosition += 8;
 
-  // Configuração da tabela
+  // Configuração da tabela com posições corrigidas
   const tableStartY = yPosition;
   const tableWidth = pageWidth - 40;
-  const colWidths = [90, 30, 40, 40];
   const rowHeight = 8;
   
   // Cabeçalho da tabela com fundo cinza
@@ -147,13 +114,13 @@ export async function generateQuotePDF({ quote, user, isPaidPlan }: PDFGenerator
   doc.setFont('helvetica', 'bold');
   doc.text('Descrição', 22, yPosition + 3);
   doc.text('Qtd', 125, yPosition + 3, { align: 'center' });
-  doc.text('Valor Unit.', 160, yPosition + 3, { align: 'center' });
-  doc.text('Total', 198, yPosition + 3, { align: 'right' });
+  doc.text('Valor Unit.', 155, yPosition + 3, { align: 'center' });
+  doc.text('Total', 188, yPosition + 3, { align: 'right' });
   
-  // Linhas verticais do cabeçalho
+  // Linhas verticais do cabeçalho - posições corretas
   doc.line(110, tableStartY - 2, 110, yPosition + 6);
   doc.line(140, tableStartY - 2, 140, yPosition + 6);
-  doc.line(180, tableStartY - 2, 180, yPosition + 6);
+  doc.line(170, tableStartY - 2, 170, yPosition + 6);
   
   yPosition += rowHeight;
 
@@ -179,36 +146,36 @@ export async function generateQuotePDF({ quote, user, isPaidPlan }: PDFGenerator
     doc.text(description, 22, yPosition + 3);
     doc.text(item.quantity.toString(), 125, yPosition + 3, { align: 'center' });
     
-    // Formatação de valores com alinhamento à direita
+    // Formatação de valores com alinhamento correto
     const unitPrice = parseFloat(item.unitPrice);
     const total = parseFloat(item.total);
-    doc.text(`R$ ${unitPrice.toFixed(2).replace('.', ',')}`, 175, yPosition + 3, { align: 'right' });
-    doc.text(`R$ ${total.toFixed(2).replace('.', ',')}`, 198, yPosition + 3, { align: 'right' });
+    doc.text(`R$ ${unitPrice.toFixed(2).replace('.', ',')}`, 165, yPosition + 3, { align: 'right' });
+    doc.text(`R$ ${total.toFixed(2).replace('.', ',')}`, 188, yPosition + 3, { align: 'right' });
     
-    // Linhas verticais
+    // Linhas verticais - posições corretas
     doc.line(110, yPosition - 2, 110, yPosition + 6);
     doc.line(140, yPosition - 2, 140, yPosition + 6);
-    doc.line(180, yPosition - 2, 180, yPosition + 6);
+    doc.line(170, yPosition - 2, 170, yPosition + 6);
     
     yPosition += rowHeight;
   });
 
   yPosition += 4;
 
-  // Total geral destacado
+  // Total geral destacado - alinhado com a coluna Total
   const subtotal = parseFloat(quote.subtotal);
   const discount = parseFloat(quote.discount);
   const total = parseFloat(quote.total);
 
   // Linha do total final destacada
   doc.setFillColor(220, 220, 220);
-  doc.rect(140, yPosition - 2, 60, 10, 'F');
-  doc.rect(140, yPosition - 2, 60, 10, 'S');
+  doc.rect(130, yPosition - 2, 70, 10, 'F');
+  doc.rect(130, yPosition - 2, 70, 10, 'S');
   
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(12);
-  doc.text('TOTAL GERAL:', 142, yPosition + 4);
-  doc.text(`R$ ${total.toFixed(2).replace('.', ',')}`, 198, yPosition + 4, { align: 'right' });
+  doc.text('TOTAL GERAL:', 132, yPosition + 4);
+  doc.text(`R$ ${total.toFixed(2).replace('.', ',')}`, 188, yPosition + 4, { align: 'right' });
   yPosition += 20;
 
   // Seção de condições organizadas
@@ -269,7 +236,39 @@ export async function generateQuotePDF({ quote, user, isPaidPlan }: PDFGenerator
   doc.setFontSize(10);
   doc.setFont('helvetica', 'normal');
   doc.text('Fico à disposição para dúvidas e aguardo sua aprovação.', 20, yPosition);
-  yPosition += 15;
+  yPosition += 25;
+
+  // Assinatura com dados do profissional
+  doc.setFontSize(10);
+  doc.setFont('helvetica', 'bold');
+  doc.text(user.businessName || `${user.firstName} ${user.lastName}`.trim(), 20, yPosition);
+  yPosition += 5;
+
+  doc.setFontSize(9);
+  doc.setFont('helvetica', 'normal');
+  if (user.email) {
+    doc.text(`Email: ${user.email}`, 20, yPosition);
+    yPosition += 4;
+  }
+
+  if ((user as any).cpfCnpj) {
+    const cpfCnpj = (user as any).cpfCnpj.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+    doc.text(`CPF/CNPJ: ${cpfCnpj}`, 20, yPosition);
+    yPosition += 4;
+  }
+  
+  if ((user as any).phone) {
+    const phone = (user as any).phone.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+    doc.text(`Telefone: ${phone}`, 20, yPosition);
+    yPosition += 4;
+  }
+  
+  if ((user as any).address) {
+    doc.text(`Endereço: ${(user as any).address}`, 20, yPosition);
+    yPosition += 4;
+  }
+
+  yPosition += 10;
 
   // Rodapé discreto para plano gratuito
   if (!isPaidPlan) {
