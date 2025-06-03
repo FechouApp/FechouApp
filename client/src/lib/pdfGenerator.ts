@@ -407,7 +407,9 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
   doc.setFont('helvetica', 'bold');
   
   const userName = user.businessName || `${user.firstName} ${user.lastName}`.trim();
-  const userCpf = (user as any).cpf || (user as any).document;
+  
+  // Tentar múltiplas propriedades para CPF/CNPJ
+  const userCpf = (user as any).cpfCnpj || (user as any).cpf || (user as any).document || (user as any).cpfCnpj;
   
   // Nome em negrito
   doc.text(userName, pageWidth / 2, yPosition, { align: 'center' });
@@ -423,6 +425,7 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
 
   console.log('User data for PDF:', user); // Debug log
   console.log('Available user properties:', Object.keys(user)); // Debug log
+  console.log('CPF found:', userCpf); // Debug log específico para CPF
 
   // Marca d'água para plano gratuito
   if (!isUserPremium) {
@@ -479,8 +482,12 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
     
     // Na última página, adicionar endereço e telefone
     if (page === totalPages) {
+      // Tentar múltiplas propriedades para endereço e telefone
       const address = (user as any).address || (user as any).streetAddress;
       const phone = (user as any).phone || (user as any).phoneNumber;
+      
+      console.log('Address found:', address); // Debug log
+      console.log('Phone found:', phone); // Debug log
       
       if (address || phone) {
         const addressParts = [];
@@ -505,6 +512,10 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
         doc.setFontSize(7);
         doc.setTextColor(80, 80, 80);
         doc.text(footerText, pageWidth / 2, footerY + 5, { align: 'center' });
+        
+        console.log('Footer text:', footerText); // Debug log
+      } else {
+        console.log('No address or phone found for footer'); // Debug log
       }
     }
     
