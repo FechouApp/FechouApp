@@ -166,7 +166,7 @@ export default function Dashboard() {
             
             {(user as any)?.plan === "PREMIUM" ? (
               <Link href="/reports">
-                <Button className="w-full h-16 bg-white/20 hover:bg-white/30 text-white border border-white/30 flex flex-col items-center justify-center gap-2">
+                <Button className="w-full h-16 bg-green-600 hover:bg-green-700 text-white flex flex-col items-center justify-center gap-2">
                   <BarChart3 className="w-5 h-5" />
                   <div className="text-center">
                     <div className="font-semibold">Relatórios</div>
@@ -176,7 +176,7 @@ export default function Dashboard() {
               </Link>
             ) : (
               <Link href="/plans">
-                <Button className="w-full h-16 bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white border-0 flex flex-col items-center justify-center gap-2">
+                <Button className="w-full h-16 bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white flex flex-col items-center justify-center gap-2">
                   <BarChart3 className="w-5 h-5" />
                   <div className="text-center">
                     <div className="font-semibold">Relatórios</div>
@@ -184,7 +184,9 @@ export default function Dashboard() {
                   </div>
                 </Button>
               </Link>
-            )}
+            )}</div>
+        </CardContent>
+      </Card>
           </div>
         </CardContent>
       </Card>
