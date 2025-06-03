@@ -102,12 +102,8 @@ export default function Quotes() {
   };
 
   const handleViewQuote = (quoteId: string) => {
-    // Encontrar o orçamento específico
-    const quote = quotes?.find(q => q.id === quoteId);
-    if (!quote) return;
-    
-    // Navegar para a página de visualização usando o número do orçamento
-    setLocation(`/quote/${quote.quoteNumber}`);
+    // Navegar para a página profissional com botões WhatsApp
+    setLocation(`/quotes/view/${quoteId}`);
   };
 
   const handleEditQuote = (quoteId: string) => {
