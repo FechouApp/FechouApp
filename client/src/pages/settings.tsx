@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,24 +12,44 @@ import { User, Building, Bell, Crown, Mail, Phone, MapPin, Save, Upload, Lock } 
 import { useAuth } from "@/hooks/useAuth";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { formatPhone, formatCPF, formatCEP } from "@/lib/utils";
 import type { User as UserType } from "@/types";
 
 export default function Settings() {
-  const { user } = useAuth();
+  const { user, isLoading } = useAuth();
   const { toast } = useToast();
   const typedUser = user as UserType;
+  
   const [formData, setFormData] = useState({
-    firstName: typedUser?.firstName || "",
-    lastName: typedUser?.lastName || "",
-    cpfCnpj: typedUser?.cpfCnpj || "",
-    profession: typedUser?.profession || "",
-    businessName: typedUser?.businessName || "",
-    phone: (typedUser as any)?.phone || "",
-    address: (typedUser as any)?.address || "",
-    pixKey: typedUser?.pixKey || "",
-    whatsappNotifications: typedUser?.whatsappNotifications || false,
-    emailNotifications: typedUser?.emailNotifications || true,
+    firstName: "",
+    lastName: "",
+    cpfCnpj: "",
+    profession: "",
+    businessName: "",
+    phone: "",
+    address: "",
+    pixKey: "",
+    whatsappNotifications: false,
+    emailNotifications: true,
   });
+
+  // Atualizar formData quando user estiver disponível
+  useEffect(() => {
+    if (typedUser) {
+      setFormData({
+        firstName: typedUser.firstName || "",
+        lastName: typedUser.lastName || "",
+        cpfCnpj: formatCPF(typedUser.cpfCnpj || ""),
+        profession: typedUser.profession || "",
+        businessName: typedUser.businessName || "",
+        phone: formatPhone((typedUser as any)?.phone || ""),
+        address: (typedUser as any)?.address || "",
+        pixKey: typedUser.pixKey || "",
+        whatsappNotifications: typedUser.whatsappNotifications || false,
+        emailNotifications: typedUser.emailNotifications || true,
+      });
+    }
+  }, [typedUser]);
 
   const [passwordData, setPasswordData] = useState({
     currentPassword: "",
@@ -83,8 +103,33 @@ export default function Settings() {
   };
 
   const handleInputChange = (field: string, value: string | boolean) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    let formattedValue = value;
+    
+    // Aplicar formatação automática nos campos específicos
+    if (typeof value === "string") {
+      if (field === "cpfCnpj") {
+        formattedValue = formatCPF(value);
+      } else if (field === "phone") {
+        formattedValue = formatPhone(value);
+      }
+    }
+    
+    setFormData(prev => ({ ...prev, [field]: formattedValue }));
   };
+
+  // Mostrar loading enquanto dados do usuário estão carregando
+  if (isLoading) {
+    return (
+      <div className="container mx-auto px-4 py-8 max-w-4xl">
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">Carregando configurações...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
