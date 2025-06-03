@@ -250,10 +250,10 @@ export default function Settings() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-4xl">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-800 mb-2">Configurações</h1>
-        <p className="text-gray-600">Gerencie suas informações pessoais e preferências</p>
+    <div className="container mx-auto px-4 py-6 sm:py-8 max-w-4xl">
+      <div className="mb-6 sm:mb-8">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-2">Configurações</h1>
+        <p className="text-sm sm:text-base text-gray-600">Gerencie suas informações pessoais e preferências</p>
       </div>
 
       <div className="grid gap-6">
@@ -301,7 +301,7 @@ export default function Settings() {
                 </div>
               </div>
 
-              <div className="grid md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="firstName">Nome</Label>
                   <Input
@@ -322,7 +322,7 @@ export default function Settings() {
                 </div>
               </div>
 
-              <div className="grid md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="cpfCnpj">CPF/CNPJ</Label>
                   <Input
@@ -353,7 +353,7 @@ export default function Settings() {
                 />
               </div>
 
-              <div className="grid md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="phone">Telefone</Label>
                   <Input

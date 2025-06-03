@@ -196,14 +196,14 @@ export default function PublicQuote() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="container mx-auto px-4 py-6 max-w-md sm:max-w-2xl lg:max-w-4xl">
+      <div className="container mx-auto px-4 py-4 sm:py-6 max-w-md sm:max-w-2xl lg:max-w-4xl">
         {/* Header */}
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <div className="w-12 h-12 bg-green-500 rounded-xl flex items-center justify-center">
-              <CheckCircle className="w-6 h-6 text-white" />
+        <div className="text-center mb-6 sm:mb-8">
+          <div className="flex items-center justify-center gap-2 sm:gap-3 mb-4">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-green-500 rounded-xl flex items-center justify-center">
+              <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
             </div>
-            <h1 className="text-3xl font-bold text-gray-800">Fechou!</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">Fechou!</h1>
           </div>
           <p className="text-gray-600">Orçamento da Marcenaria Estrela</p>
         </div>
