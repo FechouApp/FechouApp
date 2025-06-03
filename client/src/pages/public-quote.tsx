@@ -168,9 +168,8 @@ export default function PublicQuote() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="flex justify-center">
-        <div className="w-full max-w-md sm:max-w-2xl lg:max-w-4xl px-4 py-6">
-          {/* Header */}
+      <div className="container mx-auto px-4 py-6 max-w-md sm:max-w-2xl lg:max-w-4xl">
+        {/* Header */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-3 mb-4">
             <div className="w-12 h-12 bg-green-500 rounded-xl flex items-center justify-center">
@@ -408,7 +407,6 @@ export default function PublicQuote() {
             )}
           </CardContent>
         </Card>
-        </div>
       </div>
     </div>
   );
