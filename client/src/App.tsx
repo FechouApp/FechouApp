@@ -23,18 +23,37 @@ import Reports from "@/pages/reports";
 import SavedItemsPage from "@/pages/saved-items";
 import ClientProfile from "@/pages/client-profile";
 import AdminPanel from "@/pages/admin-dashboard";
+import Welcome from "@/pages/welcome";
 
 function Router() {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, user } = useAuth();
 
   return (
     <Switch>
       {/* Public route for client quote viewing */}
       <Route path="/quote/:quoteNumber" component={PublicQuote} />
 
-      {isLoading || !isAuthenticated ? (
-        <Route path="/" component={Landing} />
-      ) : (
+      {isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  // Show landing page if not authenticated
+  if (!isAuthenticated) {
+    return <Landing />;
+  }
+
+  // Check if user is authenticated and this is their first visit
+  const hasVisited = localStorage.getItem('fechou_has_visited');
+  const userHasBasicInfo = user && (user as any).firstName && (user as any).businessName;
+
+  // Show welcome screen for first-time authenticated users who haven't completed setup
+  if (!hasVisited && !userHasBasicInfo) {
+    return <Welcome />;
+  }
         <>
           <Route path="/" component={Dashboard} />
           <Route path="/clients" component={Clients} />
@@ -49,15 +68,16 @@ function Router() {
           <Route path="/plans" component={PlanComparison} />
           <Route path="/settings" component={Settings} />
           <Route path="/admin" component={AdminPanel} />
+          <Route path="/welcome" component={Welcome} />
+          <Route component={NotFound} />
         </>
       )}
-      <Route component={NotFound} />
     </Switch>
   );
 }
 
 function AppLayout() {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, user } = useAuth();
 
   if (isLoading) {
     return <LoadingSpinner />;
@@ -65,6 +85,15 @@ function AppLayout() {
 
   if (!isAuthenticated) {
     return <Router />;
+  }
+
+  // Check if user is authenticated and this is their first visit
+  const hasVisited = localStorage.getItem('fechou_has_visited');
+  const userHasBasicInfo = user && (user as any).firstName && (user as any).businessName;
+
+  // Show welcome screen for first-time authenticated users who haven't completed setup
+    if (!hasVisited && !userHasBasicInfo) {
+    return <Welcome />;
   }
 
   return (

@@ -72,9 +72,15 @@ export default function Settings() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
       toast({
-        title: "Perfil atualizado!",
-        description: "Suas informações foram salvas com sucesso.",
+        title: "Configurações salvas",
+        description: "Suas configurações foram atualizadas com sucesso!",
       });
+
+      // Mark as visited and setup complete if user saves basic info
+      if (formData.firstName && (formData.businessName || formData.profession)) {
+        localStorage.setItem('fechou_has_visited', 'true');
+      }
+
     },
     onError: () => {
       toast({
@@ -172,7 +178,7 @@ export default function Settings() {
       reader.onload = (event) => {
         const base64String = event.target?.result as string;
         handleInputChange("profileImageUrl", base64String);
-        
+
         // Auto-salvar após upload
         setTimeout(() => {
           updateUserMutation.mutate({
@@ -180,7 +186,7 @@ export default function Settings() {
             profileImageUrl: base64String
           });
         }, 500);
-        
+
         toast({
           title: "Sucesso",
           description: "Foto de perfil carregada com sucesso!",
@@ -217,7 +223,7 @@ export default function Settings() {
       reader.onload = (event) => {
         const base64String = event.target?.result as string;
         handleInputChange("logoUrl", base64String);
-        
+
         // Auto-salvar após upload
         setTimeout(() => {
           updateUserMutation.mutate({
@@ -225,7 +231,7 @@ export default function Settings() {
             logoUrl: base64String
           });
         }, 500);
-        
+
         toast({
           title: "Sucesso",
           description: "Logo carregado com sucesso!",
