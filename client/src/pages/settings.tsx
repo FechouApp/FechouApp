@@ -652,49 +652,7 @@ export default function Settings() {
           </CardContent>
         </Card>
 
-        {/* Plan Testing */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Crown className="w-5 h-5" />
-              Teste de Planos (Desenvolvimento)
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg">
-              <p className="text-sm text-amber-800 mb-3">
-                Esta seção é apenas para testes durante o desenvolvimento. 
-                Permite alternar manualmente entre os planos Gratuito e Premium.
-              </p>
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="font-medium">Plano Atual:</span>
-                    <Badge 
-                      variant={(user as any)?.plan === "PREMIUM" ? "default" : "secondary"}
-                      className={(user as any)?.plan === "PREMIUM" ? "bg-yellow-500 text-black" : "bg-gray-500 text-white"}
-                    >
-                      {(user as any)?.plan === "PREMIUM" ? "Premium" : "Gratuito"}
-                    </Badge>
-                  </div>
-                  {(user as any)?.plan === "PREMIUM" && (user as any)?.planExpiresAt && (
-                    <p className="text-sm text-gray-600">
-                      Válido até: {new Date((user as any).planExpiresAt).toLocaleDateString('pt-BR')}
-                    </p>
-                  )}
-                </div>
-                <Button 
-                  onClick={() => togglePlanMutation.mutate()}
-                  disabled={togglePlanMutation.isPending}
-                  variant="outline"
-                  size="sm"
-                >
-                  {togglePlanMutation.isPending ? "Alterando..." : "Alternar Plano"}
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        
 
         {/* Account Actions */}
         <Card>
