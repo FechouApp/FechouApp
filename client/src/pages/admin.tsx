@@ -25,7 +25,8 @@ import {
   Filter,
   Search,
   UserCheck,
-  UserX
+  UserX,
+  Eye
 } from "lucide-react";
 
 interface User {
@@ -54,6 +55,8 @@ export default function AdminPanel() {
   const [editPlan, setEditPlan] = useState("");
   const [editPaymentStatus, setEditPaymentStatus] = useState("");
   const [editPaymentMethod, setEditPaymentMethod] = useState("");
+  const [viewUser, setViewUser] = useState<User | null>(null);
+  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -192,6 +195,7 @@ export default function AdminPanel() {
   // Calculate stats
   const totalUsers = users.length;
   const premiumUsers = users.filter((user: User) => user.plan === "PREMIUM").length;
+  const premiumCortesiaUsers = users.filter((user: User) => user.plan === "PREMIUM_CORTESIA").length;
   const freeUsers = users.filter((user: User) => user.plan === "FREE").length;
   const activePayments = users.filter((user: User) => user.paymentStatus === "ativo").length;
   const pendingPayments = users.filter((user: User) => user.paymentStatus === "pendente").length;
@@ -207,7 +211,11 @@ export default function AdminPanel() {
   };
 
   const getPlanColor = (plan: string) => {
-    return plan === "PREMIUM" ? "bg-yellow-500 text-black" : "bg-gray-500 text-white";
+    switch (plan) {
+      case "PREMIUM": return "bg-yellow-500 text-black";
+      case "PREMIUM_CORTESIA": return "bg-purple-500 text-white";
+      default: return "bg-gray-500 text-white";
+    }
   };
 
   const handleUpdatePlan = (event: React.FormEvent<HTMLFormElement>) => {
@@ -239,12 +247,12 @@ export default function AdminPanel() {
     }
 
     // Validate plan value
-    const validPlans = ["FREE", "PREMIUM"];
+    const validPlans = ["FREE", "PREMIUM", "PREMIUM_CORTESIA"];
     if (!validPlans.includes(editPlan.toUpperCase())) {
       console.log("ERROR: Invalid plan:", editPlan);
       toast({
         title: "Erro",
-        description: "Plano deve ser FREE ou PREMIUM.",
+        description: "Plano deve ser FREE, PREMIUM ou PREMIUM_CORTESIA.",
         variant: "destructive",
       });
       return;
@@ -322,8 +330,8 @@ export default function AdminPanel() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600">Usuários Premium</p>
-                  <p className="text-3xl font-bold text-yellow-600">{premiumUsers}</p>
-                  <p className="text-xs text-gray-500">{freeUsers} usuários gratuitos</p>
+                  <p className="text-3xl font-bold text-yellow-600">{premiumUsers + premiumCortesiaUsers}</p>
+                  <p className="text-xs text-gray-500">{premiumUsers} pagos, {premiumCortesiaUsers} cortesia, {freeUsers} gratuitos</p>
                 </div>
                 <TrendingUp className="w-8 h-8 text-yellow-600" />
               </div>
@@ -509,6 +517,127 @@ export default function AdminPanel() {
                       </TableCell>
                       <TableCell>
                         <div className="flex gap-2">
+                          {/* View User Button */}
+                          <Dialog open={isViewDialogOpen && viewUser?.id === user.id} onOpenChange={(open) => {
+                            setIsViewDialogOpen(open);
+                            if (!open) {
+                              setViewUser(null);
+                            }
+                          }}>
+                            <DialogTrigger asChild>
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => {
+                                  setViewUser(user);
+                                  setIsViewDialogOpen(true);
+                                }}
+                                className="text-blue-600 hover:text-blue-700"
+                              >
+                                <UserCheck className="w-4 h-4" />
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent className="max-w-2xl">
+                              <DialogHeader>
+                                <DialogTitle>Dados do Usuário</DialogTitle>
+                              </DialogHeader>
+                              {viewUser && (
+                                <div className="space-y-4">
+                                  <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                      <Label className="text-sm font-medium text-gray-600">ID do Usuário</Label>
+                                      <p className="text-sm font-mono bg-gray-100 p-2 rounded">{viewUser.id}</p>
+                                    </div>
+                                    <div>
+                                      <Label className="text-sm font-medium text-gray-600">Email</Label>
+                                      <p className="text-sm">{viewUser.email}</p>
+                                    </div>
+                                    <div>
+                                      <Label className="text-sm font-medium text-gray-600">Nome</Label>
+                                      <p className="text-sm">{viewUser.firstName} {viewUser.lastName}</p>
+                                    </div>
+                                    <div>
+                                      <Label className="text-sm font-medium text-gray-600">Telefone</Label>
+                                      <p className="text-sm">{viewUser.phone || "Não informado"}</p>
+                                    </div>
+                                    <div>
+                                      <Label className="text-sm font-medium text-gray-600">Empresa</Label>
+                                      <p className="text-sm">{viewUser.businessName || "Não informado"}</p>
+                                    </div>
+                                    <div>
+                                      <Label className="text-sm font-medium text-gray-600">Plano</Label>
+                                      <Badge className={getPlanColor(viewUser.plan)}>
+                                        {viewUser.plan === "PREMIUM" ? "Premium" : 
+                                         viewUser.plan === "PREMIUM_CORTESIA" ? "Premium Cortesia" : "Gratuito"}
+                                      </Badge>
+                                    </div>
+                                    <div>
+                                      <Label className="text-sm font-medium text-gray-600">Status Pagamento</Label>
+                                      <Badge className={`${getPaymentStatusColor(viewUser.paymentStatus)} text-white`}>
+                                        {viewUser.paymentStatus}
+                                      </Badge>
+                                    </div>
+                                    <div>
+                                      <Label className="text-sm font-medium text-gray-600">Método Pagamento</Label>
+                                      <p className="text-sm">{viewUser.paymentMethod || "Não especificado"}</p>
+                                    </div>
+                                    <div>
+                                      <Label className="text-sm font-medium text-gray-600">Orçamentos Usados</Label>
+                                      <p className="text-sm">{viewUser.quotesUsedThisMonth}/{viewUser.quotesLimit}</p>
+                                    </div>
+                                    <div>
+                                      <Label className="text-sm font-medium text-gray-600">Data de Cadastro</Label>
+                                      <p className="text-sm">{new Date(viewUser.createdAt).toLocaleDateString('pt-BR')} às {new Date(viewUser.createdAt).toLocaleTimeString('pt-BR')}</p>
+                                    </div>
+                                    <div>
+                                      <Label className="text-sm font-medium text-gray-600">Último Login</Label>
+                                      <p className="text-sm">
+                                        {viewUser.lastLoginAt 
+                                          ? `${new Date(viewUser.lastLoginAt).toLocaleDateString('pt-BR')} às ${new Date(viewUser.lastLoginAt).toLocaleTimeString('pt-BR')}`
+                                          : "Nunca logou"}
+                                      </p>
+                                    </div>
+                                    <div>
+                                      <Label className="text-sm font-medium text-gray-600">Plano Expira em</Label>
+                                      <p className="text-sm">
+                                        {viewUser.planExpiresAt 
+                                          ? new Date(viewUser.planExpiresAt).toLocaleDateString('pt-BR')
+                                          : viewUser.plan === "PREMIUM_CORTESIA" 
+                                            ? "Nunca expira (Cortesia)" 
+                                            : "Não se aplica"}
+                                      </p>
+                                    </div>
+                                  </div>
+                                  
+                                  {/* Additional Info */}
+                                  <div className="border-t pt-4">
+                                    <Label className="text-sm font-medium text-gray-600">Informações Adicionais</Label>
+                                    <div className="mt-2 grid grid-cols-2 gap-4 text-sm">
+                                      <div>
+                                        <span className="text-gray-600">Cores personalizadas:</span>
+                                        <div className="flex gap-2 mt-1">
+                                          <div 
+                                            className="w-4 h-4 rounded border"
+                                            style={{ backgroundColor: (viewUser as any).primaryColor || '#3B82F6' }}
+                                          ></div>
+                                          <div 
+                                            className="w-4 h-4 rounded border"
+                                            style={{ backgroundColor: (viewUser as any).secondaryColor || '#EF4444' }}
+                                          ></div>
+                                        </div>
+                                      </div>
+                                      <div>
+                                        <span className="text-gray-600">Referências:</span>
+                                        <p>{(viewUser as any).referralCount || 0} indicações</p>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
+                            </DialogContent>
+                          </Dialog>
+
+                          {/* Edit User Button */}
                           <Dialog open={isDialogOpen && selectedUser?.id === user.id} onOpenChange={(open) => {
                             setIsDialogOpen(open);
                             if (!open) {
@@ -555,6 +684,7 @@ export default function AdminPanel() {
                                       <SelectContent>
                                         <SelectItem value="FREE">Gratuito</SelectItem>
                                         <SelectItem value="PREMIUM">Premium</SelectItem>
+                                        <SelectItem value="PREMIUM_CORTESIA">Premium Cortesia</SelectItem>
                                       </SelectContent>
                                     </Select>
                                   </div>
