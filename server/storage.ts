@@ -726,24 +726,33 @@ export class DatabaseStorage implements IStorage {
       updatedAt: new Date(),
     };
 
-    if (paymentMethod) {
+    if (paymentMethod && paymentMethod !== "none") {
       updateData.paymentMethod = paymentMethod;
+    } else {
+      updateData.paymentMethod = null;
     }
 
     if (plan === "PREMIUM") {
       // Set expiration to 30 days from now
       updateData.planExpiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+      updateData.quotesLimit = 999999; // Unlimited quotes for premium
     } else {
       updateData.planExpiresAt = null;
+      updateData.quotesLimit = 5; // Free plan limit
     }
 
-    const [user] = await db
-      .update(users)
-      .set(updateData)
-      .where(eq(users.id, userId))
-      .returning();
-    
-    return user;
+    try {
+      const [user] = await db
+        .update(users)
+        .set(updateData)
+        .where(eq(users.id, userId))
+        .returning();
+      
+      return user;
+    } catch (error) {
+      console.error("Error updating user plan status:", error);
+      throw error;
+    }
   }
 
   async resetMonthlyQuotes(userId: string): Promise<User | undefined> {

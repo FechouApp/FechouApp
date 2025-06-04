@@ -63,13 +63,15 @@ export default function AdminPanel() {
   // Update user plan mutation
   const updatePlanMutation = useMutation({
     mutationFn: async (data: { userId: string; plan: string; paymentStatus: string; paymentMethod?: string }) => {
+      console.log("Updating user plan with data:", data);
       return await apiRequest(`/api/admin/users/${data.userId}/plan`, "PATCH", {
         plan: data.plan,
         paymentStatus: data.paymentStatus,
-        paymentMethod: data.paymentMethod,
+        paymentMethod: data.paymentMethod || null,
       });
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log("Plan update successful:", data);
       toast({
         title: "Sucesso",
         description: "Plano do usuário atualizado com sucesso!",
@@ -77,7 +79,9 @@ export default function AdminPanel() {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
       setIsDialogOpen(false);
     },
-    onError: (error: Error) => {
+    onError: (error: any) => {
+      console.error("Plan update error:", error);
+      
       if (isUnauthorizedError(error)) {
         toast({
           title: "Não autorizado",
@@ -86,9 +90,12 @@ export default function AdminPanel() {
         });
         return;
       }
+      
+      const errorMessage = error?.response?.data?.message || error?.message || "Falha ao atualizar plano do usuário.";
+      
       toast({
         title: "Erro",
-        description: "Falha ao atualizar plano do usuário.",
+        description: errorMessage,
         variant: "destructive",
       });
     },
@@ -166,11 +173,22 @@ export default function AdminPanel() {
     const paymentStatus = formData.get("paymentStatus") as string;
     const paymentMethod = formData.get("paymentMethod") as string;
 
+    console.log("Form data extracted:", { plan, paymentStatus, paymentMethod });
+
+    if (!plan || !paymentStatus) {
+      toast({
+        title: "Erro",
+        description: "Plano e status de pagamento são obrigatórios.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     updatePlanMutation.mutate({
       userId: selectedUser.id,
       plan,
       paymentStatus,
-      paymentMethod: paymentMethod || undefined,
+      paymentMethod: paymentMethod && paymentMethod !== "none" ? paymentMethod : undefined,
     });
   };
 

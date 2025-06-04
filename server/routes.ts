@@ -853,15 +853,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { userId } = req.params;
       const { plan, paymentStatus, paymentMethod } = req.body;
       
-      const user = await storage.updateUserPlanStatus(userId, plan, paymentStatus, paymentMethod);
-      if (!user) {
+      console.log("Admin updating user plan:", { userId, plan, paymentStatus, paymentMethod });
+      
+      // Validate input
+      if (!plan || !paymentStatus) {
+        return res.status(400).json({ message: "Plan and payment status are required" });
+      }
+      
+      if (!["FREE", "PREMIUM"].includes(plan)) {
+        return res.status(400).json({ message: "Invalid plan type" });
+      }
+      
+      if (!["ativo", "pendente", "vencido"].includes(paymentStatus)) {
+        return res.status(400).json({ message: "Invalid payment status" });
+      }
+      
+      // Check if user exists
+      const existingUser = await storage.getUser(userId);
+      if (!existingUser) {
         return res.status(404).json({ message: "User not found" });
       }
       
+      const user = await storage.updateUserPlanStatus(userId, plan, paymentStatus, paymentMethod);
+      if (!user) {
+        return res.status(500).json({ message: "Failed to update user plan" });
+      }
+      
+      console.log("User plan updated successfully:", user);
       res.json(user);
     } catch (error) {
       console.error("Error updating user plan:", error);
-      res.status(500).json({ message: "Failed to update user plan" });
+      res.status(500).json({ 
+        message: "Failed to update user plan", 
+        error: error instanceof Error ? error.message : "Unknown error" 
+      });
     }
   });
 
