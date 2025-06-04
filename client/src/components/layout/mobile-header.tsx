@@ -92,9 +92,8 @@ export default function MobileHeader() {
               <Menu className="w-10 h-10" />
             </Button>
           </SheetTrigger>
-          <SheetContent side="right" className="w-80 bg-white p-0 flex flex-col h-screen max-h-screen">
-            {/* Header - Fixed */}
-            <div className="brand-gradient p-6 flex-shrink-0">
+          <SheetContent side="right" className="w-80 bg-white p-0 overflow-y-auto">
+            <div className="brand-gradient p-6">
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center">
                   <CheckCircle className="w-6 h-6 text-brand-primary" />
@@ -137,8 +136,8 @@ export default function MobileHeader() {
               </div>
             </div>
             
-            {/* Navigation - Scrollable */}
-            <div className="flex-1 overflow-y-auto p-6">
+            <div className="p-6">
+              {/* Navigation */}
               <nav className="space-y-2 mb-6">
                 {navigation.map((item) => {
                   const Icon = item.icon;
@@ -160,27 +159,27 @@ export default function MobileHeader() {
                   );
                 })}
               </nav>
-            </div>
-            
-            {/* Settings & Logout - Fixed at bottom */}
-            <div className="p-6 pt-4 border-t border-gray-200 space-y-2 flex-shrink-0 bg-white">
-              <Button
-                variant="ghost"
-                onClick={() => handleNavigation("/settings")}
-                className="w-full justify-start text-gray-700 hover:bg-gray-100"
-              >
-                <Settings className="w-5 h-5 mr-3" />
-                Configurações
-              </Button>
               
-              <Button
-                variant="ghost"
-                onClick={handleLogout}
-                className="w-full justify-start text-gray-700 hover:bg-gray-100"
-              >
-                <LogOut className="w-5 h-5 mr-3" />
-                Sair
-              </Button>
+              {/* Settings & Logout */}
+              <div className="pt-6 border-t border-gray-200 space-y-2">
+                <Button
+                  variant="ghost"
+                  onClick={() => handleNavigation("/settings")}
+                  className="w-full justify-start text-gray-700 hover:bg-gray-100"
+                >
+                  <Settings className="w-5 h-5 mr-3" />
+                  Configurações
+                </Button>
+                
+                <Button
+                  variant="ghost"
+                  onClick={handleLogout}
+                  className="w-full justify-start text-gray-700 hover:bg-gray-100"
+                >
+                  <LogOut className="w-5 h-5 mr-3" />
+                  Sair
+                </Button>
+              </div>
             </div>
           </SheetContent>
         </Sheet>
