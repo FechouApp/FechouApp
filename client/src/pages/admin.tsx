@@ -51,6 +51,9 @@ export default function AdminPanel() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [editPlan, setEditPlan] = useState("");
+  const [editPaymentStatus, setEditPaymentStatus] = useState("");
+  const [editPaymentMethod, setEditPaymentMethod] = useState("");
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -78,6 +81,9 @@ export default function AdminPanel() {
       });
       queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
       setIsDialogOpen(false);
+      setEditPlan("");
+      setEditPaymentStatus("");
+      setEditPaymentMethod("");
     },
     onError: (error: any) => {
       console.error("Plan update error:", error);
@@ -167,15 +173,10 @@ export default function AdminPanel() {
   const handleUpdatePlan = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!selectedUser) return;
-    
-    const formData = new FormData(event.currentTarget);
-    const plan = formData.get("plan") as string;
-    const paymentStatus = formData.get("paymentStatus") as string;
-    const paymentMethod = formData.get("paymentMethod") as string;
 
-    console.log("Form data extracted:", { plan, paymentStatus, paymentMethod });
+    console.log("Form data extracted:", { plan: editPlan, paymentStatus: editPaymentStatus, paymentMethod: editPaymentMethod });
 
-    if (!plan || !paymentStatus) {
+    if (!editPlan || !editPaymentStatus) {
       toast({
         title: "Erro",
         description: "Plano e status de pagamento são obrigatórios.",
@@ -186,9 +187,9 @@ export default function AdminPanel() {
 
     updatePlanMutation.mutate({
       userId: selectedUser.id,
-      plan,
-      paymentStatus,
-      paymentMethod: paymentMethod && paymentMethod !== "none" ? paymentMethod : undefined,
+      plan: editPlan,
+      paymentStatus: editPaymentStatus,
+      paymentMethod: editPaymentMethod && editPaymentMethod !== "none" ? editPaymentMethod : undefined,
     });
   };
 
@@ -430,7 +431,12 @@ export default function AdminPanel() {
                               <Button 
                                 variant="outline" 
                                 size="sm"
-                                onClick={() => setSelectedUser(user)}
+                                onClick={() => {
+                                  setSelectedUser(user);
+                                  setEditPlan(user.plan);
+                                  setEditPaymentStatus(user.paymentStatus);
+                                  setEditPaymentMethod(user.paymentMethod || "");
+                                }}
                               >
                                 <Settings className="w-4 h-4" />
                               </Button>
@@ -449,7 +455,7 @@ export default function AdminPanel() {
                                 
                                 <div>
                                   <Label htmlFor="plan">Plano</Label>
-                                  <Select name="plan" defaultValue={user.plan}>
+                                  <Select value={editPlan} onValueChange={setEditPlan}>
                                     <SelectTrigger>
                                       <SelectValue />
                                     </SelectTrigger>
@@ -462,7 +468,7 @@ export default function AdminPanel() {
 
                                 <div>
                                   <Label htmlFor="paymentStatus">Status de Pagamento</Label>
-                                  <Select name="paymentStatus" defaultValue={user.paymentStatus}>
+                                  <Select value={editPaymentStatus} onValueChange={setEditPaymentStatus}>
                                     <SelectTrigger>
                                       <SelectValue />
                                     </SelectTrigger>
@@ -476,12 +482,12 @@ export default function AdminPanel() {
 
                                 <div>
                                   <Label htmlFor="paymentMethod">Método de Pagamento</Label>
-                                  <Select name="paymentMethod" defaultValue={user.paymentMethod || ""}>
+                                  <Select value={editPaymentMethod} onValueChange={setEditPaymentMethod}>
                                     <SelectTrigger>
                                       <SelectValue placeholder="Selecione um método" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                      <SelectItem value="none">Não especificado</SelectItem>
+                                      <SelectItem value="">Não especificado</SelectItem>
                                       <SelectItem value="pix">PIX</SelectItem>
                                       <SelectItem value="manual">Manual</SelectItem>
                                       <SelectItem value="asaas">Asaas</SelectItem>
@@ -500,7 +506,12 @@ export default function AdminPanel() {
                                   <Button 
                                     type="button"
                                     variant="outline"
-                                    onClick={() => setIsDialogOpen(false)}
+                                    onClick={() => {
+                                      setIsDialogOpen(false);
+                                      setEditPlan("");
+                                      setEditPaymentStatus("");
+                                      setEditPaymentMethod("");
+                                    }}
                                   >
                                     Cancelar
                                   </Button>
