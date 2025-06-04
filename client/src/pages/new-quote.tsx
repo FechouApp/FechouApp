@@ -17,13 +17,11 @@ import {
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import LoadingSpinner from "@/components/common/loading-spinner";
-import QuoteItem from "@/components/quotes/quote-item";
-import SavedItemsSection from "@/components/quotes/saved-items-section";
 import QuickSetup from "@/components/quick-setup";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useLocation } from "wouter";
-import { ArrowLeft, Plus, Eye, Save, Crown } from "lucide-react";
+import { ArrowLeft, Plus, Save, Crown, Trash2 } from "lucide-react";
 import type { Client, CreateQuoteRequest, QuoteWithDetails } from "@/types";
 
 interface QuoteItemData {
@@ -270,9 +268,9 @@ export default function NewQuote() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Mobile Header */}
-      <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white">
-        <div className="px-4 py-4">
-          <div className="flex items-center gap-3 mb-2">
+      <header className="bg-gradient-to-r from-blue-600 to-purple-600 text-white sticky top-0 z-50">
+        <div className="p-4">
+          <div className="flex items-center gap-3">
             <Button
               variant="ghost"
               size="sm"
@@ -281,21 +279,23 @@ export default function NewQuote() {
             >
               <ArrowLeft className="w-5 h-5" />
             </Button>
-            <h1 className="text-lg font-semibold">
-              {isEditing ? "Editar Orçamento" : "Novo Orçamento"}
-            </h1>
+            <div>
+              <h1 className="text-lg font-semibold">
+                {isEditing ? "Editar Orçamento" : "Novo Orçamento"}
+              </h1>
+              <p className="text-sm text-white/80">
+                {isEditing ? "Edite os dados do seu orçamento" : "Crie um novo orçamento para seu cliente"}
+              </p>
+            </div>
           </div>
-          <p className="text-sm text-white/80 ml-11">
-            {isEditing ? "Edite os dados do seu orçamento" : "Crie um novo orçamento para seu cliente"}
-          </p>
         </div>
-      </div>
+      </header>
 
       {/* Content */}
-      <div className="p-4 space-y-4 max-w-md mx-auto">
+      <main className="p-4 pb-20 max-w-lg mx-auto">
         {/* Plan limit warning */}
         {planLimits && !planLimits.isPremium && !planLimits.canCreateQuote && (
-          <Card className="border-amber-200 bg-amber-50">
+          <Card className="border-amber-200 bg-amber-50 mb-4">
             <CardContent className="p-3">
               <div className="flex items-start gap-2">
                 <div className="w-5 h-5 bg-amber-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -320,7 +320,7 @@ export default function NewQuote() {
         )}
 
         {/* Client Selection */}
-        <Card>
+        <Card className="mb-4">
           <CardHeader className="pb-3">
             <CardTitle className="text-base">Cliente e Informações</CardTitle>
           </CardHeader>
@@ -370,7 +370,7 @@ export default function NewQuote() {
         </Card>
 
         {/* Items */}
-        <Card>
+        <Card className="mb-4">
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <div>
@@ -391,43 +391,68 @@ export default function NewQuote() {
               </Button>
             </div>
           </CardHeader>
-          <CardContent className="space-y-3">
-            <SavedItemsSection 
-              onAddItem={(savedItem) => {
-                if (!isUserPremium && items.length >= maxItemsForFreeUser) {
-                  toast({
-                    title: "Limite atingido",
-                    description: `Plano gratuito permite apenas ${maxItemsForFreeUser} itens.`,
-                    variant: "destructive",
-                  });
-                  return;
-                }
-                const newItem: QuoteItemData = {
-                  id: Math.random().toString(36).substr(2, 9),
-                  description: savedItem.description,
-                  quantity: savedItem.quantity,
-                  unitPrice: savedItem.unitPrice,
-                  total: (parseFloat(savedItem.unitPrice.replace(',', '.')) * savedItem.quantity).toFixed(2)
-                };
-                setItems(prev => [...prev, newItem]);
-              }}
-            />
-
+          <CardContent className="space-y-4">
             {items.map((item, index) => (
-              <QuoteItem
-                key={item.id}
-                item={item}
-                onUpdate={(field, value) => updateItem(item.id, field, value)}
-                onRemove={() => removeItem(item.id)}
-                canRemove={items.length > 1}
-                index={index + 1}
-              />
+              <div key={item.id} className="p-3 bg-gray-50 rounded-lg space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium text-gray-700">Item #{index + 1}</span>
+                  {items.length > 1 && (
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => removeItem(item.id)}
+                      className="text-red-500 hover:text-red-700 h-8 w-8 p-0"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  )}
+                </div>
+                
+                <div>
+                  <Label className="text-xs font-medium text-gray-600 mb-1 block">Descrição *</Label>
+                  <Textarea
+                    value={item.description}
+                    onChange={(e) => updateItem(item.id, 'description', e.target.value)}
+                    placeholder="Descrição do serviço/produto"
+                    rows={2}
+                    className="text-sm"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <Label className="text-xs font-medium text-gray-600 mb-1 block">Quantidade</Label>
+                    <Input
+                      type="number"
+                      value={item.quantity}
+                      onChange={(e) => updateItem(item.id, 'quantity', parseInt(e.target.value) || 1)}
+                      min="1"
+                      className="text-sm"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-xs font-medium text-gray-600 mb-1 block">Valor Unit.</Label>
+                    <Input
+                      value={item.unitPrice}
+                      onChange={(e) => updateItem(item.id, 'unitPrice', e.target.value.replace(/[^\d.,]/g, '').replace(',', '.'))}
+                      placeholder="0,00"
+                      className="text-sm"
+                    />
+                  </div>
+                </div>
+
+                <div className="text-right">
+                  <span className="text-sm font-medium text-gray-700">
+                    Total: R$ {parseFloat(item.total || "0").toFixed(2).replace('.', ',')}
+                  </span>
+                </div>
+              </div>
             ))}
           </CardContent>
         </Card>
 
         {/* Description */}
-        <Card>
+        <Card className="mb-4">
           <CardHeader className="pb-3">
             <CardTitle className="text-base">Descrição do Projeto</CardTitle>
           </CardHeader>
@@ -442,7 +467,7 @@ export default function NewQuote() {
         </Card>
 
         {/* Additional Info */}
-        <Card>
+        <Card className="mb-4">
           <CardHeader className="pb-3">
             <CardTitle className="text-base">Informações Adicionais</CardTitle>
           </CardHeader>
@@ -516,7 +541,7 @@ export default function NewQuote() {
         </Card>
 
         {/* Financial Summary */}
-        <Card>
+        <Card className="mb-4">
           <CardHeader className="pb-3">
             <CardTitle className="text-base">Resumo Financeiro</CardTitle>
           </CardHeader>
@@ -524,7 +549,7 @@ export default function NewQuote() {
             <div className="space-y-3">
               <div className="flex justify-between text-sm">
                 <span>Subtotal:</span>
-                <span>R$ {totals.subtotal}</span>
+                <span>R$ {totals.subtotal.replace('.', ',')}</span>
               </div>
               <div className="flex justify-between items-center text-sm">
                 <span>Desconto:</span>
@@ -541,14 +566,16 @@ export default function NewQuote() {
               <hr />
               <div className="flex justify-between font-semibold">
                 <span>Total:</span>
-                <span className="text-blue-600">R$ {totals.total}</span>
+                <span className="text-blue-600">R$ {totals.total.replace('.', ',')}</span>
               </div>
             </div>
           </CardContent>
         </Card>
+      </main>
 
-        {/* Action Buttons */}
-        <div className="pb-6">
+      {/* Fixed Bottom Action Button */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t p-4 z-40">
+        <div className="max-w-lg mx-auto">
           <Button 
             onClick={handleSubmit}
             disabled={!canProceed || createQuoteMutation.isPending}
