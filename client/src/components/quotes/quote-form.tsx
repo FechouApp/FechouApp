@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -92,8 +93,6 @@ export default function QuoteForm({
     setItems([...items, newItem]);
   };
 
-    // Função removida - agora integrada diretamente no SavedItemsSection
-
   const removeItem = (id: string) => {
     if (items.length > 1) {
       setItems(items.filter(item => item.id !== id));
@@ -171,106 +170,99 @@ export default function QuoteForm({
   const canProceed = selectedClientId && title && items.every(item => item.description);
 
   return (
-    <div className="space-y-4 md:space-y-6">
+    <div className="space-y-4">
       {/* Client and Quote Info */}
-      <Card className="bg-white shadow-lg overflow-hidden mx-0">
-        <CardHeader className="p-3 sm:p-4 md:p-6">
-          <CardTitle className="text-base sm:text-lg font-semibold text-gray-800">
+      <Card className="bg-white shadow-sm border-gray-200">
+        <CardHeader className="p-4 pb-3">
+          <CardTitle className="text-lg font-semibold text-gray-800">
             Informações do Orçamento
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4 md:space-y-6 p-3 sm:p-4 md:p-6 pt-0">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-            <div className="space-y-4">
-              <div>
-                <Label className="text-sm font-medium text-gray-700">Cliente *</Label>
-                <Select value={selectedClientId} onValueChange={setSelectedClientId}>
-                  <SelectTrigger className="mt-2 w-full">
-                    <SelectValue placeholder="Selecione um cliente..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {clients.map((client) => (
-                      <SelectItem key={client.id} value={client.id}>
-                        {client.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {selectedClient && (
-                  <div className="mt-2 p-3 bg-gray-50 rounded-lg">
-                    <p className="text-sm text-gray-600 break-words">
-                      {selectedClient.email && `${selectedClient.email} • `}
-                      {selectedClient.phone}
+        <CardContent className="p-4 pt-0 space-y-4">
+          <div className="grid grid-cols-1 gap-4">
+            <div>
+              <Label className="text-sm font-medium text-gray-700 mb-2 block">Cliente *</Label>
+              <Select value={selectedClientId} onValueChange={setSelectedClientId}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Selecione um cliente..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {clients.map((client) => (
+                    <SelectItem key={client.id} value={client.id}>
+                      {client.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {selectedClient && (
+                <div className="mt-3 p-3 bg-gray-50 rounded-lg">
+                  <p className="text-sm text-gray-600">
+                    {selectedClient.email && `${selectedClient.email} • `}
+                    {selectedClient.phone}
+                  </p>
+                  {selectedClient.city && selectedClient.state && (
+                    <p className="text-sm text-gray-600">
+                      {selectedClient.city}, {selectedClient.state}
                     </p>
-                    {selectedClient.city && selectedClient.state && (
-                      <p className="text-sm text-gray-600 break-words">
-                        {selectedClient.city}, {selectedClient.state}
-                      </p>
-                    )}
-                  </div>
-                )}
-              </div>
+                  )}
+                </div>
+              )}
             </div>
 
-            <div className="space-y-4">
-              <div>
-                <Label className="text-sm font-medium text-gray-700">Título do Orçamento *</Label>
-                <Input
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  placeholder="Ex: Reforma Residencial"
-                  className="mt-2 w-full"
-                />
-              </div>
+            <div>
+              <Label className="text-sm font-medium text-gray-700 mb-2 block">Título do Orçamento *</Label>
+              <Input
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="Ex: Reforma Residencial"
+                className="w-full"
+              />
+            </div>
 
-              <div>
-                <Label className="text-sm font-medium text-gray-700">Validade (dias)</Label>
-                <Input
-                  type="number"
-                  value={validityDays}
-                  onChange={(e) => setValidityDays(Number(e.target.value))}
-                  min="1"
-                  max="365"
-                  className="mt-2 w-full"
-                />
-              </div>
+            <div>
+              <Label className="text-sm font-medium text-gray-700 mb-2 block">Validade (dias)</Label>
+              <Input
+                type="number"
+                value={validityDays}
+                onChange={(e) => setValidityDays(Number(e.target.value))}
+                min="1"
+                max="365"
+                className="w-full"
+              />
             </div>
           </div>
-
-
         </CardContent>
       </Card>
 
       {/* Items */}
-      <Card className="bg-white shadow-lg overflow-hidden mx-0">
-        <CardHeader className="p-3 sm:p-4 md:p-6">
-          <div className="flex flex-col gap-3">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-3">
-              <CardTitle className="text-base sm:text-lg font-semibold text-gray-800">
-                <span className="block">Serviços e Produtos</span>
-                {!isUserPremium && (
-                  <span className="text-xs text-amber-600 bg-amber-50 px-2 py-1 rounded mt-2 inline-block">
-                    Máx. {maxItemsForFreeUser} itens (Gratuito)
-                  </span>
-                )}
+      <Card className="bg-white shadow-sm border-gray-200">
+        <CardHeader className="p-4 pb-3">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div>
+              <CardTitle className="text-lg font-semibold text-gray-800">
+                Serviços e Produtos
               </CardTitle>
-              <Button
-                onClick={addItem}
-                className="brand-gradient text-white w-full sm:w-auto text-sm"
-                disabled={!isUserPremium && items.length >= maxItemsForFreeUser}
-                size="sm"
-              >
-                <Plus className="w-4 h-4 mr-1" />
-                <span className="hidden xs:inline">Adicionar Item</span>
-                <span className="xs:hidden">Adicionar</span>
-                {!isUserPremium && items.length >= maxItemsForFreeUser && (
-                  <Crown className="w-4 h-4 ml-1" />
-                )}
-              </Button>
+              {!isUserPremium && (
+                <span className="text-xs text-amber-600 bg-amber-50 px-2 py-1 rounded mt-1 inline-block">
+                  Máx. {maxItemsForFreeUser} itens (Gratuito)
+                </span>
+              )}
             </div>
+            <Button
+              onClick={addItem}
+              className="brand-gradient text-white w-full sm:w-auto"
+              disabled={!isUserPremium && items.length >= maxItemsForFreeUser}
+              size="sm"
+            >
+              <Plus className="w-4 h-4 mr-1" />
+              Adicionar Item
+              {!isUserPremium && items.length >= maxItemsForFreeUser && (
+                <Crown className="w-4 h-4 ml-1" />
+              )}
+            </Button>
           </div>
         </CardHeader>
-        <CardContent className="space-y-2 sm:space-y-3 md:space-y-4 p-2 sm:p-3 md:p-4 lg:p-6 pt-0">
+        <CardContent className="p-4 pt-0 space-y-3">
           {/* Seção de Itens Salvos */}
           <SavedItemsSection 
             onAddItem={(savedItem) => {
@@ -286,79 +278,79 @@ export default function QuoteForm({
           />
 
           {/* Lista de Itens do Orçamento */}
-          {items.map((item, index) => (
-            <QuoteItem
-              key={item.id}
-              item={item}
-              onUpdate={(field, value) => updateItem(item.id, field, value)}
-              onRemove={() => removeItem(item.id)}
-              canRemove={items.length > 1}
-              index={index + 1}
-            />
-          ))}
+          <div className="space-y-3">
+            {items.map((item, index) => (
+              <QuoteItem
+                key={item.id}
+                item={item}
+                onUpdate={(field, value) => updateItem(item.id, field, value)}
+                onRemove={() => removeItem(item.id)}
+                canRemove={items.length > 1}
+                index={index + 1}
+              />
+            ))}
+          </div>
         </CardContent>
       </Card>
 
-
-
       {/* Description */}
-      <Card className="bg-white shadow-lg mx-0">
-        <CardHeader className="p-3 sm:p-4 md:p-6">
-          <CardTitle className="text-base sm:text-lg font-semibold text-gray-800">
+      <Card className="bg-white shadow-sm border-gray-200">
+        <CardHeader className="p-4 pb-3">
+          <CardTitle className="text-lg font-semibold text-gray-800">
             Descrição
           </CardTitle>
         </CardHeader>
-        <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
+        <CardContent className="p-4 pt-0">
           <Textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Descrição detalhada do projeto..."
             rows={3}
-            className="w-full text-sm"
+            className="w-full"
           />
         </CardContent>
       </Card>
 
-      {/* Summary and Settings */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+      {/* Additional Info and Summary */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Additional Info */}
-        <Card className="bg-white shadow-lg overflow-hidden mx-0">
-          <CardHeader className="p-3 sm:p-4 md:p-6">
-            <CardTitle className="text-base font-semibold text-gray-800">
+        <Card className="bg-white shadow-sm border-gray-200">
+          <CardHeader className="p-4 pb-3">
+            <CardTitle className="text-lg font-semibold text-gray-800">
               Informações Adicionais
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3 sm:space-y-4 p-3 sm:p-4 md:p-6 pt-0">
+          <CardContent className="p-4 pt-0 space-y-4">
             <div>
-              <Label className="text-sm font-medium text-gray-700">Condições de Pagamento</Label>
+              <Label className="text-sm font-medium text-gray-700 mb-2 block">Condições de Pagamento</Label>
               <Textarea
                 value={paymentTerms}
                 onChange={(e) => setPaymentTerms(e.target.value)}
                 placeholder="Ex: 50% na assinatura do contrato, 50% na entrega..."
                 rows={3}
-                className="mt-2"
+                className="w-full"
               />
             </div>
 
             <div>
-              <Label className="text-sm font-medium text-gray-700">Prazo de Execução</Label>
+              <Label className="text-sm font-medium text-gray-700 mb-2 block">Prazo de Execução</Label>
               <Textarea
                 value={executionDeadline}
                 onChange={(e) => setExecutionDeadline(e.target.value)}
                 placeholder="Ex: 30 dias corridos após aprovação do projeto..."
                 rows={3}
-                className="mt-2"
+                className="w-full"
               />
             </div>
 
             <div>
-              <Label className="text-sm font-medium text-gray-700">Observações Gerais</Label>
+              <Label className="text-sm font-medium text-gray-700 mb-2 block">Observações Gerais</Label>
               <Textarea
                 value={observations}
                 onChange={(e) => setObservations(e.target.value)}
                 placeholder="Informações adicionais, termos e condições..."
                 rows={3}
-                className="mt-2"
+                className="w-full"
               />
             </div>
 
@@ -405,13 +397,13 @@ export default function QuoteForm({
         </Card>
 
         {/* Financial Summary */}
-        <Card className="bg-white shadow-lg overflow-hidden mx-0">
-          <CardHeader className="p-3 sm:p-4 md:p-6">
-            <CardTitle className="text-base font-semibold text-gray-800">
+        <Card className="bg-white shadow-sm border-gray-200">
+          <CardHeader className="p-4 pb-3">
+            <CardTitle className="text-lg font-semibold text-gray-800">
               Resumo Financeiro
             </CardTitle>
           </CardHeader>
-          <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
+          <CardContent className="p-4 pt-0">
             <div className="space-y-4">
               <div className="space-y-3 pb-4 border-b border-gray-200">
                 <div className="flex justify-between">
@@ -444,14 +436,14 @@ export default function QuoteForm({
       </div>
 
       {/* Action Buttons */}
-      <Card className="bg-white shadow-lg overflow-hidden mx-0">
-        <CardContent className="p-3 sm:p-4 md:p-6">
-          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 justify-end">
+      <Card className="bg-white shadow-sm border-gray-200">
+        <CardContent className="p-4">
+          <div className="flex flex-col sm:flex-row gap-3 justify-end">
             <Button 
               variant="secondary"
               onClick={() => handleSubmit('preview')}
               disabled={!canProceed || isSubmitting}
-              className="w-full sm:w-auto order-2 sm:order-1 text-sm"
+              className="w-full sm:w-auto order-2 sm:order-1"
               size="sm"
             >
               <Eye className="w-4 h-4 mr-1" />
@@ -460,7 +452,7 @@ export default function QuoteForm({
             <Button 
               onClick={() => handleSubmit('save')}
               disabled={!canProceed || isSubmitting}
-              className="brand-gradient text-white w-full sm:w-auto order-1 sm:order-2 text-sm"
+              className="brand-gradient text-white w-full sm:w-auto order-1 sm:order-2"
               size="sm"
             >
               <Save className="w-4 h-4 mr-1" />

@@ -7,27 +7,27 @@
   .mobile-container {
     @apply px-3 py-3 sm:px-4 sm:py-4 md:px-6 md:py-6 lg:px-8 lg:py-8;
   }
-  
+
   .mobile-grid {
     @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6;
   }
-  
+
   .mobile-flex {
     @apply flex flex-col sm:flex-row gap-2 sm:gap-3 md:gap-4;
   }
-  
+
   .mobile-text-lg {
     @apply text-base sm:text-lg md:text-xl lg:text-2xl;
   }
-  
+
   .mobile-text-xl {
     @apply text-lg sm:text-xl md:text-2xl lg:text-3xl;
   }
-  
+
   .mobile-btn {
     @apply w-full sm:w-auto text-sm;
   }
-  
+
   .mobile-card {
     @apply p-3 sm:p-4 md:p-6 lg:p-8;
   }
@@ -36,23 +36,23 @@
   .text-responsive-sm {
     @apply text-xs sm:text-sm;
   }
-  
+
   .text-responsive-base {
     @apply text-sm sm:text-base;
   }
-  
+
   .text-responsive-lg {
     @apply text-base sm:text-lg;
   }
 
   /* Mobile-specific breakpoints - using min-width media queries */
-  
+
   /* Fix for very small screens */
   @media (max-width: 375px) {
     .mobile-container {
       @apply px-2 py-2;
     }
-    
+
     .mobile-card {
       @apply p-2;
     }
@@ -88,14 +88,14 @@
   --destructive-foreground: 60 9.1% 97.8%;
   --ring: 258 90% 66%;
   --radius: 0.75rem;
-  
+
   /* Custom brand colors */
   --brand-primary: 258 90% 66%; /* #667eea */
   --brand-secondary: 274 44% 59%; /* #764ba2 */
   --brand-success: 159 64% 45%; /* #10b981 */
   --brand-warning: 43 96% 56%; /* #f59e0b */
   --brand-danger: 0 84% 60%; /* #ef4444 */
-  
+
   /* Gradient backgrounds */
   --gradient-brand: linear-gradient(135deg, hsl(var(--brand-primary)) 0%, hsl(var(--brand-secondary)) 100%);
   --gradient-card: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
@@ -137,44 +137,44 @@
   .brand-gradient {
     background: var(--gradient-brand);
   }
-  
+
   .card-gradient {
     background: var(--gradient-card);
   }
-  
+
   .glassmorphism {
     background: rgba(255, 255, 255, 0.1);
     backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.2);
   }
-  
+
   .sidebar-transition {
     transition: transform 0.3s ease-in-out;
   }
-  
+
   .card-hover {
     transition: all 0.3s ease;
   }
-  
+
   .card-hover:hover {
     transform: translateY(-2px);
     box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
   }
-  
+
   .custom-scrollbar::-webkit-scrollbar {
     width: 6px;
   }
-  
+
   .custom-scrollbar::-webkit-scrollbar-track {
     background: #f1f5f9;
     border-radius: 10px;
   }
-  
+
   .custom-scrollbar::-webkit-scrollbar-thumb {
     background: #cbd5e1;
     border-radius: 10px;
   }
-  
+
   .custom-scrollbar::-webkit-scrollbar-thumb:hover {
     background: #94a3b8;
   }
@@ -184,24 +184,81 @@
   .text-brand-primary {
     color: hsl(var(--brand-primary));
   }
-  
+
   .text-brand-secondary {
     color: hsl(var(--brand-secondary));
   }
-  
+
   .bg-brand-primary {
     background-color: hsl(var(--brand-primary));
   }
-  
+
   .bg-brand-secondary {
     background-color: hsl(var(--brand-secondary));
   }
-  
+
   .border-brand-primary {
     border-color: hsl(var(--brand-primary));
   }
-  
+
   .border-brand-secondary {
     border-color: hsl(var(--brand-secondary));
+  }
+}
+
+/* Custom scrollbar for webkit browsers */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* Mobile form optimizations */
+@media (max-width: 640px) {
+  .card {
+    border-radius: 8px;
+    margin: 0 2px;
+  }
+
+  .input, .textarea, .select {
+    font-size: 16px; /* Prevents zoom on iOS */
+  }
+
+  .grid {
+    gap: 1rem;
+  }
+
+  .space-y-4 > * + * {
+    margin-top: 1rem;
+  }
+
+  .space-y-3 > * + * {
+    margin-top: 0.75rem;
+  }
+}
+
+/* Touch targets for mobile */
+@media (max-width: 768px) {
+  button {
+    min-height: 44px;
+    padding: 12px 16px;
+  }
+
+  .checkbox {
+    min-width: 20px;
+    min-height: 20px;
   }
 }
