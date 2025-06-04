@@ -7,16 +7,17 @@ async function throwIfResNotOk(res: Response) {
   }
 }
 
-export async function apiRequest(method: string, url: string, data?: any) {
+export async function apiRequest(url: string, method: string = "GET", body?: any) {
   const options: RequestInit = {
-    method,
+    method: method.toUpperCase(),
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
     },
+    credentials: "include",
   };
 
-  if (data) {
-    options.body = JSON.stringify(data);
+  if (body) {
+    options.body = JSON.stringify(body);
   }
 
   const response = await fetch(url, options);
