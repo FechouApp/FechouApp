@@ -31,7 +31,7 @@ export default function NewQuote() {
   const { isAuthenticated, isLoading: authLoading } = useAuth();
   const [location, setLocation] = useLocation();
   const [step, setStep] = useState(1);
-  
+
   // Extract quote ID from URL for editing
   const quoteId = location.includes('/edit') ? location.split('/')[2] : null;
   const isEditing = !!quoteId;
