@@ -837,6 +837,123 @@ export class DatabaseStorage implements IStorage {
       throw error;
     }
   }
+
+  async getUsersByPlan(plan: string): Promise<User[]> {
+    return await db
+      .select()
+      .from(users)
+      .where(eq(users.plan, plan))
+      .orderBy(desc(users.createdAt));
+  }
+
+  async getUsersByPaymentStatus(status: string): Promise<User[]> {
+    return await db
+      .select()
+      .from(users)
+      .where(eq(users.paymentStatus, status))
+      .orderBy(desc(users.createdAt));
+  }
+
+  async incrementQuoteUsage(userId: string): Promise<User | undefined> {
+    const user = await this.getUser(userId);
+    if (!user) return undefined;
+
+    const [updatedUser] = await db
+      .update(users)
+      .set({ 
+        quotesUsedThisMonth: user.quotesUsedThisMonth + 1,
+        updatedAt: new Date()
+      })
+      .where(eq(users.id, userId))
+      .returning();
+    return updatedUser;
+  }
+
+  async checkAdminStatus(userId: string): Promise<boolean> {
+    const user = await this.getUser(userId);
+    return user?.isAdmin === true;
+  }
+
+  async getAdminStats(): Promise<{
+    totalUsers: number;
+    premiumUsers: number;
+    freeUsers: number;
+    totalQuotes: number;
+    activeQuotes: number;
+    approvedQuotes: number;
+    pendingQuotes: number;
+    rejectedQuotes: number;
+    totalRevenue: string;
+    monthlyRevenue: string;
+    averageQuoteValue: string;
+    conversionRate: number;
+    userGrowthRate: number;
+    retentionRate: number;
+    churnRate: number;
+    activeUsersToday: number;
+    activeUsersWeek: number;
+    activeUsersMonth: number;
+  }> {
+    // Get user stats
+    const [userStats] = await db
+      .select({
+        totalUsers: count(),
+        premiumUsers: count(sql`CASE WHEN plan IN ('PREMIUM', 'PREMIUM_CORTESIA') THEN 1 END`),
+        freeUsers: count(sql`CASE WHEN plan = 'FREE' THEN 1 END`),
+      })
+      .from(users);
+
+    // Get quote stats
+    const [quoteStats] = await db
+      .select({
+        totalQuotes: count(),
+        activeQuotes: count(sql`CASE WHEN status = 'pending' THEN 1 END`),
+        approvedQuotes: count(sql`CASE WHEN status IN ('approved', 'paid') THEN 1 END`),
+        pendingQuotes: count(sql`CASE WHEN status = 'pending' THEN 1 END`),
+        rejectedQuotes: count(sql`CASE WHEN status = 'rejected' THEN 1 END`),
+        totalRevenue: sql<string>`COALESCE(SUM(CASE WHEN status IN ('approved', 'paid') THEN total ELSE 0 END), 0)`,
+      })
+      .from(quotes);
+
+    // Get monthly revenue
+    const [monthlyStats] = await db
+      .select({
+        monthlyRevenue: sql<string>`COALESCE(SUM(CASE WHEN status IN ('approved', 'paid') THEN total ELSE 0 END), 0)`,
+      })
+      .from(quotes)
+      .where(sql`created_at >= date_trunc('month', current_date)`);
+
+    // Calculate averages and rates
+    const totalRevenue = parseFloat(quoteStats.totalRevenue);
+    const averageQuoteValue = quoteStats.approvedQuotes > 0 
+      ? (totalRevenue / quoteStats.approvedQuotes).toFixed(2)
+      : "0";
+
+    const conversionRate = quoteStats.totalQuotes > 0 
+      ? (quoteStats.approvedQuotes / quoteStats.totalQuotes) * 100
+      : 0;
+
+    return {
+      totalUsers: userStats.totalUsers,
+      premiumUsers: userStats.premiumUsers,
+      freeUsers: userStats.freeUsers,
+      totalQuotes: quoteStats.totalQuotes,
+      activeQuotes: quoteStats.activeQuotes,
+      approvedQuotes: quoteStats.approvedQuotes,
+      pendingQuotes: quoteStats.pendingQuotes,
+      rejectedQuotes: quoteStats.rejectedQuotes,
+      totalRevenue: quoteStats.totalRevenue,
+      monthlyRevenue: monthlyStats.monthlyRevenue,
+      averageQuoteValue,
+      conversionRate: Number(conversionRate.toFixed(1)),
+      userGrowthRate: 0, // Would need historical data to calculate
+      retentionRate: 0, // Would need historical data to calculate
+      churnRate: 0, // Would need historical data to calculate
+      activeUsersToday: 0, // Would need login tracking to calculate
+      activeUsersWeek: 0, // Would need login tracking to calculate
+      activeUsersMonth: 0, // Would need login tracking to calculate
+    };
+  }
 }
 
 export const storage = new DatabaseStorage();
