@@ -65,12 +65,12 @@ export default function AdminPanel() {
 
   // Update user plan mutation
   const updatePlanMutation = useMutation({
-    mutationFn: async (data: { userId: string; plan: string; paymentStatus: string; paymentMethod?: string }) => {
+    mutationFn: async (data: { userId: string; plan: string; paymentStatus: string; paymentMethod?: string | null }) => {
       console.log("Updating user plan with data:", data);
       return await apiRequest(`/api/admin/users/${data.userId}/plan`, "PATCH", {
         plan: data.plan,
         paymentStatus: data.paymentStatus,
-        paymentMethod: data.paymentMethod || null,
+        paymentMethod: data.paymentMethod,
       });
     },
     onSuccess: (data) => {
@@ -190,7 +190,7 @@ export default function AdminPanel() {
       userId: selectedUser.id,
       plan: editPlan,
       paymentStatus: editPaymentStatus,
-      paymentMethod: editPaymentMethod && editPaymentMethod !== "" ? editPaymentMethod : undefined,
+      paymentMethod: editPaymentMethod || null,
     });
   };
 

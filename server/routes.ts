@@ -874,7 +874,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "User not found" });
       }
       
-      const user = await storage.updateUserPlanStatus(userId, plan, paymentStatus, paymentMethod);
+      // Clean paymentMethod value
+      const cleanPaymentMethod = paymentMethod === "" ? null : paymentMethod;
+      
+      const user = await storage.updateUserPlanStatus(userId, plan, paymentStatus, cleanPaymentMethod);
       if (!user) {
         return res.status(500).json({ message: "Failed to update user plan" });
       }

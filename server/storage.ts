@@ -719,7 +719,7 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(users).orderBy(desc(users.createdAt));
   }
 
-  async updateUserPlanStatus(userId: string, plan: string, paymentStatus: string, paymentMethod?: string): Promise<User | undefined> {
+  async updateUserPlanStatus(userId: string, plan: string, paymentStatus: string, paymentMethod?: string | null): Promise<User | undefined> {
     console.log("Storage: updateUserPlanStatus called with:", { userId, plan, paymentStatus, paymentMethod });
     
     const updateData: any = {
@@ -728,11 +728,8 @@ export class DatabaseStorage implements IStorage {
       updatedAt: new Date(),
     };
 
-    if (paymentMethod && paymentMethod !== "") {
-      updateData.paymentMethod = paymentMethod;
-    } else {
-      updateData.paymentMethod = null;
-    }
+    // Handle paymentMethod properly
+    updateData.paymentMethod = paymentMethod || null;
 
     if (plan === "PREMIUM") {
       // Set expiration to 30 days from now
