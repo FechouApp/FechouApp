@@ -70,8 +70,6 @@ export default function QuoteForm({
       : [{ id: "1", description: "", quantity: 1, unitPrice: "0", total: "0" }]
   );
   const [discount, setDiscount] = useState(existingQuote?.discount || "0");
-    const [showSavedItems, setShowSavedItems] = useState(false);
-    const [saveItemAsNew, setSaveItemAsNew] = useState(false);
 
   const addItem = () => {
     // Verificar limitação do plano gratuito
@@ -94,17 +92,7 @@ export default function QuoteForm({
     setItems([...items, newItem]);
   };
 
-    const insertSavedItem = (savedItem: SavedItem) => {
-        const newItem = {
-            id: `item-${Date.now()}`,
-            description: savedItem.name,
-            quantity: 1,
-            unitPrice: savedItem.unitPrice,
-            total: savedItem.unitPrice,
-        };
-        setItems([...items, newItem]);
-        setShowSavedItems(false);
-    };
+    // Função removida - agora integrada diretamente no SavedItemsSection
 
   const removeItem = (id: string) => {
     if (items.length > 1) {
@@ -264,27 +252,17 @@ export default function QuoteForm({
               </span>
             )}
           </CardTitle>
-          <div>
-            <Button
-                onClick={() => setShowSavedItems(true)}
-                variant="outline"
-                className="mr-2"
-            >
-              <Star className="w-4 h-4 mr-2" />
-              Itens Salvos
-            </Button>
-            <Button
-              onClick={addItem}
-              className="brand-gradient text-white"
-              disabled={!isUserPremium && items.length >= maxItemsForFreeUser}
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              Adicionar Item
-              {!isUserPremium && items.length >= maxItemsForFreeUser && (
-                <Crown className="w-4 h-4 ml-2" />
-              )}
-            </Button>
-          </div>
+          <Button
+            onClick={addItem}
+            className="brand-gradient text-white"
+            disabled={!isUserPremium && items.length >= maxItemsForFreeUser}
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Adicionar Item
+            {!isUserPremium && items.length >= maxItemsForFreeUser && (
+              <Crown className="w-4 h-4 ml-2" />
+            )}
+          </Button>
         </CardHeader>
         <CardContent className="space-y-4">
           {/* Seção de Itens Salvos */}
