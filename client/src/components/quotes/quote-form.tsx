@@ -280,7 +280,6 @@ export default function QuoteForm({
           />
 
           {/* Lista de Itens do Orçamento */}
-          {{/* Lista de Itens do Orçamento */}
           {items.map((item, index) => (
             <QuoteItem
               key={item.id}
