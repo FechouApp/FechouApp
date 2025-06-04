@@ -823,7 +823,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put('/api/admin/users/:userId/plan', isAuthenticated, isAdmin, async (req, res) => {
+  app.patch('/api/admin/users/:userId/plan', isAuthenticated, isAdmin, async (req, res) => {
     try {
       const { userId } = req.params;
       const { plan, paymentStatus, paymentMethod } = req.body;
@@ -867,7 +867,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/admin/users/:userId/reset-quotes', isAuthenticated, isAdmin, async (req, res) => {
+  app.patch('/api/admin/users/:userId/reset-quotes', isAuthenticated, isAdmin, async (req, res) => {
     try {
       const { userId } = req.params;
       
