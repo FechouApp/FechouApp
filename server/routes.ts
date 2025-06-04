@@ -853,46 +853,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { userId } = req.params;
       const { plan, paymentStatus, paymentMethod } = req.body;
       
-      console.log("=== ADMIN ROUTE CALLED ===");
-      console.log("Raw request body:", req.body);
       console.log("Admin updating user plan:", { userId, plan, paymentStatus, paymentMethod });
       
-      // Validate required fields
-      if (!plan || !paymentStatus) {
-        console.log("Validation failed: missing required fields");
-        return res.status(400).json({ message: "Plano e status de pagamento são obrigatórios" });
-      }
-
-      // Validate plan
-      const validPlans = ["FREE", "PREMIUM"];
-      if (!validPlans.includes(plan.toUpperCase())) {
-        console.log("Validation failed: invalid plan:", plan);
-        return res.status(400).json({ message: "Plano deve ser FREE ou PREMIUM" });
-      }
-
-      // Validate payment status
-      const validStatuses = ["ativo", "pendente", "vencido"];
-      if (!validStatuses.includes(paymentStatus.toLowerCase())) {
-        console.log("Validation failed: invalid payment status:", paymentStatus);
-        return res.status(400).json({ message: "Status deve ser ativo, pendente ou vencido" });
-      }
-      
-      // Check if user exists
-      const existingUser = await storage.getUser(userId);
-      if (!existingUser) {
-        console.log("User not found:", userId);
-        return res.status(404).json({ message: "Usuário não encontrado" });
-      }
-      
-      // Prepare update data
-      const normalizedPlan = plan.toUpperCase();
-      const normalizedPaymentStatus = paymentStatus.toLowerCase();
-      const cleanPaymentMethod = paymentMethod && paymentMethod.trim() !== "" ? paymentMethod.trim() : null;
-      
-      console.log("Normalized values:", { normalizedPlan, normalizedPaymentStatus, cleanPaymentMethod });
-      
       // Update user plan
-      const updatedUser = await storage.updateUserPlanStatus(userId, normalizedPlan, normalizedPaymentStatus, cleanPaymentMethod);
+      const updatedUser = await storage.updateUserPlanStatus(userId, plan, paymentStatus, paymentMethod);
       
       if (!updatedUser) {
         console.log("Storage operation failed - no user returned");
