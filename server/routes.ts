@@ -871,11 +871,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { userId } = req.params;
       
+      console.log("Resetting quotes for user:", userId);
+      
       const user = await storage.resetMonthlyQuotes(userId);
       if (!user) {
+        console.log("User not found:", userId);
         return res.status(404).json({ message: "User not found" });
       }
       
+      console.log("Quotes reset successfully for user:", userId);
       res.json(user);
     } catch (error) {
       console.error("Error resetting user quotes:", error);
