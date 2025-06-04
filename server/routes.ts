@@ -853,39 +853,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { userId } = req.params;
       const { plan, paymentStatus, paymentMethod } = req.body;
       
+      console.log("=== ADMIN ROUTE CALLED ===");
       console.log("Admin updating user plan:", { userId, plan, paymentStatus, paymentMethod });
+      console.log("Request body:", req.body);
+      console.log("Request params:", req.params);
       
       // Validate input
       if (!plan || !paymentStatus) {
+        console.log("Validation failed: missing plan or paymentStatus");
         return res.status(400).json({ message: "Plan and payment status are required" });
       }
       
       if (!["FREE", "PREMIUM"].includes(plan)) {
+        console.log("Validation failed: invalid plan type:", plan);
         return res.status(400).json({ message: "Invalid plan type" });
       }
       
       if (!["ativo", "pendente", "vencido"].includes(paymentStatus)) {
+        console.log("Validation failed: invalid payment status:", paymentStatus);
         return res.status(400).json({ message: "Invalid payment status" });
       }
       
       // Check if user exists
+      console.log("Checking if user exists:", userId);
       const existingUser = await storage.getUser(userId);
       if (!existingUser) {
+        console.log("User not found:", userId);
         return res.status(404).json({ message: "User not found" });
       }
+      console.log("User found:", existingUser.email);
       
       // Clean paymentMethod value
       const cleanPaymentMethod = paymentMethod === "" ? null : paymentMethod;
+      console.log("Cleaned paymentMethod:", cleanPaymentMethod);
       
+      console.log("Calling storage.updateUserPlanStatus...");
       const user = await storage.updateUserPlanStatus(userId, plan, paymentStatus, cleanPaymentMethod);
       if (!user) {
+        console.log("Storage returned null/undefined");
         return res.status(500).json({ message: "Failed to update user plan" });
       }
       
       console.log("User plan updated successfully:", user);
+      console.log("=== ADMIN ROUTE SUCCESS ===");
       res.json(user);
     } catch (error) {
+      console.error("=== ADMIN ROUTE ERROR ===");
       console.error("Error updating user plan:", error);
+      console.error("Error stack:", error instanceof Error ? error.stack : "No stack");
       res.status(500).json({ 
         message: "Failed to update user plan", 
         error: error instanceof Error ? error.message : "Unknown error" 

@@ -720,6 +720,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateUserPlanStatus(userId: string, plan: string, paymentStatus: string, paymentMethod?: string | null): Promise<User | undefined> {
+    console.log("=== STORAGE updateUserPlanStatus ===");
     console.log("Storage: updateUserPlanStatus called with:", { userId, plan, paymentStatus, paymentMethod });
     
     const updateData: any = {
@@ -742,18 +743,30 @@ export class DatabaseStorage implements IStorage {
     }
 
     console.log("Storage: Update data:", updateData);
+    console.log("Storage: Executing database update for userId:", userId);
 
     try {
-      const [user] = await db
+      const result = await db
         .update(users)
         .set(updateData)
         .where(eq(users.id, userId))
         .returning();
       
+      console.log("Storage: Database update result:", result);
+      
+      if (result.length === 0) {
+        console.log("Storage: No user found with id:", userId);
+        return undefined;
+      }
+      
+      const [user] = result;
       console.log("Storage: User updated successfully:", user);
+      console.log("=== STORAGE SUCCESS ===");
       return user;
     } catch (error) {
+      console.error("=== STORAGE ERROR ===");
       console.error("Storage: Error updating user plan status:", error);
+      console.error("Storage: Error details:", error instanceof Error ? error.message : "Unknown error");
       throw error;
     }
   }

@@ -67,11 +67,18 @@ export default function AdminPanel() {
   const updatePlanMutation = useMutation({
     mutationFn: async (data: { userId: string; plan: string; paymentStatus: string; paymentMethod?: string | null }) => {
       console.log("Updating user plan with data:", data);
-      return await apiRequest(`/api/admin/users/${data.userId}/plan`, "PATCH", {
-        plan: data.plan,
-        paymentStatus: data.paymentStatus,
-        paymentMethod: data.paymentMethod,
-      });
+      try {
+        const response = await apiRequest(`/api/admin/users/${data.userId}/plan`, "PATCH", {
+          plan: data.plan,
+          paymentStatus: data.paymentStatus,
+          paymentMethod: data.paymentMethod,
+        });
+        console.log("API response:", response);
+        return response;
+      } catch (error) {
+        console.error("API request failed:", error);
+        throw error;
+      }
     },
     onSuccess: (data) => {
       console.log("Plan update successful:", data);
