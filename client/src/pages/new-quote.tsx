@@ -19,6 +19,7 @@ import LoadingSpinner from "@/components/common/loading-spinner";
 import QuoteForm from "@/components/quotes/quote-form";
 import QuickSetup from "@/components/quick-setup";
 import Header from "@/components/layout/header";
+import SavedItemsSection from "@/components/quotes/saved-items-section";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useLocation } from "wouter";

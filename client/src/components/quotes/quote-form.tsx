@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import QuoteItem from "./quote-item";
-import SavedItemsManager from "../saved-items/saved-items-manager";
+import SavedItemsSection from "./saved-items-section";
 import { Plus, Calendar, Save, Eye, Send, Trash2, Crown, Star } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
@@ -287,6 +287,21 @@ export default function QuoteForm({
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
+          {/* Seção de Itens Salvos */}
+          <SavedItemsSection 
+            onAddItem={(savedItem) => {
+              const newItem: QuoteItemData = {
+                id: Math.random().toString(36).substr(2, 9),
+                description: savedItem.description,
+                quantity: savedItem.quantity,
+                unitPrice: savedItem.unitPrice,
+                total: (parseFloat(savedItem.unitPrice.replace(',', '.')) * savedItem.quantity).toFixed(2).replace('.', ',')
+              };
+              setItems(prev => [...prev, newItem]);
+            }}
+          />
+          
+          {/* Lista de Itens do Orçamento */}
           {items.map((item, index) => (
             <QuoteItem
               key={item.id}
@@ -300,18 +315,7 @@ export default function QuoteForm({
         </CardContent>
       </Card>
 
-            {/* Dialog para Itens Salvos */}
-            <Dialog open={showSavedItems} onOpenChange={setShowSavedItems}>
-                <DialogContent className="max-w-2xl">
-                    <DialogHeader>
-                        <DialogTitle>Selecionar Item Salvo</DialogTitle>
-                    </DialogHeader>
-                    <SavedItemsManager
-                        onSelectItem={insertSavedItem}
-                        selectionMode={true}
-                    />
-                </DialogContent>
-            </Dialog>
+
 
       {/* Description */}
       <Card className="bg-white shadow-lg">
