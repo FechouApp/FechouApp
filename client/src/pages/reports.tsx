@@ -306,180 +306,191 @@ export default function Reports() {
       </div>
 
       {/* Gráficos - Layout responsivo */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        <Card className="bg-white shadow-lg">
-          <CardHeader className="p-4 md:p-6">
-            <CardTitle className="text-lg font-semibold text-gray-800">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-8">
+        <Card className="bg-white shadow-lg overflow-hidden">
+          <CardHeader className="p-3 md:p-4">
+            <CardTitle className="text-base md:text-lg font-semibold text-gray-800">
               Performance dos Últimos {isMobile ? '6' : '12'} Meses
             </CardTitle>
           </CardHeader>
-          <CardContent className="p-4 md:p-6">
-            <ChartContainer
-              config={{
-                total: {
-                  label: "Orçamentos Emitidos",
-                  color: "#3b82f6",
-                },
-                approved: {
-                  label: "Orçamentos Fechados",
-                  color: "#10b981",
-                },
-                ticketMedio: {
-                  label: "Ticket Médio",
-                  color: "#f59e0b",
-                },
-              }}
-              className={isMobile ? "h-[250px]" : "h-[300px]"}
-            >
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={monthlyData} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis 
-                    dataKey="month" 
-                    fontSize={isMobile ? 10 : 12}
-                    tickLine={false}
-                    axisLine={false}
-                    angle={isMobile ? -45 : 0}
-                    textAnchor={isMobile ? "end" : "middle"}
-                    height={isMobile ? 60 : 30}
-                  />
-                  <YAxis 
-                    fontSize={isMobile ? 10 : 12}
-                    tickLine={false}
-                    axisLine={false}
-                  />
-                  <ChartTooltip 
-                    content={({ active, payload, label }) => {
-                      if (active && payload && payload.length) {
-                        return (
-                          <div className="rounded-lg border bg-background p-2 shadow-sm">
-                            <div className="grid grid-cols-1 gap-2">
-                              <div className="flex flex-col">
-                                <span className="text-[0.70rem] uppercase text-muted-foreground">
-                                  {label}
-                                </span>
-                                {payload.map((entry, index) => (
-                                  <span key={index} className="font-bold text-muted-foreground" style={{ color: entry.color }}>
-                                    {entry.dataKey === 'ticketMedio' 
-                                      ? `${entry.name}: ${formatCurrency(entry.value)}`
-                                      : `${entry.name}: ${entry.value}`
-                                    }
-                                  </span>
-                                ))}
-                              </div>
-                            </div>
-                          </div>
-                        );
-                      }
-                      return null;
+          <CardContent className="p-2 md:p-4">
+            <div className="w-full overflow-hidden">
+              <ChartContainer
+                config={{
+                  total: {
+                    label: "Orçamentos Emitidos",
+                    color: "#3b82f6",
+                  },
+                  approved: {
+                    label: "Orçamentos Fechados",
+                    color: "#10b981",
+                  },
+                  ticketMedio: {
+                    label: "Ticket Médio",
+                    color: "#f59e0b",
+                  },
+                }}
+                className="h-[200px] md:h-[280px] w-full"
+              >
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart 
+                    data={monthlyData} 
+                    margin={{ 
+                      top: 10, 
+                      right: isMobile ? 10 : 20, 
+                      left: isMobile ? 0 : 10, 
+                      bottom: isMobile ? 50 : 20 
                     }}
-                  />
-                  <Line 
-                    type="monotone" 
-                    dataKey="total" 
-                    stroke="#3b82f6" 
-                    strokeWidth={2}
-                    dot={{ fill: "#3b82f6", strokeWidth: 2, r: isMobile ? 3 : 4 }}
-                    activeDot={{ r: isMobile ? 4 : 6, stroke: "#3b82f6", strokeWidth: 2 }}
-                  />
-                  <Line 
-                    type="monotone" 
-                    dataKey="approved" 
-                    stroke="#10b981" 
-                    strokeWidth={2}
-                    dot={{ fill: "#10b981", strokeWidth: 2, r: isMobile ? 3 : 4 }}
-                    activeDot={{ r: isMobile ? 4 : 6, stroke: "#10b981", strokeWidth: 2 }}
-                  />
-                  {!isMobile && (
+                  >
+                    <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                    <XAxis 
+                      dataKey="month" 
+                      fontSize={isMobile ? 9 : 11}
+                      tickLine={false}
+                      axisLine={false}
+                      angle={isMobile ? -45 : 0}
+                      textAnchor={isMobile ? "end" : "middle"}
+                      height={isMobile ? 50 : 30}
+                      interval={0}
+                    />
+                    <YAxis 
+                      fontSize={isMobile ? 9 : 11}
+                      tickLine={false}
+                      axisLine={false}
+                      width={isMobile ? 30 : 50}
+                    />
+                    <ChartTooltip 
+                      content={({ active, payload, label }) => {
+                        if (active && payload && payload.length) {
+                          return (
+                            <div className="rounded-lg border bg-white p-2 shadow-lg max-w-[200px]">
+                              <div className="text-xs font-medium text-gray-600 mb-1">
+                                {label}
+                              </div>
+                              {payload.map((entry, index) => (
+                                <div key={index} className="text-xs" style={{ color: entry.color }}>
+                                  {entry.dataKey === 'ticketMedio' 
+                                    ? `${entry.name}: ${formatCurrency(entry.value)}`
+                                    : `${entry.name}: ${entry.value}`
+                                  }
+                                </div>
+                              ))}
+                            </div>
+                          );
+                        }
+                        return null;
+                      }}
+                    />
                     <Line 
                       type="monotone" 
-                      dataKey="ticketMedio" 
-                      stroke="#f59e0b" 
-                      strokeWidth={2}
-                      dot={{ fill: "#f59e0b", strokeWidth: 2, r: 4 }}
-                      activeDot={{ r: 6, stroke: "#f59e0b", strokeWidth: 2 }}
+                      dataKey="total" 
+                      stroke="#3b82f6" 
+                      strokeWidth={isMobile ? 1.5 : 2}
+                      dot={{ fill: "#3b82f6", strokeWidth: 1, r: isMobile ? 2 : 3 }}
+                      activeDot={{ r: isMobile ? 3 : 4, stroke: "#3b82f6", strokeWidth: 1 }}
                     />
-                  )}
-                  {!isMobile && <ChartLegend />}
-                </LineChart>
-              </ResponsiveContainer>
-            </ChartContainer>
+                    <Line 
+                      type="monotone" 
+                      dataKey="approved" 
+                      stroke="#10b981" 
+                      strokeWidth={isMobile ? 1.5 : 2}
+                      dot={{ fill: "#10b981", strokeWidth: 1, r: isMobile ? 2 : 3 }}
+                      activeDot={{ r: isMobile ? 3 : 4, stroke: "#10b981", strokeWidth: 1 }}
+                    />
+                    {!isMobile && (
+                      <Line 
+                        type="monotone" 
+                        dataKey="ticketMedio" 
+                        stroke="#f59e0b" 
+                        strokeWidth={2}
+                        dot={{ fill: "#f59e0b", strokeWidth: 1, r: 3 }}
+                        activeDot={{ r: 4, stroke: "#f59e0b", strokeWidth: 1 }}
+                      />
+                    )}
+                  </LineChart>
+                </ResponsiveContainer>
+              </ChartContainer>
+            </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-white shadow-lg">
-          <CardHeader className="p-4 md:p-6">
-            <CardTitle className="text-lg font-semibold text-gray-800">
+        <Card className="bg-white shadow-lg overflow-hidden">
+          <CardHeader className="p-3 md:p-4">
+            <CardTitle className="text-base md:text-lg font-semibold text-gray-800">
               Taxa de Conversão por Mês
             </CardTitle>
           </CardHeader>
-          <CardContent className="p-4 md:p-6">
-            <ChartContainer
-              config={{
-                conversionRate: {
-                  label: "Taxa de Conversão (%)",
-                  color: "#8b5cf6",
-                },
-              }}
-              className={isMobile ? "h-[250px]" : "h-[300px]"}
-            >
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart 
-                  data={monthlyData.map(month => ({
-                    ...month,
-                    conversionRate: month.total > 0 ? ((month.approved / month.total) * 100).toFixed(1) : 0
-                  }))}
-                  margin={{ top: 5, right: 5, left: 5, bottom: 5 }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis 
-                    dataKey="month" 
-                    fontSize={isMobile ? 10 : 12}
-                    tickLine={false}
-                    axisLine={false}
-                    angle={isMobile ? -45 : 0}
-                    textAnchor={isMobile ? "end" : "middle"}
-                    height={isMobile ? 60 : 30}
-                  />
-                  <YAxis 
-                    fontSize={isMobile ? 10 : 12}
-                    tickLine={false}
-                    axisLine={false}
-                    domain={[0, 100]}
-                  />
-                  <ChartTooltip 
-                    content={({ active, payload, label }) => {
-                      if (active && payload && payload.length) {
-                        return (
-                          <div className="rounded-lg border bg-background p-2 shadow-sm">
-                            <div className="grid grid-cols-1 gap-2">
-                              <div className="flex flex-col">
-                                <span className="text-[0.70rem] uppercase text-muted-foreground">
-                                  {label}
-                                </span>
-                                <span className="font-bold text-purple-600">
-                                  Taxa de Conversão: {payload[0].value}%
-                                </span>
+          <CardContent className="p-2 md:p-4">
+            <div className="w-full overflow-hidden">
+              <ChartContainer
+                config={{
+                  conversionRate: {
+                    label: "Taxa de Conversão (%)",
+                    color: "#8b5cf6",
+                  },
+                }}
+                className="h-[200px] md:h-[280px] w-full"
+              >
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart 
+                    data={monthlyData.map(month => ({
+                      ...month,
+                      conversionRate: month.total > 0 ? ((month.approved / month.total) * 100).toFixed(1) : 0
+                    }))}
+                    margin={{ 
+                      top: 10, 
+                      right: isMobile ? 10 : 20, 
+                      left: isMobile ? 0 : 10, 
+                      bottom: isMobile ? 50 : 20 
+                    }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                    <XAxis 
+                      dataKey="month" 
+                      fontSize={isMobile ? 9 : 11}
+                      tickLine={false}
+                      axisLine={false}
+                      angle={isMobile ? -45 : 0}
+                      textAnchor={isMobile ? "end" : "middle"}
+                      height={isMobile ? 50 : 30}
+                      interval={0}
+                    />
+                    <YAxis 
+                      fontSize={isMobile ? 9 : 11}
+                      tickLine={false}
+                      axisLine={false}
+                      domain={[0, 100]}
+                      width={isMobile ? 30 : 50}
+                    />
+                    <ChartTooltip 
+                      content={({ active, payload, label }) => {
+                        if (active && payload && payload.length) {
+                          return (
+                            <div className="rounded-lg border bg-white p-2 shadow-lg max-w-[150px]">
+                              <div className="text-xs font-medium text-gray-600 mb-1">
+                                {label}
+                              </div>
+                              <div className="text-xs text-purple-600">
+                                Taxa: {payload[0].value}%
                               </div>
                             </div>
-                          </div>
-                        );
-                      }
-                      return null;
-                    }}
-                  />
-                  <Line 
-                    type="monotone" 
-                    dataKey="conversionRate" 
-                    stroke="#8b5cf6" 
-                    strokeWidth={3}
-                    dot={{ fill: "#8b5cf6", strokeWidth: 2, r: isMobile ? 3 : 5 }}
-                    activeDot={{ r: isMobile ? 5 : 7, stroke: "#8b5cf6", strokeWidth: 2 }}
-                  />
-                  {!isMobile && <ChartLegend />}
-                </LineChart>
-              </ResponsiveContainer>
-            </ChartContainer>
+                          );
+                        }
+                        return null;
+                      }}
+                    />
+                    <Line 
+                      type="monotone" 
+                      dataKey="conversionRate" 
+                      stroke="#8b5cf6" 
+                      strokeWidth={isMobile ? 2 : 3}
+                      dot={{ fill: "#8b5cf6", strokeWidth: 1, r: isMobile ? 2 : 4 }}
+                      activeDot={{ r: isMobile ? 4 : 6, stroke: "#8b5cf6", strokeWidth: 1 }}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </ChartContainer>
+            </div>
           </CardContent>
         </Card>
       </div>
