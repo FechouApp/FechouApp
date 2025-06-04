@@ -33,13 +33,13 @@ function Router() {
       {/* Public route for client quote viewing */}
       <Route path="/quote/:quoteNumber" component={PublicQuote} />
 
-      {isLoading) {
+      {isLoading && (
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
       </div>
-    );
-  }
+    )
+  )}
 
   // Show landing page if not authenticated
   if (!isAuthenticated) {
