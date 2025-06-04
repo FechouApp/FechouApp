@@ -586,108 +586,67 @@ export default function Reports() {
           </div>
         </CardContent>
       </Card>
+    </div>
 
-      
-    
-        
-          
-            
-              
-                
-                  
-                    
-                      
-                    
-                    
-                      {quotes?.filter(q => q.status !== 'draft').length || 0}
-                    
-                  
-                
-                
-                  
-                    
-                      
-                    
-                    
-                      {quotes?.filter(q => q.status === 'approved' || q.status === 'paid').length || 0}
-                    
-                  
-                
-                
-                  
-                    
-                      
-                    
-                    
-                      {reviews?.length || 0}
-                    
-                  
-                
-              
-            
-          
+    <div className="mx-4 md:mx-0">
+      <Card className="bg-white shadow-lg">
+        <CardHeader className="p-4 md:p-6">
+          <CardTitle className="text-base md:text-lg font-semibold text-gray-800">
+            Progresso Mensal de Orçamentos
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-4 md:p-6">
+          <div className="flex items-center justify-between mb-4">
+            <p className="text-gray-600">
+              <FileText className="inline-block w-4 h-4 mr-1" />
+              {quotes?.filter(q => q.status !== 'draft').length || 0} Orçamentos
+            </p>
+            <p className="text-green-600">
+              <CheckCircle className="inline-block w-4 h-4 mr-1" />
+              {quotes?.filter(q => q.status === 'approved' || q.status === 'paid').length || 0} Aprovados
+            </p>
+          </div>
 
-          
-            
-              
-                
-                  
-                    
-                      
-                    
-                    
-                      2-3 dias
-                    
-                  
-                
-                
-                  
-                    
-                      
-                    
-                    
-                      30 dias
-                    
-                  
-                
-              
-            
-          
+          <div className="flex items-center justify-between mb-4">
+            <p className="text-gray-600">
+              <Star className="inline-block w-4 h-4 mr-1" />
+              {reviews?.length || 0} Reviews
+            </p>
+          </div>
 
-          
-            
-              
-                {(() => {
-                  const currentMonth = new Date().getMonth();
-                  const currentYear = new Date().getFullYear();
-                  return quotes?.filter(q => {
-                    const quoteDate = new Date(q.createdAt);
-                    return quoteDate.getMonth() === currentMonth && quoteDate.getFullYear() === currentYear;
-                  }).length || 0;
-                })()}
-              
-              orçamentos este mês
-            
-            
-              
-                
-                  style={{ width: `${Math.min(((() => {
-                  const currentMonth = new Date().getMonth();
-                  const currentYear = new Date().getFullYear();
-                  const thisMonthQuotes = quotes?.filter(q => {
-                    const quoteDate = new Date(q.createdAt);
-                    return quoteDate.getMonth() === currentMonth && quoteDate.getFullYear() === currentYear;
-                  }).length || 0;
-                  return (thisMonthQuotes / 20) * 100;
-                })()), 100)}%` }}
-              >
-            
-            
-              Meta: 20 orçamentos/mês
-            
-          
-        
-      
-    
+          <div className="flex items-center justify-between mb-4">
+            <p className="text-gray-600">
+              <Clock className="inline-block w-4 h-4 mr-1" />
+              2-3 dias Tempo médio de resposta
+            </p>
+          </div>
+
+          <div className="flex items-center justify-between mb-4">
+            <p className="text-gray-600">
+              <Calendar className="inline-block w-4 h-4 mr-1" />
+              30 dias Tempo médio de fechamento
+            </p>
+          </div>
+
+          <div className="bg-white/10 rounded-lg p-4 mb-6">
+            <div
+              className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+              style={{ width: `${Math.min(((() => {
+                const currentMonth = new Date().getMonth();
+                const currentYear = new Date().getFullYear();
+                const thisMonthQuotes = quotes?.filter(q => {
+                  const quoteDate = new Date(q.createdAt);
+                  return quoteDate.getMonth() === currentMonth && quoteDate.getFullYear() === currentYear;
+                }).length || 0;
+                return (thisMonthQuotes / 20) * 100;
+              })()), 100)}%` }}
+            />
+          </div>
+          <p className="text-white/70 text-sm mt-2">
+            Meta: 20 orçamentos/mês
+          </p>
+        </div>
+      </div>
+    </div>
   );
 }
