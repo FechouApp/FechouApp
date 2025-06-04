@@ -38,7 +38,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/auth/change-password', isAuthenticated, async (req: any, res) => {
     try {
       const { currentPassword, newPassword } = req.body;
-      
+
       if (!currentPassword || !newPassword) {
         return res.status(400).json({ message: "Senha atual e nova senha são obrigatórias" });
       }
@@ -50,7 +50,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Simular verificação da senha atual (em um app real, você verificaria contra o banco)
       // Como estamos usando OpenID Connect, a mudança real da senha deve ser feita na conta Replit
       // Esta é apenas uma demonstração da interface
-      
+
       res.json({ message: "Senha alterada com sucesso" });
     } catch (error) {
       console.error("Error changing password:", error);
@@ -63,14 +63,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.claims.sub;
       const user = await storage.getUser(userId);
-      
+
       if (!user) {
         return res.status(404).json({ message: "Usuário não encontrado" });
       }
 
       const newPlan = user.plan === "FREE" ? "PREMIUM" : "FREE";
       const planExpiresAt = newPlan === "PREMIUM" ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) : null; // 30 dias
-      
+
       const updatedUser = await storage.updateUserPlan(userId, newPlan, planExpiresAt);
       res.json(updatedUser);
     } catch (error) {
@@ -100,7 +100,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Verificar se é Premium
       const user = await storage.getUser(userId);
       const isPremium = user?.plan === "PREMIUM";
-      
+
       if (!isPremium) {
         return res.status(403).json({ message: "Funcionalidade exclusiva do plano Premium" });
       }
@@ -117,13 +117,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.claims.sub;
       const updateData = req.body;
-      
+
+      // Validar campos obrigatórios
+      if (!updateData.firstName) {
+        return res.status(400).json({ message: "Nome é obrigatório" });
+      }
+
       const updatedUser = await storage.upsertUser({
         id: userId,
         ...updateData,
         updatedAt: new Date(),
       });
-      
+
       res.json(updatedUser);
     } catch (error) {
       console.error("Error updating user:", error);
@@ -148,16 +153,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.claims.sub;
       const user = await storage.getUser(userId);
-      
+
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
 
       const isPremium = user.plan === "PREMIUM";
       const isExpired = user.planExpiresAt && new Date() > user.planExpiresAt;
-      
+
       let monthlyQuoteLimit, itemsPerQuoteLimit;
-      
+
       if (isPremium && !isExpired) {
         monthlyQuoteLimit = null; // Unlimited
         itemsPerQuoteLimit = null; // Unlimited
@@ -173,7 +178,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const now = new Date();
       const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
       const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-      
+
       const monthlyQuotes = await storage.getQuotesInDateRange(userId, startOfMonth, endOfMonth);
 
       res.json({
@@ -197,14 +202,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.claims.sub;
       const { search } = req.query;
-      
+
       let clients;
       if (search) {
         clients = await storage.searchClients(userId, search as string);
       } else {
         clients = await storage.getClients(userId);
       }
-      
+
       res.json(clients);
     } catch (error) {
       console.error("Error fetching clients:", error);
@@ -216,11 +221,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.claims.sub;
       const client = await storage.getClient(req.params.id, userId);
-      
+
       if (!client) {
         return res.status(404).json({ message: "Client not found" });
       }
-      
+
       res.json(client);
     } catch (error) {
       console.error("Error fetching client:", error);
@@ -232,7 +237,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.claims.sub;
       const clientData = insertClientSchema.parse({ ...req.body, userId });
-      
+
       const client = await storage.createClient(clientData);
       res.status(201).json(client);
     } catch (error) {
@@ -248,13 +253,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.claims.sub;
       const clientData = insertClientSchema.partial().parse(req.body);
-      
+
       const client = await storage.updateClient(req.params.id, clientData, userId);
-      
+
       if (!client) {
         return res.status(404).json({ message: "Client not found" });
       }
-      
+
       res.json(client);
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -269,11 +274,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.claims.sub;
       const success = await storage.deleteClient(req.params.id, userId);
-      
+
       if (!success) {
         return res.status(404).json({ message: "Client not found" });
       }
-      
+
       res.status(204).send();
     } catch (error) {
       console.error("Error deleting client:", error);
@@ -298,7 +303,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { quoteNumber } = req.params;
       const quote = await storage.getQuoteByNumber(quoteNumber);
-      
+
       if (!quote) {
         return res.status(404).json({ message: "Quote not found" });
       }
@@ -320,11 +325,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.claims.sub;
       const quote = await storage.getQuote(req.params.id, userId);
-      
+
       if (!quote) {
         return res.status(404).json({ message: "Quote not found" });
       }
-      
+
       res.json(quote);
     } catch (error) {
       console.error("Error fetching quote:", error);
@@ -339,7 +344,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const success = await storage.updateQuoteStatus(id, 'approved', { 
         approvedAt: new Date() 
       });
-      
+
       if (!success) {
         return res.status(404).json({ message: "Quote not found" });
       }
@@ -356,12 +361,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { id } = req.params;
       const { reason } = req.body;
-      
+
       const success = await storage.updateQuoteStatus(id, 'rejected', { 
         rejectedAt: new Date(),
         rejectionReason: reason || null
       });
-      
+
       if (!success) {
         return res.status(404).json({ message: "Quote not found" });
       }
@@ -373,18 +378,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  
+
 
   app.post('/api/quotes', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const { quote: quoteData, items } = req.body;
-      
+
       const parsedQuote = insertQuoteSchema.parse({ ...quoteData, userId });
       const parsedItems = z.array(insertQuoteItemSchema).parse(items);
-      
+
       const quote = await storage.createQuote(parsedQuote, parsedItems);
-      
+
       // Update user's monthly quote count
       const user = await storage.getUser(userId);
       if (user) {
@@ -393,7 +398,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           monthlyQuotes: user.monthlyQuotes + 1,
         });
       }
-      
+
       res.status(201).json(quote);
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -411,23 +416,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.claims.sub;
       const { quote: quoteData, items } = req.body;
-      
+
       // Verificar se o orçamento existe e pertence ao usuário
       const existingQuote = await storage.getQuote(req.params.id, userId);
       if (!existingQuote) {
         return res.status(404).json({ message: "Quote not found" });
       }
-      
+
       // Atualizar orçamento
       const updatedQuote = await storage.updateQuote(req.params.id, quoteData, userId);
-      
+
       if (!updatedQuote) {
         return res.status(404).json({ message: "Failed to update quote" });
       }
-      
+
       // Deletar itens existentes e criar novos
       await storage.deleteQuoteItems(req.params.id);
-      
+
       if (items && items.length > 0) {
         await storage.createQuoteItems(
           items.map((item: any, index: number) => ({
@@ -440,10 +445,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }))
         );
       }
-      
+
       // Buscar o orçamento atualizado com os itens
       const completeQuote = await storage.getQuote(req.params.id, userId);
-      
+
       res.json(completeQuote);
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -458,11 +463,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.claims.sub;
       const success = await storage.deleteQuote(req.params.id, userId);
-      
+
       if (!success) {
         return res.status(404).json({ message: "Quote not found" });
       }
-      
+
       res.status(204).send();
     } catch (error) {
       console.error("Error deleting quote:", error);
@@ -475,11 +480,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { status, metadata } = req.body;
       const success = await storage.updateQuoteStatus(req.params.id, status, metadata);
-      
+
       if (!success) {
         return res.status(404).json({ message: "Quote not found" });
       }
-      
+
       res.json({ success: true });
     } catch (error) {
       console.error("Error updating quote status:", error);
@@ -493,7 +498,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const success = await storage.updateQuoteStatus(req.params.id, 'approved', {
         approvedAt: new Date().toISOString()
       });
-      
+
       if (!success) {
         return res.status(404).json({ message: "Quote not found" });
       }
@@ -515,7 +520,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.error("Error creating notification:", notificationError);
         // Don't fail the approval if notification fails
       }
-      
+
       res.json({ success: true });
     } catch (error) {
       console.error("Error approving quote:", error);
@@ -526,11 +531,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/quotes/:id/reject', async (req, res) => {
     try {
       const success = await storage.updateQuoteStatus(req.params.id, 'rejected');
-      
+
       if (!success) {
         return res.status(404).json({ message: "Quote not found" });
       }
-      
+
       res.json({ success: true });
     } catch (error) {
       console.error("Error rejecting quote:", error);
@@ -545,11 +550,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         sentViaWhatsApp: true, 
         sentAt: sentAt.toISOString() 
       });
-      
+
       if (!success) {
         return res.status(404).json({ message: "Quote not found" });
       }
-      
+
       res.json({ success: true, sentAt });
     } catch (error) {
       console.error("Error marking quote as sent:", error);
@@ -572,7 +577,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/reviews', async (req, res) => {
     try {
       const reviewData = insertReviewSchema.parse(req.body);
-      
+
       // Check if a review already exists for this client and quote
       if (reviewData.quoteId && reviewData.clientId) {
         const existingReview = await storage.getReviewByQuoteAndClient(reviewData.quoteId, reviewData.clientId);
@@ -582,7 +587,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           });
         }
       }
-      
+
       const review = await storage.createReview(reviewData);
       res.status(201).json(review);
     } catch (error) {
@@ -601,11 +606,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         response,
         respondedAt: new Date(),
       });
-      
+
       if (!review) {
         return res.status(404).json({ message: "Review not found" });
       }
-      
+
       res.json(review);
     } catch (error) {
       console.error("Error updating review response:", error);
@@ -618,7 +623,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { quoteId, clientId } = req.params;
       const existingReview = await storage.getReviewByQuoteAndClient(quoteId, clientId);
-      
+
       if (existingReview) {
         res.json(existingReview);
       } else {
@@ -646,19 +651,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.claims.sub;
       const itemData = insertSavedItemSchema.parse({ ...req.body, userId });
-      
+
       // Check plan limits
       const user = await storage.getUser(userId);
       const isPremium = user?.plan === "PREMIUM";
       const currentItems = await storage.getSavedItems(userId);
       const maxItems = isPremium ? 15 : 3;
-      
+
       if (currentItems.length >= maxItems) {
         return res.status(403).json({ 
           message: `Limite de ${maxItems} itens salvos atingido. ${!isPremium ? 'Faça upgrade para o plano Pro para salvar mais itens.' : ''}` 
         });
       }
-      
+
       const item = await storage.createSavedItem(itemData);
       res.status(201).json(item);
     } catch (error) {
@@ -674,13 +679,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.claims.sub;
       const itemData = insertSavedItemSchema.partial().parse(req.body);
-      
+
       const item = await storage.updateSavedItem(req.params.id, itemData, userId);
-      
+
       if (!item) {
         return res.status(404).json({ message: "Saved item not found" });
       }
-      
+
       res.json(item);
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -695,11 +700,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.claims.sub;
       const success = await storage.deleteSavedItem(req.params.id, userId);
-      
+
       if (!success) {
         return res.status(404).json({ message: "Saved item not found" });
       }
-      
+
       res.status(204).send();
     } catch (error) {
       console.error("Error deleting saved item:", error);
@@ -723,11 +728,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.claims.sub;
       const success = await storage.markNotificationAsRead(req.params.id, userId);
-      
+
       if (!success) {
         return res.status(404).json({ message: "Notification not found" });
       }
-      
+
       res.json({ success: true });
     } catch (error) {
       console.error("Error marking notification as read:", error);
@@ -740,19 +745,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.claims.sub;
       const { plan } = req.body;
-      
+
       const user = await storage.getUser(userId);
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
-      
+
       const updatedUser = await storage.upsertUser({
         ...user,
         plan,
         planExpiresAt: plan === 'PREMIUM' ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) : null,
         quotesLimit: plan === 'PREMIUM' ? 999999 : 5,
       });
-      
+
       res.json(updatedUser);
     } catch (error) {
       console.error("Error updating user plan:", error);
@@ -767,12 +772,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!userId) {
         return res.status(401).json({ message: "Unauthorized" });
       }
-      
+
       const isAdminUser = await storage.checkAdminStatus(userId);
       if (!isAdminUser) {
         return res.status(403).json({ message: "Admin access required" });
       }
-      
+
       next();
     } catch (error) {
       console.error("Error checking admin status:", error);
@@ -827,20 +832,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { userId } = req.params;
       const { plan, paymentStatus, paymentMethod } = req.body;
-      
+
       console.log("Admin updating user plan:", { userId, plan, paymentStatus, paymentMethod });
-      
+
       // Update user plan
       const updatedUser = await storage.updateUserPlanStatus(userId, plan, paymentStatus, paymentMethod);
-      
+
       if (!updatedUser) {
         console.log("Storage operation failed - no user returned");
         return res.status(500).json({ message: "Falha ao atualizar dados no banco" });
       }
-      
+
       console.log("User plan updated successfully:", updatedUser.id);
       console.log("=== ADMIN ROUTE SUCCESS ===");
-      
+
       res.json({
         id: updatedUser.id,
         email: updatedUser.email,
@@ -853,13 +858,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         quotesLimit: updatedUser.quotesLimit,
         quotesUsedThisMonth: updatedUser.quotesUsedThisMonth
       });
-      
+
     } catch (error) {
       console.error("=== ADMIN ROUTE ERROR ===");
       console.error("Full error object:", error);
       console.error("Error message:", error instanceof Error ? error.message : String(error));
       console.error("Error stack:", error instanceof Error ? error.stack : "No stack");
-      
+
       res.status(500).json({ 
         message: "Erro interno do servidor ao atualizar plano", 
         error: error instanceof Error ? error.message : "Erro desconhecido"
@@ -870,15 +875,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.patch('/api/admin/users/:userId/reset-quotes', isAuthenticated, isAdmin, async (req, res) => {
     try {
       const { userId } = req.params;
-      
+
       console.log("Resetting quotes for user:", userId);
-      
+
       const user = await storage.resetMonthlyQuotes(userId);
       if (!user) {
         console.log("User not found:", userId);
         return res.status(404).json({ message: "User not found" });
       }
-      
+
       console.log("Quotes reset successfully for user:", userId);
       res.json(user);
     } catch (error) {

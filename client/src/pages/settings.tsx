@@ -28,6 +28,11 @@ export default function Settings() {
     businessName: "",
     phone: "",
     address: "",
+    cep: "", // new field
+    numero: "", // new field
+    complemento: "", // new field
+    cidade: "", // new field
+    estado: "", // new field
     pixKey: "",
     logoUrl: "",
     profileImageUrl: "",
@@ -48,6 +53,11 @@ export default function Settings() {
         businessName: typedUser.businessName || "",
         phone: formatPhone((typedUser as any)?.phone || ""),
         address: (typedUser as any)?.address || "",
+        cep: (typedUser as any)?.cep || "",
+        numero: (typedUser as any)?.numero || "",
+        complemento: (typedUser as any)?.complemento || "",
+        cidade: (typedUser as any)?.cidade || "",
+        estado: (typedUser as any)?.estado || "",
         pixKey: typedUser.pixKey || "",
         logoUrl: (typedUser as any)?.logoUrl || "",
         profileImageUrl: typedUser.profileImageUrl || "",
@@ -67,7 +77,8 @@ export default function Settings() {
 
   const updateUserMutation = useMutation({
     mutationFn: async (data: Partial<UserType>) => {
-      await apiRequest("PUT", "/api/auth/user", data);
+      const response = await apiRequest("PUT", "/api/auth/user", data);
+      return response;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
@@ -76,16 +87,17 @@ export default function Settings() {
         description: "Suas configurações foram atualizadas com sucesso!",
       });
 
-      // Mark as visited and setup complete if user saves basic info
+     // Mark as visited and setup complete if user saves basic info
       if (formData.firstName && (formData.businessName || formData.profession)) {
         localStorage.setItem('fechou_has_visited', 'true');
       }
 
     },
-    onError: () => {
+    onError: (error: any) => {
+      console.error("Erro ao atualizar perfil:", error);
       toast({
         title: "Erro",
-        description: "Não foi possível atualizar o perfil.",
+        description: error?.message || "Não foi possível atualizar o perfil.",
         variant: "destructive",
       });
     },
@@ -145,6 +157,8 @@ export default function Settings() {
         formattedValue = formatCPF(value);
       } else if (field === "phone") {
         formattedValue = formatPhone(value);
+      } else if (field === "cep") {
+        formattedValue = formatCEP(value);
       }
     }
 
@@ -238,6 +252,38 @@ export default function Settings() {
         });
       };
       reader.readAsDataURL(file);
+    }
+  };
+
+  const handleCEPChange = async (cep: string) => {
+    if (cep.length === 9) {
+      try {
+        const response = await fetch(`https://viacep.com.br/ws/${cep.replace(/\D/g, '')}/json/`);
+        const data = await response.json();
+
+        if (!data.erro) {
+          setFormData(prev => ({
+            ...prev,
+            address: data.logradouro,
+            complemento: data.complemento,
+            cidade: data.localidade,
+            estado: data.uf,
+            bairro: data.bairro,
+          }));
+        } else {
+          toast({
+            title: "Erro",
+            description: "CEP não encontrado.",
+            variant: "destructive",
+          });
+        }
+      } catch (error) {
+        toast({
+          title: "Erro",
+          description: "Erro ao buscar CEP.",
+          variant: "destructive",
+        });
+      }
     }
   };
 
@@ -359,7 +405,7 @@ export default function Settings() {
                 />
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="phone">Telefone</Label>
                   <Input
@@ -370,15 +416,67 @@ export default function Settings() {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="address">Endereço</Label>
+                  <Label htmlFor="cep">CEP</Label>
                   <Input
-                    id="address"
-                    value={formData.address}
-                    onChange={(e) => handleInputChange("address", e.target.value)}
-                    placeholder="Rua, número, bairro, cidade"
+                    id="cep"
+                    value={formData.cep}
+                    onChange={(e) => {
+                      handleInputChange("cep", e.target.value);
+                      handleCEPChange(e.target.value);
+                    }}
+                    placeholder="00000-000"
                   />
                 </div>
               </div>
+               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                 <div>
+                    <Label htmlFor="address">Endereço</Label>
+                    <Input
+                      id="address"
+                      value={formData.address}
+                      onChange={(e) => handleInputChange("address", e.target.value)}
+                      placeholder="Rua"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="numero">Número</Label>
+                    <Input
+                      id="numero"
+                      value={formData.numero}
+                      onChange={(e) => handleInputChange("numero", e.target.value)}
+                      placeholder="Número"
+                    />
+                  </div>
+               </div>
+               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="complemento">Complemento</Label>
+                    <Input
+                      id="complemento"
+                      value={formData.complemento}
+                      onChange={(e) => handleInputChange("complemento", e.target.value)}
+                      placeholder="Complemento"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="cidade">Cidade</Label>
+                    <Input
+                      id="cidade"
+                      value={formData.cidade}
+                      onChange={(e) => handleInputChange("cidade", e.target.value)}
+                      placeholder="Cidade"
+                    />
+                  </div>
+               </div>
+               <div>
+                  <Label htmlFor="estado">Estado</Label>
+                  <Input
+                    id="estado"
+                    value={formData.estado}
+                    onChange={(e) => handleInputChange("estado", e.target.value)}
+                    placeholder="Estado"
+                  />
+                </div>
 
               <Button 
                 type="submit" 
@@ -652,7 +750,7 @@ export default function Settings() {
           </CardContent>
         </Card>
 
-        
+
 
         {/* Account Actions */}
         <Card>

@@ -909,7 +909,7 @@ export class DatabaseStorage implements IStorage {
       .where(eq(users.id, userId))
       .returning();
     return updatedUser;
-  }
+    }
 
   async checkAdminStatus(userId: string): Promise<boolean> {
     const user = await this.getUser(userId);
