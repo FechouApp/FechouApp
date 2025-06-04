@@ -68,15 +68,12 @@ export default function AdminPanel() {
 
   // Update user plan mutation
   const updatePlanMutation = useMutation({
-    mutationFn: async (data: { userId: string; plan: string; paymentStatus: string; paymentMethod?: string | null }) => {
-      console.log("=== MUTATION START ===");
-      console.log("Mutation called with data:", data);
-
+    mutationFn: async (data: { userId: string; plan: string; paymentStatus: string; paymentMethod?: string }) => {
       try {
         const requestBody = {
           plan: data.plan,
-          paymentStatus: data.paymentStatus,
-          paymentMethod: data.paymentMethod,
+          paymentStatus: data.paymentStatus || "ativo",
+          paymentMethod: data.paymentMethod || "manual",
         };
 
         console.log("Request body:", requestBody);
@@ -608,7 +605,7 @@ export default function AdminPanel() {
                                       </p>
                                     </div>
                                   </div>
-                                  
+
                                   {/* Additional Info */}
                                   <div className="border-t pt-4">
                                     <Label className="text-sm font-medium text-gray-600">Informações Adicionais</Label>
@@ -654,8 +651,8 @@ export default function AdminPanel() {
                                 onClick={() => {
                                   setSelectedUser(user);
                                   setEditPlan(user.plan);
-                                  setEditPaymentStatus(user.paymentStatus);
-                                  setEditPaymentMethod(user.paymentMethod || "");
+                                  setEditPaymentStatus(user.paymentStatus || "ativo");
+                                  setEditPaymentMethod(user.paymentMethod || "manual");
                                   setIsDialogOpen(true);
                                 }}
                               >
