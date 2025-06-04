@@ -170,16 +170,16 @@ export default function QuoteForm({
   const canProceed = selectedClientId && title && items.every(item => item.description);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3 sm:space-y-4">
       {/* Client and Quote Info */}
       <Card className="bg-white shadow-sm border-gray-200">
-        <CardHeader className="p-4 pb-3">
-          <CardTitle className="text-lg font-semibold text-gray-800">
+        <CardHeader className="p-3 sm:p-4 pb-2 sm:pb-3">
+          <CardTitle className="text-base sm:text-lg font-semibold text-gray-800">
             Informações do Orçamento
           </CardTitle>
         </CardHeader>
-        <CardContent className="p-4 pt-0 space-y-4">
-          <div className="grid grid-cols-1 gap-4">
+        <CardContent className="p-3 sm:p-4 pt-0 space-y-3 sm:space-y-4">
+          <div className="grid grid-cols-1 gap-3 sm:gap-4">
             <div>
               <Label className="text-sm font-medium text-gray-700 mb-2 block">Cliente *</Label>
               <Select value={selectedClientId} onValueChange={setSelectedClientId}>
@@ -236,10 +236,10 @@ export default function QuoteForm({
 
       {/* Items */}
       <Card className="bg-white shadow-sm border-gray-200">
-        <CardHeader className="p-4 pb-3">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <CardHeader className="p-3 sm:p-4 pb-2 sm:pb-3">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
             <div>
-              <CardTitle className="text-lg font-semibold text-gray-800">
+              <CardTitle className="text-base sm:text-lg font-semibold text-gray-800">
                 Serviços e Produtos
               </CardTitle>
               {!isUserPremium && (
@@ -295,12 +295,12 @@ export default function QuoteForm({
 
       {/* Description */}
       <Card className="bg-white shadow-sm border-gray-200">
-        <CardHeader className="p-4 pb-3">
-          <CardTitle className="text-lg font-semibold text-gray-800">
+        <CardHeader className="p-3 sm:p-4 pb-2 sm:pb-3">
+          <CardTitle className="text-base sm:text-lg font-semibold text-gray-800">
             Descrição
           </CardTitle>
         </CardHeader>
-        <CardContent className="p-4 pt-0">
+        <CardContent className="p-3 sm:p-4 pt-0">
           <Textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
@@ -312,15 +312,15 @@ export default function QuoteForm({
       </Card>
 
       {/* Additional Info and Summary */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-3 sm:gap-4">
         {/* Additional Info */}
         <Card className="bg-white shadow-sm border-gray-200">
-          <CardHeader className="p-4 pb-3">
-            <CardTitle className="text-lg font-semibold text-gray-800">
+          <CardHeader className="p-3 sm:p-4 pb-2 sm:pb-3">
+            <CardTitle className="text-base sm:text-lg font-semibold text-gray-800">
               Informações Adicionais
             </CardTitle>
           </CardHeader>
-          <CardContent className="p-4 pt-0 space-y-4">
+          <CardContent className="p-3 sm:p-4 pt-0 space-y-3 sm:space-y-4">
             <div>
               <Label className="text-sm font-medium text-gray-700 mb-2 block">Condições de Pagamento</Label>
               <Textarea
@@ -398,12 +398,12 @@ export default function QuoteForm({
 
         {/* Financial Summary */}
         <Card className="bg-white shadow-sm border-gray-200">
-          <CardHeader className="p-4 pb-3">
-            <CardTitle className="text-lg font-semibold text-gray-800">
+          <CardHeader className="p-3 sm:p-4 pb-2 sm:pb-3">
+            <CardTitle className="text-base sm:text-lg font-semibold text-gray-800">
               Resumo Financeiro
             </CardTitle>
           </CardHeader>
-          <CardContent className="p-4 pt-0">
+          <CardContent className="p-3 sm:p-4 pt-0">
             <div className="space-y-4">
               <div className="space-y-3 pb-4 border-b border-gray-200">
                 <div className="flex justify-between">
@@ -437,7 +437,7 @@ export default function QuoteForm({
 
       {/* Action Buttons */}
       <Card className="bg-white shadow-sm border-gray-200">
-        <CardContent className="p-4">
+        <CardContent className="p-3 sm:p-4">
           <div className="flex flex-col sm:flex-row gap-3 justify-end">
             <Button 
               variant="secondary"

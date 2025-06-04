@@ -131,15 +131,15 @@ export default function NewQuote() {
       />
 
       {/* Main Content Container - Mobile Optimized */}
-      <div className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
-        <div className="max-w-4xl mx-auto space-y-4 sm:space-y-6">
+      <div className="px-3 sm:px-4 md:px-6 lg:px-8 py-3 sm:py-4 md:py-6">
+        <div className="max-w-3xl mx-auto space-y-3 sm:space-y-4 md:space-y-6">
 
           {/* Plan limit warning */}
           {planLimits && !planLimits.isPremium && !planLimits.canCreateQuote && (
-            <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg">
-              <div className="flex items-start gap-3">
-                <div className="w-6 h-6 bg-amber-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <span className="text-amber-600 font-bold text-sm">!</span>
+            <div className="p-3 sm:p-4 bg-amber-50 border border-amber-200 rounded-lg">
+              <div className="flex flex-col sm:flex-row sm:items-start gap-2 sm:gap-3">
+                <div className="w-5 h-5 sm:w-6 sm:h-6 bg-amber-100 rounded-full flex items-center justify-center flex-shrink-0">
+                  <span className="text-amber-600 font-bold text-xs sm:text-sm">!</span>
                 </div>
                 <div className="min-w-0 flex-1">
                   <h3 className="font-medium text-amber-800 text-sm">Limite mensal atingido</h3>
