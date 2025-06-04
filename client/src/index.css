@@ -45,10 +45,7 @@
     @apply text-base sm:text-lg;
   }
 
-  /* Mobile-specific breakpoints */
-  @screen xs {
-    /* Extra small devices (phones, less than 576px) */
-  }
+  /* Mobile-specific breakpoints - using min-width media queries */
   
   /* Fix for very small screens */
   @media (max-width: 375px) {
