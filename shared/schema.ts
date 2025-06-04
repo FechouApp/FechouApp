@@ -39,7 +39,7 @@ export const users = pgTable("users", {
   address: varchar("address"),
   logoUrl: text("logo_url"),
   customDomain: varchar("custom_domain").unique(),
-  plan: varchar("plan").notNull().default("FREE"), // FREE, PREMIUM
+  plan: varchar("plan").notNull().default("FREE"), // FREE, PREMIUM, PREMIUM_CORTESIA
   planExpiresAt: timestamp("plan_expires_at"),
   pixKey: varchar("pix_key"),
   paymentGatewayId: varchar("payment_gateway_id"),

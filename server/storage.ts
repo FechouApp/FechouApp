@@ -761,10 +761,10 @@ export class DatabaseStorage implements IStorage {
       };
 
       // Set plan-specific fields
-      if (plan.toUpperCase() === "PREMIUM") {
+      if (plan.toUpperCase() === "PREMIUM" || plan.toUpperCase() === "PREMIUM_CORTESIA") {
         updateData.planExpiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 days
         updateData.quotesLimit = 999999;
-        if (existingUser.plan !== "PREMIUM") {
+        if (existingUser.plan !== "PREMIUM" && existingUser.plan !== "PREMIUM_CORTESIA") {
           updateData.quotesUsedThisMonth = 0; // Reset for new premium users
         }
       } else {
@@ -893,6 +893,7 @@ export class DatabaseStorage implements IStorage {
     const allUsers = await db.select().from(users);
     const totalUsers = allUsers.length;
     const premiumUsers = allUsers.filter(u => u.plan === 'PREMIUM').length;
+    const premiumCortesiaUsers = allUsers.filter(u => u.plan === 'PREMIUM_CORTESIA').length;
     const freeUsers = allUsers.filter(u => u.plan === 'FREE').length;
 
     // Quote statistics
@@ -903,11 +904,11 @@ export class DatabaseStorage implements IStorage {
     const pendingQuotes = allQuotes.filter(q => q.status === 'sent').length;
     const rejectedQuotes = allQuotes.filter(q => q.status === 'rejected').length;
 
-    // Revenue calculations (Premium plans at R$ 29,90/month)
+    // Revenue calculations (Only paid Premium plans at R$ 29,90/month)
     const premiumPrice = 29.90;
     const totalRevenue = (premiumUsers * premiumPrice).toFixed(2).replace('.', ',');
     
-    // Monthly revenue (new premium users this month)
+    // Monthly revenue (new paid premium users this month)
     const newPremiumUsersThisMonth = allUsers.filter(u => 
       u.plan === 'PREMIUM' && 
       new Date(u.updatedAt!) >= thirtyDaysAgo

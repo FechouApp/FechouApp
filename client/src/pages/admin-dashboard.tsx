@@ -110,9 +110,8 @@ export default function AdminDashboard() {
     },
   });
 
-  const handleTogglePlan = (user: User) => {
-    const newPlan = user.plan === "FREE" ? "PREMIUM" : "FREE";
-    updatePlanMutation.mutate({ userId: user.id, newPlan });
+  const handleTogglePlan = (user: User, planType: string) => {
+    updatePlanMutation.mutate({ userId: user.id, newPlan: planType });
   };
 
   if (usersLoading || statsLoading) {
@@ -309,12 +308,26 @@ export default function AdminDashboard() {
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-gray-600">Usuários Premium</p>
+                      <p className="text-sm font-medium text-gray-600">Premium Pago</p>
                       <p className="text-3xl font-bold text-yellow-600">
                         {users.filter(u => u.plan === "PREMIUM").length}
                       </p>
                     </div>
                     <Zap className="w-8 h-8 text-yellow-600" />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-600">Premium Cortesia</p>
+                      <p className="text-3xl font-bold text-purple-600">
+                        {users.filter(u => u.plan === "PREMIUM_CORTESIA").length}
+                      </p>
+                    </div>
+                    <Zap className="w-8 h-8 text-purple-600" />
                   </div>
                 </CardContent>
               </Card>
@@ -379,8 +392,14 @@ export default function AdminDashboard() {
                             <p className="text-sm">{user.email}</p>
                           </TableCell>
                           <TableCell>
-                            <Badge className={user.plan === "PREMIUM" ? "bg-yellow-500 text-black" : "bg-gray-500 text-white"}>
-                              {user.plan === "PREMIUM" ? "Premium" : "Gratuito"}
+                            <Badge className={
+                              user.plan === "PREMIUM" ? "bg-yellow-500 text-black" : 
+                              user.plan === "PREMIUM_CORTESIA" ? "bg-purple-500 text-white" : 
+                              "bg-gray-500 text-white"
+                            }>
+                              {user.plan === "PREMIUM" ? "Premium Pago" : 
+                               user.plan === "PREMIUM_CORTESIA" ? "Premium Cortesia" : 
+                               "Gratuito"}
                             </Badge>
                           </TableCell>
                           <TableCell>
@@ -415,14 +434,35 @@ export default function AdminDashboard() {
                             )}
                           </TableCell>
                           <TableCell>
-                            <div className="flex gap-2">
+                            <div className="flex gap-1 flex-wrap">
                               <Button
                                 variant="outline"
                                 size="sm"
-                                onClick={() => handleTogglePlan(user)}
-                                disabled={updatePlanMutation.isPending}
+                                onClick={() => handleTogglePlan(user, "FREE")}
+                                disabled={updatePlanMutation.isPending || user.plan === "FREE"}
+                                className="text-xs"
                               >
-                                {user.plan === "FREE" ? "→ Premium" : "→ Gratuito"}
+                                Gratuito
+                              </Button>
+                              
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleTogglePlan(user, "PREMIUM")}
+                                disabled={updatePlanMutation.isPending || user.plan === "PREMIUM"}
+                                className="text-xs bg-yellow-50"
+                              >
+                                Premium
+                              </Button>
+                              
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleTogglePlan(user, "PREMIUM_CORTESIA")}
+                                disabled={updatePlanMutation.isPending || user.plan === "PREMIUM_CORTESIA"}
+                                className="text-xs bg-purple-50"
+                              >
+                                Cortesia
                               </Button>
                               
                               <Button
