@@ -97,6 +97,26 @@ export interface IStorage {
   getUsersByPaymentStatus(status: string): Promise<User[]>;
   incrementQuoteUsage(userId: string): Promise<User | undefined>;
   checkAdminStatus(userId: string): Promise<boolean>;
+  getAdminStats(): Promise<{
+    totalUsers: number;
+    premiumUsers: number;
+    freeUsers: number;
+    totalQuotes: number;
+    activeQuotes: number;
+    approvedQuotes: number;
+    pendingQuotes: number;
+    rejectedQuotes: number;
+    totalRevenue: string;
+    monthlyRevenue: string;
+    averageQuoteValue: string;
+    conversionRate: number;
+    userGrowthRate: number;
+    retentionRate: number;
+    churnRate: number;
+    activeUsersToday: number;
+    activeUsersWeek: number;
+    activeUsersMonth: number;
+  }>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -842,6 +862,117 @@ export class DatabaseStorage implements IStorage {
       .where(eq(users.id, userId));
     
     return user?.isAdmin || false;
+  }
+
+  async getAdminStats(): Promise<{
+    totalUsers: number;
+    premiumUsers: number;
+    freeUsers: number;
+    totalQuotes: number;
+    activeQuotes: number;
+    approvedQuotes: number;
+    pendingQuotes: number;
+    rejectedQuotes: number;
+    totalRevenue: string;
+    monthlyRevenue: string;
+    averageQuoteValue: string;
+    conversionRate: number;
+    userGrowthRate: number;
+    retentionRate: number;
+    churnRate: number;
+    activeUsersToday: number;
+    activeUsersWeek: number;
+    activeUsersMonth: number;
+  }> {
+    const now = new Date();
+    const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+    const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+
+    // User statistics
+    const allUsers = await db.select().from(users);
+    const totalUsers = allUsers.length;
+    const premiumUsers = allUsers.filter(u => u.plan === 'PREMIUM').length;
+    const freeUsers = allUsers.filter(u => u.plan === 'FREE').length;
+
+    // Quote statistics
+    const allQuotes = await db.select().from(quotes);
+    const totalQuotes = allQuotes.length;
+    const activeQuotes = allQuotes.filter(q => q.status === 'draft' || q.status === 'sent').length;
+    const approvedQuotes = allQuotes.filter(q => q.status === 'approved').length;
+    const pendingQuotes = allQuotes.filter(q => q.status === 'sent').length;
+    const rejectedQuotes = allQuotes.filter(q => q.status === 'rejected').length;
+
+    // Revenue calculations (Premium plans at R$ 29,90/month)
+    const premiumPrice = 29.90;
+    const totalRevenue = (premiumUsers * premiumPrice).toFixed(2).replace('.', ',');
+    
+    // Monthly revenue (new premium users this month)
+    const newPremiumUsersThisMonth = allUsers.filter(u => 
+      u.plan === 'PREMIUM' && 
+      new Date(u.updatedAt!) >= thirtyDaysAgo
+    ).length;
+    const monthlyRevenue = (newPremiumUsersThisMonth * premiumPrice).toFixed(2).replace('.', ',');
+
+    // Average quote value (from approved quotes)
+    const approvedQuotesWithTotal = allQuotes.filter(q => q.status === 'approved' && q.total);
+    const averageQuoteValue = approvedQuotesWithTotal.length > 0 
+      ? (approvedQuotesWithTotal.reduce((sum, q) => sum + parseFloat(q.total!.replace(',', '.')), 0) / approvedQuotesWithTotal.length).toFixed(2).replace('.', ',')
+      : '0,00';
+
+    // Conversion rate (approved quotes / total quotes)
+    const conversionRate = totalQuotes > 0 ? Math.round((approvedQuotes / totalQuotes) * 100) : 0;
+
+    // User growth rate (new users in last 30 days vs previous 30 days)
+    const sixtyDaysAgo = new Date(now.getTime() - 60 * 24 * 60 * 60 * 1000);
+    const newUsersLast30Days = allUsers.filter(u => new Date(u.createdAt!) >= thirtyDaysAgo).length;
+    const newUsersPrevious30Days = allUsers.filter(u => 
+      new Date(u.createdAt!) >= sixtyDaysAgo && new Date(u.createdAt!) < thirtyDaysAgo
+    ).length;
+    const userGrowthRate = newUsersPrevious30Days > 0 
+      ? Math.round(((newUsersLast30Days - newUsersPrevious30Days) / newUsersPrevious30Days) * 100)
+      : newUsersLast30Days > 0 ? 100 : 0;
+
+    // Active users (users who created quotes recently)
+    const activeUsersToday = allUsers.filter(u => {
+      const userQuotes = allQuotes.filter(q => q.userId === u.id);
+      return userQuotes.some(q => new Date(q.createdAt!) >= oneDayAgo);
+    }).length;
+
+    const activeUsersWeek = allUsers.filter(u => {
+      const userQuotes = allQuotes.filter(q => q.userId === u.id);
+      return userQuotes.some(q => new Date(q.createdAt!) >= sevenDaysAgo);
+    }).length;
+
+    const activeUsersMonth = allUsers.filter(u => {
+      const userQuotes = allQuotes.filter(q => q.userId === u.id);
+      return userQuotes.some(q => new Date(q.createdAt!) >= thirtyDaysAgo);
+    }).length;
+
+    // Retention and churn (simplified calculations)
+    const retentionRate = totalUsers > 0 ? Math.round((activeUsersMonth / totalUsers) * 100) : 0;
+    const churnRate = Math.max(0, 100 - retentionRate);
+
+    return {
+      totalUsers,
+      premiumUsers,
+      freeUsers,
+      totalQuotes,
+      activeQuotes,
+      approvedQuotes,
+      pendingQuotes,
+      rejectedQuotes,
+      totalRevenue,
+      monthlyRevenue,
+      averageQuoteValue,
+      conversionRate,
+      userGrowthRate,
+      retentionRate,
+      churnRate,
+      activeUsersToday,
+      activeUsersWeek,
+      activeUsersMonth,
+    };
   }
 }
 
