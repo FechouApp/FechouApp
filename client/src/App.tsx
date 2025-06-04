@@ -22,6 +22,7 @@ import LoadingSpinner from "@/components/common/loading-spinner";
 import Reports from "@/pages/reports";
 import SavedItemsPage from "@/pages/saved-items";
 import ClientProfile from "@/pages/client-profile";
+import AdminPanel from "@/pages/admin";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -47,6 +48,7 @@ function Router() {
           <Route path="/reports" component={Reports} />
           <Route path="/plans" component={PlanComparison} />
           <Route path="/settings" component={Settings} />
+          <Route path="/admin" component={AdminPanel} />
         </>
       )}
       <Route component={NotFound} />
