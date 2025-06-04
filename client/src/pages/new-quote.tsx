@@ -134,7 +134,7 @@ export default function NewQuote() {
       <div className="px-2 sm:px-4 md:px-6 lg:px-8 pb-4 sm:pb-6 md:pb-8">
         <div className="w-full max-w-5xl mx-auto space-y-3 sm:space-y-4 md:space-y-6">
           {/* Step Indicator - Hidden on small mobile */}
-          <div className="hidden sm:flex items-center justify-center mb-3 sm:mb-4 md:mb-6"></div>
+          <div className="hidden sm:flex items-center justify-center mb-3 sm:mb-4 md:mb-6">
             <div className="flex items-center">
               <div className={`w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center text-sm md:text-base font-medium ${
                 step >= 1 ? 'bg-white text-brand-primary' : 'bg-white/20 text-white/60'
