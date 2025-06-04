@@ -163,6 +163,7 @@ export default function MobileHeader() {
               <div className="pt-6 border-t border-gray-200 space-y-2">
                 <Button
                   variant="ghost"
+                  onClick={() => handleNavigation("/settings")}
                   className="w-full justify-start text-gray-700 hover:bg-gray-100"
                 >
                   <Settings className="w-5 h-5 mr-3" />
