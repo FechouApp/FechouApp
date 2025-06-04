@@ -587,78 +587,76 @@ export default function Reports() {
         </CardContent>
       </Card>
 
-      {/* Métricas de Engajamento */}
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mx-4 md:mx-0">
-        <Card className="bg-white shadow-lg">
-          <CardHeader className="p-4 md:p-6">
-            <CardTitle className="text-base md:text-lg font-semibold text-gray-800">
-              Engajamento
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-4 md:p-6 space-y-3 md:space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Eye className="w-4 h-4 text-blue-600" />
-                <span className="text-gray-600">Visualizações</span>
-              </div>
-              <span className="font-semibold text-gray-800">
-                {quotes?.filter(q => q.status !== 'draft').length || 0}
-              </span>
-            </div>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <ThumbsUp className="w-4 h-4 text-green-600" />
-                <span className="text-gray-600">Aprovações</span>
-              </div>
-              <span className="font-semibold text-gray-800">
-                {quotes?.filter(q => q.status === 'approved' || q.status === 'paid').length || 0}
-              </span>
-            </div>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Star className="w-4 h-4 text-yellow-600" />
-                <span className="text-gray-600">Avaliações</span>
-              </div>
-              <span className="font-semibold text-gray-800">
-                {reviews?.length || 0}
-              </span>
-            </div>
-          </CardContent>
-        </Card>
+      
+    
+        
+          
+            
+              
+                
+                  
+                    
+                      
+                    
+                    
+                      {quotes?.filter(q => q.status !== 'draft').length || 0}
+                    
+                  
+                
+                
+                  
+                    
+                      
+                    
+                    
+                      {quotes?.filter(q => q.status === 'approved' || q.status === 'paid').length || 0}
+                    
+                  
+                
+                
+                  
+                    
+                      
+                    
+                    
+                      {reviews?.length || 0}
+                    
+                  
+                
+              
+            
+          
 
-        <Card className="bg-white shadow-lg">
-          <CardHeader className="p-4 md:p-6">
-            <CardTitle className="text-base md:text-lg font-semibold text-gray-800">
-              Tempo Médio
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-4 md:p-6 space-y-3 md:space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Clock className="w-4 h-4 text-purple-600" />
-                <span className="text-gray-600 text-sm md:text-base">Para aprovação</span>
-              </div>
-              <span className="font-semibold text-gray-800 text-sm md:text-base">2-3 dias</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Calendar className="w-4 h-4 text-orange-600" />
-                <span className="text-gray-600 text-sm md:text-base">Validade</span>
-              </div>
-              <span className="font-semibold text-gray-800 text-sm md:text-base">30 dias</span>
-            </div>
-          </CardContent>
-        </Card>
+          
+            
+              
+                
+                  
+                    
+                      
+                    
+                    
+                      2-3 dias
+                    
+                  
+                
+                
+                  
+                    
+                      
+                    
+                    
+                      30 dias
+                    
+                  
+                
+              
+            
+          
 
-        <Card className="bg-white shadow-lg md:col-span-2 lg:col-span-1">
-          <CardHeader className="p-4 md:p-6">
-            <CardTitle className="text-base md:text-lg font-semibold text-gray-800">
-              Meta do Mês
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-4 md:p-6 space-y-3 md:space-y-4">
-            <div className="text-center">
-              <p className="text-3xl font-bold text-brand-primary">
+          
+            
+              
                 {(() => {
                   const currentMonth = new Date().getMonth();
                   const currentYear = new Date().getFullYear();
@@ -667,13 +665,13 @@ export default function Reports() {
                     return quoteDate.getMonth() === currentMonth && quoteDate.getFullYear() === currentYear;
                   }).length || 0;
                 })()}
-              </p>
-              <p className="text-gray-600">orçamentos este mês</p>
-            </div>
-            <div className="w-full bg-gray-200 rounded-full h-2">
-              <div 
-                className="brand-gradient h-2 rounded-full" 
-                style={{ width: `${Math.min(((() => {
+              
+              orçamentos este mês
+            
+            
+              
+                
+                  style={{ width: `${Math.min(((() => {
                   const currentMonth = new Date().getMonth();
                   const currentYear = new Date().getFullYear();
                   const thisMonthQuotes = quotes?.filter(q => {
@@ -682,14 +680,14 @@ export default function Reports() {
                   }).length || 0;
                   return (thisMonthQuotes / 20) * 100;
                 })()), 100)}%` }}
-              ></div>
-            </div>
-            <p className="text-sm text-gray-600 text-center">
+              >
+            
+            
               Meta: 20 orçamentos/mês
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
+            
+          
+        
+      
+    
   );
 }
