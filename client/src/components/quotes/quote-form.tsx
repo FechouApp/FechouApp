@@ -278,8 +278,9 @@ export default function QuoteForm({
               setItems(prev => [...prev, newItem]);
             }}
           />
-          
+
           {/* Lista de Itens do Orçamento */}
+          {{/* Lista de Itens do Orçamento */}
           {items.map((item, index) => (
             <QuoteItem
               key={item.id}
