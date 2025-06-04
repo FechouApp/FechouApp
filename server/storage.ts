@@ -720,13 +720,15 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateUserPlanStatus(userId: string, plan: string, paymentStatus: string, paymentMethod?: string): Promise<User | undefined> {
+    console.log("Storage: updateUserPlanStatus called with:", { userId, plan, paymentStatus, paymentMethod });
+    
     const updateData: any = {
       plan,
       paymentStatus,
       updatedAt: new Date(),
     };
 
-    if (paymentMethod && paymentMethod !== "none") {
+    if (paymentMethod && paymentMethod !== "") {
       updateData.paymentMethod = paymentMethod;
     } else {
       updateData.paymentMethod = null;
@@ -736,10 +738,13 @@ export class DatabaseStorage implements IStorage {
       // Set expiration to 30 days from now
       updateData.planExpiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
       updateData.quotesLimit = 999999; // Unlimited quotes for premium
+      updateData.quotesUsedThisMonth = 0; // Reset quota for new premium user
     } else {
       updateData.planExpiresAt = null;
       updateData.quotesLimit = 5; // Free plan limit
     }
+
+    console.log("Storage: Update data:", updateData);
 
     try {
       const [user] = await db
@@ -748,9 +753,10 @@ export class DatabaseStorage implements IStorage {
         .where(eq(users.id, userId))
         .returning();
       
+      console.log("Storage: User updated successfully:", user);
       return user;
     } catch (error) {
-      console.error("Error updating user plan status:", error);
+      console.error("Storage: Error updating user plan status:", error);
       throw error;
     }
   }

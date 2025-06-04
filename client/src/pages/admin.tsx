@@ -81,6 +81,7 @@ export default function AdminPanel() {
       });
       queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
       setIsDialogOpen(false);
+      setSelectedUser(null);
       setEditPlan("");
       setEditPaymentStatus("");
       setEditPaymentMethod("");
@@ -189,7 +190,7 @@ export default function AdminPanel() {
       userId: selectedUser.id,
       plan: editPlan,
       paymentStatus: editPaymentStatus,
-      paymentMethod: editPaymentMethod && editPaymentMethod !== "none" ? editPaymentMethod : undefined,
+      paymentMethod: editPaymentMethod && editPaymentMethod !== "" ? editPaymentMethod : undefined,
     });
   };
 
@@ -426,7 +427,15 @@ export default function AdminPanel() {
                       </TableCell>
                       <TableCell>
                         <div className="flex gap-2">
-                          <Dialog open={isDialogOpen && selectedUser?.id === user.id} onOpenChange={setIsDialogOpen}>
+                          <Dialog open={isDialogOpen && selectedUser?.id === user.id} onOpenChange={(open) => {
+                            setIsDialogOpen(open);
+                            if (!open) {
+                              setSelectedUser(null);
+                              setEditPlan("");
+                              setEditPaymentStatus("");
+                              setEditPaymentMethod("");
+                            }
+                          }}>
                             <DialogTrigger asChild>
                               <Button 
                                 variant="outline" 
@@ -436,6 +445,7 @@ export default function AdminPanel() {
                                   setEditPlan(user.plan);
                                   setEditPaymentStatus(user.paymentStatus);
                                   setEditPaymentMethod(user.paymentMethod || "");
+                                  setIsDialogOpen(true);
                                 }}
                               >
                                 <Settings className="w-4 h-4" />
@@ -445,78 +455,81 @@ export default function AdminPanel() {
                               <DialogHeader>
                                 <DialogTitle>Gerenciar Usuário</DialogTitle>
                               </DialogHeader>
-                              <form onSubmit={handleUpdatePlan} className="space-y-4">
-                                <div>
-                                  <Label>Usuário</Label>
-                                  <p className="text-sm text-gray-600">
-                                    {user.firstName} {user.lastName} ({user.email})
-                                  </p>
-                                </div>
-                                
-                                <div>
-                                  <Label htmlFor="plan">Plano</Label>
-                                  <Select value={editPlan} onValueChange={setEditPlan}>
-                                    <SelectTrigger>
-                                      <SelectValue />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                      <SelectItem value="FREE">Gratuito</SelectItem>
-                                      <SelectItem value="PREMIUM">Premium</SelectItem>
-                                    </SelectContent>
-                                  </Select>
-                                </div>
+                              {selectedUser && (
+                                <form onSubmit={handleUpdatePlan} className="space-y-4">
+                                  <div>
+                                    <Label>Usuário</Label>
+                                    <p className="text-sm text-gray-600">
+                                      {selectedUser.firstName} {selectedUser.lastName} ({selectedUser.email})
+                                    </p>
+                                  </div>
+                                  
+                                  <div>
+                                    <Label htmlFor="plan">Plano</Label>
+                                    <Select value={editPlan} onValueChange={setEditPlan}>
+                                      <SelectTrigger>
+                                        <SelectValue placeholder="Selecione um plano" />
+                                      </SelectTrigger>
+                                      <SelectContent>
+                                        <SelectItem value="FREE">Gratuito</SelectItem>
+                                        <SelectItem value="PREMIUM">Premium</SelectItem>
+                                      </SelectContent>
+                                    </Select>
+                                  </div>
 
-                                <div>
-                                  <Label htmlFor="paymentStatus">Status de Pagamento</Label>
-                                  <Select value={editPaymentStatus} onValueChange={setEditPaymentStatus}>
-                                    <SelectTrigger>
-                                      <SelectValue />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                      <SelectItem value="ativo">Ativo</SelectItem>
-                                      <SelectItem value="pendente">Pendente</SelectItem>
-                                      <SelectItem value="vencido">Vencido</SelectItem>
-                                    </SelectContent>
-                                  </Select>
-                                </div>
+                                  <div>
+                                    <Label htmlFor="paymentStatus">Status de Pagamento</Label>
+                                    <Select value={editPaymentStatus} onValueChange={setEditPaymentStatus}>
+                                      <SelectTrigger>
+                                        <SelectValue placeholder="Selecione um status" />
+                                      </SelectTrigger>
+                                      <SelectContent>
+                                        <SelectItem value="ativo">Ativo</SelectItem>
+                                        <SelectItem value="pendente">Pendente</SelectItem>
+                                        <SelectItem value="vencido">Vencido</SelectItem>
+                                      </SelectContent>
+                                    </Select>
+                                  </div>
 
-                                <div>
-                                  <Label htmlFor="paymentMethod">Método de Pagamento</Label>
-                                  <Select value={editPaymentMethod} onValueChange={setEditPaymentMethod}>
-                                    <SelectTrigger>
-                                      <SelectValue placeholder="Selecione um método" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                      <SelectItem value="">Não especificado</SelectItem>
-                                      <SelectItem value="pix">PIX</SelectItem>
-                                      <SelectItem value="manual">Manual</SelectItem>
-                                      <SelectItem value="asaas">Asaas</SelectItem>
-                                    </SelectContent>
-                                  </Select>
-                                </div>
+                                  <div>
+                                    <Label htmlFor="paymentMethod">Método de Pagamento</Label>
+                                    <Select value={editPaymentMethod} onValueChange={setEditPaymentMethod}>
+                                      <SelectTrigger>
+                                        <SelectValue placeholder="Selecione um método" />
+                                      </SelectTrigger>
+                                      <SelectContent>
+                                        <SelectItem value="">Não especificado</SelectItem>
+                                        <SelectItem value="pix">PIX</SelectItem>
+                                        <SelectItem value="manual">Manual</SelectItem>
+                                        <SelectItem value="asaas">Asaas</SelectItem>
+                                      </SelectContent>
+                                    </Select>
+                                  </div>
 
-                                <div className="flex gap-2">
-                                  <Button 
-                                    type="submit"
-                                    disabled={updatePlanMutation.isPending}
-                                    className="flex-1"
-                                  >
-                                    {updatePlanMutation.isPending ? "Atualizando..." : "Atualizar"}
-                                  </Button>
-                                  <Button 
-                                    type="button"
-                                    variant="outline"
-                                    onClick={() => {
-                                      setIsDialogOpen(false);
-                                      setEditPlan("");
-                                      setEditPaymentStatus("");
-                                      setEditPaymentMethod("");
-                                    }}
-                                  >
-                                    Cancelar
-                                  </Button>
-                                </div>
-                              </form>
+                                  <div className="flex gap-2">
+                                    <Button 
+                                      type="submit"
+                                      disabled={updatePlanMutation.isPending}
+                                      className="flex-1"
+                                    >
+                                      {updatePlanMutation.isPending ? "Atualizando..." : "Atualizar"}
+                                    </Button>
+                                    <Button 
+                                      type="button"
+                                      variant="outline"
+                                      onClick={() => {
+                                        setIsDialogOpen(false);
+                                        setSelectedUser(null);
+                                        setEditPlan("");
+                                        setEditPaymentStatus("");
+                                        setEditPaymentMethod("");
+                                      }}
+                                    >
+                                      Cancelar
+                                    </Button>
+                                  </div>
+                                </form>
+                              )}
                             </DialogContent>
                           </Dialog>
 
