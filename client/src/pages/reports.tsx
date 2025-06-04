@@ -44,7 +44,7 @@ export default function Reports() {
 
   if (!isPremium) {
     return (
-      <div className="space-y-8">
+      <div className="min-h-screen bg-gradient-to-br from-blue-600 to-purple-700 p-4">
         {/* Botão de Voltar */}
         <div className="flex items-center mb-6">
           <Button
@@ -57,20 +57,20 @@ export default function Reports() {
           </Button>
         </div>
 
-        <div className="text-center">
-          <h1 className="text-3xl font-bold text-white mb-2">Relatórios Avançados</h1>
+        <div className="text-center mb-8">
+          <h1 className="text-2xl md:text-3xl font-bold text-white mb-2">Relatórios Avançados</h1>
           <p className="text-white/70">Análises detalhadas para o seu negócio</p>
         </div>
 
-        <Card className="bg-white/10 backdrop-blur-sm border-white/20">
-          <CardContent className="p-12 text-center">
+        <Card className="bg-white/10 backdrop-blur-sm border-white/20 max-w-2xl mx-auto">
+          <CardContent className="p-6 md:p-12 text-center">
             <div className="flex justify-center mb-6">
               <div className="bg-gradient-to-r from-yellow-500 to-orange-500 p-4 rounded-full">
                 <Lock className="w-12 h-12 text-white" />
               </div>
             </div>
 
-            <h2 className="text-2xl font-bold text-white mb-4">
+            <h2 className="text-xl md:text-2xl font-bold text-white mb-4">
               OS RELATÓRIOS ESTÃO DISPONÍVEIS PARA O PLANO PREMIUM
             </h2>
 
@@ -90,7 +90,7 @@ export default function Reports() {
             </div>
 
             <Link href="/plans">
-              <Button className="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white font-semibold px-8 py-3">
+              <Button className="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white font-semibold px-8 py-3 w-full md:w-auto">
                 <Crown className="w-5 h-5 mr-2" />
                 Fazer Upgrade para Premium
               </Button>
@@ -224,7 +224,7 @@ export default function Reports() {
   const averageQuoteValue = getAverageQuoteValue();
 
   return (
-    <div className="space-y-8">
+    <div className="min-h-screen bg-gray-50 p-4">
       {/* Botão de Voltar */}
       <div className="flex items-center mb-6">
         <Button
@@ -238,64 +238,64 @@ export default function Reports() {
       </div>
 
       {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold text-gray-800 mb-2">Relatórios</h1>
+      <div className="mb-8">
+        <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-2">Relatórios</h1>
         <p className="text-gray-600">Análise detalhada do seu desempenho</p>
       </div>
 
       {/* KPIs Principais */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mx-4 md:mx-0">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         <Card className="bg-white shadow-lg">
-          <CardContent className="p-4 md:p-6">
+          <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div className="space-y-1">
-                <p className="text-xs md:text-sm font-medium text-gray-600">Taxa de Conversão</p>
-                <p className="text-xl md:text-2xl font-bold text-green-600">{conversionRate}%</p>
+                <p className="text-sm font-medium text-gray-600">Taxa de Conversão</p>
+                <p className="text-2xl font-bold text-green-600">{conversionRate}%</p>
               </div>
-              <div className="w-8 h-8 md:w-10 md:h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                <Target className="w-4 h-4 md:w-6 md:h-6 text-green-600" />
+              <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                <Target className="w-6 h-6 text-green-600" />
               </div>
             </div>
           </CardContent>
         </Card>
 
         <Card className="bg-white shadow-lg">
-          <CardContent className="p-4 md:p-6">
+          <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div className="space-y-1">
-                <p className="text-xs md:text-sm font-medium text-gray-600">Ticket Médio</p>
-                <p className="text-lg md:text-2xl font-bold text-blue-600">{formatCurrency(averageQuoteValue)}</p>
+                <p className="text-sm font-medium text-gray-600">Ticket Médio</p>
+                <p className="text-2xl font-bold text-blue-600">{formatCurrency(averageQuoteValue)}</p>
               </div>
-              <div className="w-8 h-8 md:w-10 md:h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                <DollarSign className="w-4 h-4 md:w-6 md:h-6 text-blue-600" />
+              <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                <DollarSign className="w-6 h-6 text-blue-600" />
               </div>
             </div>
           </CardContent>
         </Card>
 
         <Card className="bg-white shadow-lg">
-          <CardContent className="p-4 md:p-6">
+          <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div className="space-y-1">
-                <p className="text-xs md:text-sm font-medium text-gray-600">Clientes Únicos</p>
-                <p className="text-xl md:text-2xl font-bold text-purple-600">{topClients.length}</p>
+                <p className="text-sm font-medium text-gray-600">Clientes Únicos</p>
+                <p className="text-2xl font-bold text-purple-600">{topClients.length}</p>
               </div>
-              <div className="w-8 h-8 md:w-10 md:h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                <Users className="w-4 h-4 md:w-6 md:h-6 text-purple-600" />
+              <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                <Users className="w-6 h-6 text-purple-600" />
               </div>
             </div>
           </CardContent>
         </Card>
 
         <Card className="bg-white shadow-lg">
-          <CardContent className="p-4 md:p-6">
+          <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div className="space-y-1">
-                <p className="text-xs md:text-sm font-medium text-gray-600">Avaliação Média</p>
-                <p className="text-xl md:text-2xl font-bold text-yellow-600">{stats?.averageRating?.toFixed(1) || "0.0"}</p>
+                <p className="text-sm font-medium text-gray-600">Avaliação Média</p>
+                <p className="text-2xl font-bold text-yellow-600">{stats?.averageRating?.toFixed(1) || "0.0"}</p>
               </div>
-              <div className="w-8 h-8 md:w-10 md:h-10 bg-yellow-100 rounded-lg flex items-center justify-center">
-                <Star className="w-4 h-4 md:w-6 md:h-6 text-yellow-600" />
+              <div className="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center">
+                <Star className="w-6 h-6 text-yellow-600" />
               </div>
             </div>
           </CardContent>
@@ -303,14 +303,14 @@ export default function Reports() {
       </div>
 
       {/* Gráficos - Últimos 12 Meses */}
-      <div className="grid lg:grid-cols-2 gap-4 md:gap-6 mx-4 md:mx-0">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         <Card className="bg-white shadow-lg">
-          <CardHeader className="p-4 md:p-6">
-            <CardTitle className="text-base md:text-lg font-semibold text-gray-800">
+          <CardHeader className="p-6">
+            <CardTitle className="text-lg font-semibold text-gray-800">
               Performance dos Últimos 12 Meses
             </CardTitle>
           </CardHeader>
-          <CardContent className="p-4 md:p-6">
+          <CardContent className="p-6">
             <ChartContainer
               config={{
                 total: {
@@ -326,7 +326,7 @@ export default function Reports() {
                   color: "#f59e0b",
                 },
               }}
-              className="h-[250px] md:h-[300px]"
+              className="h-[300px]"
             >
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={monthlyData}>
@@ -400,12 +400,12 @@ export default function Reports() {
         </Card>
 
         <Card className="bg-white shadow-lg">
-          <CardHeader className="p-4 md:p-6">
-            <CardTitle className="text-base md:text-lg font-semibold text-gray-800">
+          <CardHeader className="p-6">
+            <CardTitle className="text-lg font-semibold text-gray-800">
               Taxa de Conversão por Mês
             </CardTitle>
           </CardHeader>
-          <CardContent className="p-4 md:p-6">
+          <CardContent className="p-6">
             <ChartContainer
               config={{
                 conversionRate: {
@@ -413,7 +413,7 @@ export default function Reports() {
                   color: "#8b5cf6",
                 },
               }}
-              className="h-[250px] md:h-[300px]"
+              className="h-[300px]"
             >
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={monthlyData.map(month => ({
@@ -471,24 +471,24 @@ export default function Reports() {
       </div>
 
       {/* Performance Mensal e Status dos Orçamentos */}
-      <div className="grid lg:grid-cols-2 gap-4 md:gap-6 mx-4 md:mx-0">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         <Card className="bg-white shadow-lg">
-          <CardHeader className="p-4 md:p-6">
-            <CardTitle className="text-base md:text-lg font-semibold text-gray-800">
+          <CardHeader className="p-6">
+            <CardTitle className="text-lg font-semibold text-gray-800">
               Performance Mensal (Últimos 6 meses)
             </CardTitle>
           </CardHeader>
-          <CardContent className="p-4 md:p-6">
-            <div className="space-y-3 md:space-y-4">
+          <CardContent className="p-6">
+            <div className="space-y-4">
               {monthlyData.slice(-6).map((month, index) => (
-                <div key={index} className="flex flex-col md:flex-row md:items-center justify-between p-3 md:p-4 bg-gray-50 rounded-lg space-y-2 md:space-y-0">
+                <div key={index} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                   <div>
-                    <p className="font-medium text-gray-800 text-sm md:text-base">{month.month}</p>
-                    <p className="text-xs md:text-sm text-gray-600">{month.total} orçamentos</p>
+                    <p className="font-medium text-gray-800">{month.month}</p>
+                    <p className="text-sm text-gray-600">{month.total} orçamentos</p>
                   </div>
-                  <div className="md:text-right">
-                    <p className="font-semibold text-gray-800 text-sm md:text-base">{formatCurrency(month.revenue)}</p>
-                    <p className="text-xs md:text-sm text-green-600">{month.approved} aprovados</p>
+                  <div className="text-right">
+                    <p className="font-semibold text-gray-800">{formatCurrency(month.revenue)}</p>
+                    <p className="text-sm text-green-600">{month.approved} aprovados</p>
                     <p className="text-xs text-blue-600">Ticket: {formatCurrency(month.ticketMedio)}</p>
                   </div>
                 </div>
@@ -498,13 +498,13 @@ export default function Reports() {
         </Card>
 
         <Card className="bg-white shadow-lg">
-          <CardHeader className="p-4 md:p-6">
-            <CardTitle className="text-base md:text-lg font-semibold text-gray-800">
+          <CardHeader className="p-6">
+            <CardTitle className="text-lg font-semibold text-gray-800">
               Status dos Orçamentos
             </CardTitle>
           </CardHeader>
-          <CardContent className="p-4 md:p-6">
-            <div className="space-y-3 md:space-y-4">
+          <CardContent className="p-6">
+            <div className="space-y-4">
               {Object.entries(statusStats).map(([status, count]) => {
                 const getStatusInfo = (status) => {
                   switch (status.toLowerCase()) {
@@ -545,47 +545,45 @@ export default function Reports() {
       </div>
 
       {/* Top Clientes */}
-      <div className="mx-4 md:mx-0">
-        <Card className="bg-white shadow-lg">
-          <CardHeader className="p-4 md:p-6">
-            <CardTitle className="text-base md:text-lg font-semibold text-gray-800">
-              Principais Clientes
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-4 md:p-6">
-            <div className="space-y-3 md:space-y-4">
-              {topClients.map((client, index) => (
-                <div key={index} className="flex flex-col md:flex-row md:items-center justify-between p-3 md:p-4 bg-gray-50 rounded-lg space-y-3 md:space-y-0">
-                  <div className="flex items-center gap-3 md:gap-4">
-                    <div className="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center text-white font-bold text-sm md:text-base">
-                      #{index + 1}
-                    </div>
-                    <div>
-                      <p className="font-medium text-gray-800 text-sm md:text-base">{client.name}</p>
-                      <p className="text-xs md:text-sm text-gray-600">
-                        {client.quotesCount} orçamentos • {client.approvedCount} aprovados
-                      </p>
-                    </div>
+      <Card className="bg-white shadow-lg">
+        <CardHeader className="p-6">
+          <CardTitle className="text-lg font-semibold text-gray-800">
+            Principais Clientes
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-6">
+          <div className="space-y-4">
+            {topClients.map((client, index) => (
+              <div key={index} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center text-white font-bold">
+                    #{index + 1}
                   </div>
-                  <div className="md:text-right">
-                    <p className="font-semibold text-gray-800 text-sm md:text-base">{formatCurrency(client.totalValue)}</p>
-                    <p className="text-xs md:text-sm text-green-600">
-                      Taxa: {client.quotesCount > 0 ? ((client.approvedCount / client.quotesCount) * 100).toFixed(1) : 0}%
+                  <div>
+                    <p className="font-medium text-gray-800">{client.name}</p>
+                    <p className="text-sm text-gray-600">
+                      {client.quotesCount} orçamentos • {client.approvedCount} aprovados
                     </p>
                   </div>
                 </div>
-              ))}
-              {topClients.length === 0 && (
-                <div className="text-center py-8 text-gray-500">
-                  <Users className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-                  <p className="text-lg font-medium">Nenhum cliente ainda</p>
-                  <p className="text-sm">Crie orçamentos para ver seus principais clientes</p>
+                <div className="text-right">
+                  <p className="font-semibold text-gray-800">{formatCurrency(client.totalValue)}</p>
+                  <p className="text-sm text-green-600">
+                    Taxa: {client.quotesCount > 0 ? ((client.approvedCount / client.quotesCount) * 100).toFixed(1) : 0}%
+                  </p>
                 </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+              </div>
+            ))}
+            {topClients.length === 0 && (
+              <div className="text-center py-8 text-gray-500">
+                <Users className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                <p className="text-lg font-medium">Nenhum cliente ainda</p>
+                <p className="text-sm">Crie orçamentos para ver seus principais clientes</p>
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
