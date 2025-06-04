@@ -854,22 +854,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { plan, paymentStatus, paymentMethod } = req.body;
       
       console.log("=== ADMIN ROUTE CALLED ===");
+      console.log("Raw request body:", req.body);
       console.log("Admin updating user plan:", { userId, plan, paymentStatus, paymentMethod });
       
-      // Validate input
+      // Validate required fields
       if (!plan || !paymentStatus) {
-        console.log("Validation failed: missing plan or paymentStatus");
+        console.log("Validation failed: missing required fields");
         return res.status(400).json({ message: "Plano e status de pagamento são obrigatórios" });
       }
-      
-      if (!["FREE", "PREMIUM"].includes(plan.toUpperCase())) {
-        console.log("Validation failed: invalid plan type:", plan);
-        return res.status(400).json({ message: "Tipo de plano inválido" });
+
+      // Validate plan
+      const validPlans = ["FREE", "PREMIUM"];
+      if (!validPlans.includes(plan.toUpperCase())) {
+        console.log("Validation failed: invalid plan:", plan);
+        return res.status(400).json({ message: "Plano deve ser FREE ou PREMIUM" });
       }
-      
-      if (!["ativo", "pendente", "vencido"].includes(paymentStatus.toLowerCase())) {
+
+      // Validate payment status
+      const validStatuses = ["ativo", "pendente", "vencido"];
+      if (!validStatuses.includes(paymentStatus.toLowerCase())) {
         console.log("Validation failed: invalid payment status:", paymentStatus);
-        return res.status(400).json({ message: "Status de pagamento inválido" });
+        return res.status(400).json({ message: "Status deve ser ativo, pendente ou vencido" });
       }
       
       // Check if user exists
@@ -879,28 +884,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Usuário não encontrado" });
       }
       
-      // Normalize values
+      // Prepare update data
       const normalizedPlan = plan.toUpperCase();
       const normalizedPaymentStatus = paymentStatus.toLowerCase();
       const cleanPaymentMethod = paymentMethod && paymentMethod.trim() !== "" ? paymentMethod.trim() : null;
       
       console.log("Normalized values:", { normalizedPlan, normalizedPaymentStatus, cleanPaymentMethod });
       
-      const user = await storage.updateUserPlanStatus(userId, normalizedPlan, normalizedPaymentStatus, cleanPaymentMethod);
-      if (!user) {
-        console.log("Storage returned null/undefined");
-        return res.status(500).json({ message: "Falha ao atualizar plano do usuário" });
+      // Update user plan
+      const updatedUser = await storage.updateUserPlanStatus(userId, normalizedPlan, normalizedPaymentStatus, cleanPaymentMethod);
+      
+      if (!updatedUser) {
+        console.log("Storage operation failed - no user returned");
+        return res.status(500).json({ message: "Falha ao atualizar dados no banco" });
       }
       
-      console.log("User plan updated successfully");
+      console.log("User plan updated successfully:", updatedUser.id);
       console.log("=== ADMIN ROUTE SUCCESS ===");
-      res.json(user);
+      
+      res.json({
+        id: updatedUser.id,
+        email: updatedUser.email,
+        firstName: updatedUser.firstName,
+        lastName: updatedUser.lastName,
+        plan: updatedUser.plan,
+        paymentStatus: updatedUser.paymentStatus,
+        paymentMethod: updatedUser.paymentMethod,
+        planExpiresAt: updatedUser.planExpiresAt,
+        quotesLimit: updatedUser.quotesLimit,
+        quotesUsedThisMonth: updatedUser.quotesUsedThisMonth
+      });
+      
     } catch (error) {
       console.error("=== ADMIN ROUTE ERROR ===");
-      console.error("Error updating user plan:", error);
+      console.error("Full error object:", error);
+      console.error("Error message:", error instanceof Error ? error.message : String(error));
+      console.error("Error stack:", error instanceof Error ? error.stack : "No stack");
+      
       res.status(500).json({ 
-        message: "Falha ao atualizar plano do usuário", 
-        error: error instanceof Error ? error.message : "Erro desconhecido" 
+        message: "Erro interno do servidor ao atualizar plano", 
+        error: error instanceof Error ? error.message : "Erro desconhecido"
       });
     }
   });

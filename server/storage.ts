@@ -720,57 +720,75 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateUserPlanStatus(userId: string, plan: string, paymentStatus: string, paymentMethod?: string | null): Promise<User | undefined> {
-    console.log("=== STORAGE updateUserPlanStatus ===");
-    console.log("Storage: updateUserPlanStatus called with:", { userId, plan, paymentStatus, paymentMethod });
+    console.log("=== STORAGE updateUserPlanStatus START ===");
+    console.log("Parameters:", { userId, plan, paymentStatus, paymentMethod });
     
     try {
-      // First verify user exists
+      // Verify user exists first
       const existingUser = await this.getUser(userId);
       if (!existingUser) {
-        console.log("Storage: User not found in database:", userId);
+        console.log("ERROR: User not found in database:", userId);
         return undefined;
       }
+      console.log("User found:", existingUser.email);
 
+      // Prepare update object
       const updateData: any = {
         plan: plan.toUpperCase(),
         paymentStatus: paymentStatus.toLowerCase(),
-        updatedAt: new Date(),
         paymentMethod: paymentMethod || null,
+        updatedAt: new Date(),
       };
 
+      // Set plan-specific fields
       if (plan.toUpperCase() === "PREMIUM") {
-        // Set expiration to 30 days from now
-        updateData.planExpiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
-        updateData.quotesLimit = 999999; // Unlimited quotes for premium
+        updateData.planExpiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 days
+        updateData.quotesLimit = 999999;
         if (existingUser.plan !== "PREMIUM") {
-          updateData.quotesUsedThisMonth = 0; // Reset quota for new premium user
+          updateData.quotesUsedThisMonth = 0; // Reset for new premium users
         }
       } else {
         updateData.planExpiresAt = null;
-        updateData.quotesLimit = 5; // Free plan limit
+        updateData.quotesLimit = 5;
       }
 
-      console.log("Storage: Final update data:", updateData);
+      console.log("Final update data:", updateData);
 
+      // Execute update
       const result = await db
         .update(users)
         .set(updateData)
         .where(eq(users.id, userId))
         .returning();
       
+      console.log("Database result length:", result.length);
+      
       if (result.length === 0) {
-        console.log("Storage: Update operation affected 0 rows");
+        console.log("ERROR: No rows were updated");
         return undefined;
       }
       
-      const [user] = result;
-      console.log("Storage: User updated successfully");
-      console.log("=== STORAGE SUCCESS ===");
-      return user;
+      const [updatedUser] = result;
+      console.log("SUCCESS: User updated:", {
+        id: updatedUser.id,
+        plan: updatedUser.plan,
+        paymentStatus: updatedUser.paymentStatus,
+        paymentMethod: updatedUser.paymentMethod
+      });
+      console.log("=== STORAGE updateUserPlanStatus SUCCESS ===");
+      
+      return updatedUser;
+      
     } catch (error) {
-      console.error("=== STORAGE ERROR ===");
-      console.error("Storage: Database error:", error);
-      throw new Error(`Falha na atualização do banco de dados: ${error instanceof Error ? error.message : "Erro desconhecido"}`);
+      console.error("=== STORAGE updateUserPlanStatus ERROR ===");
+      console.error("Database error details:", {
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : "No stack trace",
+        name: error instanceof Error ? error.name : "Unknown error type"
+      });
+      
+      // Re-throw with more context
+      throw new Error(`Database update failed: ${error instanceof Error ? error.message : "Unknown error"}`);
     }
   }
 

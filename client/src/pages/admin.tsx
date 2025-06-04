@@ -66,26 +66,46 @@ export default function AdminPanel() {
   // Update user plan mutation
   const updatePlanMutation = useMutation({
     mutationFn: async (data: { userId: string; plan: string; paymentStatus: string; paymentMethod?: string | null }) => {
-      console.log("Updating user plan with data:", data);
+      console.log("=== MUTATION START ===");
+      console.log("Mutation called with data:", data);
+      
       try {
-        const response = await apiRequest(`/api/admin/users/${data.userId}/plan`, "PATCH", {
+        const requestBody = {
           plan: data.plan,
           paymentStatus: data.paymentStatus,
           paymentMethod: data.paymentMethod,
-        });
-        console.log("API response:", response);
+        };
+        
+        console.log("Request body:", requestBody);
+        console.log("API endpoint:", `/api/admin/users/${data.userId}/plan`);
+        
+        const response = await apiRequest(`/api/admin/users/${data.userId}/plan`, "PATCH", requestBody);
+        
+        console.log("API response received:", response);
+        console.log("=== MUTATION SUCCESS ===");
+        
         return response;
-      } catch (error) {
+      } catch (error: any) {
+        console.error("=== MUTATION ERROR ===");
         console.error("API request failed:", error);
+        console.error("Error details:", {
+          message: error?.message,
+          response: error?.response?.data,
+          status: error?.response?.status
+        });
         throw error;
       }
     },
     onSuccess: (data) => {
-      console.log("Plan update successful:", data);
+      console.log("=== MUTATION onSuccess ===");
+      console.log("Success data:", data);
+      
       toast({
-        title: "Sucesso",
+        title: "Sucesso!",
         description: "Plano do usuário atualizado com sucesso!",
       });
+      
+      // Refresh data and close dialog
       queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
       setIsDialogOpen(false);
       setSelectedUser(null);
@@ -94,21 +114,33 @@ export default function AdminPanel() {
       setEditPaymentMethod("");
     },
     onError: (error: any) => {
-      console.error("Plan update error:", error);
+      console.error("=== MUTATION onError ===");
+      console.error("Error object:", error);
       
       if (isUnauthorizedError(error)) {
         toast({
           title: "Não autorizado",
-          description: "Você não tem permissão para acessar esta área.",
+          description: "Você não tem permissão para realizar esta ação.",
           variant: "destructive",
         });
         return;
       }
       
-      const errorMessage = error?.response?.data?.message || error?.message || "Falha ao atualizar plano do usuário.";
+      // Extract error message from different possible locations
+      let errorMessage = "Falha ao atualizar plano do usuário.";
+      
+      if (error?.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error?.message) {
+        errorMessage = error.message;
+      } else if (typeof error === 'string') {
+        errorMessage = error;
+      }
+      
+      console.error("Final error message:", errorMessage);
       
       toast({
-        title: "Erro",
+        title: "Erro ao Atualizar",
         description: errorMessage,
         variant: "destructive",
       });
@@ -180,11 +212,24 @@ export default function AdminPanel() {
 
   const handleUpdatePlan = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!selectedUser) return;
+    
+    console.log("=== FORM SUBMIT START ===");
+    console.log("Selected user:", selectedUser?.id);
+    console.log("Form values:", { editPlan, editPaymentStatus, editPaymentMethod });
+    
+    if (!selectedUser) {
+      console.log("ERROR: No user selected");
+      toast({
+        title: "Erro",
+        description: "Nenhum usuário selecionado.",
+        variant: "destructive",
+      });
+      return;
+    }
 
-    console.log("Form data extracted:", { plan: editPlan, paymentStatus: editPaymentStatus, paymentMethod: editPaymentMethod });
-
+    // Validate required fields
     if (!editPlan || !editPaymentStatus) {
+      console.log("ERROR: Missing required fields");
       toast({
         title: "Erro",
         description: "Plano e status de pagamento são obrigatórios.",
@@ -193,30 +238,42 @@ export default function AdminPanel() {
       return;
     }
 
-    if (!["FREE", "PREMIUM"].includes(editPlan)) {
+    // Validate plan value
+    const validPlans = ["FREE", "PREMIUM"];
+    if (!validPlans.includes(editPlan.toUpperCase())) {
+      console.log("ERROR: Invalid plan:", editPlan);
       toast({
         title: "Erro",
-        description: "Plano inválido selecionado.",
+        description: "Plano deve ser FREE ou PREMIUM.",
         variant: "destructive",
       });
       return;
     }
 
-    if (!["ativo", "pendente", "vencido"].includes(editPaymentStatus)) {
+    // Validate payment status
+    const validStatuses = ["ativo", "pendente", "vencido"];
+    if (!validStatuses.includes(editPaymentStatus.toLowerCase())) {
+      console.log("ERROR: Invalid payment status:", editPaymentStatus);
       toast({
         title: "Erro",
-        description: "Status de pagamento inválido selecionado.",
+        description: "Status deve ser ativo, pendente ou vencido.",
         variant: "destructive",
       });
       return;
     }
 
-    updatePlanMutation.mutate({
+    // Prepare mutation data
+    const mutationData = {
       userId: selectedUser.id,
       plan: editPlan.toUpperCase(),
       paymentStatus: editPaymentStatus.toLowerCase(),
       paymentMethod: editPaymentMethod && editPaymentMethod.trim() !== "" ? editPaymentMethod.trim() : null,
-    });
+    };
+    
+    console.log("Mutation data:", mutationData);
+    console.log("=== CALLING MUTATION ===");
+    
+    updatePlanMutation.mutate(mutationData);
   };
 
   if (isLoading) {
