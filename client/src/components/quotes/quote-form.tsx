@@ -171,21 +171,21 @@ export default function QuoteForm({
   const canProceed = selectedClientId && title && items.every(item => item.description);
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {/* Client and Quote Info */}
-      <Card className="bg-white shadow-lg">
-        <CardHeader>
+      <Card className="bg-white shadow-lg overflow-hidden">
+        <CardHeader className="p-4 md:p-6">
           <CardTitle className="text-lg font-semibold text-gray-800">
             Informações do Orçamento
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4 md:space-y-6 p-4 md:p-6">
-          <div className="grid md:grid-cols-2 gap-4 md:gap-6">
+        <CardContent className="space-y-4 md:space-y-6 p-4 md:p-6 pt-0">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
             <div className="space-y-4">
               <div>
                 <Label className="text-sm font-medium text-gray-700">Cliente *</Label>
                 <Select value={selectedClientId} onValueChange={setSelectedClientId}>
-                  <SelectTrigger className="mt-2">
+                  <SelectTrigger className="mt-2 w-full">
                     <SelectValue placeholder="Selecione um cliente..." />
                   </SelectTrigger>
                   <SelectContent>
@@ -198,12 +198,12 @@ export default function QuoteForm({
                 </Select>
                 {selectedClient && (
                   <div className="mt-2 p-3 bg-gray-50 rounded-lg">
-                    <p className="text-sm text-gray-600">
+                    <p className="text-sm text-gray-600 break-words">
                       {selectedClient.email && `${selectedClient.email} • `}
                       {selectedClient.phone}
                     </p>
                     {selectedClient.city && selectedClient.state && (
-                      <p className="text-sm text-gray-600">
+                      <p className="text-sm text-gray-600 break-words">
                         {selectedClient.city}, {selectedClient.state}
                       </p>
                     )}
@@ -219,7 +219,7 @@ export default function QuoteForm({
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder="Ex: Reforma Residencial"
-                  className="mt-2"
+                  className="mt-2 w-full"
                 />
               </div>
 
@@ -231,7 +231,7 @@ export default function QuoteForm({
                   onChange={(e) => setValidityDays(Number(e.target.value))}
                   min="1"
                   max="365"
-                  className="mt-2"
+                  className="mt-2 w-full"
                 />
               </div>
             </div>
@@ -242,29 +242,31 @@ export default function QuoteForm({
       </Card>
 
       {/* Items */}
-      <Card className="bg-white shadow-lg">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-          <CardTitle className="text-lg font-semibold text-gray-800 flex items-center gap-2">
-            Serviços e Produtos
-            {!isUserPremium && (
-              <span className="text-xs text-amber-600 bg-amber-50 px-2 py-1 rounded">
-                Máx. {maxItemsForFreeUser} itens (Gratuito)
-              </span>
-            )}
-          </CardTitle>
-          <Button
-            onClick={addItem}
-            className="brand-gradient text-white"
-            disabled={!isUserPremium && items.length >= maxItemsForFreeUser}
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            Adicionar Item
-            {!isUserPremium && items.length >= maxItemsForFreeUser && (
-              <Crown className="w-4 h-4 ml-2" />
-            )}
-          </Button>
+      <Card className="bg-white shadow-lg overflow-hidden">
+        <CardHeader className="p-4 md:p-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <CardTitle className="text-lg font-semibold text-gray-800 flex flex-col sm:flex-row sm:items-center gap-2">
+              <span>Serviços e Produtos</span>
+              {!isUserPremium && (
+                <span className="text-xs text-amber-600 bg-amber-50 px-2 py-1 rounded w-fit">
+                  Máx. {maxItemsForFreeUser} itens (Gratuito)
+                </span>
+              )}
+            </CardTitle>
+            <Button
+              onClick={addItem}
+              className="brand-gradient text-white w-full sm:w-auto"
+              disabled={!isUserPremium && items.length >= maxItemsForFreeUser}
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Adicionar Item
+              {!isUserPremium && items.length >= maxItemsForFreeUser && (
+                <Crown className="w-4 h-4 ml-2" />
+              )}
+            </Button>
+          </div>
         </CardHeader>
-        <CardContent className="space-y-4 p-4 md:p-6">
+        <CardContent className="space-y-4 p-4 md:p-6 pt-0">
           {/* Seção de Itens Salvos */}
           <SavedItemsSection 
             onAddItem={(savedItem) => {
@@ -314,9 +316,9 @@ export default function QuoteForm({
       </Card>
 
       {/* Summary and Settings */}
-      <div className="grid md:grid-cols-2 gap-4 md:gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Additional Info */}
-        <Card className="bg-white shadow-lg">
+        <Card className="bg-white shadow-lg overflow-hidden">
           <CardHeader className="p-4 md:p-6">
             <CardTitle className="text-base md:text-lg font-semibold text-gray-800">
               Informações Adicionais
@@ -399,7 +401,7 @@ export default function QuoteForm({
         </Card>
 
         {/* Financial Summary */}
-        <Card className="bg-white shadow-lg">
+        <Card className="bg-white shadow-lg overflow-hidden">
           <CardHeader className="p-4 md:p-6">
             <CardTitle className="text-base md:text-lg font-semibold text-gray-800">
               Resumo Financeiro
@@ -438,14 +440,14 @@ export default function QuoteForm({
       </div>
 
       {/* Action Buttons */}
-      <Card className="bg-white shadow-lg">
+      <Card className="bg-white shadow-lg overflow-hidden">
         <CardContent className="p-4 md:p-6">
-          <div className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-end">
+          <div className="flex flex-col sm:flex-row gap-3 justify-end">
             <Button 
               variant="secondary"
               onClick={() => handleSubmit('preview')}
               disabled={!canProceed || isSubmitting}
-              className="w-full sm:w-auto"
+              className="w-full sm:w-auto order-2 sm:order-1"
             >
               <Eye className="w-4 h-4 mr-2" />
               Visualizar
@@ -453,7 +455,7 @@ export default function QuoteForm({
             <Button 
               onClick={() => handleSubmit('save')}
               disabled={!canProceed || isSubmitting}
-              className="brand-gradient text-white w-full sm:w-auto"
+              className="brand-gradient text-white w-full sm:w-auto order-1 sm:order-2"
             >
               <Save className="w-4 h-4 mr-2" />
               {isSubmitting ? (existingQuote ? "Salvando..." : "Criando...") : (existingQuote ? "Salvar" : "Criar e Enviar")}
