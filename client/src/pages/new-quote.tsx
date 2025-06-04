@@ -56,9 +56,9 @@ export default function NewQuote() {
   const [sendByWhatsapp, setSendByWhatsapp] = useState(true);
   const [sendByEmail, setSendByEmail] = useState(false);
   const [items, setItems] = useState<QuoteItemData[]>([
-    { id: "1", description: "", quantity: 1, unitPrice: "0", total: "0" }
+    { id: "1", description: "", quantity: 1, unitPrice: "", total: "0" }
   ]);
-  const [discount, setDiscount] = useState("0");
+  const [discount, setDiscount] = useState("");
 
   // Redirect to home if not authenticated
   useEffect(() => {
@@ -182,7 +182,7 @@ export default function NewQuote() {
       id: Date.now().toString(),
       description: "",
       quantity: 1,
-      unitPrice: "0",
+      unitPrice: "",
       total: "0"
     };
     setItems([...items, newItem]);
@@ -201,7 +201,7 @@ export default function NewQuote() {
 
         if (field === 'quantity' || field === 'unitPrice') {
           const quantity = field === 'quantity' ? Math.max(1, Number(value) || 1) : item.quantity;
-          const unitPrice = field === 'unitPrice' ? Math.max(0, parseFloat(value.toString()) || 0) : parseFloat(item.unitPrice) || 0;
+          const unitPrice = field === 'unitPrice' ? (value === "" ? 0 : Math.max(0, parseFloat(value.toString()) || 0)) : (item.unitPrice === "" ? 0 : parseFloat(item.unitPrice) || 0);
           updatedItem.total = (quantity * unitPrice).toFixed(2);
           
           // Update quantity field to ensure minimum value
@@ -218,7 +218,7 @@ export default function NewQuote() {
 
   const calculateTotals = () => {
     const subtotal = items.reduce((sum, item) => sum + parseFloat(item.total || "0"), 0);
-    const discountAmount = parseFloat(discount) || 0;
+    const discountAmount = discount === "" ? 0 : parseFloat(discount) || 0;
     const total = Math.max(0, subtotal - discountAmount);
 
     return {
@@ -489,12 +489,12 @@ export default function NewQuote() {
                       value={item.unitPrice}
                       onChange={(e) => {
                         const value = e.target.value;
-                        // Allow only valid decimal numbers
+                        // Allow only valid decimal numbers or empty string
                         if (value === '' || /^\d*\.?\d*$/.test(value)) {
                           updateItem(item.id, 'unitPrice', value);
                         }
                       }}
-                      placeholder="0.00"
+                      placeholder="0,00"
                       min="0"
                       step="0.01"
                       className="mt-1 text-sm h-9"
@@ -606,7 +606,7 @@ export default function NewQuote() {
                 type="number"
                 value={discount}
                 onChange={(e) => setDiscount(e.target.value)}
-                placeholder="0.00"
+                placeholder="0,00"
                 className="w-20 h-8 text-xs"
                 min="0"
                 step="0.01"

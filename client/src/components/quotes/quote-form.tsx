@@ -68,9 +68,9 @@ export default function QuoteForm({
           unitPrice: item.unitPrice,
           total: item.total
         }))
-      : [{ id: "1", description: "", quantity: 1, unitPrice: "0", total: "0" }]
+      : [{ id: "1", description: "", quantity: 1, unitPrice: "", total: "0" }]
   );
-  const [discount, setDiscount] = useState(existingQuote?.discount || "0");
+  const [discount, setDiscount] = useState(existingQuote?.discount || "");
 
   const addItem = () => {
     // Verificar limitação do plano gratuito
@@ -87,7 +87,7 @@ export default function QuoteForm({
       id: Date.now().toString(),
       description: "",
       quantity: 1,
-      unitPrice: "0",
+      unitPrice: "",
       total: "0"
     };
     setItems([...items, newItem]);
@@ -107,7 +107,7 @@ export default function QuoteForm({
         // Recalculate total when quantity or unitPrice changes
         if (field === 'quantity' || field === 'unitPrice') {
           const quantity = field === 'quantity' ? Number(value) : item.quantity;
-          const unitPrice = field === 'unitPrice' ? parseFloat(value.toString()) || 0 : parseFloat(item.unitPrice) || 0;
+          const unitPrice = field === 'unitPrice' ? (value === "" ? 0 : parseFloat(value.toString()) || 0) : (item.unitPrice === "" ? 0 : parseFloat(item.unitPrice) || 0);
           updatedItem.total = (quantity * unitPrice).toFixed(2);
         }
 
@@ -119,7 +119,7 @@ export default function QuoteForm({
 
   const calculateTotals = () => {
     const subtotal = items.reduce((sum, item) => sum + parseFloat(item.total || "0"), 0);
-    const discountAmount = parseFloat(discount) || 0;
+    const discountAmount = discount === "" ? 0 : parseFloat(discount) || 0;
     const total = Math.max(0, subtotal - discountAmount);
 
     return {
@@ -417,7 +417,7 @@ export default function QuoteForm({
                       type="number"
                       value={discount}
                       onChange={(e) => setDiscount(e.target.value)}
-                      placeholder="0.00"
+                      placeholder="0,00"
                       className="w-24 h-8 text-sm"
                       min="0"
                       step="0.01"
