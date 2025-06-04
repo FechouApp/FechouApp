@@ -131,10 +131,10 @@ export default function NewQuote() {
       />
 
       {/* Main Content Container */}
-      <div className="px-3 sm:px-4 md:px-6 lg:px-8 pb-6 md:pb-8">
-        <div className="max-w-5xl mx-auto space-y-4 md:space-y-6">
+      <div className="px-2 sm:px-4 md:px-6 lg:px-8 pb-4 sm:pb-6 md:pb-8">
+        <div className="w-full max-w-5xl mx-auto space-y-3 sm:space-y-4 md:space-y-6">
           {/* Step Indicator - Hidden on small mobile */}
-          <div className="hidden sm:flex items-center justify-center mb-4 md:mb-6">
+          <div className="hidden sm:flex items-center justify-center mb-3 sm:mb-4 md:mb-6"></div>
             <div className="flex items-center">
               <div className={`w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center text-sm md:text-base font-medium ${
                 step >= 1 ? 'bg-white text-brand-primary' : 'bg-white/20 text-white/60'
@@ -158,14 +158,14 @@ export default function NewQuote() {
 
           {/* Plan limit warning */}
           {planLimits && !planLimits.isPremium && !planLimits.canCreateQuote && (
-            <div className="p-3 sm:p-4 bg-amber-50 border border-amber-200 rounded-lg mx-0">
+            <div className="p-2 sm:p-3 md:p-4 bg-amber-50 border border-amber-200 rounded-lg">
               <div className="flex items-start gap-2 sm:gap-3">
-                <div className="w-6 h-6 bg-amber-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <span className="text-amber-600 font-bold text-sm">!</span>
+                <div className="w-5 h-5 sm:w-6 sm:h-6 bg-amber-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <span className="text-amber-600 font-bold text-xs sm:text-sm">!</span>
                 </div>
                 <div className="min-w-0 flex-1">
-                  <h3 className="font-medium text-amber-800 text-sm">Limite mensal atingido</h3>
-                  <p className="text-xs text-amber-700 mt-1 break-words">
+                  <h3 className="font-medium text-amber-800 text-xs sm:text-sm">Limite mensal atingido</h3>
+                  <p className="text-xs text-amber-700 mt-1 break-words leading-relaxed">
                     Você atingiu o limite de {planLimits.monthlyQuoteLimit} orçamentos por mês do plano gratuito.
                     Faça upgrade para Premium e tenha orçamentos ilimitados.
                   </p>

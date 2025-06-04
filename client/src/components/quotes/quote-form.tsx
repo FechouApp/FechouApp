@@ -270,7 +270,7 @@ export default function QuoteForm({
             </div>
           </div>
         </CardHeader>
-        <CardContent className="space-y-3 sm:space-y-4 p-3 sm:p-4 md:p-6 pt-0">
+        <CardContent className="space-y-2 sm:space-y-3 md:space-y-4 p-2 sm:p-3 md:p-4 lg:p-6 pt-0">
           {/* Seção de Itens Salvos */}
           <SavedItemsSection 
             onAddItem={(savedItem) => {
