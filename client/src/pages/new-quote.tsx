@@ -21,7 +21,7 @@ import QuickSetup from "@/components/quick-setup";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useLocation } from "wouter";
-import { ArrowLeft, Plus, Save, Crown, Trash2 } from "lucide-react";
+import { ArrowLeft, Plus, Save, Crown, Trash2, AlertCircle } from "lucide-react";
 import type { Client, CreateQuoteRequest, QuoteWithDetails } from "@/types";
 
 interface QuoteItemData {
@@ -267,8 +267,8 @@ export default function NewQuote() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Mobile Header */}
-      <header className="bg-gradient-to-r from-blue-600 to-purple-600 text-white sticky top-0 z-50">
+      {/* Header */}
+      <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white">
         <div className="p-4">
           <div className="flex items-center gap-3">
             <Button
@@ -283,125 +283,128 @@ export default function NewQuote() {
               <h1 className="text-lg font-semibold">
                 {isEditing ? "Editar Orçamento" : "Novo Orçamento"}
               </h1>
-              <p className="text-sm text-white/80">
-                {isEditing ? "Edite os dados do seu orçamento" : "Crie um novo orçamento para seu cliente"}
-              </p>
             </div>
           </div>
         </div>
-      </header>
+      </div>
 
-      {/* Content */}
-      <main className="p-4 pb-20 max-w-lg mx-auto">
+      {/* Main Content */}
+      <div className="p-3 space-y-4 pb-24">
         {/* Plan limit warning */}
         {planLimits && !planLimits.isPremium && !planLimits.canCreateQuote && (
-          <Card className="border-amber-200 bg-amber-50 mb-4">
-            <CardContent className="p-3">
-              <div className="flex items-start gap-2">
-                <div className="w-5 h-5 bg-amber-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <span className="text-amber-600 font-bold text-xs">!</span>
-                </div>
-                <div>
-                  <h3 className="font-medium text-amber-800 text-sm">Limite mensal atingido</h3>
-                  <p className="text-xs text-amber-700 mt-1 leading-relaxed">
-                    Você atingiu o limite de {planLimits.monthlyQuoteLimit} orçamentos por mês do plano gratuito.
-                  </p>
-                </div>
+          <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg">
+            <div className="flex items-start gap-2">
+              <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+              <div>
+                <h3 className="font-medium text-amber-800 text-sm">Limite atingido</h3>
+                <p className="text-xs text-amber-700 mt-1">
+                  Você atingiu o limite de {planLimits.monthlyQuoteLimit} orçamentos por mês.
+                </p>
               </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Show quick setup if no clients */}
-        {(!clients || clients.length === 0) && (
-          <div className="mb-4">
-            <QuickSetup />
+            </div>
           </div>
         )}
 
-        {/* Client Selection */}
-        <Card className="mb-4">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base">Cliente e Informações</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <Label className="text-sm font-medium mb-2 block">Cliente *</Label>
-              <Select value={selectedClientId} onValueChange={setSelectedClientId}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione um cliente..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {clients?.map((client) => (
-                    <SelectItem key={client.id} value={client.id}>
-                      {client.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {selectedClient && (
-                <div className="mt-2 p-2 bg-gray-50 rounded text-xs text-gray-600">
-                  {selectedClient.email && `${selectedClient.email} • `}
-                  {selectedClient.phone}
-                </div>
-              )}
-            </div>
+        {/* Quick Setup */}
+        {(!clients || clients.length === 0) && <QuickSetup />}
 
+        {/* Client Selection */}
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base">Cliente *</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <Select value={selectedClientId} onValueChange={setSelectedClientId}>
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione um cliente..." />
+              </SelectTrigger>
+              <SelectContent>
+                {clients?.map((client) => (
+                  <SelectItem key={client.id} value={client.id}>
+                    {client.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {selectedClient && (
+              <div className="p-2 bg-gray-50 rounded text-xs text-gray-600">
+                {selectedClient.email && `${selectedClient.email} • `}
+                {selectedClient.phone}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Basic Info */}
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base">Informações Básicas</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
             <div>
-              <Label className="text-sm font-medium mb-2 block">Título do Orçamento *</Label>
+              <Label className="text-sm">Título do Orçamento *</Label>
               <Input
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="Ex: Reforma Residencial"
+                className="mt-1"
               />
             </div>
-
             <div>
-              <Label className="text-sm font-medium mb-2 block">Validade (dias)</Label>
+              <Label className="text-sm">Validade (dias)</Label>
               <Input
                 type="number"
                 value={validityDays}
                 onChange={(e) => setValidityDays(Number(e.target.value))}
                 min="1"
                 max="365"
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label className="text-sm">Descrição do Projeto</Label>
+              <Textarea
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Descrição detalhada..."
+                rows={3}
+                className="mt-1"
               />
             </div>
           </CardContent>
         </Card>
 
-        {/* Items */}
-        <Card className="mb-4">
+        {/* Items Section */}
+        <Card>
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
-              <div>
-                <CardTitle className="text-base">Itens do Orçamento</CardTitle>
-                {!isUserPremium && (
-                  <span className="text-xs text-amber-600 bg-amber-50 px-2 py-1 rounded mt-1 inline-block">
-                    Máx. {maxItemsForFreeUser} itens (Gratuito)
-                  </span>
-                )}
-              </div>
+              <CardTitle className="text-base">Itens do Orçamento</CardTitle>
               <Button
                 size="sm"
                 onClick={addItem}
                 disabled={!isUserPremium && items.length >= maxItemsForFreeUser}
-                className="brand-gradient text-white"
+                className="bg-blue-600 text-white"
               >
                 <Plus className="w-4 h-4" />
               </Button>
             </div>
+            {!isUserPremium && (
+              <p className="text-xs text-amber-600">
+                Máximo {maxItemsForFreeUser} itens no plano gratuito
+              </p>
+            )}
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-3">
             {items.map((item, index) => (
               <div key={item.id} className="p-3 bg-gray-50 rounded-lg space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-gray-700">Item #{index + 1}</span>
+                  <span className="text-sm font-medium">Item #{index + 1}</span>
                   {items.length > 1 && (
                     <Button
                       size="sm"
                       variant="ghost"
                       onClick={() => removeItem(item.id)}
-                      className="text-red-500 hover:text-red-700 h-8 w-8 p-0"
+                      className="text-red-500 h-6 w-6 p-0"
                     >
                       <Trash2 className="w-4 h-4" />
                     </Button>
@@ -409,40 +412,40 @@ export default function NewQuote() {
                 </div>
                 
                 <div>
-                  <Label className="text-xs font-medium text-gray-600 mb-1 block">Descrição *</Label>
+                  <Label className="text-xs text-gray-600">Descrição *</Label>
                   <Textarea
                     value={item.description}
                     onChange={(e) => updateItem(item.id, 'description', e.target.value)}
-                    placeholder="Descrição do serviço/produto"
+                    placeholder="Descrição do item"
                     rows={2}
-                    className="text-sm"
+                    className="mt-1 text-sm"
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-2 gap-2">
                   <div>
-                    <Label className="text-xs font-medium text-gray-600 mb-1 block">Quantidade</Label>
+                    <Label className="text-xs text-gray-600">Quantidade</Label>
                     <Input
                       type="number"
                       value={item.quantity}
                       onChange={(e) => updateItem(item.id, 'quantity', parseInt(e.target.value) || 1)}
                       min="1"
-                      className="text-sm"
+                      className="mt-1 text-sm h-9"
                     />
                   </div>
                   <div>
-                    <Label className="text-xs font-medium text-gray-600 mb-1 block">Valor Unit.</Label>
+                    <Label className="text-xs text-gray-600">Valor Unit.</Label>
                     <Input
                       value={item.unitPrice}
                       onChange={(e) => updateItem(item.id, 'unitPrice', e.target.value.replace(/[^\d.,]/g, '').replace(',', '.'))}
                       placeholder="0,00"
-                      className="text-sm"
+                      className="mt-1 text-sm h-9"
                     />
                   </div>
                 </div>
 
-                <div className="text-right">
-                  <span className="text-sm font-medium text-gray-700">
+                <div className="text-right pt-2 border-t">
+                  <span className="text-sm font-medium">
                     Total: R$ {parseFloat(item.total || "0").toFixed(2).replace('.', ',')}
                   </span>
                 </div>
@@ -451,143 +454,129 @@ export default function NewQuote() {
           </CardContent>
         </Card>
 
-        {/* Description */}
-        <Card className="mb-4">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base">Descrição do Projeto</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Descrição detalhada do projeto..."
-              rows={3}
-            />
-          </CardContent>
-        </Card>
-
         {/* Additional Info */}
-        <Card className="mb-4">
+        <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-base">Informações Adicionais</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-3">
             <div>
-              <Label className="text-sm font-medium mb-2 block">Condições de Pagamento</Label>
+              <Label className="text-sm">Condições de Pagamento</Label>
               <Textarea
                 value={paymentTerms}
                 onChange={(e) => setPaymentTerms(e.target.value)}
-                placeholder="Ex: 50% na assinatura, 50% na entrega..."
+                placeholder="Ex: 50% entrada, 50% entrega"
                 rows={2}
+                className="mt-1"
               />
             </div>
-
             <div>
-              <Label className="text-sm font-medium mb-2 block">Prazo de Execução</Label>
+              <Label className="text-sm">Prazo de Execução</Label>
               <Textarea
                 value={executionDeadline}
                 onChange={(e) => setExecutionDeadline(e.target.value)}
-                placeholder="Ex: 30 dias corridos..."
+                placeholder="Ex: 30 dias corridos"
                 rows={2}
+                className="mt-1"
               />
             </div>
-
             <div>
-              <Label className="text-sm font-medium mb-2 block">Observações</Label>
+              <Label className="text-sm">Observações</Label>
               <Textarea
                 value={observations}
                 onChange={(e) => setObservations(e.target.value)}
-                placeholder="Informações adicionais..."
+                placeholder="Informações extras"
                 rows={2}
+                className="mt-1"
               />
             </div>
+          </CardContent>
+        </Card>
 
-            <div>
-              <Label className="text-sm font-medium mb-2 block">Opções de Envio</Label>
-              <div className="space-y-2">
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="whatsapp"
-                    checked={sendByWhatsapp}
-                    onCheckedChange={(checked) => {
-                      if (!isUserPremium && checked) {
-                        toast({
-                          title: "Funcionalidade Premium",
-                          description: "WhatsApp disponível apenas no Premium.",
-                          variant: "destructive",
-                        });
-                        return;
-                      }
-                      setSendByWhatsapp(checked === true);
-                    }}
-                    disabled={!isUserPremium}
-                  />
-                  <Label htmlFor="whatsapp" className={`text-sm flex items-center gap-1 ${!isUserPremium ? 'text-gray-400' : ''}`}>
-                    WhatsApp
-                    {!isUserPremium && <Crown className="w-3 h-3 text-amber-500" />}
-                  </Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="email"
-                    checked={sendByEmail}
-                    onCheckedChange={(checked) => setSendByEmail(checked === true)}
-                  />
-                  <Label htmlFor="email" className="text-sm">E-mail</Label>
-                </div>
-              </div>
+        {/* Send Options */}
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base">Opções de Envio</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="whatsapp"
+                checked={sendByWhatsapp}
+                onCheckedChange={(checked) => {
+                  if (!isUserPremium && checked) {
+                    toast({
+                      title: "Funcionalidade Premium",
+                      description: "WhatsApp disponível apenas no Premium.",
+                      variant: "destructive",
+                    });
+                    return;
+                  }
+                  setSendByWhatsapp(checked === true);
+                }}
+                disabled={!isUserPremium}
+              />
+              <Label htmlFor="whatsapp" className="text-sm flex items-center gap-1">
+                WhatsApp
+                {!isUserPremium && <Crown className="w-3 h-3 text-amber-500" />}
+              </Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="email"
+                checked={sendByEmail}
+                onCheckedChange={(checked) => setSendByEmail(checked === true)}
+              />
+              <Label htmlFor="email" className="text-sm">E-mail</Label>
             </div>
           </CardContent>
         </Card>
 
         {/* Financial Summary */}
-        <Card className="mb-4">
+        <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-base">Resumo Financeiro</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              <div className="flex justify-between text-sm">
-                <span>Subtotal:</span>
-                <span>R$ {totals.subtotal.replace('.', ',')}</span>
-              </div>
-              <div className="flex justify-between items-center text-sm">
-                <span>Desconto:</span>
-                <Input
-                  type="number"
-                  value={discount}
-                  onChange={(e) => setDiscount(e.target.value)}
-                  placeholder="0.00"
-                  className="w-20 h-8 text-xs"
-                  min="0"
-                  step="0.01"
-                />
-              </div>
-              <hr />
-              <div className="flex justify-between font-semibold">
+          <CardContent className="space-y-3">
+            <div className="flex justify-between text-sm">
+              <span>Subtotal:</span>
+              <span>R$ {totals.subtotal.replace('.', ',')}</span>
+            </div>
+            <div className="flex justify-between items-center text-sm">
+              <span>Desconto (R$):</span>
+              <Input
+                type="number"
+                value={discount}
+                onChange={(e) => setDiscount(e.target.value)}
+                placeholder="0.00"
+                className="w-20 h-8 text-xs"
+                min="0"
+                step="0.01"
+              />
+            </div>
+            <div className="border-t pt-2">
+              <div className="flex justify-between font-semibold text-lg">
                 <span>Total:</span>
                 <span className="text-blue-600">R$ {totals.total.replace('.', ',')}</span>
               </div>
             </div>
           </CardContent>
         </Card>
-      </main>
+      </div>
 
-      {/* Fixed Bottom Action Button */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t p-4 z-40">
-        <div className="max-w-lg mx-auto">
-          <Button 
-            onClick={handleSubmit}
-            disabled={!canProceed || createQuoteMutation.isPending}
-            className="w-full brand-gradient text-white h-12"
-          >
-            <Save className="w-4 h-4 mr-2" />
-            {createQuoteMutation.isPending 
-              ? (isEditing ? "Salvando..." : "Criando...") 
-              : (isEditing ? "Salvar Alterações" : "Criar Orçamento")
-            }
-          </Button>
-        </div>
+      {/* Fixed Bottom Button */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t p-3 z-50">
+        <Button 
+          onClick={handleSubmit}
+          disabled={!canProceed || createQuoteMutation.isPending}
+          className="w-full bg-blue-600 text-white h-12"
+        >
+          <Save className="w-4 h-4 mr-2" />
+          {createQuoteMutation.isPending 
+            ? (isEditing ? "Salvando..." : "Criando...") 
+            : (isEditing ? "Salvar Alterações" : "Criar Orçamento")
+          }
+        </Button>
       </div>
     </div>
   );
