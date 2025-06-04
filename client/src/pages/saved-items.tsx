@@ -6,8 +6,8 @@ export default function SavedItemsPage() {
   return (
     <div className="space-y-8">
       <Header 
-        title="Itens Favoritos"
-        subtitle="Gerencie seus itens salvos para usar nos orçamentos"
+        title="Itens Favoritos Salvos"
+        subtitle="Gerencie seus itens favoritos salvos para usar nos orçamentos"
         backTo="/dashboard"
       />
       

@@ -29,7 +29,7 @@ export default function SavedItemsSection({ onAddItem }: SavedItemsSectionProps)
   const { toast } = useToast();
   const { user } = useAuth();
   const queryClient = useQueryClient();
-  
+
   const [isNewItemDialogOpen, setIsNewItemDialogOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<SavedItem | null>(null);
   const [newItemForm, setNewItemForm] = useState({
@@ -147,7 +147,7 @@ export default function SavedItemsSection({ onAddItem }: SavedItemsSectionProps)
       unitPrice: item.unitPrice,
       quantity: 1
     });
-    
+
     toast({
       title: "Item adicionado",
       description: `${item.name} foi adicionado ao orçamento.`,
@@ -180,12 +180,12 @@ export default function SavedItemsSection({ onAddItem }: SavedItemsSectionProps)
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Package className="w-5 h-5 text-blue-600" />
-            <CardTitle className="text-lg">Itens Salvos</CardTitle>
+            <CardTitle className="text-lg">Itens Favoritos Salvos</CardTitle>
             <Badge variant="outline" className="text-xs">
               {savedItems.length}/{maxItems}
             </Badge>
           </div>
-          
+
           <Dialog open={isNewItemDialogOpen} onOpenChange={setIsNewItemDialogOpen}>
             <DialogTrigger asChild>
               <Button 
@@ -195,7 +195,7 @@ export default function SavedItemsSection({ onAddItem }: SavedItemsSectionProps)
                 onClick={() => resetForm()}
               >
                 <Plus className="w-4 h-4 mr-1" />
-                Novo Item
+                Novo Item Favorito
               </Button>
             </DialogTrigger>
             <DialogContent>
@@ -204,7 +204,7 @@ export default function SavedItemsSection({ onAddItem }: SavedItemsSectionProps)
                   {editingItem ? "Editar Item" : "Novo Item Salvo"}
                 </DialogTitle>
               </DialogHeader>
-              
+
               <div className="space-y-4">
                 <div>
                   <Label htmlFor="itemName">Nome do Item *</Label>
@@ -215,7 +215,7 @@ export default function SavedItemsSection({ onAddItem }: SavedItemsSectionProps)
                     placeholder="Ex: Desenvolvimento de Logo"
                   />
                 </div>
-                
+
                 <div>
                   <Label htmlFor="itemPrice">Valor Unitário *</Label>
                   <Input
@@ -225,7 +225,7 @@ export default function SavedItemsSection({ onAddItem }: SavedItemsSectionProps)
                     placeholder="Ex: 250,00"
                   />
                 </div>
-                
+
                 <div>
                   <Label htmlFor="itemDescription">Descrição (opcional)</Label>
                   <Input
@@ -235,7 +235,7 @@ export default function SavedItemsSection({ onAddItem }: SavedItemsSectionProps)
                     placeholder="Descrição adicional do serviço"
                   />
                 </div>
-                
+
                 <div className="flex gap-2 pt-4">
                   <Button 
                     onClick={editingItem ? handleUpdateItem : handleCreateItem}
@@ -245,7 +245,7 @@ export default function SavedItemsSection({ onAddItem }: SavedItemsSectionProps)
                     <Save className="w-4 h-4 mr-2" />
                     {editingItem ? "Atualizar" : "Salvar Item"}
                   </Button>
-                  
+
                   <Button variant="outline" onClick={resetForm}>
                     Cancelar
                   </Button>
@@ -254,7 +254,7 @@ export default function SavedItemsSection({ onAddItem }: SavedItemsSectionProps)
             </DialogContent>
           </Dialog>
         </div>
-        
+
         {!canAddMore && (
           <div className="flex items-center gap-2 text-amber-600 text-sm mt-2">
             <AlertCircle className="w-4 h-4" />
@@ -262,7 +262,7 @@ export default function SavedItemsSection({ onAddItem }: SavedItemsSectionProps)
           </div>
         )}
       </CardHeader>
-      
+
       <CardContent className="pt-0">
         {isLoading ? (
           <div className="text-center py-8 text-gray-500">
@@ -272,7 +272,7 @@ export default function SavedItemsSection({ onAddItem }: SavedItemsSectionProps)
           <div className="text-center py-8 text-gray-500">
             <Package className="w-12 h-12 mx-auto mb-2 text-gray-300" />
             <p>Nenhum item salvo ainda</p>
-            <p className="text-sm">Clique em "Novo Item" para começar</p>
+            <p className="text-sm">Clique em "Novo Item Favorito" para começar</p>
           </div>
         ) : (
           <div className="space-y-2">
@@ -292,7 +292,7 @@ export default function SavedItemsSection({ onAddItem }: SavedItemsSectionProps)
                     <p className="text-sm text-gray-600 mt-1">{item.description}</p>
                   )}
                 </div>
-                
+
                 <div className="flex items-center gap-1">
                   <Button
                     variant="outline"
@@ -303,7 +303,7 @@ export default function SavedItemsSection({ onAddItem }: SavedItemsSectionProps)
                     <CheckCircle className="w-4 h-4 mr-1 text-green-600" />
                     Adicionar
                   </Button>
-                  
+
                   <Button
                     variant="ghost"
                     size="sm"
@@ -311,7 +311,7 @@ export default function SavedItemsSection({ onAddItem }: SavedItemsSectionProps)
                   >
                     <Edit2 className="w-4 h-4" />
                   </Button>
-                  
+
                   <Button
                     variant="ghost"
                     size="sm"

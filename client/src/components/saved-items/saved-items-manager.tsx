@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -103,7 +102,7 @@ export default function SavedItemsManager({ onSelectItem, selectionMode = false 
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!formData.name || !formData.unitPrice) {
       toast({
         title: "Erro",
@@ -158,12 +157,12 @@ export default function SavedItemsManager({ onSelectItem, selectionMode = false 
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
         <CardTitle className="flex items-center gap-2">
           <Star className="w-5 h-5" />
-          {selectionMode ? "Selecionar Item Salvo" : "Meus Itens Salvos"}
+          {selectionMode ? "Selecionar Item Salvo" : "Meus Itens Favoritos Salvos"}
           <Badge variant="outline" className="ml-2">
             {savedItems.length}/{maxItems}
           </Badge>
         </CardTitle>
-        
+
         {!selectionMode && (
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
@@ -173,7 +172,7 @@ export default function SavedItemsManager({ onSelectItem, selectionMode = false 
                 className="bg-blue-600 hover:bg-blue-700"
               >
                 <Plus className="w-4 h-4 mr-2" />
-                Novo Item
+                Novo Item Favorito
                 {!isPremium && savedItems.length >= maxItems && (
                   <Crown className="w-4 h-4 ml-2" />
                 )}
@@ -221,7 +220,7 @@ export default function SavedItemsManager({ onSelectItem, selectionMode = false 
           </Dialog>
         )}
       </CardHeader>
-      
+
       <CardContent>
         {savedItems.length === 0 ? (
           <div className="text-center py-8 text-gray-500">
@@ -237,7 +236,7 @@ export default function SavedItemsManager({ onSelectItem, selectionMode = false 
                   <h3 className="font-medium">{item.name}</h3>
                   <p className="text-sm text-gray-600">{formatCurrency(item.unitPrice)}</p>
                 </div>
-                
+
                 <div className="flex items-center gap-2">
                   {selectionMode && onSelectItem && (
                     <Button
@@ -248,7 +247,7 @@ export default function SavedItemsManager({ onSelectItem, selectionMode = false 
                       Inserir
                     </Button>
                   )}
-                  
+
                   {!selectionMode && (
                     <>
                       <Button
@@ -273,7 +272,7 @@ export default function SavedItemsManager({ onSelectItem, selectionMode = false 
             ))}
           </div>
         )}
-        
+
         {!isPremium && savedItems.length >= maxItems && (
           <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
             <p className="text-sm text-amber-800">
