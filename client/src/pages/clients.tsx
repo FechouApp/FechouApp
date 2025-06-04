@@ -662,18 +662,19 @@ export default function Clients() {
             )}
           </CardContent>
         </Card>
+      </div>
 
       {/* Pagination */}
       {filteredClients.length > 10 && (
-        <div className="flex items-center justify-between">
-          <p className="text-sm text-white/70">
+        <div className="flex items-center justify-between mx-4 md:mx-0">
+          <p className="text-sm text-gray-600">
             Mostrando 1-{Math.min(10, filteredClients.length)} de {filteredClients.length} clientes
           </p>
           <div className="flex gap-2">
             <Button variant="outline" size="sm" disabled>
               Anterior
             </Button>
-            <Button className="brand-gradient text-white" size="sm">
+            <Button className="bg-blue-600 text-white hover:bg-blue-700" size="sm">
               1
             </Button>
             <Button variant="outline" size="sm" disabled>
