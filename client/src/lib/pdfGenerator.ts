@@ -53,6 +53,7 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
   // ========== CABEÇALHO DA EMPRESA ==========
   
   // Logo no canto superior esquerdo (se premium e tiver logo)
+  let logoWidth = 0;
   if (isUserPremium && (user as any)?.logoUrl) {
     try {
       const logoSize = 20;
@@ -65,21 +66,22 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
           format = 'GIF';
         }
         doc.addImage(logoUrl, format, marginLeft, yPosition, logoSize, logoSize);
+        logoWidth = logoSize + 5; // Espaço após o logo
       }
     } catch (error) {
       console.error('Erro ao carregar logo:', error);
     }
   }
 
-  // Informações da empresa no cabeçalho
+  // Informações da empresa no cabeçalho com espaçamento adequado
   doc.setTextColor(0, 0, 0);
   doc.setFontSize(14);
   doc.setFont('helvetica', 'bold');
   
   const businessName = user.businessName || `${user.firstName} ${user.lastName}`.trim();
-  doc.text(businessName, marginLeft + (isUserPremium && (user as any)?.logoUrl ? 25 : 0), yPosition + 5);
+  doc.text(businessName, marginLeft + logoWidth, yPosition + 5);
   
-  yPosition += 8;
+  yPosition += 12; // Maior espaçamento após o nome
   
   // Informações de contato no cabeçalho
   doc.setFontSize(9);
@@ -112,9 +114,9 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
     yPosition += 4;
   });
 
-  yPosition += 8;
+  yPosition += 15; // Maior espaçamento antes da linha
   drawHorizontalLine(yPosition);
-  yPosition += 8;
+  yPosition += 10;
 
   // ========== TÍTULO E NÚMERO DO ORÇAMENTO ==========
   
@@ -127,16 +129,7 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
   doc.setFont('helvetica', 'normal');
   doc.text(format(new Date(), 'dd/MM/yyyy', { locale: ptBR }), pageWidth - marginRight, yPosition, { align: 'right' });
   
-  yPosition += 12;
-
-  // ========== DATA DA RETIRADA ==========
-  
-  doc.setFontSize(9);
-  doc.setFont('helvetica', 'normal');
-  doc.text('Data da Retirada:', marginLeft + 2, yPosition + 3);
-  doc.text(format(new Date(quote.validUntil), 'dd/MM/yyyy', { locale: ptBR }), marginLeft + 35, yPosition + 3);
-  
-  yPosition += 12;
+  yPosition += 15;
 
   // ========== DADOS DO CLIENTE ==========
   
@@ -213,9 +206,16 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
   doc.text('SERVIÇOS OU PRODUTOS', marginLeft + 2, yPosition + 3);
   yPosition += 12;
 
-  // Cabeçalho da tabela
+  // Cabeçalho da tabela com margens ajustadas
   const tableStartY = yPosition;
   const tableWidth = pageWidth - marginLeft - marginRight;
+  
+  // Definir larguras das colunas
+  const itemColWidth = 12;
+  const nameColWidth = 90;
+  const qtyColWidth = 20;
+  const unitPriceColWidth = 25;
+  const subtotalColWidth = tableWidth - itemColWidth - nameColWidth - qtyColWidth - unitPriceColWidth;
   
   doc.setDrawColor(0, 0, 0);
   doc.setLineWidth(0.5);
@@ -225,17 +225,17 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
   
   doc.setFontSize(9);
   doc.setFont('helvetica', 'bold');
-  doc.text('ITEM', marginLeft + 2, yPosition + 4);
-  doc.text('NOME', marginLeft + 15, yPosition + 4);
-  doc.text('QTD.', marginLeft + 120, yPosition + 4, { align: 'center' });
-  doc.text('VR. UNIT.', marginLeft + 145, yPosition + 4, { align: 'center' });
-  doc.text('SUBTOTAL', marginLeft + 175, yPosition + 4, { align: 'center' });
+  doc.text('ITEM', marginLeft + itemColWidth/2, yPosition + 4, { align: 'center' });
+  doc.text('NOME', marginLeft + itemColWidth + nameColWidth/2, yPosition + 4, { align: 'center' });
+  doc.text('QTD.', marginLeft + itemColWidth + nameColWidth + qtyColWidth/2, yPosition + 4, { align: 'center' });
+  doc.text('VR. UNIT.', marginLeft + itemColWidth + nameColWidth + qtyColWidth + unitPriceColWidth/2, yPosition + 4, { align: 'center' });
+  doc.text('SUBTOTAL', marginLeft + itemColWidth + nameColWidth + qtyColWidth + unitPriceColWidth + subtotalColWidth/2, yPosition + 4, { align: 'center' });
   
   // Linhas verticais do cabeçalho
-  doc.line(marginLeft + 12, yPosition - 2, marginLeft + 12, yPosition + 8);
-  doc.line(marginLeft + 110, yPosition - 2, marginLeft + 110, yPosition + 8);
-  doc.line(marginLeft + 135, yPosition - 2, marginLeft + 135, yPosition + 8);
-  doc.line(marginLeft + 160, yPosition - 2, marginLeft + 160, yPosition + 8);
+  doc.line(marginLeft + itemColWidth, yPosition - 2, marginLeft + itemColWidth, yPosition + 8);
+  doc.line(marginLeft + itemColWidth + nameColWidth, yPosition - 2, marginLeft + itemColWidth + nameColWidth, yPosition + 8);
+  doc.line(marginLeft + itemColWidth + nameColWidth + qtyColWidth, yPosition - 2, marginLeft + itemColWidth + nameColWidth + qtyColWidth, yPosition + 8);
+  doc.line(marginLeft + itemColWidth + nameColWidth + qtyColWidth + unitPriceColWidth, yPosition - 2, marginLeft + itemColWidth + nameColWidth + qtyColWidth + unitPriceColWidth, yPosition + 8);
   
   yPosition += 10;
 
@@ -249,23 +249,23 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
     // Linha da tabela
     doc.rect(marginLeft, yPosition - 2, tableWidth, 10, 'S');
     
-    doc.text((index + 1).toString(), marginLeft + 2, yPosition + 4);
+    doc.text((index + 1).toString(), marginLeft + itemColWidth/2, yPosition + 4, { align: 'center' });
     
-    const description = doc.splitTextToSize(item.description, 90);
-    doc.text(description[0], marginLeft + 15, yPosition + 4);
+    const description = doc.splitTextToSize(item.description, nameColWidth - 4);
+    doc.text(description[0], marginLeft + itemColWidth + 2, yPosition + 4);
     
-    doc.text(item.quantity.toString(), marginLeft + 120, yPosition + 4, { align: 'center' });
+    doc.text(item.quantity.toString(), marginLeft + itemColWidth + nameColWidth + qtyColWidth/2, yPosition + 4, { align: 'center' });
     
     const unitPrice = parseFloat(item.unitPrice);
     const total = parseFloat(item.total);
-    doc.text(unitPrice.toFixed(2).replace('.', ','), marginLeft + 145, yPosition + 4, { align: 'center' });
-    doc.text(total.toFixed(2).replace('.', ','), marginLeft + 175, yPosition + 4, { align: 'center' });
+    doc.text(unitPrice.toFixed(2).replace('.', ','), marginLeft + itemColWidth + nameColWidth + qtyColWidth + unitPriceColWidth/2, yPosition + 4, { align: 'center' });
+    doc.text(total.toFixed(2).replace('.', ','), marginLeft + itemColWidth + nameColWidth + qtyColWidth + unitPriceColWidth + subtotalColWidth/2, yPosition + 4, { align: 'center' });
     
     // Linhas verticais
-    doc.line(marginLeft + 12, yPosition - 2, marginLeft + 12, yPosition + 8);
-    doc.line(marginLeft + 110, yPosition - 2, marginLeft + 110, yPosition + 8);
-    doc.line(marginLeft + 135, yPosition - 2, marginLeft + 135, yPosition + 8);
-    doc.line(marginLeft + 160, yPosition - 2, marginLeft + 160, yPosition + 8);
+    doc.line(marginLeft + itemColWidth, yPosition - 2, marginLeft + itemColWidth, yPosition + 8);
+    doc.line(marginLeft + itemColWidth + nameColWidth, yPosition - 2, marginLeft + itemColWidth + nameColWidth, yPosition + 8);
+    doc.line(marginLeft + itemColWidth + nameColWidth + qtyColWidth, yPosition - 2, marginLeft + itemColWidth + nameColWidth + qtyColWidth, yPosition + 8);
+    doc.line(marginLeft + itemColWidth + nameColWidth + qtyColWidth + unitPriceColWidth, yPosition - 2, marginLeft + itemColWidth + nameColWidth + qtyColWidth + unitPriceColWidth, yPosition + 8);
     
     yPosition += 10;
   });
@@ -275,17 +275,17 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
   doc.rect(marginLeft, yPosition - 2, tableWidth, 8, 'S');
   
   doc.setFont('helvetica', 'bold');
-  doc.text('TOTAL', marginLeft + 15, yPosition + 3);
-  doc.text(quote.items.length.toString(), marginLeft + 120, yPosition + 3, { align: 'center' });
+  doc.text('TOTAL', marginLeft + itemColWidth + 2, yPosition + 3);
+  doc.text(quote.items.length.toString(), marginLeft + itemColWidth + nameColWidth + qtyColWidth/2, yPosition + 3, { align: 'center' });
   
   const totalServices = parseFloat(quote.total);
-  doc.text(totalServices.toFixed(2).replace('.', ','), marginLeft + 175, yPosition + 3, { align: 'center' });
+  doc.text(totalServices.toFixed(2).replace('.', ','), marginLeft + itemColWidth + nameColWidth + qtyColWidth + unitPriceColWidth + subtotalColWidth/2, yPosition + 3, { align: 'center' });
   
   // Linhas verticais
-  doc.line(marginLeft + 12, yPosition - 2, marginLeft + 12, yPosition + 6);
-  doc.line(marginLeft + 110, yPosition - 2, marginLeft + 110, yPosition + 6);
-  doc.line(marginLeft + 135, yPosition - 2, marginLeft + 135, yPosition + 6);
-  doc.line(marginLeft + 160, yPosition - 2, marginLeft + 160, yPosition + 6);
+  doc.line(marginLeft + itemColWidth, yPosition - 2, marginLeft + itemColWidth, yPosition + 6);
+  doc.line(marginLeft + itemColWidth + nameColWidth, yPosition - 2, marginLeft + itemColWidth + nameColWidth, yPosition + 6);
+  doc.line(marginLeft + itemColWidth + nameColWidth + qtyColWidth, yPosition - 2, marginLeft + itemColWidth + nameColWidth + qtyColWidth, yPosition + 6);
+  doc.line(marginLeft + itemColWidth + nameColWidth + qtyColWidth + unitPriceColWidth, yPosition - 2, marginLeft + itemColWidth + nameColWidth + qtyColWidth + unitPriceColWidth, yPosition + 6);
   
   yPosition += 15;
 
@@ -367,20 +367,58 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
     yPosition = Math.max(additionalInfoY, rightInfoY) + 10;
   }
 
-  // ========== ASSINATURA ==========
+  // ========== ASSINATURA COM DADOS DO USUÁRIO ==========
   
-  if (checkPageBreak(40)) {
+  if (checkPageBreak(50)) {
     addNewPage();
   }
 
   // Caixa de assinatura
   doc.setDrawColor(0, 0, 0);
   doc.setLineWidth(0.5);
-  doc.rect(marginLeft, yPosition, pageWidth - marginLeft - marginRight, 30, 'S');
+  doc.rect(marginLeft, yPosition, pageWidth - marginLeft - marginRight, 40, 'S');
   
+  // Dados do usuário na assinatura (sem logo)
   doc.setFontSize(10);
+  doc.setFont('helvetica', 'bold');
+  doc.text(businessName, marginLeft + 5, yPosition + 8);
+  
+  doc.setFontSize(8);
   doc.setFont('helvetica', 'normal');
-  doc.text('Assinatura do usuário', pageWidth / 2, yPosition + 25, { align: 'center' });
+  
+  let signatureY = yPosition + 14;
+  
+  if ((user as any).address) {
+    const address = `${(user as any).address}${(user as any).number ? `, ${(user as any).number}` : ''}`;
+    doc.text(address, marginLeft + 5, signatureY);
+    signatureY += 4;
+    
+    if ((user as any).city && (user as any).state) {
+      doc.text(`${(user as any).city}/${(user as any).state} - CEP: ${(user as any).cep || '00000-000'}`, marginLeft + 5, signatureY);
+      signatureY += 4;
+    }
+  }
+
+  const signatureContactInfo = [];
+  if ((user as any).cpfCnpj) {
+    signatureContactInfo.push(`CNPJ: ${formatCPF((user as any).cpfCnpj)}`);
+  }
+  if ((user as any).phone) {
+    signatureContactInfo.push(`(${(user as any).phone.substring(0,2)})${(user as any).phone.substring(2,7)}-${(user as any).phone.substring(7)}`);
+  }
+  if (user.email) {
+    signatureContactInfo.push(user.email);
+  }
+
+  signatureContactInfo.forEach(info => {
+    doc.text(info, marginLeft + 5, signatureY);
+    signatureY += 4;
+  });
+  
+  // Linha para assinatura
+  doc.setDrawColor(150, 150, 150);
+  doc.setLineWidth(0.3);
+  doc.line(marginLeft + 5, yPosition + 35, pageWidth - marginRight - 5, yPosition + 35);
 
   // Marca d'água para plano gratuito
   if (!isUserPremium) {
