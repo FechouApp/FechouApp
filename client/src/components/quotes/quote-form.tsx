@@ -171,15 +171,15 @@ export default function QuoteForm({
   const canProceed = selectedClientId && title && items.every(item => item.description);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6">
       {/* Client and Quote Info */}
-      <Card className="bg-white shadow-lg overflow-hidden">
-        <CardHeader className="p-4 md:p-6">
-          <CardTitle className="text-lg font-semibold text-gray-800">
+      <Card className="bg-white shadow-lg overflow-hidden mx-0">
+        <CardHeader className="p-3 sm:p-4 md:p-6">
+          <CardTitle className="text-base sm:text-lg font-semibold text-gray-800">
             Informações do Orçamento
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4 md:space-y-6 p-4 md:p-6 pt-0">
+        <CardContent className="space-y-4 md:space-y-6 p-3 sm:p-4 md:p-6 pt-0">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
             <div className="space-y-4">
               <div>
@@ -242,31 +242,35 @@ export default function QuoteForm({
       </Card>
 
       {/* Items */}
-      <Card className="bg-white shadow-lg overflow-hidden">
-        <CardHeader className="p-4 md:p-6">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-            <CardTitle className="text-lg font-semibold text-gray-800 flex flex-col sm:flex-row sm:items-center gap-2">
-              <span>Serviços e Produtos</span>
-              {!isUserPremium && (
-                <span className="text-xs text-amber-600 bg-amber-50 px-2 py-1 rounded w-fit">
-                  Máx. {maxItemsForFreeUser} itens (Gratuito)
-                </span>
-              )}
-            </CardTitle>
-            <Button
-              onClick={addItem}
-              className="brand-gradient text-white w-full sm:w-auto"
-              disabled={!isUserPremium && items.length >= maxItemsForFreeUser}
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              Adicionar Item
-              {!isUserPremium && items.length >= maxItemsForFreeUser && (
-                <Crown className="w-4 h-4 ml-2" />
-              )}
-            </Button>
+      <Card className="bg-white shadow-lg overflow-hidden mx-0">
+        <CardHeader className="p-3 sm:p-4 md:p-6">
+          <div className="flex flex-col gap-3">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-3">
+              <CardTitle className="text-base sm:text-lg font-semibold text-gray-800">
+                <span className="block">Serviços e Produtos</span>
+                {!isUserPremium && (
+                  <span className="text-xs text-amber-600 bg-amber-50 px-2 py-1 rounded mt-2 inline-block">
+                    Máx. {maxItemsForFreeUser} itens (Gratuito)
+                  </span>
+                )}
+              </CardTitle>
+              <Button
+                onClick={addItem}
+                className="brand-gradient text-white w-full sm:w-auto text-sm"
+                disabled={!isUserPremium && items.length >= maxItemsForFreeUser}
+                size="sm"
+              >
+                <Plus className="w-4 h-4 mr-1" />
+                <span className="hidden xs:inline">Adicionar Item</span>
+                <span className="xs:hidden">Adicionar</span>
+                {!isUserPremium && items.length >= maxItemsForFreeUser && (
+                  <Crown className="w-4 h-4 ml-1" />
+                )}
+              </Button>
+            </div>
           </div>
         </CardHeader>
-        <CardContent className="space-y-4 p-4 md:p-6 pt-0">
+        <CardContent className="space-y-3 sm:space-y-4 p-3 sm:p-4 md:p-6 pt-0">
           {/* Seção de Itens Salvos */}
           <SavedItemsSection 
             onAddItem={(savedItem) => {
@@ -298,33 +302,33 @@ export default function QuoteForm({
 
 
       {/* Description */}
-      <Card className="bg-white shadow-lg">
-        <CardHeader>
-          <CardTitle className="text-lg font-semibold text-gray-800">
+      <Card className="bg-white shadow-lg mx-0">
+        <CardHeader className="p-3 sm:p-4 md:p-6">
+          <CardTitle className="text-base sm:text-lg font-semibold text-gray-800">
             Descrição
           </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
           <Textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Descrição detalhada do projeto..."
             rows={3}
-            className="w-full"
+            className="w-full text-sm"
           />
         </CardContent>
       </Card>
 
       {/* Summary and Settings */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
         {/* Additional Info */}
-        <Card className="bg-white shadow-lg overflow-hidden">
-          <CardHeader className="p-4 md:p-6">
-            <CardTitle className="text-base md:text-lg font-semibold text-gray-800">
+        <Card className="bg-white shadow-lg overflow-hidden mx-0">
+          <CardHeader className="p-3 sm:p-4 md:p-6">
+            <CardTitle className="text-base font-semibold text-gray-800">
               Informações Adicionais
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4 p-4 md:p-6 pt-0">
+          <CardContent className="space-y-3 sm:space-y-4 p-3 sm:p-4 md:p-6 pt-0">
             <div>
               <Label className="text-sm font-medium text-gray-700">Condições de Pagamento</Label>
               <Textarea
@@ -401,13 +405,13 @@ export default function QuoteForm({
         </Card>
 
         {/* Financial Summary */}
-        <Card className="bg-white shadow-lg overflow-hidden">
-          <CardHeader className="p-4 md:p-6">
-            <CardTitle className="text-base md:text-lg font-semibold text-gray-800">
+        <Card className="bg-white shadow-lg overflow-hidden mx-0">
+          <CardHeader className="p-3 sm:p-4 md:p-6">
+            <CardTitle className="text-base font-semibold text-gray-800">
               Resumo Financeiro
             </CardTitle>
           </CardHeader>
-          <CardContent className="p-4 md:p-6 pt-0">
+          <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
             <div className="space-y-4">
               <div className="space-y-3 pb-4 border-b border-gray-200">
                 <div className="flex justify-between">
@@ -440,24 +444,26 @@ export default function QuoteForm({
       </div>
 
       {/* Action Buttons */}
-      <Card className="bg-white shadow-lg overflow-hidden">
-        <CardContent className="p-4 md:p-6">
-          <div className="flex flex-col sm:flex-row gap-3 justify-end">
+      <Card className="bg-white shadow-lg overflow-hidden mx-0">
+        <CardContent className="p-3 sm:p-4 md:p-6">
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 justify-end">
             <Button 
               variant="secondary"
               onClick={() => handleSubmit('preview')}
               disabled={!canProceed || isSubmitting}
-              className="w-full sm:w-auto order-2 sm:order-1"
+              className="w-full sm:w-auto order-2 sm:order-1 text-sm"
+              size="sm"
             >
-              <Eye className="w-4 h-4 mr-2" />
+              <Eye className="w-4 h-4 mr-1" />
               Visualizar
             </Button>
             <Button 
               onClick={() => handleSubmit('save')}
               disabled={!canProceed || isSubmitting}
-              className="brand-gradient text-white w-full sm:w-auto order-1 sm:order-2"
+              className="brand-gradient text-white w-full sm:w-auto order-1 sm:order-2 text-sm"
+              size="sm"
             >
-              <Save className="w-4 h-4 mr-2" />
+              <Save className="w-4 h-4 mr-1" />
               {isSubmitting ? (existingQuote ? "Salvando..." : "Criando...") : (existingQuote ? "Salvar" : "Criar e Enviar")}
             </Button>
           </div>

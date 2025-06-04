@@ -5,31 +5,68 @@
 /* Mobile-first responsive utilities */
 @layer utilities {
   .mobile-container {
-    @apply px-4 py-4 sm:px-6 sm:py-6 lg:px-8 lg:py-8;
+    @apply px-3 py-3 sm:px-4 sm:py-4 md:px-6 md:py-6 lg:px-8 lg:py-8;
   }
   
   .mobile-grid {
-    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6;
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6;
   }
   
   .mobile-flex {
-    @apply flex flex-col sm:flex-row gap-3 sm:gap-4;
+    @apply flex flex-col sm:flex-row gap-2 sm:gap-3 md:gap-4;
   }
   
   .mobile-text-lg {
-    @apply text-lg sm:text-xl lg:text-2xl;
+    @apply text-base sm:text-lg md:text-xl lg:text-2xl;
   }
   
   .mobile-text-xl {
-    @apply text-xl sm:text-2xl lg:text-3xl;
+    @apply text-lg sm:text-xl md:text-2xl lg:text-3xl;
   }
   
   .mobile-btn {
-    @apply w-full sm:w-auto;
+    @apply w-full sm:w-auto text-sm;
   }
   
   .mobile-card {
-    @apply p-4 sm:p-6 lg:p-8;
+    @apply p-3 sm:p-4 md:p-6 lg:p-8;
+  }
+
+  /* Responsive text sizes */
+  .text-responsive-sm {
+    @apply text-xs sm:text-sm;
+  }
+  
+  .text-responsive-base {
+    @apply text-sm sm:text-base;
+  }
+  
+  .text-responsive-lg {
+    @apply text-base sm:text-lg;
+  }
+
+  /* Mobile-specific breakpoints */
+  @screen xs {
+    /* Extra small devices (phones, less than 576px) */
+  }
+  
+  /* Fix for very small screens */
+  @media (max-width: 375px) {
+    .mobile-container {
+      @apply px-2 py-2;
+    }
+    
+    .mobile-card {
+      @apply p-2;
+    }
+  }
+}
+
+/* Responsive table fixes */
+@media (max-width: 640px) {
+  .table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
   }
 }
 

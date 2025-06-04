@@ -122,7 +122,7 @@ export default function NewQuote() {
   }
 
   return (
-    <div className="min-h-screen pb-6">
+    <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <Header 
         title={isEditing ? "Editar Orçamento" : "Novo Orçamento"}
@@ -130,64 +130,67 @@ export default function NewQuote() {
         backTo="/quotes"
       />
 
-      <div className="w-full max-w-5xl mx-auto px-4 space-y-6">
-        {/* Step Indicator */}
-        <div className="flex items-center justify-center mb-6">
-          <div className="flex items-center">
-            <div className={`w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center text-sm md:text-base font-medium ${
-              step >= 1 ? 'bg-white text-brand-primary' : 'bg-white/20 text-white/60'
-            }`}>
-              1
-            </div>
-            <div className={`w-12 md:w-16 h-1 ${step > 1 ? 'bg-white' : 'bg-white/20'}`}></div>
-            <div className={`w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center text-sm md:text-base font-medium ${
-              step >= 2 ? 'bg-white text-brand-primary' : 'bg-white/20 text-white/60'
-            }`}>
-              2
-            </div>
-            <div className={`w-12 md:w-16 h-1 ${step > 2 ? 'bg-white' : 'bg-white/20'}`}></div>
-            <div className={`w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center text-sm md:text-base font-medium ${
-              step >= 3 ? 'bg-white text-brand-primary' : 'bg-white/20 text-white/60'
-            }`}>
-              3
+      {/* Main Content Container */}
+      <div className="px-3 sm:px-4 md:px-6 lg:px-8 pb-6 md:pb-8">
+        <div className="max-w-5xl mx-auto space-y-4 md:space-y-6">
+          {/* Step Indicator - Hidden on small mobile */}
+          <div className="hidden sm:flex items-center justify-center mb-4 md:mb-6">
+            <div className="flex items-center">
+              <div className={`w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center text-sm md:text-base font-medium ${
+                step >= 1 ? 'bg-white text-brand-primary' : 'bg-white/20 text-white/60'
+              }`}>
+                1
+              </div>
+              <div className={`w-12 md:w-16 h-1 ${step > 1 ? 'bg-white' : 'bg-white/20'}`}></div>
+              <div className={`w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center text-sm md:text-base font-medium ${
+                step >= 2 ? 'bg-white text-brand-primary' : 'bg-white/20 text-white/60'
+              }`}>
+                2
+              </div>
+              <div className={`w-12 md:w-16 h-1 ${step > 2 ? 'bg-white' : 'bg-white/20'}`}></div>
+              <div className={`w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center text-sm md:text-base font-medium ${
+                step >= 3 ? 'bg-white text-brand-primary' : 'bg-white/20 text-white/60'
+              }`}>
+                3
+              </div>
             </div>
           </div>
+
+          {/* Plan limit warning */}
+          {planLimits && !planLimits.isPremium && !planLimits.canCreateQuote && (
+            <div className="p-3 sm:p-4 bg-amber-50 border border-amber-200 rounded-lg mx-0">
+              <div className="flex items-start gap-2 sm:gap-3">
+                <div className="w-6 h-6 bg-amber-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <span className="text-amber-600 font-bold text-sm">!</span>
+                </div>
+                <div className="min-w-0 flex-1">
+                  <h3 className="font-medium text-amber-800 text-sm">Limite mensal atingido</h3>
+                  <p className="text-xs text-amber-700 mt-1 break-words">
+                    Você atingiu o limite de {planLimits.monthlyQuoteLimit} orçamentos por mês do plano gratuito.
+                    Faça upgrade para Premium e tenha orçamentos ilimitados.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Show quick setup if no clients */}
+          {(!clients || clients.length === 0) && (
+            <div className="mb-4 md:mb-6">
+              <QuickSetup />
+            </div>
+          )}
+
+          {/* Quote Form */}
+          <QuoteForm
+            clients={clients || []}
+            onSubmit={(data) => createQuoteMutation.mutate(data)}
+            isSubmitting={createQuoteMutation.isPending}
+            step={step}
+            onStepChange={setStep}
+            existingQuote={quoteData}
+          />
         </div>
-
-        {/* Plan limit warning */}
-        {planLimits && !planLimits.isPremium && !planLimits.canCreateQuote && (
-          <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg">
-            <div className="flex items-start gap-3">
-              <div className="w-6 h-6 md:w-8 md:h-8 bg-amber-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                <span className="text-amber-600 font-bold text-sm md:text-base">!</span>
-              </div>
-              <div>
-                <h3 className="font-medium text-amber-800 text-sm md:text-base">Limite mensal atingido</h3>
-                <p className="text-xs md:text-sm text-amber-700 mt-1">
-                  Você atingiu o limite de {planLimits.monthlyQuoteLimit} orçamentos por mês do plano gratuito.
-                  {" "}Faça upgrade para Premium e tenha orçamentos ilimitados.
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Show quick setup if no clients */}
-        {(!clients || clients.length === 0) && (
-          <div className="mb-6">
-            <QuickSetup />
-          </div>
-        )}
-
-        {/* Quote Form */}
-        <QuoteForm
-          clients={clients || []}
-          onSubmit={(data) => createQuoteMutation.mutate(data)}
-          isSubmitting={createQuoteMutation.isPending}
-          step={step}
-          onStepChange={setStep}
-          existingQuote={quoteData}
-        />
       </div>
     </div>
   );
