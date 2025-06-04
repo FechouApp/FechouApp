@@ -125,8 +125,8 @@ export default function AdminPanel() {
 
   // Filter users based on criteria
   const filteredUsers = users.filter((user: User) => {
-    const matchesPlan = !filterPlan || user.plan === filterPlan;
-    const matchesPayment = !filterPayment || user.paymentStatus === filterPayment;
+    const matchesPlan = !filterPlan || filterPlan === "all" || user.plan === filterPlan;
+    const matchesPayment = !filterPayment || filterPayment === "all" || user.paymentStatus === filterPayment;
     const matchesSearch = !searchTerm || 
       user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.firstName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -285,7 +285,7 @@ export default function AdminPanel() {
                     <SelectValue placeholder="Todos os planos" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Todos os planos</SelectItem>
+                    <SelectItem value="all">Todos os planos</SelectItem>
                     <SelectItem value="FREE">Gratuito</SelectItem>
                     <SelectItem value="PREMIUM">Premium</SelectItem>
                   </SelectContent>
@@ -299,7 +299,7 @@ export default function AdminPanel() {
                     <SelectValue placeholder="Todos os status" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Todos os status</SelectItem>
+                    <SelectItem value="all">Todos os status</SelectItem>
                     <SelectItem value="ativo">Ativo</SelectItem>
                     <SelectItem value="pendente">Pendente</SelectItem>
                     <SelectItem value="vencido">Vencido</SelectItem>
@@ -311,8 +311,8 @@ export default function AdminPanel() {
                 <Button 
                   variant="outline" 
                   onClick={() => {
-                    setFilterPlan("");
-                    setFilterPayment("");
+                    setFilterPlan("all");
+                    setFilterPayment("all");
                     setSearchTerm("");
                   }}
                   className="w-full"
@@ -463,7 +463,7 @@ export default function AdminPanel() {
                                       <SelectValue placeholder="Selecione um método" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                      <SelectItem value="">Não especificado</SelectItem>
+                                      <SelectItem value="none">Não especificado</SelectItem>
                                       <SelectItem value="pix">PIX</SelectItem>
                                       <SelectItem value="manual">Manual</SelectItem>
                                       <SelectItem value="asaas">Asaas</SelectItem>
