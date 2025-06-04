@@ -500,95 +500,10 @@ export default function Clients() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                {filteredClients.map((client) => (
-                  <TableRow key={client.id} className="hover:bg-gray-50">
-                    {/* Desktop view */}
-                    <TableCell className="hidden md:table-cell">
-                      <div className="flex items-center">
-                        <div className="w-10 h-10 bg-brand-primary/10 rounded-full flex items-center justify-center mr-3">
-                          <span className="text-brand-primary font-semibold">
-                            {client.name.charAt(0).toUpperCase()}
-                          </span>
-                        </div>
-                        <div>
-                          <p className="font-medium text-gray-800">{client.name}</p>
-                          <p className="text-sm text-gray-600">
-                            Cliente desde {new Date(client.createdAt || '').getFullYear()}
-                          </p>
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell className="hidden md:table-cell">
-                      <div className="space-y-1">
-                        {client.email && (
-                          <div className="flex items-center gap-2 text-sm">
-                            <Mail className="w-4 h-4 text-gray-400" />
-                            <span>{client.email}</span>
-                          </div>
-                        )}
-                        <div className="flex items-center gap-2 text-sm">
-                          <Phone className="w-4 h-4 text-gray-400" />
-                          <span>{client.phone}</span>
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell className="hidden md:table-cell">
-                      {client.city && client.state ? (
-                        <div className="flex items-center gap-2 text-sm">
-                          <MapPin className="w-4 h-4 text-gray-400" />
-                          <span>{client.city}, {client.state}</span>
-                        </div>
-                      ) : (
-                        <span className="text-gray-400">-</span>
-                      )}
-                    </TableCell>
-                    <TableCell className="hidden md:table-cell">
-                      <span className="inline-block px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
-                        {client.quoteCount || 0} orçamentos
-                      </span>
-                    </TableCell>
-                    <TableCell className="hidden md:table-cell">
-                      <div className="flex gap-2">
-                        <Button 
-                          size="sm" 
-                          variant="ghost" 
-                          title="Ver perfil"
-                          onClick={() => setLocation(`/clients/${client.id}`)}
-                        >
-                          <Eye className="w-4 h-4" />
-                        </Button>
-                        <Button 
-                          size="sm" 
-                          variant="ghost" 
-                          title="Editar"
-                          onClick={() => setEditingClient(client)}
-                        >
-                          <Edit className="w-4 h-4" />
-                        </Button>
-                        <Button 
-                          size="sm" 
-                          variant="ghost" 
-                          title="Novo orçamento"
-                          onClick={() => setLocation(`/new-quote?clientId=${client.id}`)}
-                        >
-                          <FileText className="w-4 h-4" />
-                        </Button>
-                        <Button 
-                          size="sm" 
-                          variant="ghost" 
-                          title="Excluir"
-                          onClick={() => handleDeleteClient(client.id)}
-                          disabled={deleteClientMutation.isPending}
-                        >
-                          <Trash2 className="w-4 h-4 text-red-500" />
-                        </Button>
-                      </div>
-                    </TableCell>
-
-                    {/* Mobile view - single cell with card layout */}
-                    <TableCell className="md:hidden" colSpan={5}>
-                      <div className="p-4 space-y-3">
-                        <div className="flex items-center justify-between">
+                    {filteredClients.map((client) => (
+                      <TableRow key={client.id} className="hover:bg-gray-50">
+                        {/* Desktop view */}
+                        <TableCell className="hidden md:table-cell">
                           <div className="flex items-center">
                             <div className="w-10 h-10 bg-brand-primary/10 rounded-full flex items-center justify-center mr-3">
                               <span className="text-brand-primary font-semibold">
@@ -597,68 +512,153 @@ export default function Clients() {
                             </div>
                             <div>
                               <p className="font-medium text-gray-800">{client.name}</p>
-                              <span className="inline-block px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
-                                {client.quoteCount || 0} orçamentos
-                              </span>
+                              <p className="text-sm text-gray-600">
+                                Cliente desde {new Date(client.createdAt || '').getFullYear()}
+                              </p>
                             </div>
                           </div>
-                        </div>
-                        
-                        <div className="space-y-2">
-                          {client.email && (
-                            <div className="flex items-center gap-2 text-sm text-gray-600">
-                              <Mail className="w-4 h-4 text-gray-400" />
-                              <span>{client.email}</span>
+                        </TableCell>
+                        <TableCell className="hidden md:table-cell">
+                          <div className="space-y-1">
+                            {client.email && (
+                              <div className="flex items-center gap-2 text-sm">
+                                <Mail className="w-4 h-4 text-gray-400" />
+                                <span>{client.email}</span>
+                              </div>
+                            )}
+                            <div className="flex items-center gap-2 text-sm">
+                              <Phone className="w-4 h-4 text-gray-400" />
+                              <span>{client.phone}</span>
                             </div>
-                          )}
-                          <div className="flex items-center gap-2 text-sm text-gray-600">
-                            <Phone className="w-4 h-4 text-gray-400" />
-                            <span>{client.phone}</span>
                           </div>
-                          {client.city && client.state && (
-                            <div className="flex items-center gap-2 text-sm text-gray-600">
+                        </TableCell>
+                        <TableCell className="hidden md:table-cell">
+                          {client.city && client.state ? (
+                            <div className="flex items-center gap-2 text-sm">
                               <MapPin className="w-4 h-4 text-gray-400" />
                               <span>{client.city}, {client.state}</span>
                             </div>
+                          ) : (
+                            <span className="text-gray-400">-</span>
                           )}
-                        </div>
+                        </TableCell>
+                        <TableCell className="hidden md:table-cell">
+                          <span className="inline-block px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
+                            {client.quoteCount || 0} orçamentos
+                          </span>
+                        </TableCell>
+                        <TableCell className="hidden md:table-cell">
+                          <div className="flex gap-2">
+                            <Button 
+                              size="sm" 
+                              variant="ghost" 
+                              title="Ver perfil"
+                              onClick={() => setLocation(`/clients/${client.id}`)}
+                            >
+                              <Eye className="w-4 h-4" />
+                            </Button>
+                            <Button 
+                              size="sm" 
+                              variant="ghost" 
+                              title="Editar"
+                              onClick={() => setEditingClient(client)}
+                            >
+                              <Edit className="w-4 h-4" />
+                            </Button>
+                            <Button 
+                              size="sm" 
+                              variant="ghost" 
+                              title="Novo orçamento"
+                              onClick={() => setLocation(`/new-quote?clientId=${client.id}`)}
+                            >
+                              <FileText className="w-4 h-4" />
+                            </Button>
+                            <Button 
+                              size="sm" 
+                              variant="ghost" 
+                              title="Excluir"
+                              onClick={() => handleDeleteClient(client.id)}
+                              disabled={deleteClientMutation.isPending}
+                            >
+                              <Trash2 className="w-4 h-4 text-red-500" />
+                            </Button>
+                          </div>
+                        </TableCell>
 
-                        <div className="flex gap-2 pt-2">
-                          <Button 
-                            size="sm" 
-                            variant="outline" 
-                            className="flex-1"
-                            onClick={() => setLocation(`/clients/${client.id}`)}
-                          >
-                            <Eye className="w-4 h-4 mr-1" />
-                            Ver
-                          </Button>
-                          <Button 
-                            size="sm" 
-                            variant="outline" 
-                            className="flex-1"
-                            onClick={() => setEditingClient(client)}
-                          >
-                            <Edit className="w-4 h-4 mr-1" />
-                            Editar
-                          </Button>
-                          <Button 
-                            size="sm" 
-                            variant="outline" 
-                            className="flex-1"
-                            onClick={() => setLocation(`/new-quote?clientId=${client.id}`)}
-                          >
-                            <FileText className="w-4 h-4 mr-1" />
-                            Orçar
-                          </Button>
-                        </div>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
+                        {/* Mobile view - single cell with card layout */}
+                        <TableCell className="md:hidden" colSpan={5}>
+                          <div className="p-4 space-y-3">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center">
+                                <div className="w-10 h-10 bg-brand-primary/10 rounded-full flex items-center justify-center mr-3">
+                                  <span className="text-brand-primary font-semibold">
+                                    {client.name.charAt(0).toUpperCase()}
+                                  </span>
+                                </div>
+                                <div>
+                                  <p className="font-medium text-gray-800">{client.name}</p>
+                                  <span className="inline-block px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
+                                    {client.quoteCount || 0} orçamentos
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                            
+                            <div className="space-y-2">
+                              {client.email && (
+                                <div className="flex items-center gap-2 text-sm text-gray-600">
+                                  <Mail className="w-4 h-4 text-gray-400" />
+                                  <span>{client.email}</span>
+                                </div>
+                              )}
+                              <div className="flex items-center gap-2 text-sm text-gray-600">
+                                <Phone className="w-4 h-4 text-gray-400" />
+                                <span>{client.phone}</span>
+                              </div>
+                              {client.city && client.state && (
+                                <div className="flex items-center gap-2 text-sm text-gray-600">
+                                  <MapPin className="w-4 h-4 text-gray-400" />
+                                  <span>{client.city}, {client.state}</span>
+                                </div>
+                              )}
+                            </div>
+
+                            <div className="flex gap-2 pt-2">
+                              <Button 
+                                size="sm" 
+                                variant="outline" 
+                                className="flex-1"
+                                onClick={() => setLocation(`/clients/${client.id}`)}
+                              >
+                                <Eye className="w-4 h-4 mr-1" />
+                                Ver
+                              </Button>
+                              <Button 
+                                size="sm" 
+                                variant="outline" 
+                                className="flex-1"
+                                onClick={() => setEditingClient(client)}
+                              >
+                                <Edit className="w-4 h-4 mr-1" />
+                                Editar
+                              </Button>
+                              <Button 
+                                size="sm" 
+                                variant="outline" 
+                                className="flex-1"
+                                onClick={() => setLocation(`/new-quote?clientId=${client.id}`)}
+                              >
+                                <FileText className="w-4 h-4 mr-1" />
+                                Orçar
+                              </Button>
+                            </div>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
         </CardContent>
       </Card>
 
