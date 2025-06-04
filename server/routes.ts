@@ -855,55 +855,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log("=== ADMIN ROUTE CALLED ===");
       console.log("Admin updating user plan:", { userId, plan, paymentStatus, paymentMethod });
-      console.log("Request body:", req.body);
-      console.log("Request params:", req.params);
       
       // Validate input
       if (!plan || !paymentStatus) {
         console.log("Validation failed: missing plan or paymentStatus");
-        return res.status(400).json({ message: "Plan and payment status are required" });
+        return res.status(400).json({ message: "Plano e status de pagamento são obrigatórios" });
       }
       
-      if (!["FREE", "PREMIUM"].includes(plan)) {
+      if (!["FREE", "PREMIUM"].includes(plan.toUpperCase())) {
         console.log("Validation failed: invalid plan type:", plan);
-        return res.status(400).json({ message: "Invalid plan type" });
+        return res.status(400).json({ message: "Tipo de plano inválido" });
       }
       
-      if (!["ativo", "pendente", "vencido"].includes(paymentStatus)) {
+      if (!["ativo", "pendente", "vencido"].includes(paymentStatus.toLowerCase())) {
         console.log("Validation failed: invalid payment status:", paymentStatus);
-        return res.status(400).json({ message: "Invalid payment status" });
+        return res.status(400).json({ message: "Status de pagamento inválido" });
       }
       
       // Check if user exists
-      console.log("Checking if user exists:", userId);
       const existingUser = await storage.getUser(userId);
       if (!existingUser) {
         console.log("User not found:", userId);
-        return res.status(404).json({ message: "User not found" });
+        return res.status(404).json({ message: "Usuário não encontrado" });
       }
-      console.log("User found:", existingUser.email);
       
-      // Clean paymentMethod value
-      const cleanPaymentMethod = paymentMethod === "" ? null : paymentMethod;
-      console.log("Cleaned paymentMethod:", cleanPaymentMethod);
+      // Normalize values
+      const normalizedPlan = plan.toUpperCase();
+      const normalizedPaymentStatus = paymentStatus.toLowerCase();
+      const cleanPaymentMethod = paymentMethod && paymentMethod.trim() !== "" ? paymentMethod.trim() : null;
       
-      console.log("Calling storage.updateUserPlanStatus...");
-      const user = await storage.updateUserPlanStatus(userId, plan, paymentStatus, cleanPaymentMethod);
+      console.log("Normalized values:", { normalizedPlan, normalizedPaymentStatus, cleanPaymentMethod });
+      
+      const user = await storage.updateUserPlanStatus(userId, normalizedPlan, normalizedPaymentStatus, cleanPaymentMethod);
       if (!user) {
         console.log("Storage returned null/undefined");
-        return res.status(500).json({ message: "Failed to update user plan" });
+        return res.status(500).json({ message: "Falha ao atualizar plano do usuário" });
       }
       
-      console.log("User plan updated successfully:", user);
+      console.log("User plan updated successfully");
       console.log("=== ADMIN ROUTE SUCCESS ===");
       res.json(user);
     } catch (error) {
       console.error("=== ADMIN ROUTE ERROR ===");
       console.error("Error updating user plan:", error);
-      console.error("Error stack:", error instanceof Error ? error.stack : "No stack");
       res.status(500).json({ 
-        message: "Failed to update user plan", 
-        error: error instanceof Error ? error.message : "Unknown error" 
+        message: "Falha ao atualizar plano do usuário", 
+        error: error instanceof Error ? error.message : "Erro desconhecido" 
       });
     }
   });

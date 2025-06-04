@@ -723,51 +723,54 @@ export class DatabaseStorage implements IStorage {
     console.log("=== STORAGE updateUserPlanStatus ===");
     console.log("Storage: updateUserPlanStatus called with:", { userId, plan, paymentStatus, paymentMethod });
     
-    const updateData: any = {
-      plan,
-      paymentStatus,
-      updatedAt: new Date(),
-    };
-
-    // Handle paymentMethod properly
-    updateData.paymentMethod = paymentMethod || null;
-
-    if (plan === "PREMIUM") {
-      // Set expiration to 30 days from now
-      updateData.planExpiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
-      updateData.quotesLimit = 999999; // Unlimited quotes for premium
-      updateData.quotesUsedThisMonth = 0; // Reset quota for new premium user
-    } else {
-      updateData.planExpiresAt = null;
-      updateData.quotesLimit = 5; // Free plan limit
-    }
-
-    console.log("Storage: Update data:", updateData);
-    console.log("Storage: Executing database update for userId:", userId);
-
     try {
+      // First verify user exists
+      const existingUser = await this.getUser(userId);
+      if (!existingUser) {
+        console.log("Storage: User not found in database:", userId);
+        return undefined;
+      }
+
+      const updateData: any = {
+        plan: plan.toUpperCase(),
+        paymentStatus: paymentStatus.toLowerCase(),
+        updatedAt: new Date(),
+        paymentMethod: paymentMethod || null,
+      };
+
+      if (plan.toUpperCase() === "PREMIUM") {
+        // Set expiration to 30 days from now
+        updateData.planExpiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+        updateData.quotesLimit = 999999; // Unlimited quotes for premium
+        if (existingUser.plan !== "PREMIUM") {
+          updateData.quotesUsedThisMonth = 0; // Reset quota for new premium user
+        }
+      } else {
+        updateData.planExpiresAt = null;
+        updateData.quotesLimit = 5; // Free plan limit
+      }
+
+      console.log("Storage: Final update data:", updateData);
+
       const result = await db
         .update(users)
         .set(updateData)
         .where(eq(users.id, userId))
         .returning();
       
-      console.log("Storage: Database update result:", result);
-      
       if (result.length === 0) {
-        console.log("Storage: No user found with id:", userId);
+        console.log("Storage: Update operation affected 0 rows");
         return undefined;
       }
       
       const [user] = result;
-      console.log("Storage: User updated successfully:", user);
+      console.log("Storage: User updated successfully");
       console.log("=== STORAGE SUCCESS ===");
       return user;
     } catch (error) {
       console.error("=== STORAGE ERROR ===");
-      console.error("Storage: Error updating user plan status:", error);
-      console.error("Storage: Error details:", error instanceof Error ? error.message : "Unknown error");
-      throw error;
+      console.error("Storage: Database error:", error);
+      throw new Error(`Falha na atualização do banco de dados: ${error instanceof Error ? error.message : "Erro desconhecido"}`);
     }
   }
 

@@ -193,11 +193,29 @@ export default function AdminPanel() {
       return;
     }
 
+    if (!["FREE", "PREMIUM"].includes(editPlan)) {
+      toast({
+        title: "Erro",
+        description: "Plano inválido selecionado.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!["ativo", "pendente", "vencido"].includes(editPaymentStatus)) {
+      toast({
+        title: "Erro",
+        description: "Status de pagamento inválido selecionado.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     updatePlanMutation.mutate({
       userId: selectedUser.id,
-      plan: editPlan,
-      paymentStatus: editPaymentStatus,
-      paymentMethod: editPaymentMethod || null,
+      plan: editPlan.toUpperCase(),
+      paymentStatus: editPaymentStatus.toLowerCase(),
+      paymentMethod: editPaymentMethod && editPaymentMethod.trim() !== "" ? editPaymentMethod.trim() : null,
     });
   };
 
