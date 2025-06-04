@@ -132,21 +132,21 @@ export default function NewQuote() {
 
       <div className="max-w-5xl w-full">
         {/* Step Indicator */}
-        <div className="flex items-center justify-center mb-6 md:mb-8 px-4 md:px-0">
+        <div className="flex items-center justify-center mb-4 md:mb-8 px-4 md:px-0">
           <div className="flex items-center">
-            <div className={`w-6 h-6 md:w-8 md:h-8 rounded-full flex items-center justify-center text-xs md:text-sm font-medium ${
+            <div className={`w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center text-sm md:text-base font-medium ${
               step >= 1 ? 'bg-white text-brand-primary' : 'bg-white/20 text-white/60'
             }`}>
               1
             </div>
-            <div className={`w-8 md:w-16 h-1 ${step > 1 ? 'bg-white' : 'bg-white/20'}`}></div>
-            <div className={`w-6 h-6 md:w-8 md:h-8 rounded-full flex items-center justify-center text-xs md:text-sm font-medium ${
+            <div className={`w-12 md:w-16 h-1 ${step > 1 ? 'bg-white' : 'bg-white/20'}`}></div>
+            <div className={`w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center text-sm md:text-base font-medium ${
               step >= 2 ? 'bg-white text-brand-primary' : 'bg-white/20 text-white/60'
             }`}>
               2
             </div>
-            <div className={`w-8 md:w-16 h-1 ${step > 2 ? 'bg-white' : 'bg-white/20'}`}></div>
-            <div className={`w-6 h-6 md:w-8 md:h-8 rounded-full flex items-center justify-center text-xs md:text-sm font-medium ${
+            <div className={`w-12 md:w-16 h-1 ${step > 2 ? 'bg-white' : 'bg-white/20'}`}></div>
+            <div className={`w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center text-sm md:text-base font-medium ${
               step >= 3 ? 'bg-white text-brand-primary' : 'bg-white/20 text-white/60'
             }`}>
               3
@@ -156,14 +156,14 @@ export default function NewQuote() {
 
         {/* Plan limit warning */}
         {planLimits && !planLimits.isPremium && !planLimits.canCreateQuote && (
-          <div className="mb-6 mx-4 md:mx-0 p-4 bg-amber-50 border border-amber-200 rounded-lg">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-amber-100 rounded-full flex items-center justify-center">
-                <span className="text-amber-600 font-bold">!</span>
+          <div className="mb-4 md:mb-6 mx-4 md:mx-0 p-3 md:p-4 bg-amber-50 border border-amber-200 rounded-lg">
+            <div className="flex items-start gap-3">
+              <div className="w-6 h-6 md:w-8 md:h-8 bg-amber-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                <span className="text-amber-600 font-bold text-sm md:text-base">!</span>
               </div>
               <div>
-                <h3 className="font-medium text-amber-800">Limite mensal atingido</h3>
-                <p className="text-sm text-amber-700">
+                <h3 className="font-medium text-amber-800 text-sm md:text-base">Limite mensal atingido</h3>
+                <p className="text-xs md:text-sm text-amber-700 mt-1">
                   Você atingiu o limite de {planLimits.monthlyQuoteLimit} orçamentos por mês do plano gratuito.
                   {" "}Faça upgrade para Premium e tenha orçamentos ilimitados.
                 </p>
@@ -174,7 +174,7 @@ export default function NewQuote() {
 
         {/* Show quick setup if no clients */}
         {(!clients || clients.length === 0) && (
-          <div className="mb-8 mx-4 md:mx-0">
+          <div className="mb-6 md:mb-8 mx-4 md:mx-0">
             <QuickSetup />
           </div>
         )}

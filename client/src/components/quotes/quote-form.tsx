@@ -179,8 +179,8 @@ export default function QuoteForm({
             Informações do Orçamento
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="grid lg:grid-cols-2 gap-6">
+        <CardContent className="space-y-4 md:space-y-6 p-4 md:p-6">
+          <div className="grid md:grid-cols-2 gap-4 md:gap-6">
             <div className="space-y-4">
               <div>
                 <Label className="text-sm font-medium text-gray-700">Cliente *</Label>
@@ -264,7 +264,7 @@ export default function QuoteForm({
             )}
           </Button>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-4 p-4 md:p-6">
           {/* Seção de Itens Salvos */}
           <SavedItemsSection 
             onAddItem={(savedItem) => {
@@ -314,15 +314,15 @@ export default function QuoteForm({
       </Card>
 
       {/* Summary and Settings */}
-      <div className="grid lg:grid-cols-2 gap-6">
+      <div className="grid md:grid-cols-2 gap-4 md:gap-6">
         {/* Additional Info */}
         <Card className="bg-white shadow-lg">
-          <CardHeader>
-            <CardTitle className="text-lg font-semibold text-gray-800">
+          <CardHeader className="p-4 md:p-6">
+            <CardTitle className="text-base md:text-lg font-semibold text-gray-800">
               Informações Adicionais
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-4 p-4 md:p-6 pt-0">
             <div>
               <Label className="text-sm font-medium text-gray-700">Condições de Pagamento</Label>
               <Textarea
@@ -400,12 +400,12 @@ export default function QuoteForm({
 
         {/* Financial Summary */}
         <Card className="bg-white shadow-lg">
-          <CardHeader>
-            <CardTitle className="text-lg font-semibold text-gray-800">
+          <CardHeader className="p-4 md:p-6">
+            <CardTitle className="text-base md:text-lg font-semibold text-gray-800">
               Resumo Financeiro
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-4 md:p-6 pt-0">
             <div className="space-y-4">
               <div className="space-y-3 pb-4 border-b border-gray-200">
                 <div className="flex justify-between">
@@ -439,12 +439,13 @@ export default function QuoteForm({
 
       {/* Action Buttons */}
       <Card className="bg-white shadow-lg">
-        <CardContent className="p-6">
-          <div className="flex flex-col sm:flex-row gap-4 justify-end">
+        <CardContent className="p-4 md:p-6">
+          <div className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-end">
             <Button 
               variant="secondary"
               onClick={() => handleSubmit('preview')}
               disabled={!canProceed || isSubmitting}
+              className="w-full sm:w-auto"
             >
               <Eye className="w-4 h-4 mr-2" />
               Visualizar
@@ -452,7 +453,7 @@ export default function QuoteForm({
             <Button 
               onClick={() => handleSubmit('save')}
               disabled={!canProceed || isSubmitting}
-              className="brand-gradient text-white"
+              className="brand-gradient text-white w-full sm:w-auto"
             >
               <Save className="w-4 h-4 mr-2" />
               {isSubmitting ? (existingQuote ? "Salvando..." : "Criando...") : (existingQuote ? "Salvar" : "Criar e Enviar")}
