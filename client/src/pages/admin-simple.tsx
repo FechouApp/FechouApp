@@ -32,23 +32,28 @@ export default function AdminPanel() {
 
   const updatePlanMutation = useMutation({
     mutationFn: async ({ userId, newPlan }: { userId: string; newPlan: string }) => {
-      return await apiRequest(`/api/admin/users/${userId}/plan`, "PATCH", {
+      console.log("Updating plan for user:", userId, "to:", newPlan);
+      const response = await apiRequest(`/api/admin/users/${userId}/plan`, "PATCH", {
         plan: newPlan,
         paymentStatus: "ativo",
         paymentMethod: "manual"
       });
+      console.log("Update response:", response);
+      return response;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log("Plan update successful:", data);
       toast({
         title: "Sucesso",
         description: "Plano atualizado com sucesso!",
       });
       queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
     },
-    onError: () => {
+    onError: (error) => {
+      console.error("Plan update error:", error);
       toast({
         title: "Erro",
-        description: "Falha ao atualizar plano.",
+        description: `Falha ao atualizar plano: ${error.message}`,
         variant: "destructive",
       });
     },
