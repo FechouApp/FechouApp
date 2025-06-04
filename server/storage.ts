@@ -761,8 +761,14 @@ export class DatabaseStorage implements IStorage {
       };
 
       // Set plan-specific fields
-      if (plan.toUpperCase() === "PREMIUM" || plan.toUpperCase() === "PREMIUM_CORTESIA") {
+      if (plan.toUpperCase() === "PREMIUM") {
         updateData.planExpiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 days
+        updateData.quotesLimit = 999999;
+        if (existingUser.plan !== "PREMIUM" && existingUser.plan !== "PREMIUM_CORTESIA") {
+          updateData.quotesUsedThisMonth = 0; // Reset for new premium users
+        }
+      } else if (plan.toUpperCase() === "PREMIUM_CORTESIA") {
+        updateData.planExpiresAt = null; // Courtesy plans never expire
         updateData.quotesLimit = 999999;
         if (existingUser.plan !== "PREMIUM" && existingUser.plan !== "PREMIUM_CORTESIA") {
           updateData.quotesUsedThisMonth = 0; // Reset for new premium users

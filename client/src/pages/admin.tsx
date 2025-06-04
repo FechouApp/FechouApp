@@ -68,22 +68,22 @@ export default function AdminPanel() {
     mutationFn: async (data: { userId: string; plan: string; paymentStatus: string; paymentMethod?: string | null }) => {
       console.log("=== MUTATION START ===");
       console.log("Mutation called with data:", data);
-      
+
       try {
         const requestBody = {
           plan: data.plan,
           paymentStatus: data.paymentStatus,
           paymentMethod: data.paymentMethod,
         };
-        
+
         console.log("Request body:", requestBody);
         console.log("API endpoint:", `/api/admin/users/${data.userId}/plan`);
-        
+
         const response = await apiRequest(`/api/admin/users/${data.userId}/plan`, "PATCH", requestBody);
-        
+
         console.log("API response received:", response);
         console.log("=== MUTATION SUCCESS ===");
-        
+
         return response;
       } catch (error: any) {
         console.error("=== MUTATION ERROR ===");
@@ -99,12 +99,12 @@ export default function AdminPanel() {
     onSuccess: (data) => {
       console.log("=== MUTATION onSuccess ===");
       console.log("Success data:", data);
-      
+
       toast({
         title: "Sucesso!",
         description: "Plano do usuário atualizado com sucesso!",
       });
-      
+
       // Refresh data and close dialog
       queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
       setIsDialogOpen(false);
@@ -116,7 +116,7 @@ export default function AdminPanel() {
     onError: (error: any) => {
       console.error("=== MUTATION onError ===");
       console.error("Error object:", error);
-      
+
       if (isUnauthorizedError(error)) {
         toast({
           title: "Não autorizado",
@@ -125,10 +125,10 @@ export default function AdminPanel() {
         });
         return;
       }
-      
+
       // Extract error message from different possible locations
       let errorMessage = "Falha ao atualizar plano do usuário.";
-      
+
       if (error?.response?.data?.message) {
         errorMessage = error.response.data.message;
       } else if (error?.message) {
@@ -136,9 +136,9 @@ export default function AdminPanel() {
       } else if (typeof error === 'string') {
         errorMessage = error;
       }
-      
+
       console.error("Final error message:", errorMessage);
-      
+
       toast({
         title: "Erro ao Atualizar",
         description: errorMessage,
@@ -185,7 +185,7 @@ export default function AdminPanel() {
       user.firstName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.lastName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.businessName?.toLowerCase().includes(searchTerm.toLowerCase());
-    
+
     return matchesPlan && matchesPayment && matchesSearch;
   });
 
@@ -212,11 +212,11 @@ export default function AdminPanel() {
 
   const handleUpdatePlan = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    
+
     console.log("=== FORM SUBMIT START ===");
     console.log("Selected user:", selectedUser?.id);
     console.log("Form values:", { editPlan, editPaymentStatus, editPaymentMethod });
-    
+
     if (!selectedUser) {
       console.log("ERROR: No user selected");
       toast({
@@ -269,10 +269,10 @@ export default function AdminPanel() {
       paymentStatus: editPaymentStatus.toLowerCase(),
       paymentMethod: editPaymentMethod && editPaymentMethod.trim() !== "" ? editPaymentMethod.trim() : null,
     };
-    
+
     console.log("Mutation data:", mutationData);
     console.log("=== CALLING MUTATION ===");
-    
+
     updatePlanMutation.mutate(mutationData);
   };
 
@@ -379,7 +379,7 @@ export default function AdminPanel() {
                   />
                 </div>
               </div>
-              
+
               <div>
                 <Label htmlFor="filterPlan">Filtrar por plano</Label>
                 <Select value={filterPlan} onValueChange={setFilterPlan}>
@@ -472,7 +472,7 @@ export default function AdminPanel() {
                       <TableCell>
                         <div>
                           <Badge className={getPlanColor(user.plan)}>
-                            {user.plan === "PREMIUM" ? "Premium" : "Gratuito"}
+                            {user.plan === "PREMIUM" ? "Premium" : user.plan === "PREMIUM_CORTESIA" ? "Premium Cortesia" : "Gratuito"}
                           </Badge>
                           {user.planExpiresAt && (
                             <p className="text-xs text-gray-500 mt-1">
@@ -545,7 +545,7 @@ export default function AdminPanel() {
                                       {selectedUser.firstName} {selectedUser.lastName} ({selectedUser.email})
                                     </p>
                                   </div>
-                                  
+
                                   <div>
                                     <Label htmlFor="plan">Plano</Label>
                                     <Select value={editPlan} onValueChange={setEditPlan}>
