@@ -140,11 +140,13 @@ export default function NewQuote() {
       });
       setLocation("/quotes");
     },
-    onError: (error) => {
+    onError: (error: any) => {
+      console.error("Quote creation/update error:", error);
+      
       if (isUnauthorizedError(error)) {
         toast({
-          title: "Unauthorized",
-          description: "You are logged out. Logging in again...",
+          title: "Sessão expirada",
+          description: "Fazendo login novamente...",
           variant: "destructive",
         });
         setTimeout(() => {
@@ -152,9 +154,14 @@ export default function NewQuote() {
         }, 500);
         return;
       }
+
+      const errorMessage = error?.message || error?.response?.data?.message || "Erro desconhecido";
+      
       toast({
         title: "Erro",
-        description: isEditing ? "Erro ao atualizar orçamento. Tente novamente." : "Erro ao criar orçamento. Tente novamente.",
+        description: isEditing 
+          ? `Erro ao atualizar orçamento: ${errorMessage}` 
+          : `Erro ao criar orçamento: ${errorMessage}`,
         variant: "destructive",
       });
     },
@@ -193,9 +200,14 @@ export default function NewQuote() {
         const updatedItem = { ...item, [field]: value };
 
         if (field === 'quantity' || field === 'unitPrice') {
-          const quantity = field === 'quantity' ? Number(value) : item.quantity;
-          const unitPrice = field === 'unitPrice' ? parseFloat(value.toString()) || 0 : parseFloat(item.unitPrice) || 0;
+          const quantity = field === 'quantity' ? Math.max(1, Number(value) || 1) : item.quantity;
+          const unitPrice = field === 'unitPrice' ? Math.max(0, parseFloat(value.toString()) || 0) : parseFloat(item.unitPrice) || 0;
           updatedItem.total = (quantity * unitPrice).toFixed(2);
+          
+          // Update quantity field to ensure minimum value
+          if (field === 'quantity') {
+            updatedItem.quantity = quantity;
+          }
         }
 
         return updatedItem;
@@ -219,10 +231,47 @@ export default function NewQuote() {
   const totals = calculateTotals();
 
   const handleSubmit = () => {
-    if (!selectedClientId || !title || items.some(item => !item.description)) {
+    // Validação mais detalhada
+    if (!selectedClientId) {
       toast({
-        title: "Campos obrigatórios",
-        description: "Preencha cliente, título e descrição de todos os itens.",
+        title: "Cliente obrigatório",
+        description: "Selecione um cliente para continuar.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!title.trim()) {
+      toast({
+        title: "Título obrigatório",
+        description: "Digite um título para o orçamento.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (items.some(item => !item.description.trim())) {
+      toast({
+        title: "Descrição dos itens obrigatória",
+        description: "Preencha a descrição de todos os itens.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (items.some(item => item.quantity <= 0)) {
+      toast({
+        title: "Quantidade inválida",
+        description: "A quantidade deve ser maior que zero.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (items.some(item => parseFloat(item.unitPrice) < 0)) {
+      toast({
+        title: "Valor inválido",
+        description: "O valor unitário não pode ser negativo.",
         variant: "destructive",
       });
       return;
@@ -234,11 +283,11 @@ export default function NewQuote() {
     const quoteData: CreateQuoteRequest = {
       quote: {
         clientId: selectedClientId,
-        title,
-        description,
-        observations,
-        paymentTerms,
-        executionDeadline,
+        title: title.trim(),
+        description: description.trim(),
+        observations: observations.trim(),
+        paymentTerms: paymentTerms.trim(),
+        executionDeadline: executionDeadline.trim(),
         subtotal: totals.subtotal,
         discount: totals.discountAmount,
         total: totals.total,
@@ -247,10 +296,10 @@ export default function NewQuote() {
         sendByEmail,
       },
       items: items.map((item, index) => ({
-        description: item.description,
+        description: item.description.trim(),
         quantity: item.quantity,
-        unitPrice: item.unitPrice,
-        total: item.total,
+        unitPrice: parseFloat(item.unitPrice).toFixed(2),
+        total: parseFloat(item.total).toFixed(2),
         order: index,
       }))
     };
@@ -436,9 +485,18 @@ export default function NewQuote() {
                   <div>
                     <Label className="text-xs text-gray-600">Valor Unit.</Label>
                     <Input
+                      type="number"
                       value={item.unitPrice}
-                      onChange={(e) => updateItem(item.id, 'unitPrice', e.target.value.replace(/[^\d.,]/g, '').replace(',', '.'))}
-                      placeholder="0,00"
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        // Allow only valid decimal numbers
+                        if (value === '' || /^\d*\.?\d*$/.test(value)) {
+                          updateItem(item.id, 'unitPrice', value);
+                        }
+                      }}
+                      placeholder="0.00"
+                      min="0"
+                      step="0.01"
                       className="mt-1 text-sm h-9"
                     />
                   </div>
