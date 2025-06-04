@@ -736,7 +736,49 @@ export class DatabaseStorage implements IStorage {
 
   // Admin operations
   async getAllUsers(): Promise<User[]> {
-    return await db.select().from(users).orderBy(desc(users.createdAt));
+    const usersWithQuoteCounts = await db
+      .select({
+        id: users.id,
+        email: users.email,
+        firstName: users.firstName,
+        lastName: users.lastName,
+        profileImageUrl: users.profileImageUrl,
+        cpfCnpj: users.cpfCnpj,
+        profession: users.profession,
+        businessName: users.businessName,
+        phone: users.phone,
+        address: users.address,
+        logoUrl: users.logoUrl,
+        customDomain: users.customDomain,
+        plan: users.plan,
+        planExpiresAt: users.planExpiresAt,
+        pixKey: users.pixKey,
+        paymentGatewayId: users.paymentGatewayId,
+        monthlyQuotes: users.monthlyQuotes,
+        quotesLimit: users.quotesLimit,
+        bonusQuotes: users.bonusQuotes,
+        referralCount: users.referralCount,
+        whatsappNotifications: users.whatsappNotifications,
+        emailNotifications: users.emailNotifications,
+        primaryColor: users.primaryColor,
+        secondaryColor: users.secondaryColor,
+        paymentStatus: users.paymentStatus,
+        paymentMethod: users.paymentMethod,
+        quotesUsedThisMonth: users.quotesUsedThisMonth,
+        lastQuoteReset: users.lastQuoteReset,
+        isAdmin: users.isAdmin,
+        createdAt: users.createdAt,
+        updatedAt: users.updatedAt,
+        lastLoginAt: users.lastLoginAt,
+        totalQuotes: sql<number>`(SELECT COUNT(*) FROM ${quotes} WHERE ${quotes.userId} = ${users.id})`,
+      })
+      .from(users)
+      .orderBy(desc(users.createdAt));
+
+    return usersWithQuoteCounts.map(user => ({
+      ...user,
+      monthlyQuotes: user.totalQuotes || 0, // Use totalQuotes as monthlyQuotes for display
+    }));
   }
 
   async updateUserPlanStatus(userId: string, plan: string, paymentStatus: string, paymentMethod?: string | null): Promise<User | undefined> {

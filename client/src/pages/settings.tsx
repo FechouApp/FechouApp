@@ -400,19 +400,30 @@ export default function Settings() {
               Informações do Negócio
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <Label htmlFor="pixKey">Chave PIX</Label>
-              <Input
-                id="pixKey"
-                value={formData.pixKey}
-                onChange={(e) => handleInputChange("pixKey", e.target.value)}
-                placeholder="Digite sua chave PIX"
-              />
-              <p className="text-sm text-gray-500 mt-1">
-                Será exibida nos orçamentos para facilitar pagamentos
-              </p>
-            </div>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <Label htmlFor="pixKey">Chave PIX</Label>
+                <Input
+                  id="pixKey"
+                  value={formData.pixKey}
+                  onChange={(e) => handleInputChange("pixKey", e.target.value)}
+                  placeholder="Digite sua chave PIX"
+                />
+                <p className="text-sm text-gray-500 mt-1">
+                  Será exibida nos orçamentos para facilitar pagamentos
+                </p>
+              </div>
+
+              <Button 
+                type="submit" 
+                disabled={updateUserMutation.isPending}
+                className="w-full md:w-auto"
+              >
+                <Save className="w-4 h-4 mr-2" />
+                {updateUserMutation.isPending ? "Salvando..." : "Salvar PIX"}
+              </Button>
+            </form>
 
             {(user as any)?.plan === "PREMIUM" && (
               <div>
