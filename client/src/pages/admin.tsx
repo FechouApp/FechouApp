@@ -153,7 +153,7 @@ export default function AdminPanel() {
   // Reset quotes mutation
   const resetQuotesMutation = useMutation({
     mutationFn: async (userId: string) => {
-      return await apiRequest(`/api/admin/users/${userId}/reset-quotes`, "PATCH");
+      return await apiRequest(`/api/admin/users/${userId}/reset-quotes`, "POST");
     },
     onSuccess: () => {
       toast({

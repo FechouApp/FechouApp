@@ -373,42 +373,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/quotes/:id', isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = req.user.claims.sub;
-      const quote = await storage.getQuote(req.params.id, userId);
-      
-      if (!quote) {
-        return res.status(404).json({ message: "Quote not found" });
-      }
-      
-      res.json(quote);
-    } catch (error) {
-      console.error("Error fetching quote:", error);
-      res.status(500).json({ message: "Failed to fetch quote" });
-    }
-  });
-
-  // Public quote view (no authentication required)
-  app.get('/api/quotes/public/:quoteNumber', async (req, res) => {
-    try {
-      const quote = await storage.getQuoteByNumber(req.params.quoteNumber);
-      
-      if (!quote) {
-        return res.status(404).json({ message: "Quote not found" });
-      }
-      
-      // Update quote status to viewed if not already
-      if (quote.status === 'SENT') {
-        await storage.updateQuoteStatus(quote.id, 'VIEWED');
-      }
-      
-      res.json(quote);
-    } catch (error) {
-      console.error("Error fetching public quote:", error);
-      res.status(500).json({ message: "Failed to fetch quote" });
-    }
-  });
+  
 
   app.post('/api/quotes', isAuthenticated, async (req: any, res) => {
     try {
@@ -902,7 +867,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch('/api/admin/users/:userId/reset-quotes', isAuthenticated, isAdmin, async (req, res) => {
+  app.post('/api/admin/users/:userId/reset-quotes', isAuthenticated, isAdmin, async (req, res) => {
     try {
       const { userId } = req.params;
       
