@@ -1,3 +1,4 @@
+
 import { Switch, Route } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
@@ -28,18 +29,13 @@ import Welcome from "@/pages/welcome";
 function Router() {
   const { isAuthenticated, isLoading, user } = useAuth();
 
-  return (
-    <Switch>
-      {/* Public route for client quote viewing */}
-      <Route path="/quote/:quoteNumber" component={PublicQuote} />
-
-      {isLoading && (
+  if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
       </div>
-    )
-  )}
+    );
+  }
 
   // Show landing page if not authenticated
   if (!isAuthenticated) {
@@ -54,24 +50,27 @@ function Router() {
   if (!hasVisited && !userHasBasicInfo) {
     return <Welcome />;
   }
-        <>
-          <Route path="/" component={Dashboard} />
-          <Route path="/clients" component={Clients} />
-          <Route path="/clients/:clientId" component={ClientProfile} />
-          <Route path="/quotes" component={Quotes} />
-          <Route path="/new-quote" component={NewQuote} />
-          <Route path="/quotes/:quoteId/edit" component={NewQuote} />
-          <Route path="/quotes/view/:quoteId" component={QuoteView} />
-          <Route path="/reviews" component={Reviews} />
-          <Route path="/saved-items" component={SavedItemsPage} />
-          <Route path="/reports" component={Reports} />
-          <Route path="/plans" component={PlanComparison} />
-          <Route path="/settings" component={Settings} />
-          <Route path="/admin" component={AdminPanel} />
-          <Route path="/welcome" component={Welcome} />
-          <Route component={NotFound} />
-        </>
-      )}
+
+  return (
+    <Switch>
+      {/* Public route for client quote viewing */}
+      <Route path="/quote/:quoteNumber" component={PublicQuote} />
+      
+      <Route path="/" component={Dashboard} />
+      <Route path="/clients" component={Clients} />
+      <Route path="/clients/:clientId" component={ClientProfile} />
+      <Route path="/quotes" component={Quotes} />
+      <Route path="/new-quote" component={NewQuote} />
+      <Route path="/quotes/:quoteId/edit" component={NewQuote} />
+      <Route path="/quotes/view/:quoteId" component={QuoteView} />
+      <Route path="/reviews" component={Reviews} />
+      <Route path="/saved-items" component={SavedItemsPage} />
+      <Route path="/reports" component={Reports} />
+      <Route path="/plans" component={PlanComparison} />
+      <Route path="/settings" component={Settings} />
+      <Route path="/admin" component={AdminPanel} />
+      <Route path="/welcome" component={Welcome} />
+      <Route component={NotFound} />
     </Switch>
   );
 }
@@ -92,7 +91,7 @@ function AppLayout() {
   const userHasBasicInfo = user && (user as any).firstName && (user as any).businessName;
 
   // Show welcome screen for first-time authenticated users who haven't completed setup
-    if (!hasVisited && !userHasBasicInfo) {
+  if (!hasVisited && !userHasBasicInfo) {
     return <Welcome />;
   }
 
