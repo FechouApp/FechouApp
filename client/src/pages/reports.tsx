@@ -1,4 +1,3 @@
-
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -468,6 +467,7 @@ export default function Reports() {
             </ChartContainer>
           </CardContent>
         </Card>
+        </div>
       </div>
 
       {/* Performance Mensal e Status dos Orçamentos */}
@@ -542,6 +542,7 @@ export default function Reports() {
             </div>
           </CardContent>
         </Card>
+        </div>
       </div>
 
       {/* Top Clientes */}
@@ -584,6 +585,8 @@ export default function Reports() {
           </div>
         </CardContent>
       </Card>
+        </div>
+      </div>
     </div>
   );
 }
