@@ -22,7 +22,7 @@ import LoadingSpinner from "@/components/common/loading-spinner";
 import Reports from "@/pages/reports";
 import SavedItemsPage from "@/pages/saved-items";
 import ClientProfile from "@/pages/client-profile";
-import AdminPanel from "@/pages/admin-fixed";
+import AdminPanel from "@/pages/admin-simple";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
