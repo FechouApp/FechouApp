@@ -1,3 +1,4 @@
+
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -24,10 +25,12 @@ import {
 import { ChartContainer, ChartTooltip, ChartLegend } from "@/components/ui/chart";
 import { Line, LineChart, XAxis, YAxis, CartesianGrid, ResponsiveContainer } from "recharts";
 import type { DashboardStats, QuoteWithClient, ReviewWithClient } from "@/types";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export default function Reports() {
   const { user, isLoading: userLoading } = useAuth();
   const [, setLocation] = useLocation();
+  const isMobile = useIsMobile();
 
   const { data: stats, isLoading: statsLoading } = useQuery({
     queryKey: ["/api/dashboard/stats"],
@@ -125,11 +128,12 @@ export default function Reports() {
   const calculateMonthlyData = () => {
     if (!quotes) return [];
 
-    // Gerar últimos 12 meses
+    // Para mobile usar 6 meses, desktop 12 meses
+    const monthsCount = isMobile ? 6 : 12;
     const months = [];
     const now = new Date();
 
-    for (let i = 11; i >= 0; i--) {
+    for (let i = monthsCount - 1; i >= 0; i--) {
       const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
       const monthKey = date.toLocaleDateString('pt-BR', { month: 'short', year: 'numeric' });
       months.push({
@@ -301,15 +305,15 @@ export default function Reports() {
         </Card>
       </div>
 
-      {/* Gráficos - Últimos 12 Meses */}
+      {/* Gráficos - Layout responsivo */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         <Card className="bg-white shadow-lg">
-          <CardHeader className="p-6">
+          <CardHeader className="p-4 md:p-6">
             <CardTitle className="text-lg font-semibold text-gray-800">
-              Performance dos Últimos 12 Meses
+              Performance dos Últimos {isMobile ? '6' : '12'} Meses
             </CardTitle>
           </CardHeader>
-          <CardContent className="p-6">
+          <CardContent className="p-4 md:p-6">
             <ChartContainer
               config={{
                 total: {
@@ -325,19 +329,22 @@ export default function Reports() {
                   color: "#f59e0b",
                 },
               }}
-              className="h-[300px]"
+              className={isMobile ? "h-[250px]" : "h-[300px]"}
             >
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={monthlyData}>
+                <LineChart data={monthlyData} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis 
                     dataKey="month" 
-                    fontSize={12}
+                    fontSize={isMobile ? 10 : 12}
                     tickLine={false}
                     axisLine={false}
+                    angle={isMobile ? -45 : 0}
+                    textAnchor={isMobile ? "end" : "middle"}
+                    height={isMobile ? 60 : 30}
                   />
                   <YAxis 
-                    fontSize={12}
+                    fontSize={isMobile ? 10 : 12}
                     tickLine={false}
                     axisLine={false}
                   />
@@ -372,26 +379,28 @@ export default function Reports() {
                     dataKey="total" 
                     stroke="#3b82f6" 
                     strokeWidth={2}
-                    dot={{ fill: "#3b82f6", strokeWidth: 2, r: 4 }}
-                    activeDot={{ r: 6, stroke: "#3b82f6", strokeWidth: 2 }}
+                    dot={{ fill: "#3b82f6", strokeWidth: 2, r: isMobile ? 3 : 4 }}
+                    activeDot={{ r: isMobile ? 4 : 6, stroke: "#3b82f6", strokeWidth: 2 }}
                   />
                   <Line 
                     type="monotone" 
                     dataKey="approved" 
                     stroke="#10b981" 
                     strokeWidth={2}
-                    dot={{ fill: "#10b981", strokeWidth: 2, r: 4 }}
-                    activeDot={{ r: 6, stroke: "#10b981", strokeWidth: 2 }}
+                    dot={{ fill: "#10b981", strokeWidth: 2, r: isMobile ? 3 : 4 }}
+                    activeDot={{ r: isMobile ? 4 : 6, stroke: "#10b981", strokeWidth: 2 }}
                   />
-                  <Line 
-                    type="monotone" 
-                    dataKey="ticketMedio" 
-                    stroke="#f59e0b" 
-                    strokeWidth={2}
-                    dot={{ fill: "#f59e0b", strokeWidth: 2, r: 4 }}
-                    activeDot={{ r: 6, stroke: "#f59e0b", strokeWidth: 2 }}
-                  />
-                  <ChartLegend />
+                  {!isMobile && (
+                    <Line 
+                      type="monotone" 
+                      dataKey="ticketMedio" 
+                      stroke="#f59e0b" 
+                      strokeWidth={2}
+                      dot={{ fill: "#f59e0b", strokeWidth: 2, r: 4 }}
+                      activeDot={{ r: 6, stroke: "#f59e0b", strokeWidth: 2 }}
+                    />
+                  )}
+                  {!isMobile && <ChartLegend />}
                 </LineChart>
               </ResponsiveContainer>
             </ChartContainer>
@@ -399,12 +408,12 @@ export default function Reports() {
         </Card>
 
         <Card className="bg-white shadow-lg">
-          <CardHeader className="p-6">
+          <CardHeader className="p-4 md:p-6">
             <CardTitle className="text-lg font-semibold text-gray-800">
               Taxa de Conversão por Mês
             </CardTitle>
           </CardHeader>
-          <CardContent className="p-6">
+          <CardContent className="p-4 md:p-6">
             <ChartContainer
               config={{
                 conversionRate: {
@@ -412,22 +421,28 @@ export default function Reports() {
                   color: "#8b5cf6",
                 },
               }}
-              className="h-[300px]"
+              className={isMobile ? "h-[250px]" : "h-[300px]"}
             >
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={monthlyData.map(month => ({
-                  ...month,
-                  conversionRate: month.total > 0 ? ((month.approved / month.total) * 100).toFixed(1) : 0
-                }))}>
+                <LineChart 
+                  data={monthlyData.map(month => ({
+                    ...month,
+                    conversionRate: month.total > 0 ? ((month.approved / month.total) * 100).toFixed(1) : 0
+                  }))}
+                  margin={{ top: 5, right: 5, left: 5, bottom: 5 }}
+                >
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis 
                     dataKey="month" 
-                    fontSize={12}
+                    fontSize={isMobile ? 10 : 12}
                     tickLine={false}
                     axisLine={false}
+                    angle={isMobile ? -45 : 0}
+                    textAnchor={isMobile ? "end" : "middle"}
+                    height={isMobile ? 60 : 30}
                   />
                   <YAxis 
-                    fontSize={12}
+                    fontSize={isMobile ? 10 : 12}
                     tickLine={false}
                     axisLine={false}
                     domain={[0, 100]}
@@ -458,29 +473,28 @@ export default function Reports() {
                     dataKey="conversionRate" 
                     stroke="#8b5cf6" 
                     strokeWidth={3}
-                    dot={{ fill: "#8b5cf6", strokeWidth: 2, r: 5 }}
-                    activeDot={{ r: 7, stroke: "#8b5cf6", strokeWidth: 2 }}
+                    dot={{ fill: "#8b5cf6", strokeWidth: 2, r: isMobile ? 3 : 5 }}
+                    activeDot={{ r: isMobile ? 5 : 7, stroke: "#8b5cf6", strokeWidth: 2 }}
                   />
-                  <ChartLegend />
+                  {!isMobile && <ChartLegend />}
                 </LineChart>
               </ResponsiveContainer>
             </ChartContainer>
           </CardContent>
         </Card>
-        </div>
       </div>
 
       {/* Performance Mensal e Status dos Orçamentos */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         <Card className="bg-white shadow-lg">
-          <CardHeader className="p-6">
+          <CardHeader className="p-4 md:p-6">
             <CardTitle className="text-lg font-semibold text-gray-800">
-              Performance Mensal (Últimos 6 meses)
+              Performance Mensal (Últimos {isMobile ? '3' : '6'} meses)
             </CardTitle>
           </CardHeader>
-          <CardContent className="p-6">
+          <CardContent className="p-4 md:p-6">
             <div className="space-y-4">
-              {monthlyData.slice(-6).map((month, index) => (
+              {monthlyData.slice(isMobile ? -3 : -6).map((month, index) => (
                 <div key={index} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                   <div>
                     <p className="font-medium text-gray-800">{month.month}</p>
@@ -489,7 +503,9 @@ export default function Reports() {
                   <div className="text-right">
                     <p className="font-semibold text-gray-800">{formatCurrency(month.revenue)}</p>
                     <p className="text-sm text-green-600">{month.approved} aprovados</p>
-                    <p className="text-xs text-blue-600">Ticket: {formatCurrency(month.ticketMedio)}</p>
+                    {!isMobile && (
+                      <p className="text-xs text-blue-600">Ticket: {formatCurrency(month.ticketMedio)}</p>
+                    )}
                   </div>
                 </div>
               ))}
@@ -498,12 +514,12 @@ export default function Reports() {
         </Card>
 
         <Card className="bg-white shadow-lg">
-          <CardHeader className="p-6">
+          <CardHeader className="p-4 md:p-6">
             <CardTitle className="text-lg font-semibold text-gray-800">
               Status dos Orçamentos
             </CardTitle>
           </CardHeader>
-          <CardContent className="p-6">
+          <CardContent className="p-4 md:p-6">
             <div className="space-y-4">
               {Object.entries(statusStats).map(([status, count]) => {
                 const getStatusInfo = (status) => {
@@ -542,17 +558,16 @@ export default function Reports() {
             </div>
           </CardContent>
         </Card>
-        </div>
       </div>
 
       {/* Top Clientes */}
       <Card className="bg-white shadow-lg">
-        <CardHeader className="p-6">
+        <CardHeader className="p-4 md:p-6">
           <CardTitle className="text-lg font-semibold text-gray-800">
             Principais Clientes
           </CardTitle>
         </CardHeader>
-        <CardContent className="p-6">
+        <CardContent className="p-4 md:p-6">
           <div className="space-y-4">
             {topClients.map((client, index) => (
               <div key={index} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
@@ -585,8 +600,6 @@ export default function Reports() {
           </div>
         </CardContent>
       </Card>
-        </div>
-      </div>
     </div>
   );
 }
