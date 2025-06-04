@@ -471,7 +471,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Quote status updates
-  app.patch('/api/quotes/:id/status', async (req, res) => {
+  app.put('/api/quotes/:id/status', async (req, res) => {
     try {
       const { status, metadata } = req.body;
       const success = await storage.updateQuoteStatus(req.params.id, status, metadata);
@@ -719,7 +719,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch('/api/notifications/:id/read', isAuthenticated, async (req: any, res) => {
+  app.put('/api/notifications/:id/read', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const success = await storage.markNotificationAsRead(req.params.id, userId);
@@ -736,7 +736,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // User plan update
-  app.patch('/api/user/plan', isAuthenticated, async (req: any, res) => {
+  app.put('/api/user/plan', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const { plan } = req.body;
@@ -823,7 +823,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch('/api/admin/users/:userId/plan', isAuthenticated, isAdmin, async (req, res) => {
+  app.put('/api/admin/users/:userId/plan', isAuthenticated, isAdmin, async (req, res) => {
     try {
       const { userId } = req.params;
       const { plan, paymentStatus, paymentMethod } = req.body;
