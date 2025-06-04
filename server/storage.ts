@@ -88,6 +88,15 @@ export interface IStorage {
     averageRating: number;
     thisMonthQuotes: number;
   }>;
+
+  // Admin operations
+  getAllUsers(): Promise<User[]>;
+  updateUserPlanStatus(userId: string, plan: string, paymentStatus: string, paymentMethod?: string): Promise<User | undefined>;
+  resetMonthlyQuotes(userId: string): Promise<User | undefined>;
+  getUsersByPlan(plan: string): Promise<User[]>;
+  getUsersByPaymentStatus(status: string): Promise<User[]>;
+  incrementQuoteUsage(userId: string): Promise<User | undefined>;
+  checkAdminStatus(userId: string): Promise<boolean>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -703,6 +712,90 @@ export class DatabaseStorage implements IStorage {
       ratingTrend: ratingTrendData.trend,
       ratingTrendUp: ratingTrendData.up,
     };
+  }
+
+  // Admin operations
+  async getAllUsers(): Promise<User[]> {
+    return await db.select().from(users).orderBy(desc(users.createdAt));
+  }
+
+  async updateUserPlanStatus(userId: string, plan: string, paymentStatus: string, paymentMethod?: string): Promise<User | undefined> {
+    const updateData: any = {
+      plan,
+      paymentStatus,
+      updatedAt: new Date(),
+    };
+
+    if (paymentMethod) {
+      updateData.paymentMethod = paymentMethod;
+    }
+
+    if (plan === "PREMIUM") {
+      // Set expiration to 30 days from now
+      updateData.planExpiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+    } else {
+      updateData.planExpiresAt = null;
+    }
+
+    const [user] = await db
+      .update(users)
+      .set(updateData)
+      .where(eq(users.id, userId))
+      .returning();
+    
+    return user;
+  }
+
+  async resetMonthlyQuotes(userId: string): Promise<User | undefined> {
+    const [user] = await db
+      .update(users)
+      .set({
+        quotesUsedThisMonth: 0,
+        lastQuoteReset: new Date(),
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, userId))
+      .returning();
+    
+    return user;
+  }
+
+  async getUsersByPlan(plan: string): Promise<User[]> {
+    return await db
+      .select()
+      .from(users)
+      .where(eq(users.plan, plan))
+      .orderBy(desc(users.createdAt));
+  }
+
+  async getUsersByPaymentStatus(status: string): Promise<User[]> {
+    return await db
+      .select()
+      .from(users)
+      .where(eq(users.paymentStatus, status))
+      .orderBy(desc(users.createdAt));
+  }
+
+  async incrementQuoteUsage(userId: string): Promise<User | undefined> {
+    const [user] = await db
+      .update(users)
+      .set({
+        quotesUsedThisMonth: sql`${users.quotesUsedThisMonth} + 1`,
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, userId))
+      .returning();
+    
+    return user;
+  }
+
+  async checkAdminStatus(userId: string): Promise<boolean> {
+    const [user] = await db
+      .select({ isAdmin: users.isAdmin })
+      .from(users)
+      .where(eq(users.id, userId));
+    
+    return user?.isAdmin || false;
   }
 }
 

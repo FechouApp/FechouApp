@@ -51,6 +51,12 @@ export const users = pgTable("users", {
   emailNotifications: boolean("email_notifications").notNull().default(true),
   primaryColor: varchar("primary_color").default("#3B82F6"), // Cor personalizada Premium
   secondaryColor: varchar("secondary_color").default("#10B981"), // Cor secundária Premium
+  // Admin fields
+  paymentStatus: varchar("payment_status").default("ativo"), // ativo, pendente, vencido
+  paymentMethod: varchar("payment_method"), // pix, manual, asaas
+  quotesUsedThisMonth: integer("quotes_used_this_month").default(0),
+  lastQuoteReset: timestamp("last_quote_reset").defaultNow(),
+  isAdmin: boolean("is_admin").default(false),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
   lastLoginAt: timestamp("last_login_at"),
