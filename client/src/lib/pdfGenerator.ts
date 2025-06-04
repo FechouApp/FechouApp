@@ -116,11 +116,11 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
   drawHorizontalLine(yPosition);
   yPosition += 8;
 
-  // ========== TÍTULO E NÚMERO DO PEDIDO ==========
+  // ========== TÍTULO E NÚMERO DO ORÇAMENTO ==========
   
   doc.setFontSize(16);
   doc.setFont('helvetica', 'bold');
-  doc.text(`PEDIDO Nº ${quote.quoteNumber}`, pageWidth / 2, yPosition, { align: 'center' });
+  doc.text(`ORÇAMENTO Nº ${quote.quoteNumber}`, pageWidth / 2, yPosition, { align: 'center' });
   
   // Data no canto direito
   doc.setFontSize(10);
@@ -129,23 +129,12 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
   
   yPosition += 12;
 
-  // ========== PRAZOS ==========
+  // ========== DATA DA RETIRADA ==========
   
-  drawGrayBackground(marginLeft, yPosition - 2, pageWidth - marginLeft - marginRight, 8);
-  doc.setFontSize(10);
-  doc.setFont('helvetica', 'bold');
-  doc.text('PRAZO DE ENTREGA:', marginLeft + 2, yPosition + 3);
-  doc.text(quote.executionDeadline || 'A definir', marginLeft + 50, yPosition + 3);
-  yPosition += 8;
-
-  // Data da Retirada e Venda Efetivada Por
   doc.setFontSize(9);
   doc.setFont('helvetica', 'normal');
   doc.text('Data da Retirada:', marginLeft + 2, yPosition + 3);
   doc.text(format(new Date(quote.validUntil), 'dd/MM/yyyy', { locale: ptBR }), marginLeft + 35, yPosition + 3);
-  
-  doc.text('VENDA EFETIVADA POR:', marginLeft + 100, yPosition + 3);
-  doc.text(businessName, marginLeft + 160, yPosition + 3);
   
   yPosition += 12;
 
@@ -212,7 +201,7 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
 
   yPosition += 8;
 
-  // ========== TABELA DE SERVIÇOS ==========
+  // ========== TABELA DE SERVIÇOS OU PRODUTOS ==========
   
   if (checkPageBreak(100)) {
     addNewPage();
@@ -221,7 +210,7 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
   drawGrayBackground(marginLeft, yPosition - 2, pageWidth - marginLeft - marginRight, 8);
   doc.setFontSize(10);
   doc.setFont('helvetica', 'bold');
-  doc.text('SERVIÇOS', marginLeft + 2, yPosition + 3);
+  doc.text('SERVIÇOS OU PRODUTOS', marginLeft + 2, yPosition + 3);
   yPosition += 12;
 
   // Cabeçalho da tabela
@@ -281,7 +270,7 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
     yPosition += 10;
   });
 
-  // Total da seção SERVIÇOS
+  // Total da seção SERVIÇOS OU PRODUTOS
   drawGrayBackground(marginLeft, yPosition - 2, tableWidth, 8);
   doc.rect(marginLeft, yPosition - 2, tableWidth, 8, 'S');
   
@@ -300,75 +289,13 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
   
   yPosition += 15;
 
-  // ========== SEÇÃO PRODUTOS (VAZIA) ==========
+  // ========== PRAZO DE ENTREGA ==========
   
-  if (checkPageBreak(40)) {
-    addNewPage();
-  }
-
   drawGrayBackground(marginLeft, yPosition - 2, pageWidth - marginLeft - marginRight, 8);
   doc.setFontSize(10);
   doc.setFont('helvetica', 'bold');
-  doc.text('PRODUTOS', marginLeft + 2, yPosition + 3);
-  yPosition += 12;
-
-  // Cabeçalho da tabela de produtos
-  drawGrayBackground(marginLeft, yPosition - 2, tableWidth, 10);
-  doc.rect(marginLeft, yPosition - 2, tableWidth, 10, 'S');
-  
-  doc.setFontSize(9);
-  doc.setFont('helvetica', 'bold');
-  doc.text('ITEM', marginLeft + 2, yPosition + 4);
-  doc.text('NOME', marginLeft + 15, yPosition + 4);
-  doc.text('UND.', marginLeft + 110, yPosition + 4, { align: 'center' });
-  doc.text('QTD.', marginLeft + 130, yPosition + 4, { align: 'center' });
-  doc.text('VR. UNIT.', marginLeft + 150, yPosition + 4, { align: 'center' });
-  doc.text('SUBTOTAL', marginLeft + 175, yPosition + 4, { align: 'center' });
-  
-  // Linhas verticais
-  doc.line(marginLeft + 12, yPosition - 2, marginLeft + 12, yPosition + 8);
-  doc.line(marginLeft + 105, yPosition - 2, marginLeft + 105, yPosition + 8);
-  doc.line(marginLeft + 125, yPosition - 2, marginLeft + 125, yPosition + 8);
-  doc.line(marginLeft + 145, yPosition - 2, marginLeft + 145, yPosition + 8);
-  doc.line(marginLeft + 165, yPosition - 2, marginLeft + 165, yPosition + 8);
-  
-  yPosition += 10;
-
-  // Linha em branco para produtos
-  doc.rect(marginLeft, yPosition - 2, tableWidth, 10, 'S');
-  doc.setFont('helvetica', 'normal');
-  doc.text('1', marginLeft + 2, yPosition + 4);
-  doc.text('(Nenhum produto cadastrado)', marginLeft + 15, yPosition + 4);
-  doc.text('UN', marginLeft + 110, yPosition + 4, { align: 'center' });
-  doc.text('0,00', marginLeft + 130, yPosition + 4, { align: 'center' });
-  doc.text('0,00', marginLeft + 150, yPosition + 4, { align: 'center' });
-  doc.text('0,00', marginLeft + 175, yPosition + 4, { align: 'center' });
-  
-  // Linhas verticais
-  doc.line(marginLeft + 12, yPosition - 2, marginLeft + 12, yPosition + 8);
-  doc.line(marginLeft + 105, yPosition - 2, marginLeft + 105, yPosition + 8);
-  doc.line(marginLeft + 125, yPosition - 2, marginLeft + 125, yPosition + 8);
-  doc.line(marginLeft + 145, yPosition - 2, marginLeft + 145, yPosition + 8);
-  doc.line(marginLeft + 165, yPosition - 2, marginLeft + 165, yPosition + 8);
-  
-  yPosition += 10;
-
-  // Total produtos
-  drawGrayBackground(marginLeft, yPosition - 2, tableWidth, 8);
-  doc.rect(marginLeft, yPosition - 2, tableWidth, 8, 'S');
-  
-  doc.setFont('helvetica', 'bold');
-  doc.text('TOTAL', marginLeft + 15, yPosition + 3);
-  doc.text('0,00', marginLeft + 130, yPosition + 3, { align: 'center' });
-  doc.text('0,00', marginLeft + 175, yPosition + 3, { align: 'center' });
-  
-  // Linhas verticais
-  doc.line(marginLeft + 12, yPosition - 2, marginLeft + 12, yPosition + 6);
-  doc.line(marginLeft + 105, yPosition - 2, marginLeft + 105, yPosition + 6);
-  doc.line(marginLeft + 125, yPosition - 2, marginLeft + 125, yPosition + 6);
-  doc.line(marginLeft + 145, yPosition - 2, marginLeft + 145, yPosition + 6);
-  doc.line(marginLeft + 165, yPosition - 2, marginLeft + 165, yPosition + 6);
-  
+  doc.text('PRAZO DE ENTREGA:', marginLeft + 2, yPosition + 3);
+  doc.text(quote.executionDeadline || 'A definir', marginLeft + 50, yPosition + 3);
   yPosition += 15;
 
   // ========== RESUMO FINANCEIRO ==========
@@ -397,14 +324,47 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
   doc.text(`R$ ${totalServices.toFixed(2).replace('.', ',')}`, summaryX + 25, yPosition, { align: 'right' });
   yPosition += 15;
 
-  // ========== ANEXO ==========
+  // ========== INFORMAÇÕES ADICIONAIS DO ORÇAMENTO ==========
   
-  if (quote.observations) {
+  if (quote.observations || quote.paymentTerms || quote.warranty) {
     doc.setFontSize(9);
     doc.setFont('helvetica', 'normal');
-    doc.text('ANEXO:', marginLeft, yPosition);
-    doc.text(quote.observations, marginLeft + 20, yPosition);
-    yPosition += 15;
+    
+    let additionalInfoY = yPosition;
+    const leftColumnX = marginLeft;
+    const rightColumnX = pageWidth / 2 + 10;
+    
+    // Coluna esquerda
+    if (quote.observations) {
+      doc.text('Observações:', leftColumnX, additionalInfoY);
+      const obsLines = doc.splitTextToSize(quote.observations, 80);
+      obsLines.forEach((line: string, index: number) => {
+        doc.text(line, leftColumnX + (index === 0 ? 25 : 0), additionalInfoY + (index * 4));
+      });
+      additionalInfoY += Math.max(8, obsLines.length * 4);
+    }
+    
+    // Coluna direita
+    let rightInfoY = yPosition;
+    if (quote.paymentTerms) {
+      doc.text('Condições de Pagamento:', rightColumnX, rightInfoY);
+      const paymentLines = doc.splitTextToSize(quote.paymentTerms, 80);
+      paymentLines.forEach((line: string, index: number) => {
+        doc.text(line, rightColumnX + (index === 0 ? 35 : 0), rightInfoY + (index * 4));
+      });
+      rightInfoY += Math.max(8, paymentLines.length * 4);
+    }
+    
+    if (quote.warranty) {
+      doc.text('Garantia:', rightColumnX, rightInfoY);
+      const warrantyLines = doc.splitTextToSize(quote.warranty, 80);
+      warrantyLines.forEach((line: string, index: number) => {
+        doc.text(line, rightColumnX + (index === 0 ? 20 : 0), rightInfoY + (index * 4));
+      });
+      rightInfoY += Math.max(8, warrantyLines.length * 4);
+    }
+    
+    yPosition = Math.max(additionalInfoY, rightInfoY) + 10;
   }
 
   // ========== ASSINATURA ==========
@@ -420,7 +380,7 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
   
   doc.setFontSize(10);
   doc.setFont('helvetica', 'normal');
-  doc.text('Assinatura do cliente', pageWidth / 2, yPosition + 25, { align: 'center' });
+  doc.text('Assinatura do usuário', pageWidth / 2, yPosition + 25, { align: 'center' });
 
   // Marca d'água para plano gratuito
   if (!isUserPremium) {
@@ -456,7 +416,7 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
   const footerY = pageHeight - 10;
   doc.setFontSize(8);
   doc.setTextColor(100, 100, 100);
-  doc.text('Pedido emitido no Fechou! - www.fechou.com.br', pageWidth / 2, footerY, { align: 'center' });
+  doc.text('Orçamento emitido no Fechou! - www.fechou.com.br', pageWidth / 2, footerY, { align: 'center' });
 
   // Converter para blob
   const pdfBlob = doc.output('blob');
