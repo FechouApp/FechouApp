@@ -658,9 +658,10 @@ export default function Clients() {
                     ))}
                   </TableBody>
                 </Table>
-              )}
-        </CardContent>
-      </Card>
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
       {/* Pagination */}
       {filteredClients.length > 10 && (
