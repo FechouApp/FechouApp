@@ -795,6 +795,92 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin middleware
+  const isAdmin = async (req: any, res: any, next: any) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
+      const isAdminUser = await storage.checkAdminStatus(userId);
+      if (!isAdminUser) {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+      
+      next();
+    } catch (error) {
+      console.error("Error checking admin status:", error);
+      res.status(500).json({ message: "Failed to verify admin status" });
+    }
+  };
+
+  // Admin routes
+  app.get('/api/admin/users', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const users = await storage.getAllUsers();
+      res.json(users);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+      res.status(500).json({ message: "Failed to fetch users" });
+    }
+  });
+
+  app.get('/api/admin/users/plan/:plan', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { plan } = req.params;
+      const users = await storage.getUsersByPlan(plan);
+      res.json(users);
+    } catch (error) {
+      console.error("Error fetching users by plan:", error);
+      res.status(500).json({ message: "Failed to fetch users by plan" });
+    }
+  });
+
+  app.get('/api/admin/users/payment/:status', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { status } = req.params;
+      const users = await storage.getUsersByPaymentStatus(status);
+      res.json(users);
+    } catch (error) {
+      console.error("Error fetching users by payment status:", error);
+      res.status(500).json({ message: "Failed to fetch users by payment status" });
+    }
+  });
+
+  app.patch('/api/admin/users/:userId/plan', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const { plan, paymentStatus, paymentMethod } = req.body;
+      
+      const user = await storage.updateUserPlanStatus(userId, plan, paymentStatus, paymentMethod);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      res.json(user);
+    } catch (error) {
+      console.error("Error updating user plan:", error);
+      res.status(500).json({ message: "Failed to update user plan" });
+    }
+  });
+
+  app.patch('/api/admin/users/:userId/reset-quotes', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { userId } = req.params;
+      
+      const user = await storage.resetMonthlyQuotes(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      res.json(user);
+    } catch (error) {
+      console.error("Error resetting user quotes:", error);
+      res.status(500).json({ message: "Failed to reset user quotes" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
