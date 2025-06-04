@@ -1,3 +1,4 @@
+
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -469,9 +470,8 @@ export default function Reports() {
         </Card>
       </div>
 
-      {/* Gráficos e Análises */}
+      {/* Performance Mensal e Status dos Orçamentos */}
       <div className="grid lg:grid-cols-2 gap-4 md:gap-6 mx-4 md:mx-0">
-        {/* Performance Mensal */}
         <Card className="bg-white shadow-lg">
           <CardHeader className="p-4 md:p-6">
             <CardTitle className="text-base md:text-lg font-semibold text-gray-800">
@@ -497,7 +497,6 @@ export default function Reports() {
           </CardContent>
         </Card>
 
-        {/* Status dos Orçamentos */}
         <Card className="bg-white shadow-lg">
           <CardHeader className="p-4 md:p-6">
             <CardTitle className="text-base md:text-lg font-semibold text-gray-800">
@@ -555,97 +554,37 @@ export default function Reports() {
           </CardHeader>
           <CardContent className="p-4 md:p-6">
             <div className="space-y-3 md:space-y-4">
-            {topClients.map((client, index) => (
-              <div key={index} className="flex flex-col md:flex-row md:items-center justify-between p-3 md:p-4 bg-gray-50 rounded-lg space-y-3 md:space-y-0">
-                <div className="flex items-center gap-3 md:gap-4">
-                  <div className="w-8 h-8 md:w-10 md:h-10 brand-gradient rounded-lg flex items-center justify-center text-white font-bold text-sm md:text-base">
-                    #{index + 1}
+              {topClients.map((client, index) => (
+                <div key={index} className="flex flex-col md:flex-row md:items-center justify-between p-3 md:p-4 bg-gray-50 rounded-lg space-y-3 md:space-y-0">
+                  <div className="flex items-center gap-3 md:gap-4">
+                    <div className="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center text-white font-bold text-sm md:text-base">
+                      #{index + 1}
+                    </div>
+                    <div>
+                      <p className="font-medium text-gray-800 text-sm md:text-base">{client.name}</p>
+                      <p className="text-xs md:text-sm text-gray-600">
+                        {client.quotesCount} orçamentos • {client.approvedCount} aprovados
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="font-medium text-gray-800 text-sm md:text-base">{client.name}</p>
-                    <p className="text-xs md:text-sm text-gray-600">
-                      {client.quotesCount} orçamentos • {client.approvedCount} aprovados
+                  <div className="md:text-right">
+                    <p className="font-semibold text-gray-800 text-sm md:text-base">{formatCurrency(client.totalValue)}</p>
+                    <p className="text-xs md:text-sm text-green-600">
+                      Taxa: {client.quotesCount > 0 ? ((client.approvedCount / client.quotesCount) * 100).toFixed(1) : 0}%
                     </p>
                   </div>
                 </div>
-                <div className="md:text-right">
-                  <p className="font-semibold text-gray-800 text-sm md:text-base">{formatCurrency(client.totalValue)}</p>
-                  <p className="text-xs md:text-sm text-green-600">
-                    Taxa: {client.quotesCount > 0 ? ((client.approvedCount / client.quotesCount) * 100).toFixed(1) : 0}%
-                  </p>
+              ))}
+              {topClients.length === 0 && (
+                <div className="text-center py-8 text-gray-500">
+                  <Users className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                  <p className="text-lg font-medium">Nenhum cliente ainda</p>
+                  <p className="text-sm">Crie orçamentos para ver seus principais clientes</p>
                 </div>
-              </div>
-            ))}
-            {topClients.length === 0 && (
-              <div className="text-center py-8 text-gray-500">
-                <Users className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-                <p className="text-lg font-medium">Nenhum cliente ainda</p>
-                <p className="text-sm">Crie orçamentos para ver seus principais clientes</p>
-              </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-
-    <div className="mx-4 md:mx-0">
-      <Card className="bg-white shadow-lg">
-        <CardHeader className="p-4 md:p-6">
-          <CardTitle className="text-base md:text-lg font-semibold text-gray-800">
-            Progresso Mensal de Orçamentos
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-4 md:p-6">
-          <div className="flex items-center justify-between mb-4">
-            <p className="text-gray-600">
-              <FileText className="inline-block w-4 h-4 mr-1" />
-              {quotes?.filter(q => q.status !== 'draft').length || 0} Orçamentos
-            </p>
-            <p className="text-green-600">
-              <CheckCircle className="inline-block w-4 h-4 mr-1" />
-              {quotes?.filter(q => q.status === 'approved' || q.status === 'paid').length || 0} Aprovados
-            </p>
-          </div>
-
-          <div className="flex items-center justify-between mb-4">
-            <p className="text-gray-600">
-              <Star className="inline-block w-4 h-4 mr-1" />
-              {reviews?.length || 0} Reviews
-            </p>
-          </div>
-
-          <div className="flex items-center justify-between mb-4">
-            <p className="text-gray-600">
-              <Clock className="inline-block w-4 h-4 mr-1" />
-              2-3 dias Tempo médio de resposta
-            </p>
-          </div>
-
-          <div className="flex items-center justify-between mb-4">
-            <p className="text-gray-600">
-              <Calendar className="inline-block w-4 h-4 mr-1" />
-              30 dias Tempo médio de fechamento
-            </p>
-          </div>
-
-          <div className="bg-white/10 rounded-lg p-4 mb-6">
-            <div
-              className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-              style={{ width: `${Math.min(((() => {
-                const currentMonth = new Date().getMonth();
-                const currentYear = new Date().getFullYear();
-                const thisMonthQuotes = quotes?.filter(q => {
-                  const quoteDate = new Date(q.createdAt);
-                  return quoteDate.getMonth() === currentMonth && quoteDate.getFullYear() === currentYear;
-                }).length || 0;
-                return (thisMonthQuotes / 20) * 100;
-              })()), 100)}%` }}
-            />
-          </div>
-          <p className="text-white/70 text-sm mt-2">
-            Meta: 20 orçamentos/mês
-          </p>
-        </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
