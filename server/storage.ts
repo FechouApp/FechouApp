@@ -904,7 +904,7 @@ export class DatabaseStorage implements IStorage {
 
     // Quote statistics
     const allQuotes = await db.select().from(quotes);
-    const totalQuotes = allThis commit merges the updated `updateUserPlanStatus` and adds `resetMonthlyQuotes` functions to the database storage.
+    const totalQuotes = allQuotes.length;
 <replit_final_file>
 import {
   users,
