@@ -313,3 +313,6 @@ export type InsertNotification = z.infer<typeof insertNotificationSchema>;
 export type Notification = typeof notifications.$inferSelect;
 export type InsertSavedItem = z.infer<typeof insertSavedItemSchema>;
 export type SavedItem = typeof savedItems.$inferSelect;
+
+export type InsertQuoteAttachment = z.infer<typeof insertQuoteAttachmentSchema>;
+export type QuoteAttachment = typeof quoteAttachments.$inferSelect;

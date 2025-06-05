@@ -15,6 +15,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import QuoteItem from "./quote-item";
 import SavedItemsSection from "./saved-items-section";
+import PhotoUploadSection from "./photo-upload-section";
 import { Plus, Calendar, Save, Eye, Send, Trash2, Crown, Star } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
@@ -71,6 +72,7 @@ export default function QuoteForm({
       : [{ id: "1", description: "", quantity: 1, unitPrice: "", total: "0" }]
   );
   const [discount, setDiscount] = useState(existingQuote?.discount || "");
+  const [attachments, setAttachments] = useState<File[]>([]);
 
   const addItem = () => {
     // Verificar limitação do plano gratuito
@@ -310,6 +312,13 @@ export default function QuoteForm({
           />
         </CardContent>
       </Card>
+
+      {/* Upload de Fotos - Exclusivo Premium */}
+      <PhotoUploadSection
+        attachments={attachments}
+        onAttachmentsChange={setAttachments}
+        disabled={isSubmitting}
+      />
 
       {/* Additional Info and Summary */}
       <div className="grid grid-cols-1 gap-3 sm:gap-4">
