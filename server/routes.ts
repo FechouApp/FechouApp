@@ -152,7 +152,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/user/plan-limits', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-
+      
       // Get fresh user stats (which includes auto-reset check)
       await storage.getUserStats(userId);
       const user = await storage.getUser(userId);
@@ -203,7 +203,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
 
       console.log("Plan limits response:", response);
-
+      
       res.json(response);
     } catch (error) {
       console.error("Error fetching plan limits:", error);
@@ -316,11 +316,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/quotes/public/:quoteNumber', async (req, res) => {
     try {
       const { quoteNumber } = req.params;
-      // Try both uppercase and lowercase for backward compatibility
-      let quote = await storage.getQuoteByNumber(quoteNumber.toUpperCase());
-      if (!quote) {
-        quote = await storage.getQuoteByNumber(quoteNumber.toLowerCase());
-      }
+      const quote = await storage.getQuoteByNumber(quoteNumber);
 
       if (!quote) {
         return res.status(404).json({ message: "Quote not found" });
@@ -360,7 +356,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { id } = req.params;
       console.log("Approving quote:", id);
-
+      
       // Get quote first to validate it exists and check if it can be approved
       const quote = await storage.getQuoteById(id);
       if (!quote) {
@@ -464,161 +460,74 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
 
 
-  app.post("/api/quotes", async (req, res) => {
+  app.post('/api/quotes', isAuthenticated, async (req: any, res) => {
     try {
-      const { quote, items } = req.body;
+      const userId = req.user.claims.sub;
+      const { quote: quoteData, items } = req.body;
 
-      if (!req.user?.id) {
-        return res.status(401).json({ message: "User not authenticated" });
-      }
+      const parsedQuote = insertQuoteSchema.parse({ ...quoteData, userId });
+      const parsedItems = z.array(insertQuoteItemSchema).parse(items);
 
-      // Verificar se o plano permite criar mais orçamentos
-      const user = await storage.getUser(req.user.id);
-      if (!user) {
-        return res.status(404).json({ message: "User not found" });
-      }
+      const quote = await storage.createQuote(parsedQuote, parsedItems);
 
-      console.log(`Plan limits for user ${req.user.id}:`, {
-        plan: user.plan,
-        planExpiresAt: user.planExpiresAt,
-        quotesUsedThisMonth: user.quotesUsedThisMonth
-      });
+      // Increment user's monthly quote count (with auto-reset)
+      await storage.incrementQuoteUsage(userId);
 
-      const isPremium = user.plan === "PREMIUM" || user.plan === "PREMIUM_CORTESIA";
-      const isExpired = user.planExpiresAt && new Date() > user.planExpiresAt;
-
-      let monthlyQuoteLimit, itemsPerQuoteLimit;
-
-      // PREMIUM_CORTESIA nunca expira
-      if (user.plan === "PREMIUM_CORTESIA" || (isPremium && !isExpired)) {
-        monthlyQuoteLimit = null; // Unlimited
-        itemsPerQuoteLimit = null; // Unlimited
-      } else {
-        // Plano gratuito: 5 orçamentos base + orçamentos bônus de indicações
-        const baseLimit = user.quotesLimit || 5;
-        const bonusQuotes = user.bonusQuotes || 0;
-        monthlyQuoteLimit = baseLimit + bonusQuotes;
-        itemsPerQuoteLimit = 10;
-      }
-
-      // Use the quotesUsedThisMonth from database (already updated with current count)
-      const currentMonthQuotes = user.quotesUsedThisMonth || 0;
-
-      const canCreateQuote = user.plan === "PREMIUM_CORTESIA" || 
-                            (isPremium && !isExpired) || 
-                            currentMonthQuotes < monthlyQuoteLimit;
-
-      if (!canCreateQuote) {
-        return res.status(402).json({ 
-          message: "Limite de orçamentos atingido para o plano atual",
-          details: {
-            currentPlan: user.plan,
-            quotesUsedThisMonth: currentMonthQuotes,
-            monthlyQuoteLimit,
-            isExpired
-          }
-        });
-      }
-
-      // Verificar limite de itens por orçamento para plano gratuito
-      if (!isPremium || isExpired) {
-        if (items.length > itemsPerQuoteLimit) {
-          return res.status(402).json({ 
-            message: `Limite de ${itemsPerQuoteLimit} itens por orçamento excedido`,
-            details: {
-              currentPlan: user.plan,
-              itemsProvided: items.length,
-              itemsPerQuoteLimit,
-              isExpired
-            }
-          });
-        }
-      }
-
-      // Serializar fotos para JSON string se existirem
-      const quoteData = { ...quote, userId: req.user.id };
-      if (quote.photos && Array.isArray(quote.photos)) {
-        quoteData.photos = JSON.stringify(quote.photos);
-      }
-
-      const newQuote = await storage.createQuote(quoteData, items);
-
-      // Incrementar contador de orçamentos usados no mês
-      await storage.incrementQuoteUsage(req.user.id);
-
-      res.json(newQuote);
+      res.status(201).json(quote);
     } catch (error) {
+      if (error instanceof z.ZodError) {
+        console.error("Quote validation error:", error.errors);
+        console.error("Received quote data:", req.body.quote);
+        console.error("Received items data:", req.body.items);
+        return res.status(400).json({ message: "Invalid quote data", errors: error.errors });
+      }
       console.error("Error creating quote:", error);
       res.status(500).json({ message: "Failed to create quote" });
     }
   });
 
-  app.put("/api/quotes/:id", async (req, res) => {
+  app.put('/api/quotes/:id', isAuthenticated, async (req: any, res) => {
     try {
-      const { id } = req.params;
-      const { quote, items } = req.body;
-
-      if (!req.user?.id) {
-        return res.status(401).json({ message: "User not authenticated" });
-      }
+      const userId = req.user.claims.sub;
+      const { quote: quoteData, items } = req.body;
 
       // Verificar se o orçamento existe e pertence ao usuário
-      const existingQuote = await storage.getQuote(id, req.user.id);
+      const existingQuote = await storage.getQuote(req.params.id, userId);
       if (!existingQuote) {
         return res.status(404).json({ message: "Quote not found" });
       }
 
-      // Verificar se o plano permite editar orçamentos (limites de itens)
-      const user = await storage.getUser(req.user.id);
-      if (!user) {
-        return res.status(404).json({ message: "User not found" });
-      }
-
-      const isPremium = user.plan === "PREMIUM" || user.plan === "PREMIUM_CORTESIA";
-      const isExpired = user.planExpiresAt && new Date() > user.planExpiresAt;
-
-      // Verificar limite de itens por orçamento para plano gratuito
-      if (!isPremium || isExpired) {
-        const itemsPerQuoteLimit = 10;
-        if (items.length > itemsPerQuoteLimit) {
-          return res.status(402).json({ 
-            message: `Limite de ${itemsPerQuoteLimit} itens por orçamento excedido`,
-            details: {
-              currentPlan: user.plan,
-              itemsProvided: items.length,
-              itemsPerQuoteLimit,
-              isExpired
-            }
-          });
-        }
-      }
-
-      // Serializar fotos para JSON string se existirem
-      const quoteData = { ...quote };
-      if (quote.photos && Array.isArray(quote.photos)) {
-        quoteData.photos = JSON.stringify(quote.photos);
-      }
-
-      // Atualizar o orçamento
-      const updatedQuote = await storage.updateQuote(id, quoteData, req.user.id);
+      // Atualizar orçamento
+      const updatedQuote = await storage.updateQuote(req.params.id, quoteData, userId);
 
       if (!updatedQuote) {
-        return res.status(404).json({ message: "Quote not found" });
+        return res.status(404).json({ message: "Failed to update quote" });
       }
 
       // Deletar itens existentes e criar novos
-      await storage.deleteQuoteItems(id);
-      if (items.length > 0) {
-        await storage.createQuoteItems(items.map((item: any) => ({
-          ...item,
-          quoteId: id,
-        })));
+      await storage.deleteQuoteItems(req.params.id);
+
+      if (items && items.length > 0) {
+        await storage.createQuoteItems(
+          items.map((item: any, index: number) => ({
+            quoteId: req.params.id,
+            description: item.description,
+            quantity: item.quantity,
+            unitPrice: item.unitPrice,
+            total: item.total,
+            order: index,
+          }))
+        );
       }
 
-      // Retornar o orçamento atualizado com os itens
-      const completeQuote = await storage.getQuote(id, req.user.id);
+      // Buscar o orçamento atualizado com os itens
+      const completeQuote = await storage.getQuote(req.params.id, userId);
+
       res.json(completeQuote);
     } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid quote data", errors: error.errors });
+      }
       console.error("Error updating quote:", error);
       res.status(500).json({ message: "Failed to update quote" });
     }
@@ -657,7 +566,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-
+  
 
   app.post('/api/quotes/:id/mark-sent', async (req, res) => {
     try {
@@ -1042,7 +951,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/admin/refresh-counts', isAuthenticated, isAdmin, async (req, res) => {
     try {
       console.log("Refreshing all quote counts...");
-
+      
       const users = await storage.getAllUsers();
       let updated = 0;
 
@@ -1056,18 +965,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error refreshing quote counts:", error);
       res.status(500).json({ message: "Failed to refresh quote counts" });
-    }
-  });
-
-  // Get client quotes
-  app.get('/api/clients/:id/quotes', isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = req.user.claims.sub;
-      const clientQuotes = await storage.getQuotesByClientId(req.params.id, userId);
-      res.json(clientQuotes);
-    } catch (error) {
-      console.error("Error fetching client quotes:", error);
-      res.status(500).json({ message: "Failed to fetch client quotes" });
     }
   });
 

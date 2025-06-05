@@ -23,8 +23,6 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useLocation } from "wouter";
 import { ArrowLeft, Plus, Save, Crown, Trash2, AlertCircle } from "lucide-react";
 import type { Client, CreateQuoteRequest, QuoteWithDetails } from "@/types";
-import SavedItemsSection from "@/components/quotes/saved-items-section";
-import PhotoUploadSection from "@/components/quotes/photo-upload-section";
 
 interface QuoteItemData {
   id: string;
@@ -61,7 +59,6 @@ export default function NewQuote() {
     { id: "1", description: "", quantity: 1, unitPrice: "", total: "0" }
   ]);
   const [discount, setDiscount] = useState("");
-  const [attachments, setAttachments] = useState<File[]>([]);
 
   // Redirect to home if not authenticated
   useEffect(() => {
@@ -123,18 +120,13 @@ export default function NewQuote() {
 
   const createQuoteMutation = useMutation({
     mutationFn: async (quoteData: CreateQuoteRequest) => {
-      try {
-        if (isEditing) {
-          return await apiRequest("PUT", `/api/quotes/${quoteId}`, quoteData);
-        } else {
-          if (planLimits && !planLimits.isPremium && !planLimits.canCreateQuote) {
-            throw new Error(`Limite de ${planLimits.monthlyQuoteLimit} orçamentos por mês atingido. Faça upgrade para Premium.`);
-          }
-          return await apiRequest("POST", "/api/quotes", quoteData);
+      if (isEditing) {
+        await apiRequest("PUT", `/api/quotes/${quoteId}`, quoteData);
+      } else {
+        if (planLimits && !planLimits.isPremium && !planLimits.canCreateQuote) {
+          throw new Error(`Limite de ${planLimits.monthlyQuoteLimit} orçamentos por mês atingido. Faça upgrade para Premium.`);
         }
-      } catch (error) {
-        console.error("API Request Error:", error);
-        throw error;
+        await apiRequest("POST", "/api/quotes", quoteData);
       }
     },
     onSuccess: () => {
@@ -320,10 +312,7 @@ export default function NewQuote() {
   }
 
   const selectedClient = clients?.find(client => client.id === selectedClientId);
-  const canProceed = selectedClientId && 
-                    title.trim() && 
-                    items.every(item => item.description.trim() && item.quantity > 0) &&
-                    !createQuoteMutation.isPending;
+  const canProceed = selectedClientId && title && items.every(item => item.description);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -455,32 +444,6 @@ export default function NewQuote() {
             )}
           </CardHeader>
           <CardContent className="space-y-3">
-            {/* Seção de Itens Salvos/Favoritos */}
-            <SavedItemsSection 
-              onAddItem={(savedItem) => {
-                if (!isUserPremium && items.length >= maxItemsForFreeUser) {
-                  toast({
-                    title: "Limite atingido",
-                    description: `Plano gratuito permite apenas ${maxItemsForFreeUser} itens por orçamento.`,
-                    variant: "destructive",
-                  });
-                  return;
-                }
-                const newItem: QuoteItemData = {
-                  id: Math.random().toString(36).substr(2, 9),
-                  description: savedItem.name,
-                  quantity: 1,
-                  unitPrice: savedItem.unitPrice,
-                  total: parseFloat(savedItem.unitPrice).toFixed(2)
-                };
-                setItems(prev => [...prev, newItem]);
-                toast({
-                  title: "Item adicionado",
-                  description: "Item favorito adicionado ao orçamento.",
-                });
-              }}
-            />
-
             {items.map((item, index) => (
               <div key={item.id} className="p-3 bg-gray-50 rounded-lg space-y-3">
                 <div className="flex items-center justify-between">
@@ -548,13 +511,6 @@ export default function NewQuote() {
             ))}
           </CardContent>
         </Card>
-
-        {/* Upload de Fotos - Seção Premium */}
-        <PhotoUploadSection
-          attachments={attachments}
-          onAttachmentsChange={setAttachments}
-          disabled={createQuoteMutation.isPending}
-        />
 
         {/* Additional Info */}
         <Card>
