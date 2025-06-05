@@ -464,21 +464,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
 
 
-  app.post("/api/quotes", async (req, res) => {
+  app.post("/api/quotes", isAuthenticated, async (req: any, res) => {
     try {
       const { quote, items } = req.body;
-
-      if (!req.user?.id) {
-        return res.status(401).json({ message: "User not authenticated" });
-      }
+      const userId = req.user.claims.sub;
 
       // Verificar se o plano permite criar mais orçamentos
-      const user = await storage.getUser(req.user.id);
+      const user = await storage.getUser(userId);
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
 
-      console.log(`Plan limits for user ${req.user.id}:`, {
+      console.log(`Plan limits for user ${userId}:`, {
         plan: user.plan,
         planExpiresAt: user.planExpiresAt,
         quotesUsedThisMonth: user.quotesUsedThisMonth
@@ -506,7 +503,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const canCreateQuote = user.plan === "PREMIUM_CORTESIA" || 
                             (isPremium && !isExpired) || 
-                            currentMonthQuotes < monthlyQuoteLimit;
+                            currentMonthQuotes < (monthlyQuoteLimit || 0);
 
       if (!canCreateQuote) {
         return res.status(402).json({ 
@@ -522,9 +519,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Verificar limite de itens por orçamento para plano gratuito
       if (!isPremium || isExpired) {
-        if (items.length > itemsPerQuoteLimit) {
+        if (items.length > (itemsPerQuoteLimit || 10)) {
           return res.status(402).json({ 
-            message: `Limite de ${itemsPerQuoteLimit} itens por orçamento excedido`,
+            message: `Limite de ${itemsPerQuoteLimit || 10} itens por orçamento excedido`,
             details: {
               currentPlan: user.plan,
               itemsProvided: items.length,
@@ -536,7 +533,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Serializar fotos para JSON string se existirem
-      const quoteData = { ...quote, userId: req.user.id };
+      const quoteData = { ...quote, userId };
       if (quote.photos && Array.isArray(quote.photos)) {
         quoteData.photos = JSON.stringify(quote.photos);
       }
@@ -544,7 +541,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const newQuote = await storage.createQuote(quoteData, items);
 
       // Incrementar contador de orçamentos usados no mês
-      await storage.incrementQuoteUsage(req.user.id);
+      await storage.incrementQuoteUsage(userId);
 
       res.json(newQuote);
     } catch (error) {

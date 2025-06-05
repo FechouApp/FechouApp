@@ -79,7 +79,7 @@ export default function AdminPanel() {
         console.log("Request body:", requestBody);
         console.log("API endpoint:", `/api/admin/users/${data.userId}/plan`);
 
-        const response = await apiRequest(`/api/admin/users/${data.userId}/plan`, "PATCH", requestBody);
+        const response = await apiRequest("PATCH", `/api/admin/users/${data.userId}/plan`, requestBody);
 
         console.log("API response received:", response);
         console.log("=== MUTATION SUCCESS ===");
