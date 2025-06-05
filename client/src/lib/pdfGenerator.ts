@@ -54,6 +54,7 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
   
   // Logo no canto superior esquerdo (se premium e tiver logo)
   let logoWidth = 0;
+  let logoHeight = 0;
   if (isUserPremium && (user as any)?.logoUrl) {
     try {
       const logoSize = 20;
@@ -67,6 +68,7 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
         }
         doc.addImage(logoUrl, format, marginLeft, yPosition, logoSize, logoSize);
         logoWidth = logoSize + 5; // Espaço após o logo
+        logoHeight = logoSize;
       }
     } catch (error) {
       console.error('Erro ao carregar logo:', error);
@@ -81,7 +83,8 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
   const businessName = user.businessName || `${user.firstName} ${user.lastName}`.trim();
   doc.text(businessName, marginLeft + logoWidth, yPosition + 5);
   
-  yPosition += 12; // Maior espaçamento após o nome
+  // Ajustar yPosition baseado no logo se existir
+  yPosition += logoHeight > 0 ? Math.max(logoHeight + 5, 12) : 12;
   
   // Informações de contato no cabeçalho
   doc.setFontSize(9);
@@ -114,7 +117,7 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
     yPosition += 4;
   });
 
-  yPosition += 15; // Maior espaçamento antes da linha
+  yPosition += 8; // Espaçamento reduzido antes da linha
   drawHorizontalLine(yPosition);
   yPosition += 10;
 
@@ -348,18 +351,20 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
     let rightInfoY = yPosition;
     if (quote.paymentTerms) {
       doc.text('Condições de Pagamento:', rightColumnX, rightInfoY);
+      rightInfoY += 6; // Quebra de linha após o título
       const paymentLines = doc.splitTextToSize(quote.paymentTerms, 80);
       paymentLines.forEach((line: string, index: number) => {
-        doc.text(line, rightColumnX + (index === 0 ? 35 : 0), rightInfoY + (index * 4));
+        doc.text(line, rightColumnX, rightInfoY + (index * 4));
       });
-      rightInfoY += Math.max(8, paymentLines.length * 4);
+      rightInfoY += Math.max(8, paymentLines.length * 4) + 4; // Espaço adicional
     }
     
     if (quote.warranty) {
       doc.text('Garantia:', rightColumnX, rightInfoY);
+      rightInfoY += 6; // Quebra de linha após o título
       const warrantyLines = doc.splitTextToSize(quote.warranty, 80);
       warrantyLines.forEach((line: string, index: number) => {
-        doc.text(line, rightColumnX + (index === 0 ? 20 : 0), rightInfoY + (index * 4));
+        doc.text(line, rightColumnX, rightInfoY + (index * 4));
       });
       rightInfoY += Math.max(8, warrantyLines.length * 4);
     }
