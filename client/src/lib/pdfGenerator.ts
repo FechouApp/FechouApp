@@ -81,10 +81,12 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
   doc.setFont('helvetica', 'bold');
   
   const businessName = user.businessName || `${user.firstName} ${user.lastName}`.trim();
-  doc.text(businessName, marginLeft + logoWidth, yPosition + 5);
+  // Posicionar o texto à direita do logo se existir, senão na margem esquerda
+  const textStartX = logoWidth > 0 ? marginLeft + logoWidth : marginLeft;
+  doc.text(businessName, textStartX, yPosition + 5);
   
   // Ajustar yPosition baseado no logo se existir
-  yPosition += logoHeight > 0 ? Math.max(logoHeight + 5, 12) : 12;
+  yPosition += logoHeight > 0 ? Math.max(logoHeight + 2, 12) : 12;
   
   // Informações de contato no cabeçalho
   doc.setFontSize(9);
@@ -117,9 +119,9 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
     yPosition += 4;
   });
 
-  yPosition += 8; // Espaçamento reduzido antes da linha
+  yPosition += 4; // Espaçamento ainda mais reduzido antes da linha
   drawHorizontalLine(yPosition);
-  yPosition += 10;
+  yPosition += 8;
 
   // ========== TÍTULO E NÚMERO DO ORÇAMENTO ==========
   
@@ -351,12 +353,12 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
     let rightInfoY = yPosition;
     if (quote.paymentTerms) {
       doc.text('Condições de Pagamento:', rightColumnX, rightInfoY);
-      rightInfoY += 6; // Quebra de linha após o título
+      rightInfoY += 8; // Espaço maior após o título para melhor separação
       const paymentLines = doc.splitTextToSize(quote.paymentTerms, 80);
       paymentLines.forEach((line: string, index: number) => {
         doc.text(line, rightColumnX, rightInfoY + (index * 4));
       });
-      rightInfoY += Math.max(8, paymentLines.length * 4) + 4; // Espaço adicional
+      rightInfoY += Math.max(8, paymentLines.length * 4) + 6; // Espaço adicional maior
     }
     
     if (quote.warranty) {
