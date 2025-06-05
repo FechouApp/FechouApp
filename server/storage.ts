@@ -260,7 +260,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Quote operations
-  async getQuotes(userId: string): Promise<(Quote & { client: Client; itemCount: number })[]> {
+  async getQuotes(userId: string): Promise<(Quote & { client: Client; itemCount: number; photos?: any[] })[]> {
     const user = await this.getUser(userId);
     const isPremium = user?.plan === "PREMIUM" || user?.plan === "PREMIUM_CORTESIA";
     const isExpired = user?.planExpiresAt && new Date() > user.planExpiresAt;
@@ -285,11 +285,27 @@ export class DatabaseStorage implements IStorage {
       .groupBy(quotes.id, clients.id)
       .orderBy(desc(quotes.createdAt));
 
-    const mappedResult = result.map(row => ({
-      ...row.quote,
-      client: row.client!,
-      itemCount: row.itemCount,
-    }));
+    const mappedResult = result.map(row => {
+      // Parse photos from JSON field
+      let photos = [];
+      try {
+        if (row.quote.photos) {
+          photos = typeof row.quote.photos === 'string' 
+            ? JSON.parse(row.quote.photos) 
+            : row.quote.photos;
+        }
+      } catch (error) {
+        console.error('Error parsing photos:', error);
+        photos = [];
+      }
+
+      return {
+        ...row.quote,
+        client: row.client!,
+        itemCount: row.itemCount,
+        photos,
+      };
+    });
 
     // Para PREMIUM_CORTESIA, nunca limitar
     if (user?.plan === "PREMIUM_CORTESIA") {
@@ -308,7 +324,7 @@ export class DatabaseStorage implements IStorage {
     return mappedResult.slice(0, 5);
   }
 
-  async getQuote(id: string, userId: string): Promise<(Quote & { client: Client; items: QuoteItem[] }) | undefined> {
+  async getQuote(id: string, userId: string): Promise<(Quote & { client: Client; items: QuoteItem[]; photos?: any[] }) | undefined> {
     const [quote] = await db
       .select()
       .from(quotes)
@@ -323,14 +339,31 @@ export class DatabaseStorage implements IStorage {
       .where(eq(quoteItems.quoteId, id))
       .orderBy(asc(quoteItems.order));
 
+    console.log('Raw quote photos from DB:', quote.quotes.photos);
+
+    // Parse photos from JSON field
+    let photos = [];
+    try {
+      if (quote.quotes.photos) {
+        photos = typeof quote.quotes.photos === 'string' 
+          ? JSON.parse(quote.quotes.photos) 
+          : quote.quotes.photos;
+        console.log('Parsed photos:', photos);
+      }
+    } catch (error) {
+      console.error('Error parsing photos:', error);
+      photos = [];
+    }
+
     return {
       ...quote.quotes,
       client: quote.clients!,
       items,
+      photos,
     };
   }
 
-  async getQuoteByNumber(quoteNumber: string): Promise<(Quote & { client: Client; items: QuoteItem[] }) | undefined> {
+  async getQuoteByNumber(quoteNumber: string): Promise<(Quote & { client: Client; items: QuoteItem[]; photos?: any[] }) | undefined> {
     const [quote] = await db
       .select()
       .from(quotes)
@@ -345,10 +378,27 @@ export class DatabaseStorage implements IStorage {
       .where(eq(quoteItems.quoteId, quote.quotes.id))
       .orderBy(asc(quoteItems.order));
 
+    console.log('Public quote photos from DB:', quote.quotes.photos);
+
+    // Parse photos from JSON field
+    let photos = [];
+    try {
+      if (quote.quotes.photos) {
+        photos = typeof quote.quotes.photos === 'string' 
+          ? JSON.parse(quote.quotes.photos) 
+          : quote.quotes.photos;
+        console.log('Public parsed photos:', photos);
+      }
+    } catch (error) {
+      console.error('Error parsing photos:', error);
+      photos = [];
+    }
+
     return {
       ...quote.quotes,
       client: quote.clients!,
       items,
+      photos,
     };
   }
 
@@ -370,7 +420,7 @@ export class DatabaseStorage implements IStorage {
   async createQuote(quote: InsertQuote, items: InsertQuoteItem[]): Promise<Quote> {
     const quoteId = nanoid();
     const quoteNumber = `FH${Date.now().toString().slice(-6)}`;
-    const publicUrl = `${quoteNumber.toLowerCase()}`;
+    const publicUrl = quoteNumber;
 
     const [newQuote] = await db
       .insert(quotes)
@@ -452,6 +502,15 @@ export class DatabaseStorage implements IStorage {
       .from(quotes)
       .where(eq(quotes.id, id));
     return quote;
+  }
+
+  async getQuotesByClientId(clientId: string, userId: string): Promise<Quote[]> {
+    const clientQuotes = await db
+      .select()
+      .from(quotes)
+      .where(and(eq(quotes.clientId, clientId), eq(quotes.userId, userId)))
+      .orderBy(desc(quotes.createdAt));
+    return clientQuotes;
   }
 
   // Quote item operations

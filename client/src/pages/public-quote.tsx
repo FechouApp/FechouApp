@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Star, CheckCircle, XCircle, Calendar, Phone, Mail, MapPin, Download, Copy, Camera, Eye } from "lucide-react";
+import { Star, CheckCircle, XCircle, Calendar, Phone, Mail, MapPin, Download, Copy } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import type { QuoteWithDetails } from "@/types";
@@ -312,6 +312,30 @@ export default function PublicQuote() {
               </div>
             </div>
 
+            {/* Photos */}
+            {quote.photos && Array.isArray(quote.photos) && quote.photos.length > 0 && (
+              <div className="mt-6">
+                <h3 className="font-semibold mb-4">Fotos do Orçamento</h3>
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                  {quote.photos.map((photo, index) => (
+                    <div key={index} className="relative group">
+                      <img
+                        src={photo.url}
+                        alt={`Foto ${index + 1}`}
+                        className="w-full h-24 sm:h-32 object-cover rounded-lg cursor-pointer hover:opacity-90 transition-opacity"
+                        onClick={() => window.open(photo.url, '_blank')}
+                      />
+                      <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-all rounded-lg flex items-center justify-center">
+                        <span className="text-white opacity-0 group-hover:opacity-100 text-sm font-medium">
+                          Ampliar
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Observations */}
             {quote.observations && (
               <div className="mt-4">
@@ -442,36 +466,6 @@ export default function PublicQuote() {
             )}
           </CardContent>
         </Card>
-
-        {/* Attachments Section - Show photos if available */}
-        {quote.attachments && quote.attachments.length > 0 && (
-          <Card className="mb-6">
-            <CardContent className="p-6">
-              <h3 className="font-semibold mb-4 flex items-center gap-2">
-                <Camera className="w-5 h-5" />
-                Fotos do Projeto
-              </h3>
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-                {quote.attachments.map((attachment: string, index: number) => (
-                  <div key={index} className="relative group">
-                    <img
-                      src={attachment}
-                      alt={`Foto do projeto ${index + 1}`}
-                      className="w-full h-32 object-cover rounded-lg border cursor-pointer hover:opacity-80 transition-opacity"
-                      onClick={() => window.open(attachment, '_blank')}
-                    />
-                    <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 rounded-lg transition-all flex items-center justify-center">
-                      <Eye className="w-6 h-6 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <p className="text-sm text-gray-500 mt-3">
-                Clique nas fotos para visualizar em tamanho completo
-              </p>
-            </CardContent>
-          </Card>
-        )}
 
         {/* Review Section */}
         <Card>

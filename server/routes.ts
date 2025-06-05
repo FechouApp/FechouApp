@@ -1,42 +1,9 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
-import multer from "multer";
-import path from "path";
-import fs from "fs";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { insertClientSchema, insertQuoteSchema, insertQuoteItemSchema, insertReviewSchema, insertSavedItemSchema } from "@shared/schema";
 import { z } from "zod";
-
-// Configure multer for file uploads
-const storage_config = multer.diskStorage({
-  destination: function (req, file, cb) {
-    const uploadsDir = path.join(process.cwd(), 'uploads');
-    if (!fs.existsSync(uploadsDir)) {
-      fs.mkdirSync(uploadsDir, { recursive: true });
-    }
-    cb(null, uploadsDir);
-  },
-  filename: function (req, file, cb) {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, uniqueSuffix + path.extname(file.originalname));
-  }
-});
-
-const upload = multer({
-  storage: storage_config,
-  limits: {
-    fileSize: 5 * 1024 * 1024, // 5MB limit
-  },
-  fileFilter: function (req, file, cb) {
-    // Accept only image files
-    if (file.mimetype.startsWith('image/')) {
-      cb(null, true);
-    } else {
-      cb(new Error('Apenas arquivos de imagem são permitidos!'));
-    }
-  }
-});
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
@@ -185,7 +152,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/user/plan-limits', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      
+
       // Get fresh user stats (which includes auto-reset check)
       await storage.getUserStats(userId);
       const user = await storage.getUser(userId);
@@ -236,7 +203,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
 
       console.log("Plan limits response:", response);
-      
+
       res.json(response);
     } catch (error) {
       console.error("Error fetching plan limits:", error);
@@ -349,7 +316,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/quotes/public/:quoteNumber', async (req, res) => {
     try {
       const { quoteNumber } = req.params;
-      const quote = await storage.getQuoteByNumber(quoteNumber);
+      // Try both uppercase and lowercase for backward compatibility
+      let quote = await storage.getQuoteByNumber(quoteNumber.toUpperCase());
+      if (!quote) {
+        quote = await storage.getQuoteByNumber(quoteNumber.toLowerCase());
+      }
 
       if (!quote) {
         return res.status(404).json({ message: "Quote not found" });
@@ -389,7 +360,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { id } = req.params;
       console.log("Approving quote:", id);
-      
+
       // Get quote first to validate it exists and check if it can be approved
       const quote = await storage.getQuoteById(id);
       if (!quote) {
@@ -493,74 +464,161 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
 
 
-  app.post('/api/quotes', isAuthenticated, async (req: any, res) => {
+  app.post("/api/quotes", async (req, res) => {
     try {
-      const userId = req.user.claims.sub;
-      const { quote: quoteData, items } = req.body;
+      const { quote, items } = req.body;
 
-      const parsedQuote = insertQuoteSchema.parse({ ...quoteData, userId });
-      const parsedItems = z.array(insertQuoteItemSchema).parse(items);
-
-      const quote = await storage.createQuote(parsedQuote, parsedItems);
-
-      // Increment user's monthly quote count (with auto-reset)
-      await storage.incrementQuoteUsage(userId);
-
-      res.status(201).json(quote);
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        console.error("Quote validation error:", error.errors);
-        console.error("Received quote data:", req.body.quote);
-        console.error("Received items data:", req.body.items);
-        return res.status(400).json({ message: "Invalid quote data", errors: error.errors });
+      if (!req.user?.id) {
+        return res.status(401).json({ message: "User not authenticated" });
       }
+
+      // Verificar se o plano permite criar mais orçamentos
+      const user = await storage.getUser(req.user.id);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      console.log(`Plan limits for user ${req.user.id}:`, {
+        plan: user.plan,
+        planExpiresAt: user.planExpiresAt,
+        quotesUsedThisMonth: user.quotesUsedThisMonth
+      });
+
+      const isPremium = user.plan === "PREMIUM" || user.plan === "PREMIUM_CORTESIA";
+      const isExpired = user.planExpiresAt && new Date() > user.planExpiresAt;
+
+      let monthlyQuoteLimit, itemsPerQuoteLimit;
+
+      // PREMIUM_CORTESIA nunca expira
+      if (user.plan === "PREMIUM_CORTESIA" || (isPremium && !isExpired)) {
+        monthlyQuoteLimit = null; // Unlimited
+        itemsPerQuoteLimit = null; // Unlimited
+      } else {
+        // Plano gratuito: 5 orçamentos base + orçamentos bônus de indicações
+        const baseLimit = user.quotesLimit || 5;
+        const bonusQuotes = user.bonusQuotes || 0;
+        monthlyQuoteLimit = baseLimit + bonusQuotes;
+        itemsPerQuoteLimit = 10;
+      }
+
+      // Use the quotesUsedThisMonth from database (already updated with current count)
+      const currentMonthQuotes = user.quotesUsedThisMonth || 0;
+
+      const canCreateQuote = user.plan === "PREMIUM_CORTESIA" || 
+                            (isPremium && !isExpired) || 
+                            currentMonthQuotes < monthlyQuoteLimit;
+
+      if (!canCreateQuote) {
+        return res.status(402).json({ 
+          message: "Limite de orçamentos atingido para o plano atual",
+          details: {
+            currentPlan: user.plan,
+            quotesUsedThisMonth: currentMonthQuotes,
+            monthlyQuoteLimit,
+            isExpired
+          }
+        });
+      }
+
+      // Verificar limite de itens por orçamento para plano gratuito
+      if (!isPremium || isExpired) {
+        if (items.length > itemsPerQuoteLimit) {
+          return res.status(402).json({ 
+            message: `Limite de ${itemsPerQuoteLimit} itens por orçamento excedido`,
+            details: {
+              currentPlan: user.plan,
+              itemsProvided: items.length,
+              itemsPerQuoteLimit,
+              isExpired
+            }
+          });
+        }
+      }
+
+      // Serializar fotos para JSON string se existirem
+      const quoteData = { ...quote, userId: req.user.id };
+      if (quote.photos && Array.isArray(quote.photos)) {
+        quoteData.photos = JSON.stringify(quote.photos);
+      }
+
+      const newQuote = await storage.createQuote(quoteData, items);
+
+      // Incrementar contador de orçamentos usados no mês
+      await storage.incrementQuoteUsage(req.user.id);
+
+      res.json(newQuote);
+    } catch (error) {
       console.error("Error creating quote:", error);
       res.status(500).json({ message: "Failed to create quote" });
     }
   });
 
-  app.put('/api/quotes/:id', isAuthenticated, async (req: any, res) => {
+  app.put("/api/quotes/:id", async (req, res) => {
     try {
-      const userId = req.user.claims.sub;
-      const { quote: quoteData, items } = req.body;
+      const { id } = req.params;
+      const { quote, items } = req.body;
+
+      if (!req.user?.id) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
 
       // Verificar se o orçamento existe e pertence ao usuário
-      const existingQuote = await storage.getQuote(req.params.id, userId);
+      const existingQuote = await storage.getQuote(id, req.user.id);
       if (!existingQuote) {
         return res.status(404).json({ message: "Quote not found" });
       }
 
-      // Atualizar orçamento
-      const updatedQuote = await storage.updateQuote(req.params.id, quoteData, userId);
+      // Verificar se o plano permite editar orçamentos (limites de itens)
+      const user = await storage.getUser(req.user.id);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      const isPremium = user.plan === "PREMIUM" || user.plan === "PREMIUM_CORTESIA";
+      const isExpired = user.planExpiresAt && new Date() > user.planExpiresAt;
+
+      // Verificar limite de itens por orçamento para plano gratuito
+      if (!isPremium || isExpired) {
+        const itemsPerQuoteLimit = 10;
+        if (items.length > itemsPerQuoteLimit) {
+          return res.status(402).json({ 
+            message: `Limite de ${itemsPerQuoteLimit} itens por orçamento excedido`,
+            details: {
+              currentPlan: user.plan,
+              itemsProvided: items.length,
+              itemsPerQuoteLimit,
+              isExpired
+            }
+          });
+        }
+      }
+
+      // Serializar fotos para JSON string se existirem
+      const quoteData = { ...quote };
+      if (quote.photos && Array.isArray(quote.photos)) {
+        quoteData.photos = JSON.stringify(quote.photos);
+      }
+
+      // Atualizar o orçamento
+      const updatedQuote = await storage.updateQuote(id, quoteData, req.user.id);
 
       if (!updatedQuote) {
-        return res.status(404).json({ message: "Failed to update quote" });
+        return res.status(404).json({ message: "Quote not found" });
       }
 
       // Deletar itens existentes e criar novos
-      await storage.deleteQuoteItems(req.params.id);
-
-      if (items && items.length > 0) {
-        await storage.createQuoteItems(
-          items.map((item: any, index: number) => ({
-            quoteId: req.params.id,
-            description: item.description,
-            quantity: item.quantity,
-            unitPrice: item.unitPrice,
-            total: item.total,
-            order: index,
-          }))
-        );
+      await storage.deleteQuoteItems(id);
+      if (items.length > 0) {
+        await storage.createQuoteItems(items.map((item: any) => ({
+          ...item,
+          quoteId: id,
+        })));
       }
 
-      // Buscar o orçamento atualizado com os itens
-      const completeQuote = await storage.getQuote(req.params.id, userId);
-
+      // Retornar o orçamento atualizado com os itens
+      const completeQuote = await storage.getQuote(id, req.user.id);
       res.json(completeQuote);
     } catch (error) {
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({ message: "Invalid quote data", errors: error.errors });
-      }
       console.error("Error updating quote:", error);
       res.status(500).json({ message: "Failed to update quote" });
     }
@@ -599,7 +657,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  
+
 
   app.post('/api/quotes/:id/mark-sent', async (req, res) => {
     try {
@@ -984,7 +1042,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/admin/refresh-counts', isAuthenticated, isAdmin, async (req, res) => {
     try {
       console.log("Refreshing all quote counts...");
-      
+
       const users = await storage.getAllUsers();
       let updated = 0;
 
@@ -1001,59 +1059,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // File upload routes - Premium only
-  app.post('/api/upload', isAuthenticated, upload.single('photo'), async (req: any, res) => {
+  // Get client quotes
+  app.get('/api/clients/:id/quotes', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      const user = await storage.getUser(userId);
-      
-      // Check if user has premium plan
-      if (!user || user.plan !== "PREMIUM") {
-        // Delete uploaded file if user is not premium
-        if (req.file) {
-          fs.unlinkSync(req.file.path);
-        }
-        return res.status(403).json({ message: "Upload de fotos é exclusivo para usuários Pro" });
-      }
-
-      if (!req.file) {
-        return res.status(400).json({ message: "Nenhum arquivo foi enviado" });
-      }
-
-      const fileUrl = `/uploads/${req.file.filename}`;
-      res.json({ 
-        url: fileUrl,
-        filename: req.file.filename,
-        originalName: req.file.originalname,
-        size: req.file.size 
-      });
+      const clientQuotes = await storage.getQuotesByClientId(req.params.id, userId);
+      res.json(clientQuotes);
     } catch (error) {
-      console.error("Error uploading file:", error);
-      res.status(500).json({ message: "Erro ao fazer upload do arquivo" });
-    }
-  });
-
-  app.delete('/api/uploads/:filename', isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = req.user.claims.sub;
-      const user = await storage.getUser(userId);
-      
-      if (!user || user.plan !== "PREMIUM") {
-        return res.status(403).json({ message: "Acesso negado" });
-      }
-
-      const filename = req.params.filename;
-      const filePath = path.join(process.cwd(), 'uploads', filename);
-      
-      if (fs.existsSync(filePath)) {
-        fs.unlinkSync(filePath);
-        res.json({ message: "Arquivo removido com sucesso" });
-      } else {
-        res.status(404).json({ message: "Arquivo não encontrado" });
-      }
-    } catch (error) {
-      console.error("Error deleting file:", error);
-      res.status(500).json({ message: "Erro ao remover arquivo" });
+      console.error("Error fetching client quotes:", error);
+      res.status(500).json({ message: "Failed to fetch client quotes" });
     }
   });
 

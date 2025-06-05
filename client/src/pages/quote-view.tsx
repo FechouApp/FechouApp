@@ -473,6 +473,30 @@ export default function QuoteView() {
               )}
             </div>
 
+            {/* Photos */}
+            {quote.photos && Array.isArray(quote.photos) && quote.photos.length > 0 && (
+              <div className="mt-6">
+                <h3 className="font-semibold mb-4">Fotos do Orçamento</h3>
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+                  {quote.photos.map((photo, index) => (
+                    <div key={index} className="relative group">
+                      <img
+                        src={photo.url}
+                        alt={`Foto ${index + 1}`}
+                        className="w-full h-24 sm:h-32 object-cover rounded-lg cursor-pointer hover:opacity-90 transition-opacity"
+                        onClick={() => window.open(photo.url, '_blank')}
+                      />
+                      <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-all rounded-lg flex items-center justify-center">
+                        <span className="text-white opacity-0 group-hover:opacity-100 text-sm font-medium">
+                          Ampliar
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Observations */}
             {quote.observations && (
               <div className="mt-6">
