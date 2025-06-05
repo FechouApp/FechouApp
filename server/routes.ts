@@ -161,12 +161,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "User not found" });
       }
 
+      console.log(`Plan limits for user ${userId}:`, {
+        plan: user.plan,
+        planExpiresAt: user.planExpiresAt,
+        quotesUsedThisMonth: user.quotesUsedThisMonth
+      });
+
       const isPremium = user.plan === "PREMIUM" || user.plan === "PREMIUM_CORTESIA";
       const isExpired = user.planExpiresAt && new Date() > user.planExpiresAt;
 
       let monthlyQuoteLimit, itemsPerQuoteLimit;
 
-      if (isPremium && !isExpired) {
+      // PREMIUM_CORTESIA nunca expira
+      if (user.plan === "PREMIUM_CORTESIA" || (isPremium && !isExpired)) {
         monthlyQuoteLimit = null; // Unlimited
         itemsPerQuoteLimit = null; // Unlimited
       } else {
@@ -180,16 +187,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Use the quotesUsedThisMonth from database (already updated with current count)
       const currentMonthQuotes = user.quotesUsedThisMonth || 0;
 
-      res.json({
+      const canCreateQuote = user.plan === "PREMIUM_CORTESIA" || 
+                            (isPremium && !isExpired) || 
+                            currentMonthQuotes < (monthlyQuoteLimit || 0);
+
+      const response = {
         plan: user.plan,
-        isPremium: isPremium && !isExpired,
+        isPremium: user.plan === "PREMIUM_CORTESIA" || (isPremium && !isExpired),
         monthlyQuoteLimit,
         itemsPerQuoteLimit,
         currentMonthQuotes,
-        canCreateQuote: (isPremium && !isExpired) || currentMonthQuotes < (monthlyQuoteLimit || 0),
+        canCreateQuote,
         bonusQuotes: user.bonusQuotes || 0,
         referralCount: user.referralCount || 0
-      });
+      };
+
+      console.log("Plan limits response:", response);
+      
+      res.json(response);
     } catch (error) {
       console.error("Error fetching plan limits:", error);
       res.status(500).json({ message: "Failed to fetch plan limits" });
@@ -342,28 +357,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { id } = req.params;
       console.log("Approving quote:", id);
       
+      // Get quote first to validate it exists
+      const quote = await storage.getQuoteById(id);
+      if (!quote) {
+        console.log("Quote not found for approval:", id);
+        return res.status(404).json({ message: "Orçamento não encontrado" });
+      }
+
       const success = await storage.updateQuoteStatus(id, 'approved', { 
         approvedAt: new Date() 
       });
 
       if (!success) {
-        console.log("Quote not found for approval:", id);
-        return res.status(404).json({ message: "Orçamento não encontrado" });
+        console.log("Failed to update quote status:", id);
+        return res.status(500).json({ message: "Erro ao atualizar status do orçamento" });
       }
 
       // Create approval notification
       try {
-        const quoteData = await storage.getQuoteById(id);
-        if (quoteData) {
-          await storage.createNotification({
-            userId: quoteData.userId,
-            title: 'Orçamento Aprovado!',
-            message: `O orçamento #${quoteData.quoteNumber} foi aprovado pelo cliente`,
-            type: 'quote_approved',
-            data: { quoteId: quoteData.id, quoteNumber: quoteData.quoteNumber },
-            isRead: false,
-          });
-        }
+        await storage.createNotification({
+          userId: quote.userId,
+          title: 'Orçamento Aprovado!',
+          message: `O orçamento #${quote.quoteNumber} foi aprovado pelo cliente`,
+          type: 'quote_approved',
+          data: { quoteId: quote.id, quoteNumber: quote.quoteNumber },
+          isRead: false,
+        });
       } catch (notificationError) {
         console.error("Error creating notification:", notificationError);
         // Don't fail the approval if notification fails

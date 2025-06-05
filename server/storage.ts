@@ -262,8 +262,15 @@ export class DatabaseStorage implements IStorage {
   // Quote operations
   async getQuotes(userId: string): Promise<(Quote & { client: Client; itemCount: number })[]> {
     const user = await this.getUser(userId);
-    const isPremium = user?.plan === "PREMIUM";
+    const isPremium = user?.plan === "PREMIUM" || user?.plan === "PREMIUM_CORTESIA";
     const isExpired = user?.planExpiresAt && new Date() > user.planExpiresAt;
+
+    console.log(`Getting quotes for user ${userId}:`, {
+      plan: user?.plan,
+      isPremium,
+      isExpired,
+      planExpiresAt: user?.planExpiresAt
+    });
 
     const result = await db
       .select({
@@ -284,12 +291,21 @@ export class DatabaseStorage implements IStorage {
       itemCount: row.itemCount,
     }));
 
-    // Se não é Premium ou plano expirou, limitar aos 5 orçamentos mais recentes
-    if (!isPremium || isExpired) {
-      return mappedResult.slice(0, 5);
+    // Para PREMIUM_CORTESIA, nunca limitar
+    if (user?.plan === "PREMIUM_CORTESIA") {
+      console.log("PREMIUM_CORTESIA plan detected - unlimited quotes");
+      return mappedResult;
     }
 
-    return mappedResult;
+    // Para PREMIUM, verificar expiração
+    if (isPremium && !isExpired) {
+      console.log("Valid premium plan - unlimited quotes");
+      return mappedResult;
+    }
+
+    // Se não é Premium ou plano expirou, limitar aos 5 orçamentos mais recentes
+    console.log("Free plan or expired - limiting to 5 quotes");
+    return mappedResult.slice(0, 5);
   }
 
   async getQuote(id: string, userId: string): Promise<(Quote & { client: Client; items: QuoteItem[] }) | undefined> {
