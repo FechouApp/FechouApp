@@ -169,56 +169,61 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
   doc.setFontSize(9);
   doc.setFont('helvetica', 'normal');
 
+  const rightColumnX = pageWidth / 2 + 10;
+  let leftColumnY = yPosition;
+  let rightColumnY = yPosition;
+
   // Coluna esquerda
-  doc.text('Razão social:', marginLeft + 2, yPosition);
-  doc.text(quote.client.name, marginLeft + 25, yPosition);
-  yPosition += 5;
+  doc.text('Razão social:', marginLeft + 2, leftColumnY);
+  doc.text(quote.client.name, marginLeft + 25, leftColumnY);
+  leftColumnY += 5;
 
-  if (quote.client.email) {
-    doc.text('CNPj/CPF:', marginLeft + 2, yPosition);
-    doc.text(quote.client.email, marginLeft + 25, yPosition);
-    yPosition += 5;
+  // CPF/CNPJ (só mostra se existir)
+  if (quote.client.cpf) {
+    doc.text('CPF/CNPJ:', marginLeft + 2, leftColumnY);
+    doc.text(formatCPF(quote.client.cpf), marginLeft + 25, leftColumnY);
+    leftColumnY += 5;
   }
 
-  if (quote.client.address) {
-    doc.text('CEP:', marginLeft + 2, yPosition);
-    doc.text('00000-000', marginLeft + 25, yPosition);
-    yPosition += 5;
+  // CEP (só mostra se existir)
+  if (quote.client.zipCode) {
+    doc.text('CEP:', marginLeft + 2, leftColumnY);
+    doc.text(formatCEP(quote.client.zipCode), marginLeft + 25, leftColumnY);
+    leftColumnY += 5;
   }
 
+  // Telefone (só mostra se existir)
   if (quote.client.phone) {
-    doc.text('Telefone:', marginLeft + 2, yPosition);
-    doc.text(quote.client.phone, marginLeft + 25, yPosition);
-    yPosition += 5;
+    doc.text('Telefone:', marginLeft + 2, leftColumnY);
+    doc.text(formatPhoneNumber(quote.client.phone), marginLeft + 25, leftColumnY);
+    leftColumnY += 5;
   }
 
   // Coluna direita
-  const rightColumnX = pageWidth / 2 + 10;
-  let rightColumnY = yPosition - (quote.client.email ? 20 : 15);
-
-  doc.text('Nome fantasia:', rightColumnX, rightColumnY);
-  doc.text(quote.client.name, rightColumnX + 30, rightColumnY);
-  rightColumnY += 5;
-
+  // Endereço (só mostra se existir)
   if (quote.client.address) {
     doc.text('Endereço:', rightColumnX, rightColumnY);
     const address = `${quote.client.address}${quote.client.number ? `, ${quote.client.number}` : ''}`;
     doc.text(address, rightColumnX + 20, rightColumnY);
     rightColumnY += 5;
-
-    if (quote.client.city && quote.client.state) {
-      doc.text('Cidade/UF:', rightColumnX, rightColumnY);
-      doc.text(`${quote.client.city}/${quote.client.state}`, rightColumnX + 22, rightColumnY);
-      rightColumnY += 5;
-    }
   }
 
+  // Cidade/UF (só mostra se ambos existirem)
+  if (quote.client.city && quote.client.state) {
+    doc.text('Cidade/UF:', rightColumnX, rightColumnY);
+    doc.text(`${quote.client.city}/${quote.client.state}`, rightColumnX + 22, rightColumnY);
+    rightColumnY += 5;
+  }
+
+  // E-mail (só mostra se existir)
   if (quote.client.email) {
     doc.text('E-mail:', rightColumnX, rightColumnY);
     doc.text(quote.client.email, rightColumnX + 15, rightColumnY);
+    rightColumnY += 5;
   }
 
-  yPosition += 6;
+  // Ajustar yPosition baseado na coluna que ficou mais alta
+  yPosition = Math.max(leftColumnY, rightColumnY) + 1;
 
   // ========== TABELA DE SERVIÇOS OU PRODUTOS ==========
 
