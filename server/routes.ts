@@ -340,18 +340,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/quotes/:id/approve', async (req, res) => {
     try {
       const { id } = req.params;
+      console.log("Approving quote:", id);
+      
       const success = await storage.updateQuoteStatus(id, 'approved', { 
         approvedAt: new Date() 
       });
 
       if (!success) {
-        return res.status(404).json({ message: "Quote not found" });
+        console.log("Quote not found for approval:", id);
+        return res.status(404).json({ message: "Orçamento não encontrado" });
       }
 
-      res.json({ message: "Quote approved successfully" });
+      // Create approval notification
+      try {
+        const quoteData = await storage.getQuoteById(id);
+        if (quoteData) {
+          await storage.createNotification({
+            userId: quoteData.userId,
+            title: 'Orçamento Aprovado!',
+            message: `O orçamento #${quoteData.quoteNumber} foi aprovado pelo cliente`,
+            type: 'quote_approved',
+            data: { quoteId: quoteData.id, quoteNumber: quoteData.quoteNumber },
+            isRead: false,
+          });
+        }
+      } catch (notificationError) {
+        console.error("Error creating notification:", notificationError);
+        // Don't fail the approval if notification fails
+      }
+
+      console.log("Quote approved successfully:", id);
+      res.json({ message: "Orçamento aprovado com sucesso!" });
     } catch (error) {
       console.error("Error approving quote:", error);
-      res.status(500).json({ message: "Failed to approve quote" });
+      res.status(500).json({ message: "Não foi possível aprovar o orçamento" });
     }
   });
 
@@ -360,6 +382,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { id } = req.params;
       const { reason } = req.body;
+      console.log("Rejecting quote:", id);
 
       const success = await storage.updateQuoteStatus(id, 'rejected', { 
         rejectedAt: new Date(),
@@ -367,13 +390,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       if (!success) {
-        return res.status(404).json({ message: "Quote not found" });
+        console.log("Quote not found for rejection:", id);
+        return res.status(404).json({ message: "Orçamento não encontrado" });
       }
 
-      res.json({ message: "Quote rejected successfully" });
+      console.log("Quote rejected successfully:", id);
+      res.json({ message: "Orçamento rejeitado com sucesso!" });
     } catch (error) {
       console.error("Error rejecting quote:", error);
-      res.status(500).json({ message: "Failed to reject quote" });
+      res.status(500).json({ message: "Não foi possível rejeitar o orçamento" });
     }
   });
 
@@ -485,58 +510,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Quote approval/rejection/sending
-  app.post('/api/quotes/:id/approve', async (req, res) => {
-    try {
-      const success = await storage.updateQuoteStatus(req.params.id, 'approved', {
-        approvedAt: new Date()
-      });
-
-      if (!success) {
-        return res.status(404).json({ message: "Quote not found" });
-      }
-
-      // Create approval notification
-      try {
-        // Get quote using the public method since we don't have userId in this context
-        const quote = await storage.getQuoteByNumber(''); // We need to get it by ID instead
-        const quoteData = await storage.getQuoteById(req.params.id);
-        if (quoteData) {
-          await storage.createNotification({
-            userId: quoteData.userId,
-            title: 'Orçamento Aprovado!',
-            message: `O orçamento #${quoteData.quoteNumber} foi aprovado pelo cliente`,
-            type: 'quote_approved',
-            data: { quoteId: quoteData.id, quoteNumber: quoteData.quoteNumber },
-            isRead: false,
-          });
-        }
-      } catch (notificationError) {
-        console.error("Error creating notification:", notificationError);
-        // Don't fail the approval if notification fails
-      }
-
-      res.json({ success: true });
-    } catch (error) {
-      console.error("Error approving quote:", error);
-      res.status(500).json({ message: "Failed to approve quote" });
-    }
-  });
-
-  app.post('/api/quotes/:id/reject', async (req, res) => {
-    try {
-      const success = await storage.updateQuoteStatus(req.params.id, 'rejected');
-
-      if (!success) {
-        return res.status(404).json({ message: "Quote not found" });
-      }
-
-      res.json({ success: true });
-    } catch (error) {
-      console.error("Error rejecting quote:", error);
-      res.status(500).json({ message: "Failed to reject quote" });
-    }
-  });
+  
 
   app.post('/api/quotes/:id/mark-sent', async (req, res) => {
     try {

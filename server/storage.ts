@@ -48,6 +48,7 @@ export interface IStorage {
   getQuotes(userId: string): Promise<(Quote & { client: Client; itemCount: number })[]>;
   getQuote(id: string, userId: string): Promise<(Quote & { client: Client; items: QuoteItem[] }) | undefined>;
   getQuoteByNumber(quoteNumber: string): Promise<(Quote & { client: Client; items: QuoteItem[] }) | undefined>;
+  getQuoteById(id: string): Promise<Quote | undefined>;
   getQuotesInDateRange(userId: string, startDate: Date, endDate: Date): Promise<Quote[]>;
   createQuote(quote: InsertQuote, items: InsertQuoteItem[]): Promise<Quote>;
   updateQuote(id: string, quote: Partial<InsertQuote>, userId: string): Promise<Quote | undefined>;
