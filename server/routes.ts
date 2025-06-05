@@ -1,9 +1,42 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
+import multer from "multer";
+import path from "path";
+import fs from "fs";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { insertClientSchema, insertQuoteSchema, insertQuoteItemSchema, insertReviewSchema, insertSavedItemSchema } from "@shared/schema";
 import { z } from "zod";
+
+// Configure multer for file uploads
+const storage_config = multer.diskStorage({
+  destination: function (req, file, cb) {
+    const uploadsDir = path.join(process.cwd(), 'uploads');
+    if (!fs.existsSync(uploadsDir)) {
+      fs.mkdirSync(uploadsDir, { recursive: true });
+    }
+    cb(null, uploadsDir);
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, uniqueSuffix + path.extname(file.originalname));
+  }
+});
+
+const upload = multer({
+  storage: storage_config,
+  limits: {
+    fileSize: 5 * 1024 * 1024, // 5MB limit
+  },
+  fileFilter: function (req, file, cb) {
+    // Accept only image files
+    if (file.mimetype.startsWith('image/')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Apenas arquivos de imagem são permitidos!'));
+    }
+  }
+});
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
@@ -965,6 +998,62 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error refreshing quote counts:", error);
       res.status(500).json({ message: "Failed to refresh quote counts" });
+    }
+  });
+
+  // File upload routes - Premium only
+  app.post('/api/upload', isAuthenticated, upload.single('photo'), async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      // Check if user has premium plan
+      if (!user || user.plan !== "PREMIUM") {
+        // Delete uploaded file if user is not premium
+        if (req.file) {
+          fs.unlinkSync(req.file.path);
+        }
+        return res.status(403).json({ message: "Upload de fotos é exclusivo para usuários Pro" });
+      }
+
+      if (!req.file) {
+        return res.status(400).json({ message: "Nenhum arquivo foi enviado" });
+      }
+
+      const fileUrl = `/uploads/${req.file.filename}`;
+      res.json({ 
+        url: fileUrl,
+        filename: req.file.filename,
+        originalName: req.file.originalname,
+        size: req.file.size 
+      });
+    } catch (error) {
+      console.error("Error uploading file:", error);
+      res.status(500).json({ message: "Erro ao fazer upload do arquivo" });
+    }
+  });
+
+  app.delete('/api/uploads/:filename', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      if (!user || user.plan !== "PREMIUM") {
+        return res.status(403).json({ message: "Acesso negado" });
+      }
+
+      const filename = req.params.filename;
+      const filePath = path.join(process.cwd(), 'uploads', filename);
+      
+      if (fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath);
+        res.json({ message: "Arquivo removido com sucesso" });
+      } else {
+        res.status(404).json({ message: "Arquivo não encontrado" });
+      }
+    } catch (error) {
+      console.error("Error deleting file:", error);
+      res.status(500).json({ message: "Erro ao remover arquivo" });
     }
   });
 
