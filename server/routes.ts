@@ -755,6 +755,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Version endpoint for deployment verification
+  app.get('/api/version', async (req, res) => {
+    try {
+      res.json({
+        version: "1.0.1",
+        timestamp: new Date().toISOString(),
+        lastUpdated: "2025-01-02T19:45:00.000Z",
+        status: "latest deployment"
+      });
+    } catch (error) {
+      console.error("Error fetching version:", error);
+      res.status(500).json({ message: "Failed to fetch version" });
+    }
+  });
+
   // User plan update
   app.put('/api/user/plan', isAuthenticated, async (req: any, res) => {
     try {
