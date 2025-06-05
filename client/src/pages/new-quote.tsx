@@ -288,31 +288,61 @@ export default function NewQuote() {
     const validUntil = new Date();
     validUntil.setDate(validUntil.getDate() + validityDays);
 
-    const quoteData: CreateQuoteRequest = {
-      quote: {
-        clientId: selectedClientId,
-        title: title.trim(),
-        description: description.trim(),
-        observations: observations.trim(),
-        paymentTerms: paymentTerms.trim(),
-        executionDeadline: executionDeadline.trim(),
-        subtotal: totals.subtotal,
-        discount: totals.discountAmount,
-        total: totals.total,
-        validUntil,
-        sendByWhatsapp,
-        sendByEmail,
-      },
-      items: items.map((item, index) => ({
-        description: item.description.trim(),
-        quantity: item.quantity,
-        unitPrice: parseFloat(item.unitPrice).toFixed(2),
-        total: parseFloat(item.total).toFixed(2),
-        order: index,
-      }))
+    // Process photos to base64
+    const processPhotos = async () => {
+      const photos = [];
+      if (attachments.length > 0) {
+        for (const file of attachments) {
+          try {
+            const base64 = await new Promise<string>((resolve, reject) => {
+              const reader = new FileReader();
+              reader.onload = () => resolve(reader.result as string);
+              reader.onerror = reject;
+              reader.readAsDataURL(file);
+            });
+            photos.push({
+              name: file.name,
+              url: base64,
+              size: file.size,
+              type: file.type
+            });
+          } catch (error) {
+            console.error('Error processing photo:', error);
+          }
+        }
+      }
+      return photos;
     };
 
-    createQuoteMutation.mutate(quoteData);
+    // Process photos and create quote
+    processPhotos().then(photos => {
+      const quoteData: CreateQuoteRequest = {
+        quote: {
+          clientId: selectedClientId,
+          title: title.trim(),
+          description: description.trim(),
+          observations: observations.trim(),
+          paymentTerms: paymentTerms.trim(),
+          executionDeadline: executionDeadline.trim(),
+          subtotal: totals.subtotal,
+          discount: totals.discountAmount,
+          total: totals.total,
+          validUntil,
+          sendByWhatsapp,
+          sendByEmail,
+          photos: photos.length > 0 ? photos : null,
+        },
+        items: items.map((item, index) => ({
+          description: item.description.trim(),
+          quantity: item.quantity,
+          unitPrice: parseFloat(item.unitPrice).toFixed(2),
+          total: parseFloat(item.total).toFixed(2),
+          order: index,
+        }))
+      };
+
+      createQuoteMutation.mutate(quoteData);
+    });
   };
 
   if (authLoading || clientsLoading || (isEditing && quoteLoading)) {
