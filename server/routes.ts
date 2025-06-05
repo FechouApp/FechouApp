@@ -489,7 +489,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/quotes/:id/approve', async (req, res) => {
     try {
       const success = await storage.updateQuoteStatus(req.params.id, 'approved', {
-        approvedAt: new Date().toISOString()
+        approvedAt: new Date()
       });
 
       if (!success) {
@@ -498,14 +498,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Create approval notification
       try {
-        const quote = await storage.getQuote(req.params.id, 'public');
-        if (quote) {
+        // Get quote using the public method since we don't have userId in this context
+        const quote = await storage.getQuoteByNumber(''); // We need to get it by ID instead
+        const quoteData = await storage.getQuoteById(req.params.id);
+        if (quoteData) {
           await storage.createNotification({
-            userId: quote.userId,
+            userId: quoteData.userId,
             title: 'Orçamento Aprovado!',
-            message: `O orçamento #${quote.quoteNumber} foi aprovado pelo cliente ${quote.client.name}`,
+            message: `O orçamento #${quoteData.quoteNumber} foi aprovado pelo cliente`,
             type: 'quote_approved',
-            data: { quoteId: quote.id, quoteNumber: quote.quoteNumber },
+            data: { quoteId: quoteData.id, quoteNumber: quoteData.quoteNumber },
             isRead: false,
           });
         }

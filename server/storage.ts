@@ -403,17 +403,23 @@ export class DatabaseStorage implements IStorage {
   async updateQuoteStatus(id: string, status: string, metadata?: any): Promise<boolean> {
     const updateData: any = { status, updatedAt: new Date() };
 
-    if (status === 'VIEWED' && !metadata?.viewedAt) {
-      updateData.viewedAt = new Date();
+    if (metadata?.viewedAt) {
+      updateData.viewedAt = metadata.viewedAt;
     }
-    if (status === 'APPROVED' && !metadata?.approvedAt) {
-      updateData.approvedAt = new Date();
+    if (metadata?.approvedAt) {
+      updateData.approvedAt = metadata.approvedAt;
     }
-    if (status === 'REJECTED') {
-      updateData.rejectedAt = new Date();
-      if (metadata?.rejectionReason) {
-        updateData.rejectionReason = metadata.rejectionReason;
-      }
+    if (metadata?.rejectedAt) {
+      updateData.rejectedAt = metadata.rejectedAt;
+    }
+    if (metadata?.rejectionReason) {
+      updateData.rejectionReason = metadata.rejectionReason;
+    }
+    if (metadata?.sentViaWhatsApp) {
+      updateData.sentViaWhatsApp = metadata.sentViaWhatsApp;
+    }
+    if (metadata?.sentAt) {
+      updateData.sentAt = metadata.sentAt;
     }
 
     const result = await db
@@ -421,6 +427,14 @@ export class DatabaseStorage implements IStorage {
       .set(updateData)
       .where(eq(quotes.id, id));
     return (result.rowCount ?? 0) > 0;
+  }
+
+  async getQuoteById(id: string): Promise<Quote | undefined> {
+    const [quote] = await db
+      .select()
+      .from(quotes)
+      .where(eq(quotes.id, id));
+    return quote;
   }
 
   // Quote item operations
