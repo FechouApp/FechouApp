@@ -106,6 +106,7 @@ export const quotes = pgTable("quotes", {
   publicUrl: varchar("public_url").unique(),
   pdfUrl: varchar("pdf_url"),
   contractUrl: varchar("contract_url"),
+  photos: text("photos"), // JSON field for storing photo URLs
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

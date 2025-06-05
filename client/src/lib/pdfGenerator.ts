@@ -229,7 +229,18 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
 
   console.log('Checking photos for PDF:', quote.photos);
   
-  if (quote.photos && Array.isArray(quote.photos) && quote.photos.length > 0) {
+  // Parse photos if they are stored as JSON string
+  let quotePhotos = [];
+  if (quote.photos) {
+    try {
+      quotePhotos = typeof quote.photos === 'string' ? JSON.parse(quote.photos) : quote.photos;
+    } catch (error) {
+      console.error('Error parsing photos:', error);
+      quotePhotos = [];
+    }
+  }
+  
+  if (quotePhotos && Array.isArray(quotePhotos) && quotePhotos.length > 0) {
     if (checkPageBreak(80)) {
       addNewPage();
     }
@@ -246,8 +257,8 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
     const photoSpacing = 10;
     const startX = marginLeft + (pageWidth - marginLeft - marginRight - (photosPerRow * photoWidth) - ((photosPerRow - 1) * photoSpacing)) / 2;
 
-    for (let i = 0; i < quote.photos.length; i++) {
-      const photo = quote.photos[i];
+    for (let i = 0; i < quotePhotos.length; i++) {
+      const photo = quotePhotos[i];
       const row = Math.floor(i / photosPerRow);
       const col = i % photosPerRow;
       
@@ -307,7 +318,7 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
       }
     }
 
-    const totalRows = Math.ceil(quote.photos.length / photosPerRow);
+    const totalRows = Math.ceil(quotePhotos.length / photosPerRow);
     yPosition += totalRows * (photoHeight + photoSpacing) + 5;
   }
 

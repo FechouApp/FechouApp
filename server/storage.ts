@@ -414,7 +414,7 @@ export class DatabaseStorage implements IStorage {
   async createQuote(quote: InsertQuote, items: InsertQuoteItem[]): Promise<Quote> {
     const quoteId = nanoid();
     const quoteNumber = `FH${Date.now().toString().slice(-6)}`;
-    const publicUrl = quoteNumber.toLowerCase();
+    const publicUrl = quoteNumber;
 
     const [newQuote] = await db
       .insert(quotes)

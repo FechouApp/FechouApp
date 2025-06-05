@@ -316,7 +316,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/quotes/public/:quoteNumber', async (req, res) => {
     try {
       const { quoteNumber } = req.params;
-      const quote = await storage.getQuoteByNumber(quoteNumber);
+      // Try both uppercase and lowercase for backward compatibility
+      let quote = await storage.getQuoteByNumber(quoteNumber.toUpperCase());
+      if (!quote) {
+        quote = await storage.getQuoteByNumber(quoteNumber.toLowerCase());
+      }
 
       if (!quote) {
         return res.status(404).json({ message: "Quote not found" });

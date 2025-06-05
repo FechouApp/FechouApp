@@ -66,6 +66,7 @@ export interface Quote {
   publicUrl: string | null;
   pdfUrl: string | null;
   contractUrl: string | null;
+  photos?: any[]; // Array of photo objects
   createdAt: Date | null;
   updatedAt: Date | null;
 }

@@ -59,7 +59,7 @@ export default function QuoteView() {
     const phoneNumber = cleanPhone.startsWith('55') ? cleanPhone : `55${cleanPhone}`;
 
     // Always use public URL for clients
-    const publicUrl = `${window.location.origin}/quote/${quote.quoteNumber.toLowerCase()}`;
+    const publicUrl = `${window.location.origin}/quote/${quote.quoteNumber}`;
 
     const profesionalName = user ? (user as any)?.businessName || (user as any)?.email?.split('@')[0] || 'Profissional' : 'Profissional';
     const message = `Olá, ${quote.client.name}! Aqui está o seu orçamento gerado via *Fechou!*.
