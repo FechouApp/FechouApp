@@ -339,6 +339,8 @@ export class DatabaseStorage implements IStorage {
       .where(eq(quoteItems.quoteId, id))
       .orderBy(asc(quoteItems.order));
 
+    console.log('Raw quote photos from DB:', quote.quotes.photos);
+
     // Parse photos from JSON field
     let photos = [];
     try {
@@ -346,6 +348,7 @@ export class DatabaseStorage implements IStorage {
         photos = typeof quote.quotes.photos === 'string' 
           ? JSON.parse(quote.quotes.photos) 
           : quote.quotes.photos;
+        console.log('Parsed photos:', photos);
       }
     } catch (error) {
       console.error('Error parsing photos:', error);
@@ -375,6 +378,8 @@ export class DatabaseStorage implements IStorage {
       .where(eq(quoteItems.quoteId, quote.quotes.id))
       .orderBy(asc(quoteItems.order));
 
+    console.log('Public quote photos from DB:', quote.quotes.photos);
+
     // Parse photos from JSON field
     let photos = [];
     try {
@@ -382,6 +387,7 @@ export class DatabaseStorage implements IStorage {
         photos = typeof quote.quotes.photos === 'string' 
           ? JSON.parse(quote.quotes.photos) 
           : quote.quotes.photos;
+        console.log('Public parsed photos:', photos);
       }
     } catch (error) {
       console.error('Error parsing photos:', error);

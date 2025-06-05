@@ -464,74 +464,161 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
 
 
-  app.post('/api/quotes', isAuthenticated, async (req: any, res) => {
+  app.post("/api/quotes", async (req, res) => {
     try {
-      const userId = req.user.claims.sub;
-      const { quote: quoteData, items } = req.body;
+      const { quote, items } = req.body;
 
-      const parsedQuote = insertQuoteSchema.parse({ ...quoteData, userId });
-      const parsedItems = z.array(insertQuoteItemSchema).parse(items);
-
-      const quote = await storage.createQuote(parsedQuote, parsedItems);
-
-      // Increment user's monthly quote count (with auto-reset)
-      await storage.incrementQuoteUsage(userId);
-
-      res.status(201).json(quote);
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        console.error("Quote validation error:", error.errors);
-        console.error("Received quote data:", req.body.quote);
-        console.error("Received items data:", req.body.items);
-        return res.status(400).json({ message: "Invalid quote data", errors: error.errors });
+      if (!req.user?.id) {
+        return res.status(401).json({ message: "User not authenticated" });
       }
+
+      // Verificar se o plano permite criar mais orçamentos
+      const user = await storage.getUser(req.user.id);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      console.log(`Plan limits for user ${req.user.id}:`, {
+        plan: user.plan,
+        planExpiresAt: user.planExpiresAt,
+        quotesUsedThisMonth: user.quotesUsedThisMonth
+      });
+
+      const isPremium = user.plan === "PREMIUM" || user.plan === "PREMIUM_CORTESIA";
+      const isExpired = user.planExpiresAt && new Date() > user.planExpiresAt;
+
+      let monthlyQuoteLimit, itemsPerQuoteLimit;
+
+      // PREMIUM_CORTESIA nunca expira
+      if (user.plan === "PREMIUM_CORTESIA" || (isPremium && !isExpired)) {
+        monthlyQuoteLimit = null; // Unlimited
+        itemsPerQuoteLimit = null; // Unlimited
+      } else {
+        // Plano gratuito: 5 orçamentos base + orçamentos bônus de indicações
+        const baseLimit = user.quotesLimit || 5;
+        const bonusQuotes = user.bonusQuotes || 0;
+        monthlyQuoteLimit = baseLimit + bonusQuotes;
+        itemsPerQuoteLimit = 10;
+      }
+
+      // Use the quotesUsedThisMonth from database (already updated with current count)
+      const currentMonthQuotes = user.quotesUsedThisMonth || 0;
+
+      const canCreateQuote = user.plan === "PREMIUM_CORTESIA" || 
+                            (isPremium && !isExpired) || 
+                            currentMonthQuotes < monthlyQuoteLimit;
+
+      if (!canCreateQuote) {
+        return res.status(402).json({ 
+          message: "Limite de orçamentos atingido para o plano atual",
+          details: {
+            currentPlan: user.plan,
+            quotesUsedThisMonth: currentMonthQuotes,
+            monthlyQuoteLimit,
+            isExpired
+          }
+        });
+      }
+
+      // Verificar limite de itens por orçamento para plano gratuito
+      if (!isPremium || isExpired) {
+        if (items.length > itemsPerQuoteLimit) {
+          return res.status(402).json({ 
+            message: `Limite de ${itemsPerQuoteLimit} itens por orçamento excedido`,
+            details: {
+              currentPlan: user.plan,
+              itemsProvided: items.length,
+              itemsPerQuoteLimit,
+              isExpired
+            }
+          });
+        }
+      }
+
+      // Serializar fotos para JSON string se existirem
+      const quoteData = { ...quote, userId: req.user.id };
+      if (quote.photos && Array.isArray(quote.photos)) {
+        quoteData.photos = JSON.stringify(quote.photos);
+      }
+
+      const newQuote = await storage.createQuote(quoteData, items);
+
+      // Incrementar contador de orçamentos usados no mês
+      await storage.incrementQuoteUsage(req.user.id);
+
+      res.json(newQuote);
+    } catch (error) {
       console.error("Error creating quote:", error);
       res.status(500).json({ message: "Failed to create quote" });
     }
   });
 
-  app.put('/api/quotes/:id', isAuthenticated, async (req: any, res) => {
+  app.put("/api/quotes/:id", async (req, res) => {
     try {
-      const userId = req.user.claims.sub;
-      const { quote: quoteData, items } = req.body;
+      const { id } = req.params;
+      const { quote, items } = req.body;
+
+      if (!req.user?.id) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
 
       // Verificar se o orçamento existe e pertence ao usuário
-      const existingQuote = await storage.getQuote(req.params.id, userId);
+      const existingQuote = await storage.getQuote(id, req.user.id);
       if (!existingQuote) {
         return res.status(404).json({ message: "Quote not found" });
       }
 
-      // Atualizar orçamento
-      const updatedQuote = await storage.updateQuote(req.params.id, quoteData, userId);
+      // Verificar se o plano permite editar orçamentos (limites de itens)
+      const user = await storage.getUser(req.user.id);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      const isPremium = user.plan === "PREMIUM" || user.plan === "PREMIUM_CORTESIA";
+      const isExpired = user.planExpiresAt && new Date() > user.planExpiresAt;
+
+      // Verificar limite de itens por orçamento para plano gratuito
+      if (!isPremium || isExpired) {
+        const itemsPerQuoteLimit = 10;
+        if (items.length > itemsPerQuoteLimit) {
+          return res.status(402).json({ 
+            message: `Limite de ${itemsPerQuoteLimit} itens por orçamento excedido`,
+            details: {
+              currentPlan: user.plan,
+              itemsProvided: items.length,
+              itemsPerQuoteLimit,
+              isExpired
+            }
+          });
+        }
+      }
+
+      // Serializar fotos para JSON string se existirem
+      const quoteData = { ...quote };
+      if (quote.photos && Array.isArray(quote.photos)) {
+        quoteData.photos = JSON.stringify(quote.photos);
+      }
+
+      // Atualizar o orçamento
+      const updatedQuote = await storage.updateQuote(id, quoteData, req.user.id);
 
       if (!updatedQuote) {
-        return res.status(404).json({ message: "Failed to update quote" });
+        return res.status(404).json({ message: "Quote not found" });
       }
 
       // Deletar itens existentes e criar novos
-      await storage.deleteQuoteItems(req.params.id);
-
-      if (items && items.length > 0) {
-        await storage.createQuoteItems(
-          items.map((item: any, index: number) => ({
-            quoteId: req.params.id,
-            description: item.description,
-            quantity: item.quantity,
-            unitPrice: item.unitPrice,
-            total: item.total,
-            order: index,
-          }))
-        );
+      await storage.deleteQuoteItems(id);
+      if (items.length > 0) {
+        await storage.createQuoteItems(items.map((item: any) => ({
+          ...item,
+          quoteId: id,
+        })));
       }
 
-      // Buscar o orçamento atualizado com os itens
-      const completeQuote = await storage.getQuote(req.params.id, userId);
-
+      // Retornar o orçamento atualizado com os itens
+      const completeQuote = await storage.getQuote(id, req.user.id);
       res.json(completeQuote);
     } catch (error) {
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({ message: "Invalid quote data", errors: error.errors });
-      }
       console.error("Error updating quote:", error);
       res.status(500).json({ message: "Failed to update quote" });
     }
