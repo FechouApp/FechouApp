@@ -37,9 +37,22 @@ function Router() {
     );
   }
 
-  // Show landing page if not authenticated
-  if (!isAuthenticated) {
+  // Check if this is a public quote route
+  const isPublicQuoteRoute = window.location.pathname.startsWith('/quote/');
+  
+  // Allow public access to quote pages
+  if (!isAuthenticated && !isPublicQuoteRoute) {
     return <Landing />;
+  }
+
+  // If not authenticated but accessing public quote, show only the public quote
+  if (!isAuthenticated && isPublicQuoteRoute) {
+    return (
+      <Switch>
+        <Route path="/quote/:quoteNumber" component={PublicQuote} />
+        <Route component={Landing} />
+      </Switch>
+    );
   }
 
   // Check if user is authenticated and this is their first visit
@@ -81,6 +94,9 @@ function AppLayout() {
   if (isLoading) {
     return <LoadingSpinner />;
   }
+
+  // Check if this is a public quote route
+  const isPublicQuoteRoute = window.location.pathname.startsWith('/quote/');
 
   if (!isAuthenticated) {
     return <Router />;
