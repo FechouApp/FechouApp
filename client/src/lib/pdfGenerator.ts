@@ -277,7 +277,7 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
     doc.line(marginLeft + itemColWidth + nameColWidth + qtyColWidth, yPosition - 2, marginLeft + itemColWidth + nameColWidth + qtyColWidth, yPosition + 8);
     doc.line(marginLeft + itemColWidth + nameColWidth + qtyColWidth + unitPriceColWidth, yPosition - 2, marginLeft + itemColWidth + nameColWidth + qtyColWidth + unitPriceColWidth, yPosition + 8);
 
-    yPosition += 6;
+    yPosition += 10;
   });
 
   // Total da seção SERVIÇOS OU PRODUTOS
