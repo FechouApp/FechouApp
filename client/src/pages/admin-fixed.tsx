@@ -56,7 +56,7 @@ export default function AdminPanel() {
 
   const updatePlanMutation = useMutation({
     mutationFn: async (data: { userId: string; plan: string; paymentStatus: string; paymentMethod?: string }) => {
-      return await apiRequest(`/api/admin/users/${data.userId}/plan`, "PATCH", {
+      return await apiRequest("PATCH", `/api/admin/users/${data.userId}/plan`, {
         plan: data.plan,
         paymentStatus: data.paymentStatus,
         paymentMethod: data.paymentMethod,
