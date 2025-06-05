@@ -272,7 +272,7 @@ export default function AdminPanel() {
       userId: selectedUser.id,
       plan: editPlan.toUpperCase(),
       paymentStatus: editPaymentStatus.toLowerCase(),
-      paymentMethod: editPaymentMethod && editPaymentMethod.trim() !== "" ? editPaymentMethod.trim() : null,
+      paymentMethod: editPaymentMethod && editPaymentMethod.trim() !== "" ? editPaymentMethod.trim() : undefined,
     };
 
     console.log("Mutation data:", mutationData);
@@ -537,6 +537,9 @@ export default function AdminPanel() {
                             <DialogContent className="max-w-2xl">
                               <DialogHeader>
                                 <DialogTitle>Dados do Usuário</DialogTitle>
+                                <DialogDescription>
+                                  Visualize todas as informações detalhadas do usuário selecionado
+                                </DialogDescription>
                               </DialogHeader>
                               {viewUser && (
                                 <div className="space-y-4">
@@ -662,6 +665,9 @@ export default function AdminPanel() {
                             <DialogContent>
                               <DialogHeader>
                                 <DialogTitle>Gerenciar Usuário</DialogTitle>
+                                <DialogDescription>
+                                  Edite o plano, status de pagamento e método de pagamento do usuário
+                                </DialogDescription>
                               </DialogHeader>
                               {selectedUser && (
                                 <form onSubmit={handleUpdatePlan} className="space-y-4">

@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
@@ -407,6 +407,9 @@ export default function AdminPanel() {
                             <DialogContent>
                               <DialogHeader>
                                 <DialogTitle>Gerenciar Usuário</DialogTitle>
+                                <DialogDescription>
+                                  Edite o plano e status de pagamento do usuário selecionado
+                                </DialogDescription>
                               </DialogHeader>
                               <UserEditForm 
                                 user={user} 
