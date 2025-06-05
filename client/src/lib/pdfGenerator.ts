@@ -227,7 +227,9 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
 
   // ========== FOTOS DO ORÇAMENTO ==========
 
-  if (quote.photos && quote.photos.length > 0) {
+  console.log('Checking photos for PDF:', quote.photos);
+  
+  if (quote.photos && Array.isArray(quote.photos) && quote.photos.length > 0) {
     if (checkPageBreak(80)) {
       addNewPage();
     }
