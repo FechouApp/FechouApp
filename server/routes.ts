@@ -152,13 +152,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/user/plan-limits', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
+      
+      // Get fresh user stats (which includes auto-reset check)
+      await storage.getUserStats(userId);
       const user = await storage.getUser(userId);
 
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
 
-      const isPremium = user.plan === "PREMIUM";
+      const isPremium = user.plan === "PREMIUM" || user.plan === "PREMIUM_CORTESIA";
       const isExpired = user.planExpiresAt && new Date() > user.planExpiresAt;
 
       let monthlyQuoteLimit, itemsPerQuoteLimit;
@@ -174,20 +177,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         itemsPerQuoteLimit = 10;
       }
 
-      // Count current month quotes
-      const now = new Date();
-      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-      const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-
-      const monthlyQuotes = await storage.getQuotesInDateRange(userId, startOfMonth, endOfMonth);
+      // Use the quotesUsedThisMonth from database (already updated with current count)
+      const currentMonthQuotes = user.quotesUsedThisMonth || 0;
 
       res.json({
         plan: user.plan,
         isPremium: isPremium && !isExpired,
         monthlyQuoteLimit,
         itemsPerQuoteLimit,
-        currentMonthQuotes: monthlyQuotes.length,
-        canCreateQuote: (isPremium && !isExpired) || monthlyQuotes.length < (monthlyQuoteLimit || 0),
+        currentMonthQuotes,
+        canCreateQuote: (isPremium && !isExpired) || currentMonthQuotes < (monthlyQuoteLimit || 0),
         bonusQuotes: user.bonusQuotes || 0,
         referralCount: user.referralCount || 0
       });
@@ -390,14 +389,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const quote = await storage.createQuote(parsedQuote, parsedItems);
 
-      // Update user's monthly quote count
-      const user = await storage.getUser(userId);
-      if (user) {
-        await storage.upsertUser({
-          ...user,
-          monthlyQuotes: user.monthlyQuotes + 1,
-        });
-      }
+      // Increment user's monthly quote count (with auto-reset)
+      await storage.incrementQuoteUsage(userId);
 
       res.status(201).json(quote);
     } catch (error) {

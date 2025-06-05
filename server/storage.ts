@@ -629,6 +629,9 @@ export class DatabaseStorage implements IStorage {
     const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
     const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0);
 
+    // Check if we need to reset monthly quotes
+    await this.checkAndResetMonthlyQuotes(userId);
+
     // Get all quotes for the user
     const userQuotes = await db
       .select()
@@ -932,6 +935,9 @@ export class DatabaseStorage implements IStorage {
   }
 
   async incrementQuoteUsage(userId: string): Promise<User | undefined> {
+    // Check if we need to reset monthly quotes before incrementing
+    await this.checkAndResetMonthlyQuotes(userId);
+
     const user = await this.getUser(userId);
     if (!user) return undefined;
 
@@ -944,7 +950,35 @@ export class DatabaseStorage implements IStorage {
       .where(eq(users.id, userId))
       .returning();
     return updatedUser;
+  }
+
+  // Método privado para verificar e resetar orçamentos mensais automaticamente
+  private async checkAndResetMonthlyQuotes(userId: string): Promise<void> {
+    const user = await this.getUser(userId);
+    if (!user) return;
+
+    const now = new Date();
+    const lastReset = user.lastQuoteReset ? new Date(user.lastQuoteReset) : new Date(0);
+    
+    // Se o último reset foi em um mês diferente do atual
+    const shouldReset = lastReset.getFullYear() !== now.getFullYear() || 
+                       lastReset.getMonth() !== now.getMonth();
+
+    if (shouldReset) {
+      console.log(`Auto-resetting monthly quotes for user ${userId}`);
+      
+      await db
+        .update(users)
+        .set({ 
+          quotesUsedThisMonth: 0,
+          lastQuoteReset: now,
+          updatedAt: now
+        })
+        .where(eq(users.id, userId));
+      
+      console.log(`Monthly quotes reset completed for user ${userId}`);
     }
+  }
 
   async checkAdminStatus(userId: string): Promise<boolean> {
     const user = await this.getUser(userId);
