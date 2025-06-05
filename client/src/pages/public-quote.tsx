@@ -57,31 +57,67 @@ export default function PublicQuote() {
 
   const approveMutation = useMutation({
     mutationFn: async () => {
-      await apiRequest("POST", `/api/quotes/${quote?.id}/approve`);
+      const response = await fetch(`/api/quotes/${quote?.id}/approve`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Erro ao aprovar orçamento");
+      }
+      
+      return response.json();
     },
     onSuccess: () => {
       toast({
         title: "Orçamento aprovado!",
         description: "O profissional será notificado da sua aprovação.",
       });
+      // Reload page to update status
+      window.location.reload();
     },
-    onError: () => {
+    onError: (error: any) => {
       toast({
         title: "Erro",
-        description: "Não foi possível aprovar o orçamento.",
+        description: error.message || "Não foi possível aprovar o orçamento.",
         variant: "destructive",
       });
     },
   });
 
   const rejectMutation = useMutation({
-    mutationFn: async () => {
-      await apiRequest("POST", `/api/quotes/${quote?.id}/reject`);
+    mutationFn: async (reason?: string) => {
+      const response = await fetch(`/api/quotes/${quote?.id}/reject`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ reason }),
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Erro ao rejeitar orçamento");
+      }
+      
+      return response.json();
     },
     onSuccess: () => {
       toast({
         title: "Orçamento rejeitado",
         description: "O profissional será notificado da sua decisão.",
+      });
+      // Reload page to update status
+      window.location.reload();
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Erro",
+        description: error.message || "Não foi possível rejeitar o orçamento.",
+        variant: "destructive",
       });
     },
   });
@@ -364,8 +400,8 @@ export default function PublicQuote() {
               </Button>
             </div>
             
-            {/* Approve/Reject buttons */}
-            {canApprove && (
+            {/* Approve/Reject buttons - Show only for pending quotes that are not expired */}
+            {quote.status === "pending" && !isExpired && (
               <div className="flex gap-4">
                 <Button 
                   onClick={() => approveMutation.mutate()}
@@ -382,8 +418,26 @@ export default function PublicQuote() {
                   className="flex-1"
                 >
                   <XCircle className="w-4 h-4 mr-2" />
-                  Rejeitar
+                  {rejectMutation.isPending ? "Rejeitando..." : "Rejeitar"}
                 </Button>
+              </div>
+            )}
+
+            {/* Status message for non-pending quotes */}
+            {quote.status !== "pending" && (
+              <div className="text-center p-4 bg-gray-50 rounded-lg">
+                <p className="text-gray-600">
+                  {quote.status === "approved" && "✅ Este orçamento já foi aprovado"}
+                  {quote.status === "rejected" && "❌ Este orçamento foi rejeitado"}
+                  {quote.status === "paid" && "💰 Este orçamento foi pago"}
+                </p>
+              </div>
+            )}
+
+            {/* Expiry message */}
+            {isExpired && quote.status === "pending" && (
+              <div className="text-center p-4 bg-red-50 border border-red-200 rounded-lg">
+                <p className="text-red-600">⏰ Este orçamento expirou e não pode mais ser aprovado.</p>
               </div>
             )}
           </CardContent>

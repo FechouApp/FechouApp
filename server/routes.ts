@@ -357,11 +357,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { id } = req.params;
       console.log("Approving quote:", id);
       
-      // Get quote first to validate it exists
+      // Get quote first to validate it exists and check if it can be approved
       const quote = await storage.getQuoteById(id);
       if (!quote) {
         console.log("Quote not found for approval:", id);
         return res.status(404).json({ message: "Orçamento não encontrado" });
+      }
+
+      // Check if quote is still pending and not expired
+      if (quote.status !== 'pending') {
+        return res.status(400).json({ message: "Este orçamento não pode ser aprovado" });
+      }
+
+      const isExpired = new Date(quote.validUntil) < new Date();
+      if (isExpired) {
+        return res.status(400).json({ message: "Este orçamento expirou e não pode ser aprovado" });
       }
 
       const success = await storage.updateQuoteStatus(id, 'approved', { 
@@ -389,7 +399,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       console.log("Quote approved successfully:", id);
-      res.json({ message: "Orçamento aprovado com sucesso!" });
+      res.json({ message: "Orçamento aprovado com sucesso!", status: "approved" });
     } catch (error) {
       console.error("Error approving quote:", error);
       res.status(500).json({ message: "Não foi possível aprovar o orçamento" });
@@ -403,18 +413,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { reason } = req.body;
       console.log("Rejecting quote:", id);
 
+      // Get quote first to validate it exists
+      const quote = await storage.getQuoteById(id);
+      if (!quote) {
+        console.log("Quote not found for rejection:", id);
+        return res.status(404).json({ message: "Orçamento não encontrado" });
+      }
+
+      // Check if quote can be rejected
+      if (quote.status !== 'pending') {
+        return res.status(400).json({ message: "Este orçamento não pode ser rejeitado" });
+      }
+
       const success = await storage.updateQuoteStatus(id, 'rejected', { 
         rejectedAt: new Date(),
         rejectionReason: reason || null
       });
 
       if (!success) {
-        console.log("Quote not found for rejection:", id);
-        return res.status(404).json({ message: "Orçamento não encontrado" });
+        console.log("Failed to update quote status for rejection:", id);
+        return res.status(500).json({ message: "Erro ao atualizar status do orçamento" });
+      }
+
+      // Create rejection notification
+      try {
+        await storage.createNotification({
+          userId: quote.userId,
+          title: 'Orçamento Rejeitado',
+          message: `O orçamento #${quote.quoteNumber} foi rejeitado pelo cliente${reason ? ': ' + reason : ''}`,
+          type: 'quote_rejected',
+          data: { quoteId: quote.id, quoteNumber: quote.quoteNumber, reason },
+          isRead: false,
+        });
+      } catch (notificationError) {
+        console.error("Error creating notification:", notificationError);
+        // Don't fail the rejection if notification fails
       }
 
       console.log("Quote rejected successfully:", id);
-      res.json({ message: "Orçamento rejeitado com sucesso!" });
+      res.json({ message: "Orçamento rejeitado com sucesso!", status: "rejected" });
     } catch (error) {
       console.error("Error rejecting quote:", error);
       res.status(500).json({ message: "Não foi possível rejeitar o orçamento" });
