@@ -922,6 +922,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Refresh all quote counts
+  app.post('/api/admin/refresh-counts', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      console.log("Refreshing all quote counts...");
+      
+      const users = await storage.getAllUsers();
+      let updated = 0;
+
+      for (const user of users) {
+        await storage.getUserStats(user.id);
+        updated++;
+      }
+
+      console.log(`Updated quote counts for ${updated} users`);
+      res.json({ message: `Quote counts updated for ${updated} users` });
+    } catch (error) {
+      console.error("Error refreshing quote counts:", error);
+      res.status(500).json({ message: "Failed to refresh quote counts" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

@@ -151,6 +151,28 @@ export default function AdminDashboard() {
                 <RefreshCw className="w-4 h-4 mr-2" />
                 Atualizar
               </Button>
+              <Button 
+                variant="outline" 
+                onClick={async () => {
+                  try {
+                    await apiRequest("/api/admin/refresh-counts", "POST");
+                    queryClient.invalidateQueries();
+                    toast({ 
+                      title: "Contagens atualizadas", 
+                      description: "As contagens de orçamentos foram recalculadas!" 
+                    });
+                  } catch (error) {
+                    toast({ 
+                      title: "Erro", 
+                      description: "Falha ao atualizar contagens", 
+                      variant: "destructive" 
+                    });
+                  }
+                }}
+              >
+                <BarChart3 className="w-4 h-4 mr-2" />
+                Recalcular
+              </Button>
             </div>
           </div>
         </div>

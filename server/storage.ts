@@ -621,6 +621,46 @@ export class DatabaseStorage implements IStorage {
     ratingTrend?: string;
     ratingTrendUp?: boolean;
   }> {
+    console.log("Getting user stats for:", userId);
+
+    // Get current date boundaries
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0);
+
+    // Get all quotes for the user
+    const userQuotes = await db
+      .select()
+      .from(quotes)
+      .where(eq(quotes.userId, userId))
+      .orderBy(desc(quotes.createdAt));
+
+    // Filter quotes by month
+    const thisMonthQuotes = userQuotes.filter(quote => 
+      new Date(quote.createdAt) >= startOfMonth
+    );
+
+    const lastMonthQuotes = userQuotes.filter(quote => {
+      const quoteDate = new Date(quote.createdAt);
+      return quoteDate >= startOfLastMonth && quoteDate <= endOfLastMonth;
+    });
+
+    // Update user's monthly quote count in database
+    await db
+      .update(users)
+      .set({ 
+        quotesUsedThisMonth: thisMonthQuotes.length,
+        updatedAt: new Date()
+      })
+      .where(eq(users.id, userId));
+
+    // Count quotes by status
+    const totalQuotes = userQuotes.length;
+    const approvedQuotes = userQuotes.filter(q => q.status === 'approved' || q.status === 'paid').length;
+    const pendingQuotes = userQuotes.filter(q => q.status === 'pending').length;
+    const draftQuotes = userQuotes.filter(q => q.status === 'draft').length;
+
     const [quoteStats] = await db
       .select({
         totalQuotes: count(),
@@ -736,49 +776,44 @@ export class DatabaseStorage implements IStorage {
 
   // Admin operations
   async getAllUsers(): Promise<User[]> {
-    const usersWithQuoteCounts = await db
-      .select({
-        id: users.id,
-        email: users.email,
-        firstName: users.firstName,
-        lastName: users.lastName,
-        profileImageUrl: users.profileImageUrl,
-        cpfCnpj: users.cpfCnpj,
-        profession: users.profession,
-        businessName: users.businessName,
-        phone: users.phone,
-        address: users.address,
-        logoUrl: users.logoUrl,
-        customDomain: users.customDomain,
-        plan: users.plan,
-        planExpiresAt: users.planExpiresAt,
-        pixKey: users.pixKey,
-        paymentGatewayId: users.paymentGatewayId,
-        monthlyQuotes: users.monthlyQuotes,
-        quotesLimit: users.quotesLimit,
-        bonusQuotes: users.bonusQuotes,
-        referralCount: users.referralCount,
-        whatsappNotifications: users.whatsappNotifications,
-        emailNotifications: users.emailNotifications,
-        primaryColor: users.primaryColor,
-        secondaryColor: users.secondaryColor,
-        paymentStatus: users.paymentStatus,
-        paymentMethod: users.paymentMethod,
-        quotesUsedThisMonth: users.quotesUsedThisMonth,
-        lastQuoteReset: users.lastQuoteReset,
-        isAdmin: users.isAdmin,
-        createdAt: users.createdAt,
-        updatedAt: users.updatedAt,
-        lastLoginAt: users.lastLoginAt,
-        totalQuotes: sql<number>`(SELECT COUNT(*) FROM ${quotes} WHERE ${quotes.userId} = ${users.id})`,
-      })
+    console.log("=== Getting all users for admin ===");
+
+    // Get all users first
+    const allUsers = await db
+      .select()
       .from(users)
       .orderBy(desc(users.createdAt));
 
-    return usersWithQuoteCounts.map(user => ({
-      ...user,
-      monthlyQuotes: user.totalQuotes || 0, // Use totalQuotes as monthlyQuotes for display
-    }));
+    // Calculate current month quotes for each user
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+
+    const usersWithQuoteCounts = await Promise.all(
+      allUsers.map(async (user) => {
+        // Count quotes for current month
+        const [monthlyQuotesResult] = await db
+          .select({ count: count() })
+          .from(quotes)
+          .where(
+            and(
+              eq(quotes.userId, user.id),
+              gte(quotes.createdAt, startOfMonth),
+              lte(quotes.createdAt, endOfMonth)
+            )
+          );
+
+        const monthlyQuotesCount = monthlyQuotesResult?.count || 0;
+
+        return {
+          ...user,
+          quotesUsedThisMonth: monthlyQuotesCount,
+          monthlyQuotes: monthlyQuotesCount,
+        };
+      })
+    );
+
+    return usersWithQuoteCounts;
   }
 
   async updateUserPlanStatus(userId: string, plan: string, paymentStatus: string, paymentMethod?: string | null): Promise<User | undefined> {
