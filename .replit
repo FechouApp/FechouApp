@@ -64,3 +64,8 @@ mode = "sequential"
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "npm run dev"
+
+[env]
+PYTHONPATH = "${REPL_HOME}/.pythonlibs/lib/python3.10/site-packages:/opt/virtualenvs/python3/lib/python3.10/site-packages"
+REPLIT_KEEP_PACKAGE_DEV_DEPENDENCIES = "1"
+REPLIT_DISABLE_PACKAGE_LAYER = "1"
