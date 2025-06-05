@@ -452,7 +452,7 @@ export default function PublicQuote() {
                 Fotos do Projeto
               </h3>
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-                {quote.attachments.map((attachment, index) => (
+                {quote.attachments.map((attachment: string, index: number) => (
                   <div key={index} className="relative group">
                     <img
                       src={attachment}
