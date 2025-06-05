@@ -75,49 +75,55 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
     }
   }
 
-  // Informações da empresa no cabeçalho com espaçamento adequado
+  // Informações da empresa ao lado do logotipo
   doc.setTextColor(0, 0, 0);
   doc.setFontSize(14);
   doc.setFont('helvetica', 'bold');
   
   const businessName = user.businessName || `${user.firstName} ${user.lastName}`.trim();
-  // Posicionar o texto à direita do logo se existir, senão na margem esquerda
-  const textStartX = logoWidth > 0 ? marginLeft + logoWidth : marginLeft;
+  const textStartX = logoWidth > 0 ? marginLeft + logoWidth + 5 : marginLeft;
+  
+  // Nome da empresa
   doc.text(businessName, textStartX, yPosition + 5);
   
-  // Ajustar yPosition baseado no logo se existir
-  yPosition += logoHeight > 0 ? Math.max(logoHeight + 2, 12) : 12;
-  
-  // Informações de contato no cabeçalho
+  // Informações completas ao lado do logo
   doc.setFontSize(9);
   doc.setFont('helvetica', 'normal');
   
-  const contactInfo = [];
-  if ((user as any).cpfCnpj) {
-    contactInfo.push(`CNPJ: ${formatCPF((user as any).cpfCnpj)}`);
-  }
-  if ((user as any).phone) {
-    contactInfo.push(`(${(user as any).phone.substring(0,2)})${(user as any).phone.substring(2,7)}-${(user as any).phone.substring(7)}`);
-  }
-  if (user.email) {
-    contactInfo.push(user.email);
-  }
+  let infoY = yPosition + 12;
   
+  // Endereço completo
   if ((user as any).address) {
     const address = `${(user as any).address}${(user as any).number ? `, ${(user as any).number}` : ''}`;
-    doc.text(address, marginLeft, yPosition);
-    yPosition += 4;
+    doc.text(address, textStartX, infoY);
+    infoY += 4;
     
     if ((user as any).city && (user as any).state) {
-      doc.text(`${(user as any).city}/${(user as any).state} - CEP: ${(user as any).cep || '00000-000'}`, marginLeft, yPosition);
-      yPosition += 4;
+      doc.text(`${(user as any).city}/${(user as any).state} - CEP: ${(user as any).cep || '00000-000'}`, textStartX, infoY);
+      infoY += 4;
     }
   }
-
-  contactInfo.forEach(info => {
-    doc.text(info, marginLeft, yPosition);
-    yPosition += 4;
-  });
+  
+  // CNPJ/CPF
+  if ((user as any).cpfCnpj) {
+    doc.text(`CNPJ: ${formatCPF((user as any).cpfCnpj)}`, textStartX, infoY);
+    infoY += 4;
+  }
+  
+  // Telefone
+  if ((user as any).phone) {
+    doc.text(`Telefone: (${(user as any).phone.substring(0,2)}) ${(user as any).phone.substring(2,7)}-${(user as any).phone.substring(7)}`, textStartX, infoY);
+    infoY += 4;
+  }
+  
+  // Email
+  if (user.email) {
+    doc.text(`Email: ${user.email}`, textStartX, infoY);
+    infoY += 4;
+  }
+  
+  // Ajustar yPosition baseado no conteúdo
+  yPosition = Math.max(yPosition + logoHeight + 5, infoY);
 
   yPosition += 4; // Espaçamento ainda mais reduzido antes da linha
   drawHorizontalLine(yPosition);
@@ -371,37 +377,34 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
       rightInfoY += Math.max(8, warrantyLines.length * 4);
     }
     
-    yPosition = Math.max(additionalInfoY, rightInfoY) + 10;
+    yPosition = Math.max(additionalInfoY, rightInfoY) + 5;
   }
 
-  // ========== ASSINATURA COM DADOS DO USUÁRIO ==========
+  // ========== ASSINATURA SEM RETÂNGULO ==========
   
-  if (checkPageBreak(50)) {
+  if (checkPageBreak(35)) {
     addNewPage();
   }
 
-  // Caixa de assinatura
-  doc.setDrawColor(0, 0, 0);
-  doc.setLineWidth(0.5);
-  doc.rect(marginLeft, yPosition, pageWidth - marginLeft - marginRight, 40, 'S');
+  yPosition += 10; // Espaçamento antes da assinatura
   
-  // Dados do usuário na assinatura (sem logo)
+  // Dados do usuário na assinatura
   doc.setFontSize(10);
   doc.setFont('helvetica', 'bold');
-  doc.text(businessName, marginLeft + 5, yPosition + 8);
+  doc.text(businessName, marginLeft, yPosition);
   
   doc.setFontSize(8);
   doc.setFont('helvetica', 'normal');
   
-  let signatureY = yPosition + 14;
+  let signatureY = yPosition + 6;
   
   if ((user as any).address) {
     const address = `${(user as any).address}${(user as any).number ? `, ${(user as any).number}` : ''}`;
-    doc.text(address, marginLeft + 5, signatureY);
+    doc.text(address, marginLeft, signatureY);
     signatureY += 4;
     
     if ((user as any).city && (user as any).state) {
-      doc.text(`${(user as any).city}/${(user as any).state} - CEP: ${(user as any).cep || '00000-000'}`, marginLeft + 5, signatureY);
+      doc.text(`${(user as any).city}/${(user as any).state} - CEP: ${(user as any).cep || '00000-000'}`, marginLeft, signatureY);
       signatureY += 4;
     }
   }
@@ -411,21 +414,28 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
     signatureContactInfo.push(`CNPJ: ${formatCPF((user as any).cpfCnpj)}`);
   }
   if ((user as any).phone) {
-    signatureContactInfo.push(`(${(user as any).phone.substring(0,2)})${(user as any).phone.substring(2,7)}-${(user as any).phone.substring(7)}`);
+    signatureContactInfo.push(`Telefone: (${(user as any).phone.substring(0,2)}) ${(user as any).phone.substring(2,7)}-${(user as any).phone.substring(7)}`);
   }
   if (user.email) {
-    signatureContactInfo.push(user.email);
+    signatureContactInfo.push(`Email: ${user.email}`);
   }
 
   signatureContactInfo.forEach(info => {
-    doc.text(info, marginLeft + 5, signatureY);
+    doc.text(info, marginLeft, signatureY);
     signatureY += 4;
   });
   
-  // Linha para assinatura
-  doc.setDrawColor(150, 150, 150);
+  signatureY += 4; // Espaço antes da linha de assinatura
+  
+  // Linha para assinatura (mais elegante)
+  doc.setDrawColor(120, 120, 120);
   doc.setLineWidth(0.3);
-  doc.line(marginLeft + 5, yPosition + 35, pageWidth - marginRight - 5, yPosition + 35);
+  doc.line(marginLeft, signatureY, marginLeft + 80, signatureY);
+  
+  // Texto "Assinatura" abaixo da linha
+  doc.setFontSize(7);
+  doc.setTextColor(120, 120, 120);
+  doc.text('Assinatura', marginLeft, signatureY + 4);
 
   // Marca d'água para plano gratuito
   if (!isUserPremium) {
