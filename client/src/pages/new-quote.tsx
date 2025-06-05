@@ -22,6 +22,7 @@ import { isUnauthorizedError } from "@/lib/authUtils";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useLocation } from "wouter";
 import { ArrowLeft, Plus, Save, Crown, Trash2, AlertCircle } from "lucide-react";
+import PhotoUploadSection from "@/components/quotes/photo-upload-section";
 import type { Client, CreateQuoteRequest, QuoteWithDetails } from "@/types";
 
 interface QuoteItemData {
@@ -59,6 +60,7 @@ export default function NewQuote() {
     { id: "1", description: "", quantity: 1, unitPrice: "", total: "0" }
   ]);
   const [discount, setDiscount] = useState("");
+  const [attachments, setAttachments] = useState<File[]>([]);
 
   // Redirect to home if not authenticated
   useEffect(() => {
@@ -511,6 +513,13 @@ export default function NewQuote() {
             ))}
           </CardContent>
         </Card>
+
+        {/* Photo Upload Section */}
+        <PhotoUploadSection
+          attachments={attachments}
+          onAttachmentsChange={setAttachments}
+          disabled={createQuoteMutation.isPending}
+        />
 
         {/* Additional Info */}
         <Card>
