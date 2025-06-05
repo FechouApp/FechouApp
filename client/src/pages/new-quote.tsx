@@ -123,13 +123,18 @@ export default function NewQuote() {
 
   const createQuoteMutation = useMutation({
     mutationFn: async (quoteData: CreateQuoteRequest) => {
-      if (isEditing) {
-        await apiRequest("PUT", `/api/quotes/${quoteId}`, quoteData);
-      } else {
-        if (planLimits && !planLimits.isPremium && !planLimits.canCreateQuote) {
-          throw new Error(`Limite de ${planLimits.monthlyQuoteLimit} orçamentos por mês atingido. Faça upgrade para Premium.`);
+      try {
+        if (isEditing) {
+          return await apiRequest("PUT", `/api/quotes/${quoteId}`, quoteData);
+        } else {
+          if (planLimits && !planLimits.isPremium && !planLimits.canCreateQuote) {
+            throw new Error(`Limite de ${planLimits.monthlyQuoteLimit} orçamentos por mês atingido. Faça upgrade para Premium.`);
+          }
+          return await apiRequest("POST", "/api/quotes", quoteData);
         }
-        await apiRequest("POST", "/api/quotes", quoteData);
+      } catch (error) {
+        console.error("API Request Error:", error);
+        throw error;
       }
     },
     onSuccess: () => {
@@ -315,7 +320,10 @@ export default function NewQuote() {
   }
 
   const selectedClient = clients?.find(client => client.id === selectedClientId);
-  const canProceed = selectedClientId && title.trim() && items.every(item => item.description.trim());
+  const canProceed = selectedClientId && 
+                    title.trim() && 
+                    items.every(item => item.description.trim() && item.quantity > 0) &&
+                    !createQuoteMutation.isPending;
 
   return (
     <div className="min-h-screen bg-gray-50">
