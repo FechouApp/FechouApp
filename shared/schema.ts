@@ -180,6 +180,18 @@ export const savedItems = pgTable("saved_items", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Quote Attachments table (Premium feature)
+export const quoteAttachments = pgTable("quote_attachments", {
+  id: varchar("id").primaryKey().notNull(),
+  quoteId: varchar("quote_id").notNull(),
+  fileName: varchar("file_name").notNull(),
+  originalName: varchar("original_name").notNull(),
+  fileSize: integer("file_size").notNull(),
+  mimeType: varchar("mime_type").notNull(),
+  filePath: varchar("file_path").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   clients: many(clients),
@@ -201,6 +213,7 @@ export const quotesRelations = relations(quotes, ({ one, many }) => ({
   client: one(clients, { fields: [quotes.clientId], references: [clients.id] }),
   items: many(quoteItems),
   payments: many(payments),
+  attachments: many(quoteAttachments),
 }));
 
 export const quoteItemsRelations = relations(quoteItems, ({ one }) => ({
@@ -223,6 +236,10 @@ export const notificationsRelations = relations(notifications, ({ one }) => ({
 
 export const savedItemsRelations = relations(savedItems, ({ one }) => ({
   user: one(users, { fields: [savedItems.userId], references: [users.id] }),
+}));
+
+export const quoteAttachmentsRelations = relations(quoteAttachments, ({ one }) => ({
+  quote: one(quotes, { fields: [quoteAttachments.quoteId], references: [quotes.id] }),
 }));
 
 // Insert schemas
@@ -272,6 +289,11 @@ export const insertSavedItemSchema = createInsertSchema(savedItems).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
+});
+
+export const insertQuoteAttachmentSchema = createInsertSchema(quoteAttachments).omit({
+  id: true,
+  createdAt: true,
 });
 
 // Types
