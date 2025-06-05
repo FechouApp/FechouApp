@@ -131,15 +131,15 @@ export default function PhotoUploadSection({
 
   return (
     <>
-      <Card className={`${!isPremium ? 'bg-gradient-to-r from-amber-50 to-yellow-50 border-amber-200' : 'bg-white'} transition-all`}>
-        <CardHeader className="pb-3">
-          <div className="flex items-center justify-between">
+      <Card className={`${!isPremium ? 'bg-gradient-to-r from-amber-50 to-yellow-50 border-amber-200' : 'bg-white'} transition-all mb-4`}>
+        <CardHeader className="p-3 sm:p-4 pb-2 sm:pb-3">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="flex items-center gap-2">
               <Camera className={`w-5 h-5 ${isPremium ? 'text-blue-600' : 'text-amber-600'}`} />
-              <CardTitle className="text-lg flex items-center gap-2">
+              <CardTitle className="text-base sm:text-lg flex items-center gap-2">
                 Fotos / Anexos
                 {!isPremium && (
-                  <Badge className="bg-gradient-to-r from-amber-500 to-yellow-500 text-white">
+                  <Badge className="bg-gradient-to-r from-amber-500 to-yellow-500 text-white text-xs">
                     <Crown className="w-3 h-3 mr-1" />
                     Premium
                   </Badge>
@@ -157,10 +157,11 @@ export default function PhotoUploadSection({
               size="sm"
               onClick={openFileDialog}
               disabled={disabled || !isPremium || attachments.length >= maxFiles}
-              className={isPremium ? "border-blue-200 hover:bg-blue-50" : "border-amber-200"}
+              className={`${isPremium ? "border-blue-200 hover:bg-blue-50" : "border-amber-200"} w-full sm:w-auto`}
             >
               <Upload className="w-4 h-4 mr-1" />
-              Adicionar Fotos
+              <span className="hidden sm:inline">Adicionar Fotos</span>
+              <span className="sm:hidden">Fotos</span>
             </Button>
           </div>
           
@@ -172,7 +173,7 @@ export default function PhotoUploadSection({
           )}
         </CardHeader>
         
-        <CardContent className="pt-0">
+        <CardContent className="p-3 sm:p-4 pt-0">
           <input
             ref={fileInputRef}
             type="file"
@@ -183,20 +184,20 @@ export default function PhotoUploadSection({
           />
           
           {attachments.length === 0 ? (
-            <div className={`text-center py-8 ${isPremium ? 'text-gray-500' : 'text-amber-600'}`}>
-              <ImageIcon className={`w-12 h-12 mx-auto mb-2 ${isPremium ? 'text-gray-300' : 'text-amber-300'}`} />
-              <p className="font-medium">
+            <div className={`text-center py-6 sm:py-8 ${isPremium ? 'text-gray-500' : 'text-amber-600'}`}>
+              <ImageIcon className={`w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-2 ${isPremium ? 'text-gray-300' : 'text-amber-300'}`} />
+              <p className="font-medium text-sm sm:text-base">
                 {isPremium ? "Nenhuma foto adicionada" : "Recurso Premium"}
               </p>
-              <p className="text-sm">
+              <p className="text-xs sm:text-sm mt-1">
                 {isPremium 
-                  ? "Clique em 'Adicionar Fotos' para começar" 
+                  ? "Clique em 'Fotos' para começar" 
                   : "Faça upgrade para adicionar fotos aos seus orçamentos"
                 }
               </p>
             </div>
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
               {attachments.map((file, index) => (
                 <div key={index} className="relative group">
                   <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden border-2 border-gray-200 hover:border-blue-300 transition-colors">
