@@ -415,7 +415,7 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
 
   // ========== FRASE DE CORTESIA ==========
 
-  if (checkPageBreak(25)) {
+  if (checkPageBreak(35)) {
     addNewPage();
   }
 
@@ -425,9 +425,15 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(60, 60, 60);
   doc.text('Fico à disposição para dúvidas e aguardo sua aprovação.', marginLeft, yPosition);
-  yPosition += 8;
+  yPosition += 16; // Espaço duplo antes do traço
 
   // ========== ASSINATURA SEM RETÂNGULO ==========
+
+  // Linha para assinatura acima do nome
+  doc.setDrawColor(120, 120, 120);
+  doc.setLineWidth(0.3);
+  doc.line(marginLeft, yPosition, marginLeft + 80, yPosition);
+  yPosition += 8;
 
   // Dados do usuário na assinatura
   doc.setTextColor(0, 0, 0);
@@ -468,16 +474,6 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
   });
 
   signatureY += 3;
-
-  // Linha para assinatura (mais elegante)
-  doc.setDrawColor(120, 120, 120);
-  doc.setLineWidth(0.3);
-  doc.line(marginLeft, signatureY, marginLeft + 80, signatureY);
-
-  // Texto "Assinatura" abaixo da linha
-  doc.setFontSize(7);
-  doc.setTextColor(120, 120, 120);
-  doc.text('Assinatura', marginLeft, signatureY + 3);
 
   // Marca d'água para plano gratuito
   if (!isUserPremium) {
