@@ -225,6 +225,90 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
   // Ajustar yPosition baseado na coluna que ficou mais alta
   yPosition = Math.max(leftColumnY, rightColumnY) + 1;
 
+  // ========== FOTOS DO ORÇAMENTO ==========
+
+  if (quote.photos && quote.photos.length > 0) {
+    if (checkPageBreak(80)) {
+      addNewPage();
+    }
+
+    drawGrayBackground(marginLeft, yPosition - 2, pageWidth - marginLeft - marginRight, 8);
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'bold');
+    doc.text('FOTOS DO ORÇAMENTO', marginLeft + 2, yPosition + 3);
+    yPosition += 10;
+
+    const photosPerRow = 2;
+    const photoWidth = 60;
+    const photoHeight = 45;
+    const photoSpacing = 10;
+    const startX = marginLeft + (pageWidth - marginLeft - marginRight - (photosPerRow * photoWidth) - ((photosPerRow - 1) * photoSpacing)) / 2;
+
+    for (let i = 0; i < quote.photos.length; i++) {
+      const photo = quote.photos[i];
+      const row = Math.floor(i / photosPerRow);
+      const col = i % photosPerRow;
+      
+      const x = startX + col * (photoWidth + photoSpacing);
+      const y = yPosition + row * (photoHeight + photoSpacing);
+
+      // Check if we need a new page for this photo
+      if (y + photoHeight > pageHeight - marginBottom) {
+        addNewPage();
+        const newY = yPosition;
+        const adjustedRow = row - Math.floor((pageHeight - marginBottom - yPosition) / (photoHeight + photoSpacing));
+        const adjustedY = newY + adjustedRow * (photoHeight + photoSpacing);
+        
+        try {
+          if (photo.url && photo.url.trim() !== '') {
+            let format = 'JPEG';
+            if (photo.url.includes('data:image/png')) {
+              format = 'PNG';
+            } else if (photo.url.includes('data:image/gif')) {
+              format = 'GIF';
+            }
+            doc.addImage(photo.url, format, x, adjustedY, photoWidth, photoHeight);
+          }
+        } catch (error) {
+          console.error('Erro ao carregar foto:', error);
+          // Draw a placeholder rectangle if image fails to load
+          doc.setDrawColor(200, 200, 200);
+          doc.setFillColor(240, 240, 240);
+          doc.rect(x, adjustedY, photoWidth, photoHeight, 'FD');
+          doc.setTextColor(100, 100, 100);
+          doc.setFontSize(8);
+          doc.text('Imagem não disponível', x + photoWidth/2, adjustedY + photoHeight/2, { align: 'center' });
+          doc.setTextColor(0, 0, 0);
+        }
+      } else {
+        try {
+          if (photo.url && photo.url.trim() !== '') {
+            let format = 'JPEG';
+            if (photo.url.includes('data:image/png')) {
+              format = 'PNG';
+            } else if (photo.url.includes('data:image/gif')) {
+              format = 'GIF';
+            }
+            doc.addImage(photo.url, format, x, y, photoWidth, photoHeight);
+          }
+        } catch (error) {
+          console.error('Erro ao carregar foto:', error);
+          // Draw a placeholder rectangle if image fails to load
+          doc.setDrawColor(200, 200, 200);
+          doc.setFillColor(240, 240, 240);
+          doc.rect(x, y, photoWidth, photoHeight, 'FD');
+          doc.setTextColor(100, 100, 100);
+          doc.setFontSize(8);
+          doc.text('Imagem não disponível', x + photoWidth/2, y + photoHeight/2, { align: 'center' });
+          doc.setTextColor(0, 0, 0);
+        }
+      }
+    }
+
+    const totalRows = Math.ceil(quote.photos.length / photosPerRow);
+    yPosition += totalRows * (photoHeight + photoSpacing) + 5;
+  }
+
   // ========== TABELA DE SERVIÇOS OU PRODUTOS ==========
 
   if (checkPageBreak(60)) {
