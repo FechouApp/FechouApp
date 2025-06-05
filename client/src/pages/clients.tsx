@@ -226,6 +226,9 @@ export default function Clients() {
           <DialogContent className="max-w-lg max-h-[80vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Novo Cliente</DialogTitle>
+              <DialogDescription>
+                Adicione um novo cliente preenchendo as informações abaixo
+              </DialogDescription>
             </DialogHeader>
             <form onSubmit={handleCreateClient} className="space-y-3">
               <div className="grid grid-cols-2 gap-4">
