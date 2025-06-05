@@ -152,7 +152,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/user/plan-limits', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      
+
       // Get fresh user stats (which includes auto-reset check)
       await storage.getUserStats(userId);
       const user = await storage.getUser(userId);
@@ -203,7 +203,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
 
       console.log("Plan limits response:", response);
-      
+
       res.json(response);
     } catch (error) {
       console.error("Error fetching plan limits:", error);
@@ -356,7 +356,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { id } = req.params;
       console.log("Approving quote:", id);
-      
+
       // Get quote first to validate it exists and check if it can be approved
       const quote = await storage.getQuoteById(id);
       if (!quote) {
@@ -566,7 +566,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  
+
 
   app.post('/api/quotes/:id/mark-sent', async (req, res) => {
     try {
@@ -951,7 +951,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/admin/refresh-counts', isAuthenticated, isAdmin, async (req, res) => {
     try {
       console.log("Refreshing all quote counts...");
-      
+
       const users = await storage.getAllUsers();
       let updated = 0;
 
@@ -965,6 +965,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error refreshing quote counts:", error);
       res.status(500).json({ message: "Failed to refresh quote counts" });
+    }
+  });
+
+  // Get client quotes
+  app.get('/api/clients/:id/quotes', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const clientQuotes = await storage.getQuotesByClientId(req.params.id, userId);
+      res.json(clientQuotes);
+    } catch (error) {
+      console.error("Error fetching client quotes:", error);
+      res.status(500).json({ message: "Failed to fetch client quotes" });
     }
   });
 

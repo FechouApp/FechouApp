@@ -83,6 +83,7 @@ export interface QuoteItem {
 export interface QuoteWithDetails extends Quote {
   client: Client;
   items: QuoteItem[];
+  photos?: QuotePhoto[];
 }
 
 export interface QuoteWithClient extends Quote {
