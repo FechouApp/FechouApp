@@ -67,7 +67,7 @@ export default function AdminDashboard() {
 
   const updatePlanMutation = useMutation({
     mutationFn: async ({ userId, newPlan }: { userId: string; newPlan: string }) => {
-      return await apiRequest(`/api/admin/users/${userId}/plan`, "PATCH", {
+      return await apiRequest("PATCH", `/api/admin/users/${userId}/plan`, {
         plan: newPlan,
         paymentStatus: "ativo",
         paymentMethod: "manual"
@@ -155,7 +155,7 @@ export default function AdminDashboard() {
                 variant="outline" 
                 onClick={async () => {
                   try {
-                    await apiRequest("/api/admin/refresh-counts", "POST");
+                    await apiRequest("POST", "/api/admin/refresh-counts");
                     queryClient.invalidateQueries();
                     toast({ 
                       title: "Contagens atualizadas", 
