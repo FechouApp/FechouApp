@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Edit, Trash2, Star, Crown } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
@@ -183,6 +183,9 @@ export default function SavedItemsManager({ onSelectItem, selectionMode = false 
                 <DialogTitle>
                   {editingItem ? "Editar Item" : "Novo Item Favorito"}
                 </DialogTitle>
+                <DialogDescription>
+                  {editingItem ? "Edite as informações do item favorito" : "Crie um novo item favorito para reutilizar em orçamentos"}
+                </DialogDescription>
               </DialogHeader>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
