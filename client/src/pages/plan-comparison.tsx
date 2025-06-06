@@ -71,12 +71,7 @@ export default function PlanComparison() {
       premium: true,
       icon: <Crown className="w-4 h-4" />
     },
-    {
-      name: "Cores personalizadas",
-      free: false,
-      premium: true,
-      icon: <Crown className="w-4 h-4" />
-    },
+
     {
       name: "Envio por e-mail",
       free: false,
@@ -89,18 +84,8 @@ export default function PlanComparison() {
       premium: true,
       icon: <Crown className="w-4 h-4" />
     },
-    {
-      name: "Link de pagamento",
-      free: false,
-      premium: true,
-      icon: <Crown className="w-4 h-4" />
-    },
-    {
-      name: "Contrato personalizado",
-      free: false,
-      premium: true,
-      icon: <Crown className="w-4 h-4" />
-    },
+
+
     {
       name: "Notificações em tempo real",
       free: false,
