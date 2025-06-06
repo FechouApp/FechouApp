@@ -69,7 +69,7 @@ export default function NewQuote() {
   const [sendByWhatsapp, setSendByWhatsapp] = useState(true);
   const [sendByEmail, setSendByEmail] = useState(false);
   const [items, setItems] = useState<QuoteItemData[]>([
-    { id: "1", description: "", quantity: 1, unitPrice: "", total: "0" }
+    { id: "1", description: "", quantity: 0, unitPrice: "", total: "0" }
   ]);
   const [discount, setDiscount] = useState("");
   const [attachments, setAttachments] = useState<File[]>([]);
@@ -733,9 +733,9 @@ export default function NewQuote() {
                     <Label className="text-xs text-gray-600">Quantidade</Label>
                     <Input
                       type="number"
-                      value={item.quantity}
-                      onChange={(e) => updateItem(item.id, 'quantity', parseInt(e.target.value) || 1)}
-                      min="1"
+                      value={item.quantity || ""}
+                      onChange={(e) => updateItem(item.id, 'quantity', parseInt(e.target.value) || 0)}
+                      min="0"
                       placeholder="1"
                       className="mt-1 text-sm h-9 [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [-moz-appearance:textfield]"
                     />
@@ -743,19 +743,25 @@ export default function NewQuote() {
                   <div>
                     <Label className="text-xs text-gray-600">Valor Unit.</Label>
                     <Input
-                      type="number"
+                      type="text"
                       value={item.unitPrice}
                       onChange={(e) => {
                         const value = e.target.value;
-                        // Allow only valid decimal numbers or empty string
-                        if (value === '' || /^\d*\.?\d*$/.test(value)) {
-                          updateItem(item.id, 'unitPrice', value);
+                        // Remove any non-numeric characters except comma and dot
+                        const cleanValue = value.replace(/[^\d,\.]/g, '');
+                        updateItem(item.id, 'unitPrice', cleanValue);
+                      }}
+                      onBlur={(e) => {
+                        const value = e.target.value;
+                        if (value && !isNaN(parseFloat(value.replace(',', '.')))) {
+                          // Format to show cents
+                          const numValue = parseFloat(value.replace(',', '.'));
+                          const formatted = numValue.toFixed(2).replace('.', ',');
+                          updateItem(item.id, 'unitPrice', formatted);
                         }
                       }}
                       placeholder="0,00"
-                      min="0"
-                      step="0.01"
-                      className="mt-1 text-sm h-9 [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [-moz-appearance:textfield]"
+                      className="mt-1 text-sm h-9"
                     />
                   </div>
                 </div>
