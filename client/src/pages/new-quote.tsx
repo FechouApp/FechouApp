@@ -63,6 +63,38 @@ export default function NewQuote() {
   const [discount, setDiscount] = useState("");
   const [attachments, setAttachments] = useState<File[]>([]);
 
+  // Auto-scroll helper for mobile
+  const scrollToNextField = (currentFieldId: string) => {
+    if (window.innerWidth > 768) return; // Only on mobile
+    
+    const fieldOrder = [
+      'client-select',
+      'title-input',
+      'description-input',
+      'item-0-description',
+      'item-0-quantity',
+      'item-0-price',
+      'observations-input',
+      'payment-terms-input',
+      'execution-deadline-input'
+    ];
+    
+    const currentIndex = fieldOrder.indexOf(currentFieldId);
+    if (currentIndex >= 0 && currentIndex < fieldOrder.length - 1) {
+      const nextFieldId = fieldOrder[currentIndex + 1];
+      setTimeout(() => {
+        const nextField = document.getElementById(nextFieldId);
+        if (nextField) {
+          nextField.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'center' 
+          });
+          nextField.focus();
+        }
+      }, 300);
+    }
+  };
+
   // Redirect to home if not authenticated
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
@@ -137,7 +169,7 @@ export default function NewQuote() {
         throw error;
       }
     },
-    onSuccess: () => {
+    onSuccess: (data: any) => {
       queryClient.invalidateQueries({ queryKey: ["/api/quotes"] });
       if (isEditing) {
         queryClient.invalidateQueries({ queryKey: [`/api/quotes/${quoteId}`] });
@@ -146,7 +178,13 @@ export default function NewQuote() {
         title: "Sucesso",
         description: isEditing ? "Orçamento atualizado com sucesso!" : "Orçamento criado com sucesso!",
       });
-      setLocation("/quotes");
+      
+      // Redirect with new quote ID for mobile scroll
+      if (!isEditing && data?.id && window.innerWidth <= 768) {
+        setLocation(`/quotes?newQuote=${data.id}`);
+      } else {
+        setLocation("/quotes");
+      }
     },
     onError: (error: any) => {
       console.error("Quote creation/update error:", error);
@@ -404,8 +442,11 @@ export default function NewQuote() {
             <CardTitle className="text-base">Cliente *</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            <Select value={selectedClientId} onValueChange={setSelectedClientId}>
-              <SelectTrigger>
+            <Select value={selectedClientId} onValueChange={(value) => {
+              setSelectedClientId(value);
+              scrollToNextField('client-select');
+            }}>
+              <SelectTrigger id="client-select">
                 <SelectValue placeholder="Selecione um cliente..." />
               </SelectTrigger>
               <SelectContent>
@@ -434,8 +475,10 @@ export default function NewQuote() {
             <div>
               <Label className="text-sm">Título do Orçamento *</Label>
               <Input
+                id="title-input"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
+                onBlur={() => scrollToNextField('title-input')}
                 placeholder="Ex: Reforma Residencial"
                 className="mt-1"
               />

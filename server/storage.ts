@@ -64,6 +64,8 @@ export interface IStorage {
   getReviews(userId: string): Promise<(Review & { client: Client })[]>;
   createReview(review: InsertReview): Promise<Review>;
   updateReview(id: string, review: Partial<InsertReview>): Promise<Review | undefined>;
+  getReviewByQuoteAndClient(quoteId: string, clientId: string): Promise<Review | undefined>;
+  getReviewByUserAndClient(userId: string, clientId: string): Promise<Review | undefined>;
 
   // Payment operations
   getPayments(userId: string): Promise<Payment[]>;
@@ -611,6 +613,14 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(reviews)
       .where(and(eq(reviews.quoteId, quoteId), eq(reviews.clientId, clientId)));
+    return review;
+  }
+
+  async getReviewByUserAndClient(userId: string, clientId: string): Promise<Review | undefined> {
+    const [review] = await db
+      .select()
+      .from(reviews)
+      .where(and(eq(reviews.userId, userId), eq(reviews.clientId, clientId)));
     return review;
   }
 
