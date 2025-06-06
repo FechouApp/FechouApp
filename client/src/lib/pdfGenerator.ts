@@ -385,8 +385,8 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
   doc.setFont('helvetica', 'bold');
   doc.text('VALIDADE DO ORÇAMENTO:', marginLeft + 2, yPosition + 2);
   
-  // Calcular data de validade (30 dias a partir de hoje)
-  const validityDate = addDays(new Date(), 30);
+  // Usar a data de validade correta do orçamento
+  const validityDate = new Date(quote.validUntil);
   const validityDateFormatted = format(validityDate, 'dd/MM/yyyy', { locale: ptBR });
   doc.text(validityDateFormatted, marginLeft + 65, yPosition + 2);
   yPosition += 10;

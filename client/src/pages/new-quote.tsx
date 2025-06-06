@@ -269,24 +269,41 @@ export default function NewQuote() {
 
   // Add item from favorites
   const addItemFromFavorites = (savedItem: any) => {
-    if (!isUserPremium && items.length >= maxItemsForFreeUser) {
-      toast({
-        title: "Limite atingido",
-        description: `Plano gratuito permite apenas ${maxItemsForFreeUser} itens por orçamento.`,
-        variant: "destructive",
-      });
-      return;
-    }
-
-    const newItem: QuoteItemData = {
-      id: Math.random().toString(36).substr(2, 9),
-      description: savedItem.name,
-      quantity: 1,
-      unitPrice: savedItem.unitPrice,
-      total: parseFloat(savedItem.unitPrice).toFixed(2)
-    };
+    // Check if first item is empty, replace it, otherwise add new item
+    const firstItem = items[0];
+    const isFirstItemEmpty = !firstItem.description.trim() && (!firstItem.unitPrice || firstItem.unitPrice === "0");
     
-    setItems(prev => [...prev, newItem]);
+    if (isFirstItemEmpty) {
+      // Replace first empty item
+      const updatedItem: QuoteItemData = {
+        ...firstItem,
+        description: savedItem.name,
+        quantity: 1,
+        unitPrice: savedItem.unitPrice,
+        total: parseFloat(savedItem.unitPrice).toFixed(2)
+      };
+      setItems(prev => [updatedItem, ...prev.slice(1)]);
+    } else {
+      // Add new item if first item has content
+      if (!isUserPremium && items.length >= maxItemsForFreeUser) {
+        toast({
+          title: "Limite atingido",
+          description: `Plano gratuito permite apenas ${maxItemsForFreeUser} itens por orçamento.`,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const newItem: QuoteItemData = {
+        id: Math.random().toString(36).substr(2, 9),
+        description: savedItem.name,
+        quantity: 1,
+        unitPrice: savedItem.unitPrice,
+        total: parseFloat(savedItem.unitPrice).toFixed(2)
+      };
+      setItems(prev => [...prev, newItem]);
+    }
+    
     setShowFavorites(false);
     toast({
       title: "Item adicionado",
@@ -685,7 +702,7 @@ export default function NewQuote() {
                   <Textarea
                     value={item.description}
                     onChange={(e) => updateItem(item.id, 'description', e.target.value)}
-                    placeholder="Descrição do item"
+                    placeholder="Ex: Desenvolvimento de sistema web personalizado"
                     rows={2}
                     className="mt-1 text-sm"
                   />
@@ -699,6 +716,7 @@ export default function NewQuote() {
                       value={item.quantity}
                       onChange={(e) => updateItem(item.id, 'quantity', parseInt(e.target.value) || 1)}
                       min="1"
+                      placeholder="1"
                       className="mt-1 text-sm h-9"
                     />
                   </div>
@@ -714,7 +732,7 @@ export default function NewQuote() {
                           updateItem(item.id, 'unitPrice', value);
                         }
                       }}
-                      placeholder="0,00"
+                      placeholder="Ex: 150,00"
                       min="0"
                       step="0.01"
                       className="mt-1 text-sm h-9"
