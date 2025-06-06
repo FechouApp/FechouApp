@@ -114,6 +114,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Rota para salvar dados do perfil durante onboarding
+  app.post('/api/user/profile', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const {
+        firstName,
+        lastName,
+        businessName,
+        email,
+        phone,
+        address,
+        city,
+        state,
+        zipCode,
+        businessDescription
+      } = req.body;
+
+      const updatedUser = await storage.updateUserProfile(userId, {
+        firstName,
+        lastName,
+        businessName,
+        email,
+        phone,
+        address,
+        city,
+        state,
+        zipCode,
+        businessDescription
+      });
+
+      res.json(updatedUser);
+    } catch (error) {
+      console.error("Error updating user profile:", error);
+      res.status(500).json({ message: "Erro ao salvar perfil" });
+    }
+  });
+
   app.put('/api/auth/user', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;

@@ -35,6 +35,7 @@ export interface IStorage {
   updateUserPlan(id: string, plan: string, planExpiresAt: Date | null): Promise<User>;
   addReferralBonus(userId: string): Promise<User>;
   updateUserColors(id: string, primaryColor: string, secondaryColor: string): Promise<User>;
+  updateUserProfile(id: string, profileData: Partial<User>): Promise<User>;
 
   // Client operations
   getClients(userId: string): Promise<Client[]>;
@@ -179,6 +180,18 @@ export class DatabaseStorage implements IStorage {
       .set({ 
         primaryColor,
         secondaryColor,
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, id))
+      .returning();
+    return updatedUser;
+  }
+
+  async updateUserProfile(id: string, profileData: Partial<User>): Promise<User> {
+    const [updatedUser] = await db
+      .update(users)
+      .set({ 
+        ...profileData,
         updatedAt: new Date(),
       })
       .where(eq(users.id, id))
