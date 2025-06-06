@@ -21,7 +21,7 @@ import QuickSetup from "@/components/quick-setup";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useLocation } from "wouter";
-import { ArrowLeft, Plus, Save, Crown, Trash2, AlertCircle } from "lucide-react";
+import { ArrowLeft, Plus, Save, Crown, Trash2, AlertCircle, Star, ChevronDown } from "lucide-react";
 import type { Client, CreateQuoteRequest, QuoteWithDetails } from "@/types";
 
 import PhotoUploadSection from "@/components/quotes/photo-upload-section";
@@ -62,6 +62,7 @@ export default function NewQuote() {
   ]);
   const [discount, setDiscount] = useState("");
   const [attachments, setAttachments] = useState<File[]>([]);
+  const [showFavorites, setShowFavorites] = useState(false);
 
   // Auto-scroll helper for mobile
   const scrollToNextField = (currentFieldId: string) => {
@@ -119,6 +120,32 @@ export default function NewQuote() {
   const { data: planLimits } = useQuery({
     queryKey: ["/api/user/plan-limits"],
     retry: false,
+  });
+
+  // Load saved items for favorites
+  const { data: savedItems = [] } = useQuery({
+    queryKey: ["/api/saved-items"],
+    retry: false,
+  });
+
+  // Mutation to save item as favorite
+  const saveItemMutation = useMutation({
+    mutationFn: (itemData: { name: string; unitPrice: string }) => 
+      apiRequest("POST", "/api/saved-items", itemData),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/saved-items"] });
+      toast({
+        title: "Item salvo",
+        description: "Item adicionado aos favoritos.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Erro",
+        description: error?.message || "Erro ao salvar item.",
+        variant: "destructive",
+      });
+    },
   });
 
   // Load quote data for editing
@@ -212,6 +239,60 @@ export default function NewQuote() {
       });
     },
   });
+
+  // Save item as favorite
+  const saveItemAsFavorite = (item: QuoteItemData) => {
+    if (!item.description.trim() || !item.unitPrice || parseFloat(item.unitPrice) <= 0) {
+      toast({
+        title: "Erro",
+        description: "Preencha a descrição e o preço para salvar como favorito.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const maxItems = isUserPremium ? 15 : 3;
+    if (savedItems.length >= maxItems) {
+      toast({
+        title: "Limite atingido",
+        description: `${isUserPremium ? 'Premium' : 'Gratuito'} permite até ${maxItems} itens favoritos.`,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    saveItemMutation.mutate({
+      name: item.description,
+      unitPrice: item.unitPrice,
+    });
+  };
+
+  // Add item from favorites
+  const addItemFromFavorites = (savedItem: any) => {
+    if (!isUserPremium && items.length >= maxItemsForFreeUser) {
+      toast({
+        title: "Limite atingido",
+        description: `Plano gratuito permite apenas ${maxItemsForFreeUser} itens por orçamento.`,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const newItem: QuoteItemData = {
+      id: Math.random().toString(36).substr(2, 9),
+      description: savedItem.name,
+      quantity: 1,
+      unitPrice: savedItem.unitPrice,
+      total: parseFloat(savedItem.unitPrice).toFixed(2)
+    };
+    
+    setItems(prev => [...prev, newItem]);
+    setShowFavorites(false);
+    toast({
+      title: "Item adicionado",
+      description: "Item favorito adicionado ao orçamento.",
+    });
+  };
 
   // Item management functions
   const addItem = () => {
@@ -537,7 +618,40 @@ export default function NewQuote() {
             )}
           </CardHeader>
           <CardContent className="space-y-3">
-
+            {/* Favorites Dropdown */}
+            {savedItems.length > 0 && (
+              <div className="relative">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowFavorites(!showFavorites)}
+                  className="w-full justify-between"
+                >
+                  <div className="flex items-center gap-2">
+                    <Star className="w-4 h-4 text-yellow-500" />
+                    <span>Itens Favoritos ({savedItems.length})</span>
+                  </div>
+                  <ChevronDown className={`w-4 h-4 transition-transform ${showFavorites ? 'rotate-180' : ''}`} />
+                </Button>
+                
+                {showFavorites && (
+                  <div className="absolute top-full left-0 right-0 mt-1 bg-white border rounded-lg shadow-lg z-10 max-h-40 overflow-y-auto">
+                    {savedItems.map((savedItem: any) => (
+                      <button
+                        key={savedItem.id}
+                        onClick={() => addItemFromFavorites(savedItem)}
+                        className="w-full text-left px-3 py-2 hover:bg-gray-50 border-b last:border-b-0"
+                      >
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm font-medium">{savedItem.name}</span>
+                          <span className="text-xs text-gray-500">R$ {parseFloat(savedItem.unitPrice).toFixed(2).replace('.', ',')}</span>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
 
             {items.map((item, index) => (
               <div key={item.id} className="p-3 bg-gray-50 rounded-lg space-y-3">

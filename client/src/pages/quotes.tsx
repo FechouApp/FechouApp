@@ -439,16 +439,18 @@ export default function Quotes() {
                               size="sm" 
                               variant="outline" 
                               onClick={() => handleViewQuote(quote.id)}
+                              className="flex items-center justify-center gap-1 px-2 py-1 text-xs h-8"
                             >
-                              <Eye className="w-4 h-4 mr-1" />
+                              <Eye className="w-3 h-3" />
                               Ver
                             </Button>
                             <Button 
                               size="sm" 
                               variant="outline" 
                               onClick={() => handleEditQuote(quote.id)}
+                              className="flex items-center justify-center gap-1 px-2 py-1 text-xs h-8"
                             >
-                              <Edit className="w-4 h-4 mr-1" />
+                              <Edit className="w-3 h-3" />
                               Editar
                             </Button>
                             <Button 
@@ -456,8 +458,9 @@ export default function Quotes() {
                               variant="outline" 
                               onClick={() => handleDeleteQuote(quote.id)}
                               disabled={deleteQuoteMutation.isPending}
+                              className="flex items-center justify-center gap-1 px-2 py-1 text-xs h-8"
                             >
-                              <Trash2 className="w-4 h-4 mr-1 text-red-500" />
+                              <Trash2 className="w-3 h-3 text-red-500" />
                               Excluir
                             </Button>
                           </div>
