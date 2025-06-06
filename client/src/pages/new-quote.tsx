@@ -733,9 +733,17 @@ export default function NewQuote() {
                     <Label className="text-xs text-gray-600">Quantidade</Label>
                     <Input
                       type="number"
-                      value={item.quantity || ""}
-                      onChange={(e) => updateItem(item.id, 'quantity', parseInt(e.target.value) || 0)}
-                      min="0"
+                      value={item.quantity === 1 ? "" : item.quantity || ""}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        updateItem(item.id, 'quantity', value === "" ? 1 : parseInt(value) || 1);
+                      }}
+                      onFocus={(e) => {
+                        if (item.quantity === 1) {
+                          e.target.select();
+                        }
+                      }}
+                      min="1"
                       placeholder="1"
                       className="mt-1 text-sm h-9 [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [-moz-appearance:textfield]"
                     />

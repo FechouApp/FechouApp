@@ -114,6 +114,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Check if user has personal data
+  app.get('/api/user/has-personal-data', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      // Check if user has essential personal data
+      const hasPersonalData = !!(user.firstName && user.phone && user.businessName);
+      
+      res.json({ hasPersonalData });
+    } catch (error: any) {
+      console.error('Error checking user personal data:', error);
+      res.status(500).json({ 
+        message: "Erro ao verificar dados pessoais",
+        error: error.message 
+      });
+    }
+  });
+
   // Rota para salvar dados do perfil durante onboarding
   app.post('/api/user/profile', isAuthenticated, async (req: any, res) => {
     try {

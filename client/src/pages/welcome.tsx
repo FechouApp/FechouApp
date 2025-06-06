@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
+import { useQuery } from "@tanstack/react-query";
 import UserOnboarding from "@/components/onboarding/user-onboarding";
 
 export default function Welcome() {
@@ -8,17 +9,23 @@ export default function Welcome() {
   const [, setLocation] = useLocation();
   const [showOnboarding, setShowOnboarding] = useState(false);
 
+  // Check if user has personal data in the database
+  const { data: personalDataCheck, isLoading } = useQuery({
+    queryKey: ['/api/user/has-personal-data'],
+    enabled: !!user,
+  });
+
   useEffect(() => {
-    if (user) {
-      // Check if user has completed onboarding
-      const hasCompletedOnboarding = localStorage.getItem('fechou_onboarding_completed');
-      if (!hasCompletedOnboarding) {
+    if (user && !isLoading && personalDataCheck) {
+      // Show onboarding only if user doesn't have personal data
+      const hasData = personalDataCheck && typeof personalDataCheck === 'object' && 'hasPersonalData' in personalDataCheck;
+      if (hasData && !(personalDataCheck as { hasPersonalData: boolean }).hasPersonalData) {
         setShowOnboarding(true);
-      } else {
+      } else if (hasData) {
         setLocation('/');
       }
     }
-  }, [user, setLocation]);
+  }, [user, personalDataCheck, isLoading, setLocation]);
 
   const handleOnboardingComplete = () => {
     localStorage.setItem('fechou_onboarding_completed', 'true');
