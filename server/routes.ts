@@ -136,12 +136,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         lastName,
         businessName,
         email,
-        phone,
-        address,
-        city,
-        state,
-        zipCode,
-        businessDescription
+        phone
       });
 
       res.json(updatedUser);

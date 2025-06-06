@@ -16,11 +16,6 @@ interface OnboardingData {
   businessName: string;
   email: string;
   phone: string;
-  address: string;
-  city: string;
-  state: string;
-  zipCode: string;
-  businessDescription: string;
 }
 
 interface UserOnboardingProps {
@@ -37,34 +32,20 @@ const steps = [
   },
   {
     id: 2,
-    title: "Dados Pessoais",
+    title: "Seus Dados",
     subtitle: "Como você gostaria de aparecer nos orçamentos?",
     icon: User,
-    fields: ['firstName', 'lastName']
+    fields: ['firstName', 'lastName', 'businessName']
   },
   {
     id: 3,
-    title: "Sua Empresa",
-    subtitle: "Informações do seu negócio",
-    icon: Building2,
-    fields: ['businessName', 'businessDescription']
-  },
-  {
-    id: 4,
     title: "Contato",
     subtitle: "Como seus clientes podem te encontrar?",
     icon: Phone,
     fields: ['email', 'phone']
   },
   {
-    id: 5,
-    title: "Endereço",
-    subtitle: "Onde sua empresa está localizada?",
-    icon: MapPin,
-    fields: ['address', 'city', 'state', 'zipCode']
-  },
-  {
-    id: 6,
+    id: 4,
     title: "Tudo Pronto!",
     subtitle: "Suas informações foram salvas com sucesso",
     icon: Check,
@@ -79,12 +60,7 @@ export default function UserOnboarding({ onComplete }: UserOnboardingProps) {
     lastName: "",
     businessName: "",
     email: "",
-    phone: "",
-    address: "",
-    city: "",
-    state: "",
-    zipCode: "",
-    businessDescription: ""
+    phone: ""
   });
   const { toast } = useToast();
 
@@ -112,11 +88,11 @@ export default function UserOnboarding({ onComplete }: UserOnboardingProps) {
   };
 
   const handleNext = () => {
-    if (currentStep === 5) {
-      // Save data on step 5 (last data collection step)
+    if (currentStep === 3) {
+      // Save data on step 3 (last data collection step)
       saveUserDataMutation.mutate(data);
-      setCurrentStep(6);
-    } else if (currentStep < 6) {
+      setCurrentStep(4);
+    } else if (currentStep < 4) {
       setCurrentStep(prev => prev + 1);
     } else {
       onComplete();
@@ -211,11 +187,6 @@ export default function UserOnboarding({ onComplete }: UserOnboardingProps) {
                   className="mt-1"
                 />
               </div>
-            </>
-          )}
-
-          {currentStep === 3 && (
-            <>
               <div>
                 <Label htmlFor="businessName">Nome da Empresa *</Label>
                 <Input
@@ -226,21 +197,10 @@ export default function UserOnboarding({ onComplete }: UserOnboardingProps) {
                   className="mt-1"
                 />
               </div>
-              <div>
-                <Label htmlFor="businessDescription">Descrição do Negócio *</Label>
-                <Textarea
-                  id="businessDescription"
-                  value={data.businessDescription}
-                  onChange={(e) => updateData('businessDescription', e.target.value)}
-                  placeholder="Ex: Consultoria em tecnologia, Serviços de design..."
-                  rows={3}
-                  className="mt-1"
-                />
-              </div>
             </>
           )}
 
-          {currentStep === 4 && (
+          {currentStep === 3 && (
             <>
               <div>
                 <Label htmlFor="email">Email *</Label>
@@ -260,53 +220,6 @@ export default function UserOnboarding({ onComplete }: UserOnboardingProps) {
                   value={data.phone}
                   onChange={(e) => updateData('phone', e.target.value)}
                   placeholder="(11) 99999-9999"
-                  className="mt-1"
-                />
-              </div>
-            </>
-          )}
-
-          {currentStep === 5 && (
-            <>
-              <div>
-                <Label htmlFor="address">Endereço *</Label>
-                <Input
-                  id="address"
-                  value={data.address}
-                  onChange={(e) => updateData('address', e.target.value)}
-                  placeholder="Rua, número"
-                  className="mt-1"
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <Label htmlFor="city">Cidade *</Label>
-                  <Input
-                    id="city"
-                    value={data.city}
-                    onChange={(e) => updateData('city', e.target.value)}
-                    placeholder="Cidade"
-                    className="mt-1"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="state">Estado *</Label>
-                  <Input
-                    id="state"
-                    value={data.state}
-                    onChange={(e) => updateData('state', e.target.value)}
-                    placeholder="SP"
-                    className="mt-1"
-                  />
-                </div>
-              </div>
-              <div>
-                <Label htmlFor="zipCode">CEP *</Label>
-                <Input
-                  id="zipCode"
-                  value={data.zipCode}
-                  onChange={(e) => updateData('zipCode', e.target.value)}
-                  placeholder="00000-000"
                   className="mt-1"
                 />
               </div>
@@ -350,9 +263,9 @@ export default function UserOnboarding({ onComplete }: UserOnboardingProps) {
             className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700"
           >
             {currentStep === 1 ? "Iniciar" : 
-             currentStep === 6 ? "Finalizar" : 
-             currentStep === 5 ? "Salvar" : "Próximo"}
-            {currentStep < 6 && <ChevronRight className="w-4 h-4" />}
+             currentStep === 4 ? "Finalizar" : 
+             currentStep === 3 ? "Salvar" : "Próximo"}
+            {currentStep < 4 && <ChevronRight className="w-4 h-4" />}
           </Button>
         </div>
       </Card>
