@@ -4,6 +4,7 @@ import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { insertClientSchema, insertQuoteSchema, insertQuoteItemSchema, insertReviewSchema, insertSavedItemSchema } from "@shared/schema";
 import { z } from "zod";
+import "./types";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
@@ -573,12 +574,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { id } = req.params;
       const { quote, items } = req.body;
 
-      if (!req.user?.id) {
+      const userId = req.user?.id;
+      if (!userId) {
         return res.status(401).json({ message: "User not authenticated" });
       }
 
       // Verificar se o orçamento existe e pertence ao usuário
-      const existingQuote = await storage.getQuote(id, req.user.id);
+      const existingQuote = await storage.getQuote(id, userId);
       if (!existingQuote) {
         return res.status(404).json({ message: "Quote not found" });
       }

@@ -527,7 +527,10 @@ export class DatabaseStorage implements IStorage {
   async createQuoteItem(item: InsertQuoteItem): Promise<QuoteItem> {
     const [newItem] = await db
       .insert(quoteItems)
-      .values(item)
+      .values({
+        id: nanoid(),
+        ...item
+      })
       .returning();
     return newItem;
   }
@@ -733,10 +736,11 @@ export class DatabaseStorage implements IStorage {
 
     // Filter quotes by month
     const thisMonthQuotes = userQuotes.filter(quote => 
-      new Date(quote.createdAt) >= startOfMonth
+      quote.createdAt && new Date(quote.createdAt) >= startOfMonth
     );
 
     const lastMonthQuotes = userQuotes.filter(quote => {
+      if (!quote.createdAt) return false;
       const quoteDate = new Date(quote.createdAt);
       return quoteDate >= startOfLastMonth && quoteDate <= endOfLastMonth;
     });
@@ -1036,7 +1040,7 @@ export class DatabaseStorage implements IStorage {
     const [updatedUser] = await db
       .update(users)
       .set({ 
-        quotesUsedThisMonth: user.quotesUsedThisMonth + 1,
+        quotesUsedThisMonth: (user.quotesUsedThisMonth || 0) + 1,
         updatedAt: new Date()
       })
       .where(eq(users.id, userId))
