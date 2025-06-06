@@ -206,7 +206,7 @@ export default function Quotes() {
     const matchesSearch = 
       quote.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       quote.quoteNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      quote.client.name.toLowerCase().includes(searchTerm.toLowerCase());
+      (quote.client?.name || '').toLowerCase().includes(searchTerm.toLowerCase());
 
     const matchesStatus = statusFilter === 'all' || quote.status === statusFilter;
 
@@ -334,9 +334,9 @@ export default function Quotes() {
                       </TableCell>
                       <TableCell className="hidden md:table-cell">
                         <div>
-                          <p className="text-gray-800">{quote.client.name}</p>
-                          {quote.client.email && (
-                            <p className="text-sm text-gray-600">{quote.client.email}</p>
+                          <p className="text-gray-800">{quote.client?.name || 'Cliente não informado'}</p>
+                          {quote.client?.email && (
+                            <p className="text-sm text-gray-600">{quote.client?.email}</p>
                           )}
                         </div>
                       </TableCell>
@@ -414,7 +414,7 @@ export default function Quotes() {
                           <div className="flex items-center justify-between">
                             <div>
                               <p className="text-sm text-gray-600">Cliente</p>
-                              <p className="font-medium text-gray-800">{quote.client.name}</p>
+                              <p className="font-medium text-gray-800">{quote.client?.name || 'Cliente não informado'}</p>
                             </div>
                             <div className="text-right">
                               <p className="text-sm text-gray-600">Valor</p>
