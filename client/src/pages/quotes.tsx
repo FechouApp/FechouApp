@@ -324,7 +324,7 @@ export default function Quotes() {
                   const validityStatus = getValidityStatus(quote.validUntil);
 
                   return (
-                    <TableRow key={quote.id} data-quote-id={quote.id} className="hover:bg-gray-50">
+                    <TableRow key={quote.id} data-quote-id={quote.id} className="hover:bg-gray-50 md:border-b-2 md:border-gray-100 border-b-0">
                       {/* Desktop view */}
                       <TableCell className="hidden md:table-cell">
                         <div>
@@ -404,7 +404,7 @@ export default function Quotes() {
 
                       {/* Mobile view - single cell with card layout */}
                       <TableCell className="md:hidden" colSpan={6}>
-                        <div className="p-4 space-y-3">
+                        <div className="bg-white border border-gray-200 rounded-lg p-4 space-y-3 mx-2 my-3 shadow-sm">
                           <div className="flex items-center justify-between">
                             <div>
                               <p className="font-medium text-gray-800">{quote.quoteNumber}</p>

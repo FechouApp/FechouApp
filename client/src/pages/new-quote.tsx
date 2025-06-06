@@ -389,13 +389,31 @@ export default function NewQuote() {
   const selectedClient = clients?.find(client => client.id === selectedClientId);
   const canProceed = selectedClientId && 
                     title.trim() && 
+                    items.length > 0 &&
                     items.every(item => 
                       item.description.trim() && 
                       item.quantity > 0 && 
                       item.unitPrice && 
+                      !isNaN(parseFloat(item.unitPrice)) &&
                       parseFloat(item.unitPrice) > 0
                     ) &&
                     !createQuoteMutation.isPending;
+
+  // Debug log para verificar o estado
+  console.log('Debug canProceed:', {
+    selectedClientId,
+    titleTrim: title.trim(),
+    itemsLength: items.length,
+    itemsValid: items.every(item => 
+      item.description.trim() && 
+      item.quantity > 0 && 
+      item.unitPrice && 
+      !isNaN(parseFloat(item.unitPrice)) &&
+      parseFloat(item.unitPrice) > 0
+    ),
+    isPending: createQuoteMutation.isPending,
+    canProceed
+  });
 
   return (
     <div className="min-h-screen bg-gray-50">
