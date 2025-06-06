@@ -25,17 +25,13 @@ export default function Welcome() {
     }
   }, [user, setLocation]);
 
-  const handleStartRegistration = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
+  const handleStartRegistration = () => {
     console.log('Botão Começar Cadastro clicado');
     localStorage.setItem('fechou_has_visited', 'true');
     setLocation('/settings');
   };
 
-  const handleSkip = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
+  const handleSkip = () => {
     console.log('Botão Pular por agora clicado');
     localStorage.setItem('fechou_has_visited', 'true');
     setLocation('/');
@@ -112,25 +108,20 @@ export default function Welcome() {
 
           {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button 
-              type="button"
+            <button 
               onClick={handleStartRegistration}
-              className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-3 text-lg font-semibold hover:from-blue-700 hover:to-purple-700"
-              size="lg"
+              className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-3 text-lg font-semibold hover:from-blue-700 hover:to-purple-700 rounded-lg transition-all duration-200 flex items-center justify-center gap-2"
             >
               Começar Cadastro
-              <ArrowRight className="w-5 h-5 ml-2" />
-            </Button>
+              <ArrowRight className="w-5 h-5" />
+            </button>
             
-            <Button 
-              type="button"
-              variant="outline" 
+            <button 
               onClick={handleSkip}
-              className="px-8 py-3 text-lg border-2 hover:bg-gray-50"
-              size="lg"
+              className="px-8 py-3 text-lg border-2 border-gray-300 hover:bg-gray-50 rounded-lg transition-all duration-200 bg-white text-gray-700"
             >
               Pular por agora
-            </Button>
+            </button>
           </div>
 
           {/* Note */}
