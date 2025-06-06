@@ -711,12 +711,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const reviewData = insertReviewSchema.parse(req.body);
 
-      // Check if a review already exists for this client and quote
+      // Check if a review already exists for this client and user (one review per client per user)
       if (reviewData.quoteId && reviewData.clientId) {
-        const existingReview = await storage.getReviewByQuoteAndClient(reviewData.quoteId, reviewData.clientId);
+        // Get the quote to find the userId
+        const quote = await storage.getQuoteById(reviewData.quoteId);
+        if (!quote) {
+          return res.status(404).json({ message: "Quote not found" });
+        }
+
+        // Check if this client has already reviewed ANY quote from this user
+        const existingReview = await storage.getReviewByUserAndClient(quote.userId, reviewData.clientId);
         if (existingReview) {
           return res.status(409).json({ 
-            message: "Você já avaliou este orçamento. Cada cliente pode avaliar apenas uma vez por orçamento." 
+            message: "Você já avaliou este prestador de serviços. Obrigado pela sua avaliação anterior!" 
           });
         }
       }
@@ -751,11 +758,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Check if review exists for quote and client
+  // Check if review exists for quote and client (one review per client per user)
   app.get('/api/reviews/check/:quoteId/:clientId', async (req, res) => {
     try {
       const { quoteId, clientId } = req.params;
-      const existingReview = await storage.getReviewByQuoteAndClient(quoteId, clientId);
+      
+      // Get the quote to find the userId
+      const quote = await storage.getQuoteById(quoteId);
+      if (!quote) {
+        return res.status(404).json({ message: "Quote not found" });
+      }
+
+      // Check if this client has already reviewed ANY quote from this user
+      const existingReview = await storage.getReviewByUserAndClient(quote.userId, clientId);
 
       if (existingReview) {
         res.json(existingReview);
