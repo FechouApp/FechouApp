@@ -607,9 +607,12 @@ export default function QuoteView() {
 
       {/* Photos Dialog */}
       <Dialog open={showPhotosDialog} onOpenChange={setShowPhotosDialog}>
-        <DialogContent className="max-w-4xl max-h-[90vh]">
+        <DialogContent className="max-w-4xl max-h-[90vh]" aria-describedby="photos-description">
           <DialogHeader>
             <DialogTitle>Fotos do Orçamento</DialogTitle>
+            <p id="photos-description" className="text-sm text-muted-foreground">
+              Visualize e amplie as fotos anexadas ao orçamento. Clique em uma foto para abrir em nova aba.
+            </p>
           </DialogHeader>
           
           {quote?.photos && Array.isArray(quote.photos) && (
@@ -623,9 +626,36 @@ export default function QuoteView() {
                     onClick={() => window.open(photo.url, '_blank')}
                   />
                   <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100">
-                    <div className="text-white text-center">
-                      <Eye className="w-8 h-8 mx-auto mb-2" />
-                      <span className="text-sm font-medium">Clique para ampliar</span>
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          window.open(photo.url, '_blank');
+                        }}
+                        className="bg-white/90 text-black hover:bg-white"
+                      >
+                        <Eye className="w-4 h-4 mr-1" />
+                        Ampliar
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          const link = document.createElement('a');
+                          link.href = photo.url;
+                          link.download = photo.name || `foto-${index + 1}.jpg`;
+                          document.body.appendChild(link);
+                          link.click();
+                          document.body.removeChild(link);
+                        }}
+                        className="bg-white/90 text-black hover:bg-white"
+                      >
+                        <Download className="w-4 h-4 mr-1" />
+                        Salvar
+                      </Button>
                     </div>
                   </div>
                   {photo.name && (
