@@ -8,65 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 export default function QuickSetup() {
   const { toast } = useToast();
 
-  const createSampleClientsMutation = useMutation({
-    mutationFn: async () => {
-      try {
-        const sampleClients = [
-          {
-            name: "João Silva",
-            email: "joao.silva@email.com",
-            phone: "(11) 99999-1234",
-            address: "Rua das Flores, 123",
-            city: "São Paulo",
-            state: "SP",
-            zipCode: "01234-567",
-            notes: "Cliente frequente, prefere orçamentos detalhados"
-          },
-          {
-            name: "Maria Santos",
-            email: "maria.santos@email.com", 
-            phone: "(11) 98888-5678",
-            address: "Av. Paulista, 456",
-            city: "São Paulo",
-            state: "SP",
-            zipCode: "01311-000",
-            notes: "Trabalhos de reforma residencial"
-          },
-          {
-            name: "Carlos Ferreira",
-            email: "carlos.ferreira@email.com",
-            phone: "(11) 97777-9012",
-            address: "Rua Augusta, 789",
-            city: "São Paulo", 
-            state: "SP",
-            zipCode: "01305-100",
-            notes: "Serviços elétricos comerciais"
-          }
-        ];
-
-        for (const client of sampleClients) {
-          await apiRequest("POST", "/api/clients", client);
-        }
-      } catch (error) {
-        console.error("Error creating clients:", error);
-        throw error;
-      }
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/clients"] });
-      toast({
-        title: "Clientes criados!",
-        description: "3 clientes de exemplo foram adicionados. Agora você pode criar orçamentos.",
-      });
-    },
-    onError: () => {
-      toast({
-        title: "Erro",
-        description: "Não foi possível criar os clientes de exemplo.",
-        variant: "destructive",
-      });
-    },
-  });
+  // Removed automatic sample client creation
 
   return (
     <Card className="bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200">
@@ -82,13 +24,11 @@ export default function QuickSetup() {
         </p>
         
         <div className="flex flex-col sm:flex-row gap-3">
-          <Button
-            onClick={() => createSampleClientsMutation.mutate()}
-            disabled={createSampleClientsMutation.isPending}
-            className="flex items-center gap-2"
-          >
-            <Users className="w-4 h-4" />
-            {createSampleClientsMutation.isPending ? "Criando..." : "Criar Cliente"}
+          <Button asChild className="flex items-center gap-2">
+            <a href="/clients" className="flex items-center gap-2">
+              <Users className="w-4 h-4" />
+              Cadastrar Novo Cliente
+            </a>
           </Button>
           
           <Button variant="outline" asChild>

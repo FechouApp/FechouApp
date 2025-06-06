@@ -25,23 +25,20 @@ export default function Welcome() {
     }
   }, [user, setLocation]);
 
-  const handleStartRegistration = () => {
+  const handleStartRegistration = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     console.log('Botão Começar Cadastro clicado');
-    // Mark as visited
     localStorage.setItem('fechou_has_visited', 'true');
-    // Redirect to registration/settings page
-    setTimeout(() => {
-      setLocation('/settings');
-    }, 100);
+    setLocation('/settings');
   };
 
-  const handleSkip = () => {
+  const handleSkip = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     console.log('Botão Pular por agora clicado');
-    // Mark as visited and go to dashboard
     localStorage.setItem('fechou_has_visited', 'true');
-    setTimeout(() => {
-      setLocation('/');
-    }, 100);
+    setLocation('/');
   };
 
   if (!isVisible) {

@@ -77,7 +77,7 @@ export default function Settings() {
 
   const updateUserMutation = useMutation({
     mutationFn: async (data: Partial<UserType>) => {
-      const response = await apiRequest("/api/auth/user", "PUT", data);
+      const response = await apiRequest("PATCH", "/api/auth/user", data);
       return response;
     },
     onSuccess: () => {
