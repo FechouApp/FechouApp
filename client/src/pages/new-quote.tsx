@@ -69,7 +69,7 @@ export default function NewQuote() {
   const [sendByWhatsapp, setSendByWhatsapp] = useState(true);
   const [sendByEmail, setSendByEmail] = useState(false);
   const [items, setItems] = useState<QuoteItemData[]>([
-    { id: "1", description: "", quantity: 1, unitPrice: "0", total: "0" }
+    { id: "1", description: "", quantity: 1, unitPrice: "", total: "0" }
   ]);
   const [discount, setDiscount] = useState("");
   const [attachments, setAttachments] = useState<File[]>([]);
