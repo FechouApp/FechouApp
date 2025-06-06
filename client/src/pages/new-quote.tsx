@@ -617,6 +617,7 @@ export default function NewQuote() {
                 onChange={(e) => setValidityDays(Number(e.target.value))}
                 min="1"
                 max="365"
+                placeholder="30"
                 className="mt-1"
               />
             </div>
