@@ -60,6 +60,21 @@ export default function Quotes() {
     retry: false,
   });
 
+  // Scroll to newest quote on mobile after creation
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const newQuoteId = urlParams.get('newQuote');
+    
+    if (newQuoteId && quotes && window.innerWidth <= 768) {
+      setTimeout(() => {
+        const quoteElement = document.querySelector(`[data-quote-id="${newQuoteId}"]`);
+        if (quoteElement) {
+          quoteElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 500);
+    }
+  }, [quotes]);
+
   const deleteQuoteMutation = useMutation({
     mutationFn: async (quoteId: string) => {
       await apiRequest("DELETE", `/api/quotes/${quoteId}`);
@@ -309,7 +324,7 @@ export default function Quotes() {
                   const validityStatus = getValidityStatus(quote.validUntil);
 
                   return (
-                    <TableRow key={quote.id} className="hover:bg-gray-50">
+                    <TableRow key={quote.id} data-quote-id={quote.id} className="hover:bg-gray-50">
                       {/* Desktop view */}
                       <TableCell className="hidden md:table-cell">
                         <div>

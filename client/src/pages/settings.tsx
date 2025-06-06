@@ -582,18 +582,18 @@ export default function Settings() {
             <div className="flex items-center justify-between mb-4">
               <div>
                 <div className="flex items-center gap-2 mb-1">
-                  <Badge variant={user?.plan === "premium" ? "default" : "secondary"}>
-                    {user?.plan === "premium" ? "Premium" : "Gratuito"}
+                  <Badge variant={user?.plan === "PREMIUM" || user?.plan === "PREMIUM_CORTESIA" ? "default" : "secondary"}>
+                    {user?.plan === "PREMIUM" || user?.plan === "PREMIUM_CORTESIA" ? "Premium" : "Gratuito"}
                   </Badge>
-                  {user?.plan === "premium" && (
+                  {(user?.plan === "PREMIUM" || user?.plan === "PREMIUM_CORTESIA") && (
                     <Crown className="w-4 h-4 text-yellow-500" />
                   )}
                 </div>
                 <p className="text-sm text-gray-600">
-                  {user?.quotesLimit ? `${user.monthlyQuotes}/${user.quotesLimit} orçamentos este mês` : "Orçamentos ilimitados"}
+                  {user?.quotesUsedThisMonth !== null && user?.quotesLimit ? `${user.quotesUsedThisMonth || 0}/${user.quotesLimit} orçamentos este mês` : "Orçamentos ilimitados"}
                 </p>
               </div>
-              {user?.plan !== "premium" && (
+              {!(user?.plan === "PREMIUM" || user?.plan === "PREMIUM_CORTESIA") && (
                 <Button variant="outline">
                   Fazer Upgrade
                 </Button>
@@ -603,21 +603,19 @@ export default function Settings() {
             <div className="text-xs text-gray-500">
               <strong>Recursos do seu plano:</strong>
               <ul className="mt-2 space-y-1">
-                {user?.plan === "premium" ? (
+                {(user?.plan === "PREMIUM" || user?.plan === "PREMIUM_CORTESIA") ? (
                   <>
                     <li>✓ Orçamentos ilimitados</li>
-                    <li>✓ Logo personalizado</li>
-                    <li>✓ Link personalizado</li>
-                    <li>✓ Envio por WhatsApp e e-mail</li>
+                    <li>✓ Upload de fotos nos orçamentos</li>
+                    <li>✓ Envio por WhatsApp</li>
                     <li>✓ Suporte prioritário</li>
                   </>
                 ) : (
                   <>
                     <li>✓ Até 5 orçamentos por mês</li>
                     <li>✓ Envio por WhatsApp</li>
-                    <li>✗ Logo personalizado</li>
-                    <li>✗ Link personalizado</li>
-                    <li>✗ Envio por e-mail</li>
+                    <li>✗ Upload de fotos</li>
+                    <li>✗ Suporte prioritário</li>
                   </>
                 )}
               </ul>
