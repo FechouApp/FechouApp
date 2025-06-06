@@ -92,10 +92,11 @@ export default function UserOnboarding({ onComplete }: UserOnboardingProps) {
       // Save data on step 3 (last data collection step)
       saveUserDataMutation.mutate(data);
       setCurrentStep(4);
+    } else if (currentStep === 4) {
+      // Final step - complete onboarding
+      onComplete();
     } else if (currentStep < 4) {
       setCurrentStep(prev => prev + 1);
-    } else {
-      onComplete();
     }
   };
 
