@@ -187,12 +187,26 @@ export default function Clients() {
           const cityInput = form.querySelector('input[name="city"]') as HTMLInputElement;
           const stateInput = form.querySelector('input[name="state"]') as HTMLInputElement;
           
-          if (addressInput) addressInput.value = `${data.logradouro}, ${data.bairro}`;
-          if (cityInput) cityInput.value = data.localidade;
-          if (stateInput) stateInput.value = data.uf;
+          if (addressInput && data.logradouro) {
+            addressInput.value = data.bairro ? `${data.logradouro}, ${data.bairro}` : data.logradouro;
+            addressInput.dispatchEvent(new Event('input', { bubbles: true }));
+          }
+          if (cityInput && data.localidade) {
+            cityInput.value = data.localidade;
+            cityInput.dispatchEvent(new Event('input', { bubbles: true }));
+          }
+          if (stateInput && data.uf) {
+            stateInput.value = data.uf;
+            stateInput.dispatchEvent(new Event('input', { bubbles: true }));
+          }
         }
       } catch (error) {
         console.error('Erro ao buscar CEP:', error);
+        toast({
+          title: "Erro",
+          description: "Não foi possível buscar o endereço pelo CEP.",
+          variant: "destructive",
+        });
       }
     }
   };
@@ -591,7 +605,7 @@ export default function Clients() {
 
                         {/* Mobile view - single cell with card layout */}
                         <TableCell className="md:hidden" colSpan={5}>
-                          <div className="p-4 space-y-3">
+                          <div className="p-3 space-y-3 border rounded-lg bg-gray-50">
                             <div className="flex items-center justify-between">
                               <div className="flex items-center">
                                 <div className="w-10 h-10 bg-brand-primary/10 rounded-full flex items-center justify-center mr-3">
@@ -654,6 +668,16 @@ export default function Clients() {
                               >
                                 <FileText className="w-4 h-4 mr-1" />
                                 Orçar
+                              </Button>
+                              <Button 
+                                size="sm" 
+                                variant="outline" 
+                                className="flex-1"
+                                onClick={() => handleDeleteClient(client.id)}
+                                disabled={deleteClientMutation.isPending}
+                              >
+                                <Trash2 className="w-4 h-4 mr-1 text-red-500" />
+                                Excluir
                               </Button>
                             </div>
                           </div>

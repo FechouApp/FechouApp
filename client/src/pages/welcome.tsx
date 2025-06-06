@@ -12,15 +12,13 @@ export default function Welcome() {
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
-    // Check if this is the first visit
-    const hasVisited = localStorage.getItem('fechou_has_visited');
+    // Always show welcome screen for new users without basic info
     const userHasBasicInfo = user && (user as any).firstName && (user as any).businessName;
     
-    // If user already has basic info or has visited before, redirect to dashboard
-    if (hasVisited || userHasBasicInfo) {
-      localStorage.setItem('fechou_has_visited', 'true');
+    if (userHasBasicInfo) {
       setLocation('/');
-    } else {
+    } else if (user) {
+      // User is logged in but doesn't have basic info
       setIsVisible(true);
     }
   }, [user, setLocation]);
