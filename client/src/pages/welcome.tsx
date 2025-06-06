@@ -22,7 +22,7 @@ export default function Welcome() {
 
   const handleOnboardingComplete = () => {
     localStorage.setItem('fechou_onboarding_completed', 'true');
-    setLocation('/');
+    window.location.href = '/';
   };
 
   if (!showOnboarding) {
