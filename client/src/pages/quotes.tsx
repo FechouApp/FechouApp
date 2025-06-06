@@ -385,14 +385,6 @@ export default function Quotes() {
                           <Button 
                             size="sm" 
                             variant="ghost" 
-                            title="Enviar"
-                            onClick={() => handleSendQuote(quote.id)}
-                          >
-                            <Send className="w-4 h-4" />
-                          </Button>
-                          <Button 
-                            size="sm" 
-                            variant="ghost" 
                             title="Excluir"
                             onClick={() => handleDeleteQuote(quote.id)}
                             disabled={deleteQuoteMutation.isPending}
@@ -442,7 +434,7 @@ export default function Quotes() {
                             </p>
                           </div>
 
-                          <div className="grid grid-cols-2 gap-2 pt-2">
+                          <div className="grid grid-cols-3 gap-2 pt-2">
                             <Button 
                               size="sm" 
                               variant="outline" 
@@ -458,14 +450,6 @@ export default function Quotes() {
                             >
                               <Edit className="w-4 h-4 mr-1" />
                               Editar
-                            </Button>
-                            <Button 
-                              size="sm" 
-                              variant="outline" 
-                              onClick={() => handleSendQuote(quote.id)}
-                            >
-                              <Send className="w-4 h-4 mr-1" />
-                              Enviar
                             </Button>
                             <Button 
                               size="sm" 

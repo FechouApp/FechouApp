@@ -23,7 +23,7 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useLocation } from "wouter";
 import { ArrowLeft, Plus, Save, Crown, Trash2, AlertCircle } from "lucide-react";
 import type { Client, CreateQuoteRequest, QuoteWithDetails } from "@/types";
-import SavedItemsSection from "@/components/quotes/saved-items-section";
+
 import PhotoUploadSection from "@/components/quotes/photo-upload-section";
 
 interface QuoteItemData {
@@ -58,7 +58,7 @@ export default function NewQuote() {
   const [sendByWhatsapp, setSendByWhatsapp] = useState(true);
   const [sendByEmail, setSendByEmail] = useState(false);
   const [items, setItems] = useState<QuoteItemData[]>([
-    { id: "1", description: "", quantity: 1, unitPrice: "", total: "0" }
+    { id: "1", description: "", quantity: 1, unitPrice: "0", total: "0" }
   ]);
   const [discount, setDiscount] = useState("");
   const [attachments, setAttachments] = useState<File[]>([]);
@@ -394,8 +394,9 @@ export default function NewQuote() {
                       item.description.trim() && 
                       item.quantity > 0 && 
                       item.unitPrice && 
+                      item.unitPrice !== "" &&
                       !isNaN(parseFloat(item.unitPrice)) &&
-                      parseFloat(item.unitPrice) > 0
+                      parseFloat(item.unitPrice) >= 0
                     ) &&
                     !createQuoteMutation.isPending;
 
@@ -536,31 +537,7 @@ export default function NewQuote() {
             )}
           </CardHeader>
           <CardContent className="space-y-3">
-            {/* Seção de Itens Salvos/Favoritos */}
-            <SavedItemsSection 
-              onAddItem={(savedItem) => {
-                if (!isUserPremium && items.length >= maxItemsForFreeUser) {
-                  toast({
-                    title: "Limite atingido",
-                    description: `Plano gratuito permite apenas ${maxItemsForFreeUser} itens por orçamento.`,
-                    variant: "destructive",
-                  });
-                  return;
-                }
-                const newItem: QuoteItemData = {
-                  id: Math.random().toString(36).substr(2, 9),
-                  description: savedItem.name,
-                  quantity: 1,
-                  unitPrice: savedItem.unitPrice,
-                  total: parseFloat(savedItem.unitPrice).toFixed(2)
-                };
-                setItems(prev => [...prev, newItem]);
-                toast({
-                  title: "Item adicionado",
-                  description: "Item favorito adicionado ao orçamento.",
-                });
-              }}
-            />
+
 
             {items.map((item, index) => (
               <div key={item.id} className="p-3 bg-gray-50 rounded-lg space-y-3">
