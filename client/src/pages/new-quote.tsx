@@ -752,10 +752,10 @@ export default function NewQuote() {
                           updateItem(item.id, 'unitPrice', value);
                         }
                       }}
-                      placeholder="Ex: 150,00"
+                      placeholder="150.00"
                       min="0"
                       step="0.01"
-                      className="mt-1 text-sm h-9"
+                      className="mt-1 text-sm h-9 [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [-moz-appearance:textfield]"
                     />
                   </div>
                 </div>
