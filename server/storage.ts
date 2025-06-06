@@ -527,15 +527,7 @@ export class DatabaseStorage implements IStorage {
   async createQuoteItem(item: InsertQuoteItem): Promise<QuoteItem> {
     const [newItem] = await db
       .insert(quoteItems)
-      .values({
-        id: nanoid(),
-        quoteId: item.quoteId,
-        description: item.description,
-        quantity: item.quantity || 1,
-        unitPrice: item.unitPrice,
-        total: item.total,
-        order: item.order || 0,
-      })
+      .values(item)
       .returning();
     return newItem;
   }
