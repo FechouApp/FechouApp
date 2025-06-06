@@ -23,7 +23,7 @@ import {
 
 export default function Plans() {
   const { toast } = useToast();
-  const { user, isAuthenticated, isLoading: authLoading } = useAuth();
+  const { user, isAuthenticated, isLoading: authLoading, isPremium } = useAuth();
 
   // Redirect to home if not authenticated
   useEffect(() => {
