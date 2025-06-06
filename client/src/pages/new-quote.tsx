@@ -123,7 +123,7 @@ export default function NewQuote() {
   });
 
   // Load saved items for favorites
-  const { data: savedItems = [] } = useQuery({
+  const { data: savedItems = [] } = useQuery<any[]>({
     queryKey: ["/api/saved-items"],
     retry: false,
   });
@@ -657,16 +657,27 @@ export default function NewQuote() {
               <div key={item.id} className="p-3 bg-gray-50 rounded-lg space-y-3">
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium">Item #{index + 1}</span>
-                  {items.length > 1 && (
+                  <div className="flex items-center gap-1">
                     <Button
                       size="sm"
                       variant="ghost"
-                      onClick={() => removeItem(item.id)}
-                      className="text-red-500 h-6 w-6 p-0"
+                      onClick={() => saveItemAsFavorite(item)}
+                      className="text-yellow-500 hover:text-yellow-600 h-6 w-6 p-0"
+                      title="Salvar como favorito"
                     >
-                      <Trash2 className="w-4 h-4" />
+                      <Star className="w-4 h-4" />
                     </Button>
-                  )}
+                    {items.length > 1 && (
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => removeItem(item.id)}
+                        className="text-red-500 h-6 w-6 p-0"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    )}
+                  </div>
                 </div>
                 
                 <div>
