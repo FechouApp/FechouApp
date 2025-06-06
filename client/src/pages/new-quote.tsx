@@ -737,7 +737,7 @@ export default function NewQuote() {
                       onChange={(e) => updateItem(item.id, 'quantity', parseInt(e.target.value) || 1)}
                       min="1"
                       placeholder="1"
-                      className="mt-1 text-sm h-9"
+                      className="mt-1 text-sm h-9 [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [-moz-appearance:textfield]"
                     />
                   </div>
                   <div>
@@ -752,7 +752,7 @@ export default function NewQuote() {
                           updateItem(item.id, 'unitPrice', value);
                         }
                       }}
-                      placeholder="150.00"
+                      placeholder="0,00"
                       min="0"
                       step="0.01"
                       className="mt-1 text-sm h-9 [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [-moz-appearance:textfield]"
