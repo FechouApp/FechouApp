@@ -159,8 +159,8 @@ export default function NewQuote() {
         if (isEditing) {
           return await apiRequest("PUT", `/api/quotes/${quoteId}`, quoteData);
         } else {
-          if (planLimits && !planLimits.isPremium && !planLimits.canCreateQuote) {
-            throw new Error(`Limite de ${planLimits.monthlyQuoteLimit} orçamentos por mês atingido. Faça upgrade para Premium.`);
+          if (planLimits && !(planLimits as any).isPremium && !(planLimits as any).canCreateQuote) {
+            throw new Error(`Limite de ${(planLimits as any).monthlyQuoteLimit} orçamentos por mês atingido. Faça upgrade para Premium.`);
           }
           return await apiRequest("POST", "/api/quotes", quoteData);
         }
@@ -368,7 +368,6 @@ export default function NewQuote() {
           validUntil,
           sendByWhatsapp,
           sendByEmail,
-          photos: photos.length > 0 ? photos : null,
         },
         items: items.map((item, index) => ({
           description: item.description.trim(),
@@ -390,7 +389,12 @@ export default function NewQuote() {
   const selectedClient = clients?.find(client => client.id === selectedClientId);
   const canProceed = selectedClientId && 
                     title.trim() && 
-                    items.every(item => item.description.trim() && item.quantity > 0) &&
+                    items.every(item => 
+                      item.description.trim() && 
+                      item.quantity > 0 && 
+                      item.unitPrice && 
+                      parseFloat(item.unitPrice) > 0
+                    ) &&
                     !createQuoteMutation.isPending;
 
   return (
@@ -419,14 +423,14 @@ export default function NewQuote() {
       {/* Main Content */}
       <div className="p-3 space-y-4 pb-24">
         {/* Plan limit warning */}
-        {planLimits && !planLimits.isPremium && !planLimits.canCreateQuote && (
+        {planLimits && !(planLimits as any).isPremium && !(planLimits as any).canCreateQuote && (
           <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg">
             <div className="flex items-start gap-2">
               <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
               <div>
                 <h3 className="font-medium text-amber-800 text-sm">Limite atingido</h3>
                 <p className="text-xs text-amber-700 mt-1">
-                  Você atingiu o limite de {planLimits.monthlyQuoteLimit} orçamentos por mês.
+                  Você atingiu o limite de {(planLimits as any).monthlyQuoteLimit} orçamentos por mês.
                 </p>
               </div>
             </div>
@@ -434,7 +438,7 @@ export default function NewQuote() {
         )}
 
         {/* Quick Setup */}
-        {(!clients || clients.length === 0) && <QuickSetup />}
+        {(!clients || clients.length === 0) && <div><QuickSetup /></div>}
 
         {/* Client Selection */}
         <Card>
