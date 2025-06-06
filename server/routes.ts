@@ -574,7 +574,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { id } = req.params;
       const { quote, items } = req.body;
 
-      const userId = req.user?.id;
+      const userId = (req.user as any)?.claims?.sub;
       if (!userId) {
         return res.status(401).json({ message: "User not authenticated" });
       }
@@ -586,7 +586,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Verificar se o plano permite editar orçamentos (limites de itens)
-      const user = await storage.getUser(req.user.id);
+      const user = await storage.getUser(userId);
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
@@ -617,7 +617,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Atualizar o orçamento
-      const updatedQuote = await storage.updateQuote(id, quoteData, req.user.id);
+      const updatedQuote = await storage.updateQuote(id, quoteData, userId);
 
       if (!updatedQuote) {
         return res.status(404).json({ message: "Quote not found" });
@@ -633,7 +633,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Retornar o orçamento atualizado com os itens
-      const completeQuote = await storage.getQuote(id, req.user.id);
+      const completeQuote = await storage.getQuote(id, userId);
       res.json(completeQuote);
     } catch (error) {
       console.error("Error updating quote:", error);
