@@ -272,7 +272,7 @@ export class DatabaseStorage implements IStorage {
       planExpiresAt: user?.planExpiresAt
     });
 
-    const result = await db
+    const baseQuery = db
       .select({
         quote: quotes,
         client: clients,
@@ -284,6 +284,16 @@ export class DatabaseStorage implements IStorage {
       .where(eq(quotes.userId, userId))
       .groupBy(quotes.id, clients.id)
       .orderBy(desc(quotes.createdAt));
+
+    // Aplicar limitação para planos gratuitos
+    let result;
+    if (!isPremium || isExpired) {
+      console.log("Applying free plan limitation - showing only last 5 quotes");
+      result = await baseQuery.limit(5);
+    } else {
+      console.log(`${user?.plan} plan detected - unlimited quotes`);
+      result = await baseQuery;
+    }
 
     const mappedResult = result.map(row => {
       // Parse photos from JSON field

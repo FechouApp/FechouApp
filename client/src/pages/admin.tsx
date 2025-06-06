@@ -105,8 +105,13 @@ export default function AdminPanel() {
         description: "Plano do usuário atualizado com sucesso!",
       });
 
-      // Refresh data and close dialog
+      // Force refresh all related queries
       queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/stats"] });
+      
+      // Force refetch immediately
+      queryClient.refetchQueries({ queryKey: ["/api/admin/users"] });
+      
       setIsDialogOpen(false);
       setSelectedUser(null);
       setEditPlan("");
