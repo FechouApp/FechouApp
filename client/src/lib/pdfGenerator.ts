@@ -241,7 +241,7 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
   }
   
   if (quotePhotos && Array.isArray(quotePhotos) && quotePhotos.length > 0) {
-    if (checkPageBreak(80)) {
+    if (checkPageBreak(30)) {
       addNewPage();
     }
 
@@ -249,77 +249,29 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
     doc.setFontSize(10);
     doc.setFont('helvetica', 'bold');
     doc.text('FOTOS DO ORÇAMENTO', marginLeft + 2, yPosition + 3);
-    yPosition += 10;
+    yPosition += 12;
 
-    const photosPerRow = 2;
-    const photoWidth = 60;
-    const photoHeight = 45;
-    const photoSpacing = 10;
-    const startX = marginLeft + (pageWidth - marginLeft - marginRight - (photosPerRow * photoWidth) - ((photosPerRow - 1) * photoSpacing)) / 2;
+    // Adicionar texto explicativo
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Este orçamento contém ${quotePhotos.length} foto${quotePhotos.length > 1 ? 's' : ''} anexada${quotePhotos.length > 1 ? 's' : ''}.`, marginLeft + 2, yPosition);
+    yPosition += 5;
+    doc.text('Para visualizar as fotos, acesse o link do orçamento ou entre em contato.', marginLeft + 2, yPosition);
+    yPosition += 8;
 
-    for (let i = 0; i < quotePhotos.length; i++) {
-      const photo = quotePhotos[i];
-      const row = Math.floor(i / photosPerRow);
-      const col = i % photosPerRow;
-      
-      const x = startX + col * (photoWidth + photoSpacing);
-      const y = yPosition + row * (photoHeight + photoSpacing);
-
-      // Check if we need a new page for this photo
-      if (y + photoHeight > pageHeight - marginBottom) {
+    // Listar apenas os nomes das fotos (se disponíveis)
+    doc.setFontSize(8);
+    doc.setFont('helvetica', 'italic');
+    quotePhotos.forEach((photo, index) => {
+      if (checkPageBreak(4)) {
         addNewPage();
-        const newY = yPosition;
-        const adjustedRow = row - Math.floor((pageHeight - marginBottom - yPosition) / (photoHeight + photoSpacing));
-        const adjustedY = newY + adjustedRow * (photoHeight + photoSpacing);
-        
-        try {
-          if (photo.url && photo.url.trim() !== '') {
-            let format = 'JPEG';
-            if (photo.url.includes('data:image/png')) {
-              format = 'PNG';
-            } else if (photo.url.includes('data:image/gif')) {
-              format = 'GIF';
-            }
-            doc.addImage(photo.url, format, x, adjustedY, photoWidth, photoHeight);
-          }
-        } catch (error) {
-          console.error('Erro ao carregar foto:', error);
-          // Draw a placeholder rectangle if image fails to load
-          doc.setDrawColor(200, 200, 200);
-          doc.setFillColor(240, 240, 240);
-          doc.rect(x, adjustedY, photoWidth, photoHeight, 'FD');
-          doc.setTextColor(100, 100, 100);
-          doc.setFontSize(8);
-          doc.text('Imagem não disponível', x + photoWidth/2, adjustedY + photoHeight/2, { align: 'center' });
-          doc.setTextColor(0, 0, 0);
-        }
-      } else {
-        try {
-          if (photo.url && photo.url.trim() !== '') {
-            let format = 'JPEG';
-            if (photo.url.includes('data:image/png')) {
-              format = 'PNG';
-            } else if (photo.url.includes('data:image/gif')) {
-              format = 'GIF';
-            }
-            doc.addImage(photo.url, format, x, y, photoWidth, photoHeight);
-          }
-        } catch (error) {
-          console.error('Erro ao carregar foto:', error);
-          // Draw a placeholder rectangle if image fails to load
-          doc.setDrawColor(200, 200, 200);
-          doc.setFillColor(240, 240, 240);
-          doc.rect(x, y, photoWidth, photoHeight, 'FD');
-          doc.setTextColor(100, 100, 100);
-          doc.setFontSize(8);
-          doc.text('Imagem não disponível', x + photoWidth/2, y + photoHeight/2, { align: 'center' });
-          doc.setTextColor(0, 0, 0);
-        }
       }
-    }
+      const photoName = photo.name || `Foto ${index + 1}`;
+      doc.text(`• ${photoName}`, marginLeft + 4, yPosition);
+      yPosition += 4;
+    });
 
-    const totalRows = Math.ceil(quotePhotos.length / photosPerRow);
-    yPosition += totalRows * (photoHeight + photoSpacing) + 5;
+    yPosition += 5;
   }
 
   // ========== TABELA DE SERVIÇOS OU PRODUTOS ==========
