@@ -79,7 +79,7 @@ function Router() {
       <Route path="/reviews" component={Reviews} />
       <Route path="/saved-items" component={SavedItemsPage} />
       <Route path="/reports" component={Reports} />
-      <Route path="/plans" component={PlanComparison} />
+      <Route path="/plans" component={Plans} />
       <Route path="/settings" component={Settings} />
       <Route path="/admin" component={AdminPanel} />
       <Route path="/welcome" component={Welcome} />
