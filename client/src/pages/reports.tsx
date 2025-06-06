@@ -28,7 +28,7 @@ import type { DashboardStats, QuoteWithClient, ReviewWithClient } from "@/types"
 import { useIsMobile } from "@/hooks/use-mobile";
 
 export default function Reports() {
-  const { user, isLoading: userLoading } = useAuth();
+  const { user, isLoading: userLoading, isPremium } = useAuth();
   const [, setLocation] = useLocation();
   const isMobile = useIsMobile();
 
@@ -40,9 +40,6 @@ export default function Reports() {
   if (userLoading) {
     return <LoadingSpinner />;
   }
-
-  // Verificar se o usuário tem plano premium
-  const isPremium = (user as any)?.plan === "PREMIUM";
 
   if (!isPremium) {
     return (

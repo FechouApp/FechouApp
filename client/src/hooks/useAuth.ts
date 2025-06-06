@@ -1,5 +1,16 @@
 import { useQuery } from "@tanstack/react-query";
 
+// Função centralizada para verificar se o usuário é premium
+export const isPremiumUser = (user: any): boolean => {
+  if (!user) return false;
+  
+  const plan = user.plan?.toUpperCase();
+  const isPremium = plan === "PREMIUM" || plan === "PREMIUM_CORTESIA";
+  const isExpired = user.planExpiresAt && new Date() > new Date(user.planExpiresAt);
+  
+  return isPremium && !isExpired;
+};
+
 export const useAuth = () => {
   const { data: user, isLoading, error, refetch } = useQuery({
     queryKey: ['/api/auth/user'],
@@ -36,5 +47,6 @@ export const useAuth = () => {
     isLoading,
     error,
     refetch,
+    isPremium: isPremiumUser(user),
   };
 };

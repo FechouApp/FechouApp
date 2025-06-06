@@ -9,7 +9,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
 export default function PlanComparison() {
-  const { user } = useAuth();
+  const { user, isPremium } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const typedUser = user as any;
@@ -49,7 +49,6 @@ export default function PlanComparison() {
     },
   });
 
-  const isPremium = typedUser?.plan === "PREMIUM";
   const bonusQuotes = typedUser?.bonusQuotes || 0;
   const referralCount = typedUser?.referralCount || 0;
 
