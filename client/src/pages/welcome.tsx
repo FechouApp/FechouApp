@@ -12,16 +12,10 @@ export default function Welcome() {
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
-    // Always show welcome screen for new users without basic info
-    const userHasBasicInfo = user && (user as any).firstName && (user as any).businessName;
-    
-    if (userHasBasicInfo) {
-      setLocation('/');
-    } else if (user) {
-      // User is logged in but doesn't have basic info
+    if (user) {
       setIsVisible(true);
     }
-  }, [user, setLocation]);
+  }, [user]);
 
   const handleStartRegistration = () => {
     console.log('Botão Começar Cadastro clicado');
