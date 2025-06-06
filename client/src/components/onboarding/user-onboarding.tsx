@@ -72,7 +72,7 @@ export default function UserOnboarding({ onComplete }: UserOnboardingProps) {
         title: "Perfil configurado!",
         description: "Suas informações foram salvas com sucesso.",
       });
-      onComplete();
+      // Don't call onComplete here, let handleNext do it
     },
     onError: (error: any) => {
       toast({
@@ -87,11 +87,16 @@ export default function UserOnboarding({ onComplete }: UserOnboardingProps) {
     setData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (currentStep === 3) {
       // Save data on step 3 (last data collection step)
-      saveUserDataMutation.mutate(data);
-      setCurrentStep(4);
+      try {
+        await saveUserDataMutation.mutateAsync(data);
+        setCurrentStep(4);
+      } catch (error) {
+        // Error is handled by mutation onError
+        return;
+      }
     } else if (currentStep === 4) {
       // Final step - complete onboarding
       onComplete();
