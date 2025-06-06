@@ -404,7 +404,7 @@ export default function Quotes() {
 
                       {/* Mobile view - single cell with card layout */}
                       <TableCell className="md:hidden" colSpan={6}>
-                        <div className="bg-white border border-gray-200 rounded-lg p-4 space-y-3 mx-2 my-3 shadow-sm">
+                        <div className="bg-white border-2 border-blue-100 rounded-lg p-4 space-y-3 mx-2 my-3 shadow-sm hover:border-blue-200 transition-colors">
                           <div className="flex items-center justify-between">
                             <div>
                               <p className="font-medium text-gray-800">{quote.quoteNumber}</p>
