@@ -272,17 +272,7 @@ export default function PlanComparison() {
         </Card>
       </div>
 
-      {/* Botão de Teste para Desenvolvimento */}
-      <div className="mt-8 text-center">
-        <Button 
-          variant="outline"
-          onClick={() => togglePlanMutation.mutate()}
-          disabled={togglePlanMutation.isPending}
-          className="border-dashed"
-        >
-          🔄 Alternar Plano (Modo Teste)
-        </Button>
-      </div>
+
     </div>
   );
 }

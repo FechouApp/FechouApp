@@ -641,11 +641,11 @@ export default function Clients() {
                               )}
                             </div>
 
-                            <div className="flex gap-2 pt-2">
+                            <div className="grid grid-cols-2 gap-2 pt-2">
                               <Button 
                                 size="sm" 
                                 variant="outline" 
-                                className="flex-1"
+                                className="w-full"
                                 onClick={() => setLocation(`/clients/${client.id}`)}
                               >
                                 <Eye className="w-4 h-4 mr-1" />
@@ -654,7 +654,7 @@ export default function Clients() {
                               <Button 
                                 size="sm" 
                                 variant="outline" 
-                                className="flex-1"
+                                className="w-full"
                                 onClick={() => setEditingClient(client)}
                               >
                                 <Edit className="w-4 h-4 mr-1" />
@@ -663,7 +663,7 @@ export default function Clients() {
                               <Button 
                                 size="sm" 
                                 variant="outline" 
-                                className="flex-1"
+                                className="w-full"
                                 onClick={() => setLocation(`/new-quote?clientId=${client.id}`)}
                               >
                                 <FileText className="w-4 h-4 mr-1" />
@@ -672,7 +672,7 @@ export default function Clients() {
                               <Button 
                                 size="sm" 
                                 variant="outline" 
-                                className="flex-1"
+                                className="w-full"
                                 onClick={() => handleDeleteClient(client.id)}
                                 disabled={deleteClientMutation.isPending}
                               >

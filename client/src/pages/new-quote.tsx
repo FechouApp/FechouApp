@@ -43,9 +43,16 @@ export default function NewQuote() {
   const quoteId = location.includes('/edit') ? location.split('/')[2] : null;
   const isEditing = !!quoteId;
   
-  // Extract client ID from URL parameters
-  const urlParams = new URLSearchParams(location.split('?')[1] || '');
-  const preSelectedClientId = urlParams.get('clientId');
+  // Extract client ID from URL parameters - fix for client pre-selection
+  const [preSelectedClientId, setPreSelectedClientId] = useState<string | null>(null);
+  
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const clientId = urlParams.get('clientId');
+    if (clientId) {
+      setPreSelectedClientId(clientId);
+    }
+  }, [location]);
   
   // Premium user check
   const isUserPremium = (user as any)?.plan === "PREMIUM" || (user as any)?.plan === "PREMIUM_CORTESIA";
@@ -162,6 +169,7 @@ export default function NewQuote() {
   // Set pre-selected client
   useEffect(() => {
     if (preSelectedClientId && !isEditing) {
+      console.log('Setting pre-selected client:', preSelectedClientId);
       setSelectedClientId(preSelectedClientId);
     }
   }, [preSelectedClientId, isEditing]);
