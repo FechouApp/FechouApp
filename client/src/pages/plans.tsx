@@ -92,6 +92,30 @@ export default function Plans() {
         <p className="text-white/70">Escolha o plano ideal para o seu negócio</p>
       </div>
 
+      {/* Beta Notice */}
+      <Card className="bg-yellow-50 border-yellow-200">
+        <CardContent className="p-4">
+          <div className="flex items-start gap-3">
+            <div className="w-6 h-6 bg-yellow-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+              <span className="text-yellow-600 text-sm">⚠️</span>
+            </div>
+            <div>
+              <h3 className="font-semibold text-yellow-800 mb-1">Versão de Teste</h3>
+              <p className="text-sm text-yellow-700 mb-2">
+                O aplicativo está em fase de criação e é uma versão de teste. 
+                Algumas funcionalidades podem apresentar instabilidades.
+              </p>
+              <p className="text-sm text-yellow-700">
+                Sugestões e feedback podem ser enviados para: 
+                <a href="mailto:agtgpereira@gmail.com" className="font-medium underline ml-1">
+                  agtgpereira@gmail.com
+                </a>
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Current Plan Status */}
       <Card className="brand-gradient shadow-lg">
         <CardContent className="p-6 text-white">

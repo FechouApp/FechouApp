@@ -43,6 +43,10 @@ export default function NewQuote() {
   const quoteId = location.includes('/edit') ? location.split('/')[2] : null;
   const isEditing = !!quoteId;
   
+  // Extract client ID from URL parameters
+  const urlParams = new URLSearchParams(location.split('?')[1] || '');
+  const preSelectedClientId = urlParams.get('clientId');
+  
   // Premium user check
   const isUserPremium = (user as any)?.plan === "PREMIUM" || (user as any)?.plan === "PREMIUM_CORTESIA";
   const maxItemsForFreeUser = 3;
@@ -154,6 +158,13 @@ export default function NewQuote() {
     enabled: !!quoteId,
     retry: false,
   });
+
+  // Set pre-selected client
+  useEffect(() => {
+    if (preSelectedClientId && !isEditing) {
+      setSelectedClientId(preSelectedClientId);
+    }
+  }, [preSelectedClientId, isEditing]);
 
   // Load existing quote data
   useEffect(() => {
