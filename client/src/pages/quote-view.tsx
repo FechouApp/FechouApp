@@ -632,7 +632,52 @@ export default function QuoteView() {
                         variant="secondary"
                         onClick={(e) => {
                           e.stopPropagation();
-                          window.open(photo.url, '_blank');
+                          // Criar uma nova janela com a imagem centralizada
+                          const newWindow = window.open('', '_blank');
+                          if (newWindow) {
+                            newWindow.document.write(`
+                              <!DOCTYPE html>
+                              <html>
+                                <head>
+                                  <title>Foto - ${photo.name || `Imagem ${index + 1}`}</title>
+                                  <style>
+                                    body { 
+                                      margin: 0; 
+                                      padding: 20px; 
+                                      background: #000; 
+                                      display: flex; 
+                                      justify-content: center; 
+                                      align-items: center; 
+                                      min-height: 100vh;
+                                      font-family: Arial, sans-serif;
+                                    }
+                                    img { 
+                                      max-width: 100%; 
+                                      max-height: 100vh; 
+                                      object-fit: contain;
+                                      border-radius: 8px;
+                                      box-shadow: 0 4px 20px rgba(255,255,255,0.1);
+                                    }
+                                    .container {
+                                      text-align: center;
+                                    }
+                                    .title {
+                                      color: white;
+                                      margin-bottom: 20px;
+                                      font-size: 18px;
+                                    }
+                                  </style>
+                                </head>
+                                <body>
+                                  <div class="container">
+                                    <div class="title">${photo.name || `Foto ${index + 1}`}</div>
+                                    <img src="${photo.url}" alt="${photo.name || `Foto ${index + 1}`}" />
+                                  </div>
+                                </body>
+                              </html>
+                            `);
+                            newWindow.document.close();
+                          }
                         }}
                         className="bg-white/90 text-black hover:bg-white"
                       >
