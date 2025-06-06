@@ -55,12 +55,11 @@ function Router() {
     );
   }
 
-  // Check if user is authenticated and this is their first visit
-  const hasVisited = localStorage.getItem('fechou_has_visited');
-  const userHasBasicInfo = user && (user as any).firstName && (user as any).businessName;
-
-  // Show welcome screen for first-time authenticated users who haven't completed setup
-  if (!hasVisited && !userHasBasicInfo) {
+  // Check if user needs onboarding
+  const hasCompletedOnboarding = localStorage.getItem('fechou_onboarding_completed');
+  
+  // Show onboarding for new users
+  if (!hasCompletedOnboarding) {
     return <Welcome />;
   }
 
@@ -102,12 +101,11 @@ function AppLayout() {
     return <Router />;
   }
 
-  // Check if user is authenticated and this is their first visit
-  const hasVisited = localStorage.getItem('fechou_has_visited');
-  const userHasBasicInfo = user && (user as any).firstName && (user as any).businessName;
-
-  // Show welcome screen for first-time authenticated users who haven't completed setup
-  if (!hasVisited && !userHasBasicInfo) {
+  // Check if user needs onboarding
+  const hasCompletedOnboarding = localStorage.getItem('fechou_onboarding_completed');
+  
+  // Show onboarding for new users
+  if (!hasCompletedOnboarding) {
     return <Welcome />;
   }
 
