@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Star, CheckCircle, XCircle, Calendar, Phone, Mail, MapPin, Download, Copy } from "lucide-react";
+import { Star, CheckCircle, XCircle, Calendar, Phone, Mail, MapPin, Download, Copy, Eye, Image as ImageIcon } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import type { QuoteWithDetails } from "@/types";
@@ -22,6 +22,7 @@ export default function PublicQuote() {
   const [comment, setComment] = useState("");
   const [reviewSubmitted, setReviewSubmitted] = useState(false);
   const [existingReview, setExistingReview] = useState<any>(null);
+  const [showPhotosDialog, setShowPhotosDialog] = useState(false);
 
   const { data: quote, isLoading, error } = useQuery<QuoteWithDetails>({
     queryKey: [`/api/quotes/public/${quoteNumber}`],
@@ -316,22 +317,29 @@ export default function PublicQuote() {
             {quote.photos && Array.isArray(quote.photos) && quote.photos.length > 0 && (
               <div className="mt-6">
                 <h3 className="font-semibold mb-4">Fotos do Orçamento</h3>
-                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-                  {quote.photos.map((photo, index) => (
-                    <div key={index} className="relative group">
-                      <img
-                        src={photo.url}
-                        alt={`Foto ${index + 1}`}
-                        className="w-full h-24 sm:h-32 object-cover rounded-lg cursor-pointer hover:opacity-90 transition-opacity"
-                        onClick={() => window.open(photo.url, '_blank')}
-                      />
-                      <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-all rounded-lg flex items-center justify-center">
-                        <span className="text-white opacity-0 group-hover:opacity-100 text-sm font-medium">
-                          Ampliar
-                        </span>
-                      </div>
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                      <ImageIcon className="w-5 h-5 text-blue-600" />
                     </div>
-                  ))}
+                    <div className="flex-1">
+                      <p className="font-medium text-blue-900">
+                        {quote.photos.length} foto{quote.photos.length > 1 ? 's' : ''} anexada{quote.photos.length > 1 ? 's' : ''}
+                      </p>
+                      <p className="text-sm text-blue-700">
+                        Clique para visualizar as fotos do orçamento
+                      </p>
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setShowPhotosDialog(true)}
+                      className="border-blue-300 text-blue-700 hover:bg-blue-100"
+                    >
+                      <Eye className="w-4 h-4 mr-2" />
+                      Ver Fotos
+                    </Button>
+                  </div>
                 </div>
               </div>
             )}
