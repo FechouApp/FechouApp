@@ -26,16 +26,22 @@ export default function Welcome() {
   }, [user, setLocation]);
 
   const handleStartRegistration = () => {
+    console.log('Botão Começar Cadastro clicado');
     // Mark as visited
     localStorage.setItem('fechou_has_visited', 'true');
     // Redirect to registration/settings page
-    setLocation('/settings');
+    setTimeout(() => {
+      setLocation('/settings');
+    }, 100);
   };
 
   const handleSkip = () => {
+    console.log('Botão Pular por agora clicado');
     // Mark as visited and go to dashboard
     localStorage.setItem('fechou_has_visited', 'true');
-    setLocation('/');
+    setTimeout(() => {
+      setLocation('/');
+    }, 100);
   };
 
   if (!isVisible) {
@@ -110,8 +116,9 @@ export default function Welcome() {
           {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button 
+              type="button"
               onClick={handleStartRegistration}
-              className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-3 text-lg font-semibold"
+              className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-3 text-lg font-semibold hover:from-blue-700 hover:to-purple-700"
               size="lg"
             >
               Começar Cadastro
@@ -119,9 +126,10 @@ export default function Welcome() {
             </Button>
             
             <Button 
+              type="button"
               variant="outline" 
               onClick={handleSkip}
-              className="px-8 py-3 text-lg"
+              className="px-8 py-3 text-lg border-2 hover:bg-gray-50"
               size="lg"
             >
               Pular por agora
