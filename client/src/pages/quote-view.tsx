@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Star, CheckCircle, XCircle, Calendar, Phone, Mail, MapPin, ArrowLeft, Download, MessageCircle, Copy, Eye, Image as ImageIcon } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -607,12 +607,12 @@ export default function QuoteView() {
 
       {/* Photos Dialog */}
       <Dialog open={showPhotosDialog} onOpenChange={setShowPhotosDialog}>
-        <DialogContent className="max-w-4xl max-h-[90vh]">
+        <DialogContent className="max-w-4xl max-h-[90vh]" aria-describedby="photos-description">
           <DialogHeader>
             <DialogTitle>Fotos do Orçamento</DialogTitle>
-            <DialogDescription>
+            <p id="photos-description" className="text-sm text-muted-foreground">
               Visualize e amplie as fotos anexadas ao orçamento. Clique em uma foto para abrir em nova aba.
-            </DialogDescription>
+            </p>
           </DialogHeader>
           
           {quote?.photos && Array.isArray(quote.photos) && (
