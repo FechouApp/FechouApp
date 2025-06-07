@@ -19,7 +19,7 @@ import PhotoUploadSection from "./photo-upload-section";
 import { Plus, Calendar, Save, Eye, Send, Trash2, Crown, Star } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import type { Client, CreateQuoteRequest, SavedItem } from "@/types";
 
 interface QuoteFormProps {
