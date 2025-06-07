@@ -183,7 +183,7 @@ export default function Reports() {
     const clientStats = {};
     quotes.forEach(quote => {
       const clientId = quote.clientId;
-      if (!clientStats[clientId]) {
+      if (!clientStats[clientId] && quote.client) {
         clientStats[clientId] = {
           name: quote.client.name,
           quotesCount: 0,
@@ -191,10 +191,12 @@ export default function Reports() {
           approvedCount: 0
         };
       }
-      clientStats[clientId].quotesCount++;
-      clientStats[clientId].totalValue += parseFloat(quote.total);
-      if (quote.status === 'approved' || quote.status === 'paid') {
-        clientStats[clientId].approvedCount++;
+      if (quote.client) {
+        clientStats[clientId].quotesCount++;
+        clientStats[clientId].totalValue += parseFloat(quote.total);
+        if (quote.status === 'approved' || quote.status === 'paid') {
+          clientStats[clientId].approvedCount++;
+        }
       }
     });
 

@@ -755,6 +755,14 @@ export default function NewQuote() {
                           if (customValue && !isNaN(parseInt(customValue)) && parseInt(customValue) > 0) {
                             updateItem(item.id, 'quantity', parseInt(customValue));
                           }
+                          // Force re-render by setting the value again
+                          setTimeout(() => {
+                            const currentItem = items.find(i => i.id === item.id);
+                            if (currentItem) {
+                              // Trigger a state update to refresh the select
+                              setItems(prev => [...prev]);
+                            }
+                          }, 100);
                         } else {
                           updateItem(item.id, 'quantity', parseInt(value));
                         }
