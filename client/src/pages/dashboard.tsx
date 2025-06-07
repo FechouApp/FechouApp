@@ -112,17 +112,17 @@ export default function Dashboard() {
 
         {/* Quick Actions - Responsivo */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-          <Link href="/new-quote">
-            <Button className="w-full bg-white/10 hover:bg-white/20 text-white border border-white/20 justify-start h-12">
-              <Plus className="w-5 h-5 mr-3" />
-              Novo Orçamento
-            </Button>
-          </Link>
-
           <Link href="/clients">
             <Button className="w-full bg-white/10 hover:bg-white/20 text-white border border-white/20 justify-start h-12">
               <Users className="w-5 h-5 mr-3" />
               Adicionar Cliente
+            </Button>
+          </Link>
+
+          <Link href="/new-quote">
+            <Button className="w-full bg-white/10 hover:bg-white/20 text-white border border-white/20 justify-start h-12">
+              <Plus className="w-5 h-5 mr-3" />
+              Novo Orçamento
             </Button>
           </Link>
 
