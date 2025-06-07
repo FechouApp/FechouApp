@@ -505,18 +505,31 @@ export default function NewQuote() {
   }
 
   const selectedClient = clients?.find(client => client.id === selectedClientId);
-  const canProceed = selectedClientId && 
-                    title.trim() && 
-                    items.length > 0 &&
-                    items.every(item => 
-                      item.description.trim() && 
-                      item.quantity > 0 && 
-                      item.unitPrice && 
-                      item.unitPrice !== "" &&
-                      !isNaN(parseFloat(item.unitPrice)) &&
-                      parseFloat(item.unitPrice) >= 0
-                    ) &&
-                    !createQuoteMutation.isPending;
+  
+  // Debug validation
+  const validationChecks = {
+    hasClient: !!selectedClientId,
+    hasTitle: !!title.trim(),
+    hasItems: items.length > 0,
+    itemsValid: items.every(item => 
+      item.description.trim() && 
+      item.quantity > 0 && 
+      item.unitPrice && 
+      item.unitPrice !== "" &&
+      !isNaN(parseFloat(item.unitPrice)) &&
+      parseFloat(item.unitPrice) >= 0
+    ),
+    notPending: !createQuoteMutation.isPending
+  };
+  
+  console.log('Validation checks:', validationChecks);
+  console.log('Items:', items);
+  
+  const canProceed = validationChecks.hasClient && 
+                    validationChecks.hasTitle && 
+                    validationChecks.hasItems &&
+                    validationChecks.itemsValid &&
+                    validationChecks.notPending;
 
 
 
