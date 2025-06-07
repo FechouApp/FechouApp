@@ -328,6 +328,67 @@ export default function Reports() {
         </Card>
       </div>
 
+      {/* Monitoramento de Prazos Vencendo */}
+      {expiringQuotes.length > 0 && (
+        <Card className="bg-gradient-to-r from-red-50 to-orange-50 border-red-200 shadow-lg mb-8">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-lg font-semibold text-red-800 flex items-center gap-2">
+              <AlertTriangle className="w-5 h-5" />
+              ⚠️ Orçamentos Vencendo em Breve
+            </CardTitle>
+            <p className="text-sm text-red-600">
+              {expiringQuotes.length} orçamento{expiringQuotes.length > 1 ? 's' : ''} vencem nos próximos 5 dias
+            </p>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {expiringQuotes.map((quote: any) => {
+                const daysLeft = getDaysUntilExpiration(quote.validUntil);
+                const isUrgent = daysLeft <= 2;
+                
+                return (
+                  <div 
+                    key={quote.id} 
+                    className={`p-4 rounded-lg border-l-4 ${
+                      isUrgent 
+                        ? 'bg-red-100 border-red-500' 
+                        : 'bg-orange-100 border-orange-500'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3">
+                          <div>
+                            <p className="font-medium text-gray-800">{quote.title}</p>
+                            <p className="text-sm text-gray-600">
+                              Cliente: {quote.client?.name || 'N/A'}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
+                          isUrgent 
+                            ? 'bg-red-200 text-red-800' 
+                            : 'bg-orange-200 text-orange-800'
+                        }`}>
+                          {daysLeft === 0 ? 'Vence hoje!' : 
+                           daysLeft === 1 ? 'Vence amanhã' : 
+                           `${daysLeft} dias restantes`}
+                        </div>
+                        <p className="text-sm text-gray-600 mt-1">
+                          {formatCurrency(quote.total)}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Gráficos - Layout responsivo */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-8">
         <Card className="bg-white shadow-lg overflow-hidden">
