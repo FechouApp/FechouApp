@@ -611,15 +611,31 @@ export default function NewQuote() {
             </div>
             <div>
               <Label className="text-sm">Validade (dias)</Label>
-              <Input
-                type="number"
-                value={validityDays}
-                onChange={(e) => setValidityDays(Number(e.target.value))}
-                min="1"
-                max="365"
-                placeholder="30"
-                className="mt-1"
-              />
+              <Select 
+                value={validityDays.toString()} 
+                onValueChange={(value) => {
+                  if (value === "custom") {
+                    const customValue = prompt("Digite o número de dias:");
+                    if (customValue && !isNaN(parseInt(customValue)) && parseInt(customValue) > 0) {
+                      setValidityDays(parseInt(customValue));
+                    }
+                  } else {
+                    setValidityDays(parseInt(value));
+                  }
+                }}
+              >
+                <SelectTrigger className="mt-1">
+                  <SelectValue placeholder="30 dias" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="5">5 dias</SelectItem>
+                  <SelectItem value="10">10 dias</SelectItem>
+                  <SelectItem value="15">15 dias</SelectItem>
+                  <SelectItem value="20">20 dias</SelectItem>
+                  <SelectItem value="30">30 dias</SelectItem>
+                  <SelectItem value="custom">Personalizar...</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <div>
               <Label className="text-sm">Descrição do Projeto</Label>
@@ -731,14 +747,29 @@ export default function NewQuote() {
                 <div className="grid grid-cols-2 gap-2">
                   <div>
                     <Label className="text-xs text-gray-600">Quantidade</Label>
-                    <Input
-                      type="number"
-                      value={item.quantity || ""}
-                      onChange={(e) => updateItem(item.id, 'quantity', parseInt(e.target.value) || 0)}
-                      min="0"
-                      placeholder="1"
-                      className="mt-1 text-sm h-9 [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [-moz-appearance:textfield]"
-                    />
+                    <Select 
+                      value={item.quantity?.toString() || "1"} 
+                      onValueChange={(value) => {
+                        if (value === "custom") {
+                          const customValue = prompt("Digite a quantidade desejada:");
+                          if (customValue && !isNaN(parseInt(customValue)) && parseInt(customValue) > 0) {
+                            updateItem(item.id, 'quantity', parseInt(customValue));
+                          }
+                        } else {
+                          updateItem(item.id, 'quantity', parseInt(value));
+                        }
+                      }}
+                    >
+                      <SelectTrigger className="mt-1 h-9">
+                        <SelectValue placeholder="1" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {[1,2,3,4,5,6,7,8,9].map(num => (
+                          <SelectItem key={num} value={num.toString()}>{num}</SelectItem>
+                        ))}
+                        <SelectItem value="custom">Personalizar...</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                   <div>
                     <Label className="text-xs text-gray-600">Valor Unit.</Label>

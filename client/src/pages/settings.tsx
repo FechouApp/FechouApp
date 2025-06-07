@@ -353,6 +353,19 @@ export default function Settings() {
                 </div>
               </div>
 
+              <div>
+                <Label htmlFor="email">E-mail</Label>
+                <Input
+                  id="email"
+                  value={user?.email || ""}
+                  disabled
+                  className="bg-gray-50 text-gray-600"
+                />
+                <p className="text-sm text-gray-500 mt-1">
+                  O e-mail não pode ser alterado pois é usado para login
+                </p>
+              </div>
+
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="firstName">Nome</Label>

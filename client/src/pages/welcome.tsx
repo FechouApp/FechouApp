@@ -10,9 +10,9 @@ export default function Welcome() {
 
   useEffect(() => {
     if (user) {
-      // Check if user has completed onboarding
-      const hasCompletedOnboarding = localStorage.getItem('fechou_onboarding_completed');
-      if (!hasCompletedOnboarding) {
+      // Check if user has personal data filled
+      const hasPersonalData = user.company && user.phone && user.address;
+      if (!hasPersonalData) {
         setShowOnboarding(true);
       } else {
         setLocation('/');
