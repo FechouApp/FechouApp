@@ -8,7 +8,7 @@ import {
   Camera, Upload, X, Eye, AlertCircle, 
   Crown, Image as ImageIcon 
 } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
 interface PhotoUploadSectionProps {
   attachments: File[];
@@ -257,6 +257,9 @@ export default function PhotoUploadSection({
         <DialogContent className="max-w-4xl max-h-[90vh]">
           <DialogHeader>
             <DialogTitle>Visualizar Foto</DialogTitle>
+            <DialogDescription>
+              Visualização da imagem anexada ao orçamento
+            </DialogDescription>
           </DialogHeader>
           
           {previewImage && (

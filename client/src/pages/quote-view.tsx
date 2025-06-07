@@ -607,12 +607,12 @@ export default function QuoteView() {
 
       {/* Photos Dialog */}
       <Dialog open={showPhotosDialog} onOpenChange={setShowPhotosDialog}>
-        <DialogContent className="max-w-4xl max-h-[90vh]" aria-describedby="photos-description">
+        <DialogContent className="max-w-4xl max-h-[90vh]">
           <DialogHeader>
             <DialogTitle>Fotos do Orçamento</DialogTitle>
-            <p id="photos-description" className="text-sm text-muted-foreground">
+            <DialogDescription>
               Visualize e amplie as fotos anexadas ao orçamento. Clique em uma foto para abrir em nova aba.
-            </p>
+            </DialogDescription>
           </DialogHeader>
           
           {quote?.photos && Array.isArray(quote.photos) && (

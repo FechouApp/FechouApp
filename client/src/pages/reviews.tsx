@@ -313,6 +313,9 @@ export default function Reviews() {
                           <DialogContent>
                             <DialogHeader>
                               <DialogTitle>Responder Avaliação</DialogTitle>
+                              <DialogDescription>
+                                Responda à avaliação do cliente
+                              </DialogDescription>
                             </DialogHeader>
                             <form
                               onSubmit={(e) => {
