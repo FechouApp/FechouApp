@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { CheckCircle, FileText, Users, Star, Crown, ArrowRight } from "lucide-react";
+import Logo from "@/components/ui/logo";
 
 export default function Landing() {
   const handleLogin = () => {
@@ -12,14 +13,8 @@ export default function Landing() {
       <div className="container mx-auto px-4 py-12">
         {/* Header */}
         <div className="text-center mb-16">
-          <div className="flex items-center justify-center gap-3 mb-6">
-            <div className="w-16 h-16 bg-green-500 rounded-2xl flex items-center justify-center">
-              <CheckCircle className="w-8 h-8 text-white" />
-            </div>
-            <div>
-              <h1 className="text-4xl md:text-5xl font-bold text-white">Fechou!</h1>
-              <p className="text-white/80 text-lg">O jeito moderno de fechar negócios</p>
-            </div>
+          <div className="flex items-center justify-center mb-6">
+            <Logo size="lg" className="text-white" showSlogan={true} />
           </div>
           <p className="text-white/90 text-xl max-w-2xl mx-auto">
             Crie, envie e gerencie orçamentos profissionais com facilidade. 
