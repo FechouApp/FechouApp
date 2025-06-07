@@ -80,7 +80,74 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Rota para adicionar bônus de indicação
+  // Generate referral code
+  app.post('/api/user/referral/generate', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.generateReferralCode(userId);
+      res.json({ referralCode: user.referralCode });
+    } catch (error) {
+      console.error("Error generating referral code:", error);
+      res.status(500).json({ message: "Erro ao gerar código de indicação" });
+    }
+  });
+
+  // Process referral
+  app.post('/api/user/referral/process', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { referralCode } = req.body;
+      
+      if (!referralCode) {
+        return res.status(400).json({ message: "Código de indicação é obrigatório" });
+      }
+
+      const result = await storage.processReferral(userId, referralCode);
+      res.json(result);
+    } catch (error) {
+      console.error("Error processing referral:", error);
+      res.status(500).json({ message: "Erro ao processar indicação" });
+    }
+  });
+
+  // Get referral stats
+  app.get('/api/user/referral/stats', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const stats = await storage.getReferralStats(userId);
+      res.json(stats);
+    } catch (error) {
+      console.error("Error getting referral stats:", error);
+      res.status(500).json({ message: "Erro ao obter estatísticas de indicação" });
+    }
+  });
+
+  // Get referral link
+  app.get('/api/user/referral/link', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      if (!user?.referralCode) {
+        // Generate referral code if doesn't exist
+        const updatedUser = await storage.generateReferralCode(userId);
+        return res.json({ 
+          referralLink: `${req.protocol}://${req.get('host')}/?ref=${updatedUser.referralCode}`,
+          referralCode: updatedUser.referralCode
+        });
+      }
+      
+      res.json({ 
+        referralLink: `${req.protocol}://${req.get('host')}/?ref=${user.referralCode}`,
+        referralCode: user.referralCode
+      });
+    } catch (error) {
+      console.error("Error getting referral link:", error);
+      res.status(500).json({ message: "Erro ao obter link de indicação" });
+    }
+  });
+
+  // Rota para adicionar bônus de indicação (mantida para compatibilidade)
   app.post('/api/user/referral', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;

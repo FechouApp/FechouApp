@@ -47,6 +47,10 @@ export const users = pgTable("users", {
   quotesLimit: integer("quotes_limit").notNull().default(5),
   bonusQuotes: integer("bonus_quotes").notNull().default(0), // Orçamentos bonus por indicações
   referralCount: integer("referral_count").notNull().default(0), // Contador de indicações
+  referralCode: varchar("referral_code").unique(), // Código único de indicação do usuário
+  referredBy: varchar("referred_by"), // ID do usuário que indicou este usuário
+  referralCountThisMonth: integer("referral_count_this_month").notNull().default(0), // Indicações deste mês
+  lastReferralReset: timestamp("last_referral_reset").defaultNow(), // Último reset mensal das indicações
   whatsappNotifications: boolean("whatsapp_notifications").notNull().default(true),
   emailNotifications: boolean("email_notifications").notNull().default(true),
   primaryColor: varchar("primary_color").default("#3B82F6"), // Cor personalizada Premium

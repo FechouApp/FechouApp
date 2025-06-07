@@ -36,6 +36,10 @@ export interface IStorage {
   addReferralBonus(userId: string): Promise<User>;
   updateUserColors(id: string, primaryColor: string, secondaryColor: string): Promise<User>;
   updateUserProfile(id: string, profileData: Partial<User>): Promise<User>;
+  generateReferralCode(userId: string): Promise<User>;
+  processReferral(referredUserId: string, referrerCode: string): Promise<{ success: boolean; message: string }>;
+  getReferralStats(userId: string): Promise<{ totalReferrals: number; monthlyReferrals: number; bonusQuotes: number; discountPercentage: number }>;
+  resetMonthlyReferrals(): Promise<void>;
 
   // Client operations
   getClients(userId: string): Promise<Client[]>;
@@ -1183,6 +1187,165 @@ export class DatabaseStorage implements IStorage {
       activeUsersWeek: 0, // Would need login tracking to calculate
       activeUsersMonth: 0, // Would need login tracking to calculate
     };
+  }
+
+  // Referral system methods
+  async generateReferralCode(userId: string): Promise<User> {
+    const referralCode = nanoid(8).toUpperCase();
+    
+    const [updatedUser] = await db
+      .update(users)
+      .set({ 
+        referralCode,
+        updatedAt: new Date()
+      })
+      .where(eq(users.id, userId))
+      .returning();
+    
+    return updatedUser;
+  }
+
+  async processReferral(referredUserId: string, referrerCode: string): Promise<{ success: boolean; message: string }> {
+    // Find the referrer by their referral code
+    const [referrer] = await db
+      .select()
+      .from(users)
+      .where(eq(users.referralCode, referrerCode));
+
+    if (!referrer) {
+      return { success: false, message: "Código de indicação inválido" };
+    }
+
+    // Check if the referred user already has a referrer
+    const referredUser = await this.getUser(referredUserId);
+    if (!referredUser) {
+      return { success: false, message: "Usuário indicado não encontrado" };
+    }
+
+    if (referredUser.referredBy) {
+      return { success: false, message: "Este usuário já foi indicado por outra pessoa" };
+    }
+
+    // Prevent self-referral
+    if (referrer.id === referredUserId) {
+      return { success: false, message: "Você não pode se auto-indicar" };
+    }
+
+    // Check and reset monthly referrals if needed
+    await this.checkAndResetMonthlyReferrals(referrer.id);
+
+    // Update referred user
+    await db
+      .update(users)
+      .set({ 
+        referredBy: referrer.id,
+        updatedAt: new Date()
+      })
+      .where(eq(users.id, referredUserId));
+
+    // Update referrer stats and bonus
+    const isPremium = referrer.plan === "PREMIUM" || referrer.plan === "PREMIUM_CORTESIA";
+    const newReferralCount = (referrer.referralCount || 0) + 1;
+    const newMonthlyReferralCount = (referrer.referralCountThisMonth || 0) + 1;
+    
+    let bonusQuotes = referrer.bonusQuotes || 0;
+    if (!isPremium && newMonthlyReferralCount <= 5) {
+      bonusQuotes += 1; // Free users get 1 extra quote per referral (max 5/month)
+    }
+
+    await db
+      .update(users)
+      .set({
+        referralCount: newReferralCount,
+        referralCountThisMonth: newMonthlyReferralCount,
+        bonusQuotes,
+        updatedAt: new Date()
+      })
+      .where(eq(users.id, referrer.id));
+
+    const rewardMessage = isPremium 
+      ? `Você ganhou 10% de desconto na próxima mensalidade! Total de indicações: ${newReferralCount}`
+      : `Você ganhou 1 orçamento extra! Total de indicações: ${newReferralCount}`;
+
+    return { success: true, message: rewardMessage };
+  }
+
+  async getReferralStats(userId: string): Promise<{ 
+    totalReferrals: number; 
+    monthlyReferrals: number; 
+    bonusQuotes: number; 
+    discountPercentage: number 
+  }> {
+    const user = await this.getUser(userId);
+    if (!user) {
+      return { totalReferrals: 0, monthlyReferrals: 0, bonusQuotes: 0, discountPercentage: 0 };
+    }
+
+    // Check and reset monthly referrals if needed
+    await this.checkAndResetMonthlyReferrals(userId);
+    
+    // Get updated user data after potential reset
+    const updatedUser = await this.getUser(userId);
+    if (!updatedUser) {
+      return { totalReferrals: 0, monthlyReferrals: 0, bonusQuotes: 0, discountPercentage: 0 };
+    }
+
+    const isPremium = updatedUser.plan === "PREMIUM" || updatedUser.plan === "PREMIUM_CORTESIA";
+    const monthlyReferrals = updatedUser.referralCountThisMonth || 0;
+    
+    let discountPercentage = 0;
+    if (isPremium) {
+      if (monthlyReferrals >= 5) {
+        discountPercentage = 100; // Free plan for next month
+      } else {
+        discountPercentage = monthlyReferrals * 10; // 10% per referral
+      }
+    }
+
+    return {
+      totalReferrals: updatedUser.referralCount || 0,
+      monthlyReferrals,
+      bonusQuotes: updatedUser.bonusQuotes || 0,
+      discountPercentage
+    };
+  }
+
+  async resetMonthlyReferrals(): Promise<void> {
+    await db
+      .update(users)
+      .set({
+        referralCountThisMonth: 0,
+        lastReferralReset: new Date(),
+        updatedAt: new Date()
+      });
+  }
+
+  // Private method to check and reset monthly referrals automatically
+  private async checkAndResetMonthlyReferrals(userId: string): Promise<void> {
+    const user = await this.getUser(userId);
+    if (!user) return;
+
+    const now = new Date();
+    const lastReset = user.lastReferralReset ? new Date(user.lastReferralReset) : new Date(0);
+    
+    // If last reset was in a different month than current
+    const shouldReset = lastReset.getFullYear() !== now.getFullYear() || 
+                       lastReset.getMonth() !== now.getMonth();
+
+    if (shouldReset) {
+      console.log(`Auto-resetting monthly referrals for user ${userId}`);
+      
+      await db
+        .update(users)
+        .set({ 
+          referralCountThisMonth: 0,
+          lastReferralReset: now,
+          updatedAt: now
+        })
+        .where(eq(users.id, userId));
+      
+      console.log(`Monthly referrals reset completed for user ${userId}`);
+    }
   }
 }
 
