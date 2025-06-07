@@ -20,6 +20,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import LoadingSpinner from "@/components/common/loading-spinner";
+import BackButton from "@/components/common/back-button";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Star, MessageCircle, Calendar, User } from "lucide-react";
@@ -146,11 +147,13 @@ export default function Reviews() {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="min-h-screen bg-gray-50 p-4">
+      <BackButton />
+      
       {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold text-white mb-2">Avaliações</h1>
-        <p className="text-white/70">Veja o que seus clientes dizem sobre você</p>
+      <div className="mb-8">
+        <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-2">Avaliações</h1>
+        <p className="text-gray-600">Veja o que seus clientes dizem sobre você</p>
       </div>
 
       {/* Rating Overview */}
@@ -365,6 +368,7 @@ export default function Reviews() {
           )}
         </CardContent>
       </Card>
+      </div>
     </div>
   );
 }
