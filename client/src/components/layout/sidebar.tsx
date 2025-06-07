@@ -9,9 +9,9 @@ import {
   Star, 
   Crown, 
   Settings, 
-  LogOut,
-  CheckCircle
+  LogOut
 } from "lucide-react";
+import Logo from "@/components/ui/logo";
 
 const navigation = [
   { name: "Dashboard", href: "/", icon: LayoutDashboard },
@@ -66,8 +66,7 @@ export default function Sidebar() {
       <div className="p-6 h-full flex flex-col">
         {/* Logo/Brand Section */}
         <div className="mb-8">
-          <h2 className="text-xl font-bold text-white">Fechou!</h2>
-          <p className="text-blue-100 text-sm">Gerencie seus orçamentos</p>
+          <Logo size="md" className="text-white" showSlogan={true} />
         </div>
 
         {/* Navigation Menu */}

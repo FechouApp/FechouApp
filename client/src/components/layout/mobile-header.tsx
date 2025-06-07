@@ -12,10 +12,10 @@ import {
   Plus, 
   Star, 
   Crown,
-  CheckCircle,
   Settings,
   LogOut
 } from "lucide-react";
+import Logo from "@/components/ui/logo";
 
 const navigation = [
   { name: "Dashboard", href: "/", icon: LayoutDashboard },
@@ -77,14 +77,7 @@ export default function MobileHeader() {
   return (
     <div className="lg:hidden bg-gradient-to-r from-blue-600 to-purple-600 border-b border-blue-500/30 p-4 shadow-lg">
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center backdrop-blur-sm">
-            <CheckCircle className="w-5 h-5 text-white" />
-          </div>
-          <div>
-            <h1 className="text-white font-bold text-lg">Fechou!</h1>
-          </div>
-        </div>
+        <Logo size="sm" className="text-white" />
         
         <Sheet open={isOpen} onOpenChange={setIsOpen}>
           <SheetTrigger asChild>
@@ -95,11 +88,8 @@ export default function MobileHeader() {
           <SheetContent side="right" className="w-80 bg-white p-0 overflow-y-auto">
             <div className="brand-gradient p-6">
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center">
-                  <CheckCircle className="w-6 h-6 text-brand-primary" />
-                </div>
+                <Logo size="sm" />
                 <div>
-                  <h1 className="text-white font-bold text-xl">Fechou!</h1>
                   <p className="text-white/80 text-sm">Feche negócios</p>
                 </div>
               </div>
