@@ -81,8 +81,8 @@ export default function MobileHeader() {
         
         <Sheet open={isOpen} onOpenChange={setIsOpen}>
           <SheetTrigger asChild>
-            <Button variant="ghost" className="text-white hover:bg-white/10 p-4 h-auto min-h-[72px] min-w-[72px]">
-              <Menu className="w-20 h-20" />
+            <Button variant="ghost" className="text-white hover:bg-white/10 p-2 h-auto min-h-[72px] min-w-[72px]">
+              <Menu className="w-12 h-12" strokeWidth={2.5} />
             </Button>
           </SheetTrigger>
           <SheetContent side="right" className="w-80 bg-white p-0 overflow-y-auto">
