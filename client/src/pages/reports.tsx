@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import LoadingSpinner from "@/components/common/loading-spinner";
 import { Link, useLocation } from "wouter";
-import { Crown, Lock, ArrowLeft } from "lucide-react";
+import { Crown, Lock, ArrowLeft, AlertTriangle } from "lucide-react";
 import { 
   FileText, 
   CheckCircle, 
