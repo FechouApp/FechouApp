@@ -8,12 +8,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { User, Building, Bell, Crown, Mail, Phone, MapPin, Save, Upload, Lock } from "lucide-react";
+import { User, Building, Bell, Crown, Mail, Phone, MapPin, Save, Upload, Lock, Users } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { formatPhone, formatCPF, formatCEP } from "@/lib/utils";
 import type { User as UserType } from "@/types";
+import ReferralPanel from "@/components/referrals/referral-panel";
 
 export default function Settings() {
   const { user, isLoading } = useAuth();
