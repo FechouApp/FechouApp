@@ -361,7 +361,9 @@ export default function Settings() {
       {/* Tab Content */}
       <div className="grid gap-6">
         {activeTab === "referrals" && <ReferralPanel />}
-        {/* Personal Information */}
+        
+        {activeTab === "personal" && (
+        <>
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -817,6 +819,8 @@ export default function Settings() {
             </Button>
           </CardContent>
         </Card>
+        </>
+        )}
       </div>
     </div>
   );
