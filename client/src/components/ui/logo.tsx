@@ -34,21 +34,31 @@ export default function Logo({
       {/* Logo Icon */}
       <div className={`${sizeClasses[size]} aspect-square`}>
         <svg 
-          viewBox="0 0 100 100" 
+          viewBox="0 0 80 80" 
           className="w-full h-full"
           fill="none" 
           xmlns="http://www.w3.org/2000/svg"
         >
-          {/* Speech bubble background */}
+          {/* Main square with rounded corners */}
+          <rect 
+            x="10" 
+            y="10" 
+            width="50" 
+            height="50" 
+            rx="12" 
+            ry="12" 
+            fill="#1e3a8a" 
+          />
+          {/* Speech bubble tail */}
           <path 
-            d="M20 15 C15 15 10 20 10 25 L10 55 C10 60 15 65 20 65 L25 65 L35 75 L35 65 L80 65 C85 65 90 60 90 55 L90 25 C90 20 85 15 80 15 Z" 
+            d="M25 60 L35 70 L45 60" 
             fill="#1e3a8a" 
           />
           {/* Check mark */}
           <path 
-            d="M25 40 L40 55 L75 25" 
+            d="M22 35 L32 45 L48 25" 
             stroke="#10b981" 
-            strokeWidth="8" 
+            strokeWidth="6" 
             strokeLinecap="round" 
             strokeLinejoin="round" 
             fill="none"
@@ -59,7 +69,7 @@ export default function Logo({
       {/* Text */}
       {showText && (
         <div className="flex flex-col">
-          <span className={`font-bold ${textSizes[size]} leading-none ${className.includes('text-white') ? 'text-white' : 'text-gray-800'}`}>
+          <span className={`font-bold italic ${textSizes[size]} leading-none ${className.includes('text-white') ? 'text-white' : 'text-gray-800'}`}>
             Fechou!
           </span>
           {showSlogan && (
