@@ -5,27 +5,15 @@ import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import LoadingSpinner from "@/components/common/loading-spinner";
+import BackButton from "@/components/common/back-button";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { 
-  Crown, 
-  Check, 
-  X, 
-  Star, 
-  FileText,
-  Users,
-  Mail,
-  Image,
-  Globe,
-  BarChart3,
-  HeadphonesIcon
-} from "lucide-react";
+import { Crown, Check, X } from "lucide-react";
 
 export default function Plans() {
   const { toast } = useToast();
   const { user, isAuthenticated, isLoading: authLoading, isPremium } = useAuth();
 
-  // Redirect to home if not authenticated
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
       toast({
@@ -85,74 +73,31 @@ export default function Plans() {
   const quotesRemaining = Math.max(0, quotesLimit - quotesUsed);
 
   return (
-    <div className="space-y-8">
-      {/* Header */}
-      <div className="text-center">
-        <h1 className="text-3xl font-bold text-white mb-2">Planos</h1>
-        <p className="text-white/70">Escolha o plano ideal para o seu negócio</p>
+    <div className="min-h-screen bg-gray-50 p-4">
+      <BackButton />
+      
+      <div className="text-center mb-8">
+        <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-2">Planos</h1>
+        <p className="text-gray-600">Escolha o plano ideal para o seu negócio</p>
       </div>
 
-      {/* Beta Notice */}
-      <Card className="bg-yellow-50 border-yellow-200">
+      <Card className="bg-yellow-50 border-yellow-200 mb-8">
         <CardContent className="p-4">
           <div className="flex items-start gap-3">
             <div className="w-6 h-6 bg-yellow-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-              <span className="text-yellow-600 text-sm">⚠️</span>
+              <span className="text-yellow-600 text-xs font-bold">β</span>
             </div>
             <div>
-              <h3 className="font-semibold text-yellow-800 mb-1">Versão de Teste</h3>
-              <p className="text-sm text-yellow-700 mb-2">
-                O aplicativo está em fase de criação e é uma versão de teste. 
-                Algumas funcionalidades podem apresentar instabilidades.
-              </p>
-              <p className="text-sm text-yellow-700">
-                Sugestões e feedback podem ser enviados para: 
-                <a href="mailto:agtgpereira@gmail.com" className="font-medium underline ml-1">
-                  agtgpereira@gmail.com
-                </a>
+              <h3 className="font-semibold text-yellow-800 mb-1">Versão Beta</h3>
+              <p className="text-yellow-700 text-sm">
+                Estamos em fase beta! Por tempo limitado, você pode alternar entre os planos gratuitamente 
+                para testar todas as funcionalidades premium.
               </p>
             </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* Current Plan Status */}
-      <Card className="brand-gradient shadow-lg">
-        <CardContent className="p-6 text-white">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-lg font-semibold mb-1">
-                Plano Atual: {currentPlan === "FREE" ? "Gratuito" : "Premium"}
-              </h3>
-              <p className="text-blue-100">
-                {quotesUsed} de {quotesLimit === 999999 ? "∞" : quotesLimit} orçamentos utilizados este mês
-              </p>
-            </div>
-            <div className="text-right">
-              <div className="text-2xl font-bold">
-                {quotesLimit === 999999 ? "∞" : quotesRemaining}
-              </div>
-              <div className="text-sm text-blue-100">
-                {quotesLimit === 999999 ? "Ilimitado" : "Orçamentos restantes"}
-              </div>
-            </div>
-          </div>
-          
-          {/* Progress Bar */}
-          {quotesLimit !== 999999 && (
-            <div className="mt-4">
-              <div className="w-full bg-white/20 rounded-full h-2">
-                <div
-                  className="bg-white h-2 rounded-full transition-all duration-300"
-                  style={{ width: `${(quotesUsed / quotesLimit) * 100}%` }}
-                />
-              </div>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Plans Comparison */}
       <div className="max-w-6xl mx-auto">
         <div className="grid lg:grid-cols-2 gap-8">
           {/* Free Plan */}
@@ -164,38 +109,26 @@ export default function Plans() {
                 <p className="text-gray-600">Para sempre</p>
               </div>
 
-              <ul className="space-y-4 mb-8">
+              <ul className="space-y-3 mb-8">
                 <li className="flex items-center gap-3">
-                  <Check className="w-5 h-5 text-green-500" />
-                  <span className="text-gray-700">Até 5 orçamentos por mês</span>
+                  <Check className="w-5 h-5 text-green-500 flex-shrink-0" />
+                  <span className="text-gray-700">5 orçamentos por mês</span>
                 </li>
                 <li className="flex items-center gap-3">
-                  <Check className="w-5 h-5 text-green-500" />
+                  <Check className="w-5 h-5 text-green-500 flex-shrink-0" />
+                  <span className="text-gray-700">10 itens por orçamento</span>
+                </li>
+                <li className="flex items-center gap-3">
+                  <Check className="w-5 h-5 text-green-500 flex-shrink-0" />
                   <span className="text-gray-700">Gerenciamento básico de clientes</span>
                 </li>
                 <li className="flex items-center gap-3">
-                  <Check className="w-5 h-5 text-green-500" />
-                  <span className="text-gray-700">Envio via WhatsApp</span>
+                  <X className="w-5 h-5 text-red-500 flex-shrink-0" />
+                  <span className="text-gray-500">Relatórios avançados</span>
                 </li>
                 <li className="flex items-center gap-3">
-                  <Check className="w-5 h-5 text-green-500" />
-                  <span className="text-gray-700">PDFs com marca d'água</span>
-                </li>
-                <li className="flex items-center gap-3 opacity-50">
-                  <X className="w-5 h-5 text-red-500" />
-                  <span className="text-gray-500">Envio por e-mail</span>
-                </li>
-                <li className="flex items-center gap-3 opacity-50">
-                  <X className="w-5 h-5 text-red-500" />
-                  <span className="text-gray-500">Logotipo personalizado</span>
-                </li>
-                <li className="flex items-center gap-3 opacity-50">
-                  <X className="w-5 h-5 text-red-500" />
-                  <span className="text-gray-500">Link personalizado</span>
-                </li>
-                <li className="flex items-center gap-3 opacity-50">
-                  <X className="w-5 h-5 text-red-500" />
-                  <span className="text-gray-500">Relatórios avançados</span>
+                  <X className="w-5 h-5 text-red-500 flex-shrink-0" />
+                  <span className="text-gray-500">Monitoramento de prazos</span>
                 </li>
               </ul>
 
@@ -225,53 +158,38 @@ export default function Plans() {
                 <p className="text-gray-600">por mês</p>
               </div>
 
-              <ul className="space-y-4 mb-8">
+              <ul className="space-y-3 mb-8">
                 <li className="flex items-center gap-3">
-                  <Check className="w-5 h-5 text-green-500" />
-                  <span className="text-gray-700 font-medium">Orçamentos ilimitados</span>
+                  <Check className="w-5 h-5 text-green-500 flex-shrink-0" />
+                  <span className="text-gray-700">Orçamentos ilimitados</span>
                 </li>
                 <li className="flex items-center gap-3">
-                  <Check className="w-5 h-5 text-green-500" />
-                  <span className="text-gray-700 font-medium">Gerenciamento completo de clientes</span>
+                  <Check className="w-5 h-5 text-green-500 flex-shrink-0" />
+                  <span className="text-gray-700">Itens ilimitados por orçamento</span>
                 </li>
                 <li className="flex items-center gap-3">
-                  <Check className="w-5 h-5 text-green-500" />
-                  <span className="text-gray-700 font-medium">Envio via WhatsApp e e-mail</span>
+                  <Check className="w-5 h-5 text-green-500 flex-shrink-0" />
+                  <span className="text-gray-700">Relatórios avançados e gráficos</span>
                 </li>
                 <li className="flex items-center gap-3">
-                  <Check className="w-5 h-5 text-green-500" />
-                  <span className="text-gray-700 font-medium">PDFs sem marca d'água</span>
+                  <Check className="w-5 h-5 text-green-500 flex-shrink-0" />
+                  <span className="text-gray-700">Monitoramento de prazos vencendo</span>
                 </li>
                 <li className="flex items-center gap-3">
-                  <Check className="w-5 h-5 text-green-500" />
-                  <span className="text-gray-700 font-medium">Logotipo personalizado</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <Check className="w-5 h-5 text-green-500" />
-                  <span className="text-gray-700 font-medium">Link personalizado</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <Check className="w-5 h-5 text-green-500" />
-                  <span className="text-gray-700 font-medium">Relatórios avançados</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <Check className="w-5 h-5 text-green-500" />
-                  <span className="text-gray-700 font-medium">Suporte prioritário</span>
+                  <Check className="w-5 h-5 text-green-500 flex-shrink-0" />
+                  <span className="text-gray-700">Suporte prioritário</span>
                 </li>
               </ul>
 
-              <Button
+              <Button 
+                className="w-full" 
+                variant={currentPlan === "PREMIUM" ? "secondary" : "default"}
                 onClick={handleUpgrade}
-                className="w-full brand-gradient text-white font-semibold"
-                disabled={currentPlan === "PREMIUM" || updatePlanMutation.isPending}
+                disabled={updatePlanMutation.isPending}
               >
-                {currentPlan === "PREMIUM" 
-                  ? "Plano Atual" 
-                  : updatePlanMutation.isPending 
-                    ? "Processando..." 
-                    : "Fazer Upgrade"
-                }
+                {currentPlan === "PREMIUM" ? "Plano Atual" : "Ativar Premium"}
               </Button>
+
               {currentPlan === "FREE" && (
                 <p className="text-center text-sm text-gray-600 mt-3">
                   7 dias grátis para testar
@@ -280,94 +198,6 @@ export default function Plans() {
             </CardContent>
           </Card>
         </div>
-
-        {/* Features Comparison Table */}
-        <Card className="bg-white shadow-lg mt-8">
-          <CardHeader>
-            <CardTitle className="text-xl font-semibold text-gray-800 text-center">
-              Comparação Detalhada
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-gray-200">
-                    <th className="text-left py-4 text-gray-600 font-medium">Recursos</th>
-                    <th className="text-center py-4 text-gray-600 font-medium">Gratuito</th>
-                    <th className="text-center py-4 text-brand-primary font-medium">Premium</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200">
-                  <tr>
-                    <td className="py-4 flex items-center gap-2">
-                      <FileText className="w-4 h-4 text-gray-400" />
-                      <span className="text-gray-700">Orçamentos por mês</span>
-                    </td>
-                    <td className="py-4 text-center text-gray-600">5</td>
-                    <td className="py-4 text-center text-brand-primary font-semibold">Ilimitado</td>
-                  </tr>
-                  <tr>
-                    <td className="py-4 flex items-center gap-2">
-                      <Users className="w-4 h-4 text-gray-400" />
-                      <span className="text-gray-700">Clientes cadastrados</span>
-                    </td>
-                    <td className="py-4 text-center text-gray-600">50</td>
-                    <td className="py-4 text-center text-brand-primary font-semibold">Ilimitado</td>
-                  </tr>
-                  <tr>
-                    <td className="py-4 flex items-center gap-2">
-                      <Star className="w-4 h-4 text-gray-400" />
-                      <span className="text-gray-700">Marca d'água nos PDFs</span>
-                    </td>
-                    <td className="py-4 text-center text-red-500"><X className="w-5 h-5 mx-auto" /></td>
-                    <td className="py-4 text-center text-green-500"><Check className="w-5 h-5 mx-auto" /></td>
-                  </tr>
-                  <tr>
-                    <td className="py-4 flex items-center gap-2">
-                      <Image className="w-4 h-4 text-gray-400" />
-                      <span className="text-gray-700">Logotipo personalizado</span>
-                    </td>
-                    <td className="py-4 text-center text-red-500"><X className="w-5 h-5 mx-auto" /></td>
-                    <td className="py-4 text-center text-green-500"><Check className="w-5 h-5 mx-auto" /></td>
-                  </tr>
-                  <tr>
-                    <td className="py-4 flex items-center gap-2">
-                      <Mail className="w-4 h-4 text-gray-400" />
-                      <span className="text-gray-700">Envio por e-mail</span>
-                    </td>
-                    <td className="py-4 text-center text-red-500"><X className="w-5 h-5 mx-auto" /></td>
-                    <td className="py-4 text-center text-green-500"><Check className="w-5 h-5 mx-auto" /></td>
-                  </tr>
-                  <tr>
-                    <td className="py-4 flex items-center gap-2">
-                      <Globe className="w-4 h-4 text-gray-400" />
-                      <span className="text-gray-700">Link personalizado</span>
-                    </td>
-                    <td className="py-4 text-center text-red-500"><X className="w-5 h-5 mx-auto" /></td>
-                    <td className="py-4 text-center text-green-500"><Check className="w-5 h-5 mx-auto" /></td>
-                  </tr>
-                  <tr>
-                    <td className="py-4 flex items-center gap-2">
-                      <BarChart3 className="w-4 h-4 text-gray-400" />
-                      <span className="text-gray-700">Relatórios e estatísticas</span>
-                    </td>
-                    <td className="py-4 text-center text-gray-600">Básico</td>
-                    <td className="py-4 text-center text-brand-primary font-semibold">Avançado</td>
-                  </tr>
-                  <tr>
-                    <td className="py-4 flex items-center gap-2">
-                      <HeadphonesIcon className="w-4 h-4 text-gray-400" />
-                      <span className="text-gray-700">Suporte</span>
-                    </td>
-                    <td className="py-4 text-center text-gray-600">Email</td>
-                    <td className="py-4 text-center text-brand-primary font-semibold">Prioritário</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </CardContent>
-        </Card>
       </div>
     </div>
   );

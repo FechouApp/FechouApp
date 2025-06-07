@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { User, Building, Bell, Crown, Mail, Phone, MapPin, Save, Upload, Lock } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import BackButton from "@/components/common/back-button";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { formatPhone, formatCPF, formatCEP } from "@/lib/utils";
@@ -303,6 +304,8 @@ export default function Settings() {
 
   return (
     <div className="container mx-auto px-4 py-6 sm:py-8 max-w-4xl">
+      <BackButton />
+      
       <div className="mb-6 sm:mb-8">
         <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-2">Configurações</h1>
         <p className="text-sm sm:text-base text-gray-600">Gerencie suas informações pessoais e preferências</p>
