@@ -522,24 +522,14 @@ export default function NewQuote() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white">
-        <div className="p-4">
-          <div className="flex items-center gap-3">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setLocation("/quotes")}
-              className="text-white hover:bg-white/20 p-2"
-            >
-              <ArrowLeft className="w-5 h-5" />
-            </Button>
-            <div>
-              <h1 className="text-lg font-semibold">
-                {isEditing ? "Editar Orçamento" : "Novo Orçamento"}
-              </h1>
-            </div>
-          </div>
+      <div className="p-4">
+        <BackButton to="/quotes" />
+        {/* Header */}
+        <div className="mb-6">
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-2">
+            {isEditing ? "Editar Orçamento" : "Novo Orçamento"}
+          </h1>
+          <p className="text-gray-600">Preencha as informações do orçamento</p>
         </div>
       </div>
 
