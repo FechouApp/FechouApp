@@ -625,7 +625,9 @@ export default function NewQuote() {
                 }}
               >
                 <SelectTrigger className="mt-1">
-                  <SelectValue placeholder="30 dias" />
+                  <SelectValue>
+                    {validityDays} dias
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="5">5 dias</SelectItem>
@@ -755,21 +757,15 @@ export default function NewQuote() {
                           if (customValue && !isNaN(parseInt(customValue)) && parseInt(customValue) > 0) {
                             updateItem(item.id, 'quantity', parseInt(customValue));
                           }
-                          // Force re-render by setting the value again
-                          setTimeout(() => {
-                            const currentItem = items.find(i => i.id === item.id);
-                            if (currentItem) {
-                              // Trigger a state update to refresh the select
-                              setItems(prev => [...prev]);
-                            }
-                          }, 100);
                         } else {
                           updateItem(item.id, 'quantity', parseInt(value));
                         }
                       }}
                     >
                       <SelectTrigger className="mt-1 h-9">
-                        <SelectValue placeholder="1" />
+                        <SelectValue>
+                          {item.quantity || 1}
+                        </SelectValue>
                       </SelectTrigger>
                       <SelectContent>
                         {[1,2,3,4,5,6,7,8,9].map(num => (

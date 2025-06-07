@@ -219,11 +219,35 @@ export default function Reports() {
     return total / approvedQuotes.length;
   };
 
+  const getExpiringQuotes = () => {
+    if (!quotes || quotes.length === 0) return [];
+    
+    const today = new Date();
+    const fiveDaysFromNow = new Date();
+    fiveDaysFromNow.setDate(today.getDate() + 5);
+    
+    return quotes.filter(quote => {
+      if (quote.status !== 'pending' && quote.status !== 'draft') return false;
+      
+      const validUntil = new Date(quote.validUntil);
+      return validUntil >= today && validUntil <= fiveDaysFromNow;
+    }).sort((a, b) => new Date(a.validUntil).getTime() - new Date(b.validUntil).getTime());
+  };
+
+  const getDaysUntilExpiration = (validUntil: string) => {
+    const today = new Date();
+    const expirationDate = new Date(validUntil);
+    const diffTime = expirationDate.getTime() - today.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays;
+  };
+
   const monthlyData = calculateMonthlyData();
   const statusStats = getStatusStats();
   const topClients = getTopClients();
   const conversionRate = getConversionRate();
   const averageQuoteValue = getAverageQuoteValue();
+  const expiringQuotes = getExpiringQuotes();
 
   return (
     <div className="min-h-screen bg-gray-50 p-4">
