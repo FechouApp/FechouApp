@@ -339,6 +339,9 @@ export default function Clients() {
           <DialogContent className="max-w-lg max-h-[80vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Editar Cliente</DialogTitle>
+              <DialogDescription>
+                Edite as informações do cliente selecionado
+              </DialogDescription>
             </DialogHeader>
             {editingClient && (
               <form onSubmit={(e) => {

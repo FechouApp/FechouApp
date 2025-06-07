@@ -13,7 +13,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { formatPhone, formatCPF, formatCEP } from "@/lib/utils";
-import type { User as UserType } from "@/types";
+import type { User as UserType } from "@shared/schema";
 import ReferralPanel from "@/components/referrals/referral-panel";
 
 export default function Settings() {
@@ -53,8 +53,8 @@ export default function Settings() {
         cpfCnpj: typedUser.cpfCnpj || "",
         profession: typedUser.profession || "",
         businessName: typedUser.businessName || "",
-        phone: typedUser.phone || "",
-        address: typedUser.address || "",
+        phone: (typedUser as any).phone || "",
+        address: (typedUser as any).address || "",
         cep: "",
         numero: "",
         complemento: "",
@@ -63,10 +63,10 @@ export default function Settings() {
         pixKey: typedUser.pixKey || "",
         logoUrl: typedUser.logoUrl || "",
         profileImageUrl: typedUser.profileImageUrl || "",
-        primaryColor: typedUser.primaryColor || "#3B82F6",
-        secondaryColor: typedUser.secondaryColor || "#10B981",
-        whatsappNotifications: typedUser.whatsappNotifications ?? true,
-        emailNotifications: typedUser.emailNotifications ?? true,
+        primaryColor: (typedUser as any).primaryColor || "#3B82F6",
+        secondaryColor: (typedUser as any).secondaryColor || "#10B981",
+        whatsappNotifications: (typedUser as any).whatsappNotifications ?? true,
+        emailNotifications: (typedUser as any).emailNotifications ?? true,
       });
     }
   }, [typedUser]);
