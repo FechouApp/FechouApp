@@ -20,6 +20,7 @@ export default function Settings() {
   const { user, isLoading } = useAuth();
   const { toast } = useToast();
   const typedUser = user as UserType;
+  const [activeTab, setActiveTab] = useState("personal");
 
   const [formData, setFormData] = useState({
     firstName: "",
@@ -309,7 +310,57 @@ export default function Settings() {
         <p className="text-sm sm:text-base text-gray-600">Gerencie suas informações pessoais e preferências</p>
       </div>
 
+      {/* Navigation Tabs */}
+      <div className="flex space-x-1 mb-6 bg-gray-100 p-1 rounded-lg">
+        <button
+          onClick={() => setActiveTab("personal")}
+          className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+            activeTab === "personal"
+              ? "bg-white text-gray-900 shadow-sm"
+              : "text-gray-600 hover:text-gray-900"
+          }`}
+        >
+          <User className="w-4 h-4" />
+          Pessoal
+        </button>
+        <button
+          onClick={() => setActiveTab("business")}
+          className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+            activeTab === "business"
+              ? "bg-white text-gray-900 shadow-sm"
+              : "text-gray-600 hover:text-gray-900"
+          }`}
+        >
+          <Building className="w-4 h-4" />
+          Negócio
+        </button>
+        <button
+          onClick={() => setActiveTab("referrals")}
+          className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+            activeTab === "referrals"
+              ? "bg-white text-gray-900 shadow-sm"
+              : "text-gray-600 hover:text-gray-900"
+          }`}
+        >
+          <Users className="w-4 h-4" />
+          Indicações
+        </button>
+        <button
+          onClick={() => setActiveTab("notifications")}
+          className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+            activeTab === "notifications"
+              ? "bg-white text-gray-900 shadow-sm"
+              : "text-gray-600 hover:text-gray-900"
+          }`}
+        >
+          <Bell className="w-4 h-4" />
+          Notificações
+        </button>
+      </div>
+
+      {/* Tab Content */}
       <div className="grid gap-6">
+        {activeTab === "referrals" && <ReferralPanel />}
         {/* Personal Information */}
         <Card>
           <CardHeader>

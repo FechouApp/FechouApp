@@ -61,19 +61,19 @@ export default function ReferralPanel() {
   };
 
   const shareLink = async () => {
-    if (navigator.share && referralData?.referralLink) {
+    if (navigator.share && (referralData as any)?.referralLink) {
       try {
         await navigator.share({
           title: 'Fechou! - Sistema de Orçamentos',
           text: 'Crie orçamentos profissionais de forma fácil e rápida!',
-          url: referralData.referralLink,
+          url: (referralData as any).referralLink,
         });
       } catch (err) {
         // Fallback to copy if sharing fails
-        copyToClipboard(referralData.referralLink);
+        copyToClipboard((referralData as any).referralLink);
       }
-    } else if (referralData?.referralLink) {
-      copyToClipboard(referralData.referralLink);
+    } else if ((referralData as any)?.referralLink) {
+      copyToClipboard((referralData as any).referralLink);
     }
   };
 
@@ -121,15 +121,15 @@ export default function ReferralPanel() {
         <CardContent className="space-y-4">
           <div className="flex gap-2">
             <Input
-              value={referralData?.referralLink || ''}
+              value={(referralData as any)?.referralLink || ''}
               readOnly
               className="font-mono text-sm"
             />
             <Button
               variant="outline"
               size="sm"
-              onClick={() => copyToClipboard(referralData?.referralLink || '')}
-              disabled={!referralData?.referralLink}
+              onClick={() => copyToClipboard((referralData as any)?.referralLink || '')}
+              disabled={!(referralData as any)?.referralLink}
             >
               <Copy className="w-4 h-4" />
               {copied ? 'Copiado!' : 'Copiar'}
@@ -138,14 +138,14 @@ export default function ReferralPanel() {
               variant="outline"
               size="sm"
               onClick={shareLink}
-              disabled={!referralData?.referralLink}
+              disabled={!(referralData as any)?.referralLink}
             >
               <Share2 className="w-4 h-4" />
               Compartilhar
             </Button>
           </div>
 
-          {!referralData?.referralCode && (
+          {!(referralData as any)?.referralCode && (
             <Button
               onClick={() => generateCodeMutation.mutate()}
               disabled={generateCodeMutation.isPending}
@@ -167,7 +167,7 @@ export default function ReferralPanel() {
               </div>
               <div>
                 <p className="text-sm text-gray-600">Total de Indicações</p>
-                <p className="text-2xl font-bold">{stats?.totalReferrals || 0}</p>
+                <p className="text-2xl font-bold">{(stats as any)?.totalReferrals || 0}</p>
               </div>
             </div>
           </CardContent>
@@ -181,7 +181,7 @@ export default function ReferralPanel() {
               </div>
               <div>
                 <p className="text-sm text-gray-600">Este Mês</p>
-                <p className="text-2xl font-bold">{stats?.monthlyReferrals || 0}</p>
+                <p className="text-2xl font-bold">{(stats as any)?.monthlyReferrals || 0}</p>
               </div>
             </div>
           </CardContent>
@@ -195,7 +195,7 @@ export default function ReferralPanel() {
               </div>
               <div>
                 <p className="text-sm text-gray-600">Orçamentos Extras</p>
-                <p className="text-2xl font-bold">{stats?.bonusQuotes || 0}</p>
+                <p className="text-2xl font-bold">{(stats as any)?.bonusQuotes || 0}</p>
               </div>
             </div>
           </CardContent>
@@ -209,7 +209,7 @@ export default function ReferralPanel() {
               </div>
               <div>
                 <p className="text-sm text-gray-600">Desconto Atual</p>
-                <p className="text-2xl font-bold">{stats?.discountPercentage || 0}%</p>
+                <p className="text-2xl font-bold">{(stats as any)?.discountPercentage || 0}%</p>
               </div>
             </div>
           </CardContent>
@@ -275,7 +275,7 @@ export default function ReferralPanel() {
                 Progresso para Próxima Recompensa
               </span>
               <span className="text-sm text-gray-600">
-                {stats?.monthlyReferrals || 0} / {nextRewardThreshold}
+                {(stats as any)?.monthlyReferrals || 0} / {nextRewardThreshold}
               </span>
             </div>
             <div className="w-full bg-gray-200 rounded-full h-2">
@@ -286,8 +286,8 @@ export default function ReferralPanel() {
             </div>
             <p className="text-xs text-gray-600">
               {isPremium 
-                ? `Indique mais ${Math.max(0, 5 - (stats?.monthlyReferrals || 0))} pessoas para ter mensalidade grátis!`
-                : `Indique mais ${Math.max(0, nextRewardThreshold - (stats?.monthlyReferrals || 0))} pessoas para ganhar orçamentos extras!`
+                ? `Indique mais ${Math.max(0, 5 - ((stats as any)?.monthlyReferrals || 0))} pessoas para ter mensalidade grátis!`
+                : `Indique mais ${Math.max(0, nextRewardThreshold - ((stats as any)?.monthlyReferrals || 0))} pessoas para ganhar orçamentos extras!`
               }
             </p>
           </div>
