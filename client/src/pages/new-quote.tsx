@@ -17,11 +17,12 @@ import {
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import LoadingSpinner from "@/components/common/loading-spinner";
+import BackButton from "@/components/common/back-button";
 import QuickSetup from "@/components/quick-setup";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useLocation } from "wouter";
-import { ArrowLeft, Plus, Save, Crown, Trash2, AlertCircle, Star, ChevronDown } from "lucide-react";
+import { Plus, Save, Crown, Trash2, AlertCircle, Star, ChevronDown } from "lucide-react";
 import type { Client, CreateQuoteRequest, QuoteWithDetails } from "@/types";
 
 import PhotoUploadSection from "@/components/quotes/photo-upload-section";

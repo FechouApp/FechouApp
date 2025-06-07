@@ -5,8 +5,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import LoadingSpinner from "@/components/common/loading-spinner";
+import BackButton from "@/components/common/back-button";
 import { Link, useLocation } from "wouter";
-import { Crown, Lock, ArrowLeft, AlertTriangle, Eye } from "lucide-react";
+import { Crown, Lock, AlertTriangle, Eye } from "lucide-react";
 import { 
   FileText, 
   CheckCircle, 
@@ -250,17 +251,7 @@ export default function Reports() {
 
   return (
     <div className="min-h-screen bg-gray-50 p-4">
-      {/* Botão de Voltar */}
-      <div className="flex items-center mb-6">
-        <Button
-          variant="ghost"
-          onClick={() => setLocation("/")}
-          className="flex items-center gap-2 text-gray-600 hover:text-gray-900"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          Voltar
-        </Button>
-      </div>
+      <BackButton />
 
       {/* Header */}
       <div className="mb-8">
@@ -378,7 +369,7 @@ export default function Reports() {
                         <p className="text-sm text-gray-600">
                           {formatCurrency(quote.total)}
                         </p>
-                        <Link href={`/quote/${quote.id}`}>
+                        <Link href={`/quotes/${quote.id}`}>
                           <Button variant="outline" size="sm" className="flex items-center gap-2">
                             <Eye className="w-4 h-4" />
                             Ver Orçamento
