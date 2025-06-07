@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import LoadingSpinner from "@/components/common/loading-spinner";
 import { Link, useLocation } from "wouter";
-import { Crown, Lock, ArrowLeft, AlertTriangle } from "lucide-react";
+import { Crown, Lock, ArrowLeft, AlertTriangle, Eye } from "lucide-react";
 import { 
   FileText, 
   CheckCircle, 
@@ -19,7 +19,6 @@ import {
   Clock,
   Target,
   Award,
-  Eye,
   ThumbsUp
 } from "lucide-react";
 import { ChartContainer, ChartTooltip, ChartLegend } from "@/components/ui/chart";
@@ -337,7 +336,7 @@ export default function Reports() {
               ⚠️ Orçamentos Vencendo em Breve
             </CardTitle>
             <p className="text-sm text-red-600">
-              {expiringQuotes.length} orçamento{expiringQuotes.length > 1 ? 's' : ''} vencem nos próximos 5 dias
+              {expiringQuotes.length} orçamento{expiringQuotes.length > 1 ? 's' : ''} {expiringQuotes.length > 1 ? 'vencem' : 'vence'} nos próximos 5 dias
             </p>
           </CardHeader>
           <CardContent>
@@ -366,7 +365,7 @@ export default function Reports() {
                           </div>
                         </div>
                       </div>
-                      <div className="text-right">
+                      <div className="text-right flex flex-col items-end gap-2">
                         <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
                           isUrgent 
                             ? 'bg-red-200 text-red-800' 
@@ -376,9 +375,15 @@ export default function Reports() {
                            daysLeft === 1 ? 'Vence amanhã' : 
                            `${daysLeft} dias restantes`}
                         </div>
-                        <p className="text-sm text-gray-600 mt-1">
+                        <p className="text-sm text-gray-600">
                           {formatCurrency(quote.total)}
                         </p>
+                        <Link href={`/quote/${quote.id}`}>
+                          <Button variant="outline" size="sm" className="flex items-center gap-2">
+                            <Eye className="w-4 h-4" />
+                            Ver Orçamento
+                          </Button>
+                        </Link>
                       </div>
                     </div>
                   </div>
