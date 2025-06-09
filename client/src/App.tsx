@@ -17,6 +17,7 @@ import PlanComparison from "@/pages/plan-comparison";
 import Settings from "@/pages/settings";
 import QuoteView from "@/pages/quote-view";
 import PublicQuote from "@/pages/public-quote";
+import ReceiptView from "@/pages/receipt-view";
 import Sidebar from "@/components/layout/sidebar";
 import MobileHeader from "@/components/layout/mobile-header";
 import LoadingSpinner from "@/components/common/loading-spinner";
@@ -75,6 +76,7 @@ function Router() {
       <Route path="/new-quote" component={NewQuote} />
       <Route path="/quotes/:quoteId/edit" component={NewQuote} />
       <Route path="/quotes/view/:quoteId" component={QuoteView} />
+      <Route path="/quotes/:id/receipt" component={ReceiptView} />
       <Route path="/reviews" component={Reviews} />
       <Route path="/saved-items" component={SavedItemsPage} />
       <Route path="/reports" component={Reports} />

@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Star, CheckCircle, XCircle, Calendar, Phone, Mail, MapPin, Download, Copy, Eye, Image as ImageIcon } from "lucide-react";
+import { Star, CheckCircle, XCircle, Calendar, Phone, Mail, MapPin, Download, Copy, Eye, Image as ImageIcon, FileText } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import type { QuoteWithDetails } from "@/types";
@@ -174,6 +174,12 @@ export default function PublicQuote() {
         description: "Não foi possível copiar a chave PIX.",
         variant: "destructive",
       });
+    }
+  };
+
+  const handleViewReceipt = () => {
+    if (quote?.id) {
+      window.open(`/api/quotes/${quote.id}/receipt/pdf`, '_blank');
     }
   };
 
@@ -424,13 +430,23 @@ export default function PublicQuote() {
                 Baixar PDF do Orçamento
               </Button>
               
-              <Button 
-                onClick={copyPixKey}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-              >
-                <Copy className="w-4 h-4 mr-2" />
-                Copiar Chave PIX para Pagamento
-              </Button>
+              {quote.status === "paid" ? (
+                <Button 
+                  onClick={handleViewReceipt}
+                  className="w-full bg-green-600 hover:bg-green-700 text-white"
+                >
+                  <FileText className="w-4 h-4 mr-2" />
+                  Baixar Recibo de Pagamento
+                </Button>
+              ) : (
+                <Button 
+                  onClick={copyPixKey}
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                >
+                  <Copy className="w-4 h-4 mr-2" />
+                  Copiar Chave PIX para Pagamento
+                </Button>
+              )}
             </div>
             
             {/* Approve/Reject buttons - Show only for pending quotes that are not expired */}
