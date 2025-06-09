@@ -18,6 +18,7 @@ import Settings from "@/pages/settings";
 import QuoteView from "@/pages/quote-view";
 import PublicQuote from "@/pages/public-quote";
 import ReceiptView from "@/pages/receipt-view";
+import PublicReceipt from "@/pages/public-receipt";
 import Sidebar from "@/components/layout/sidebar";
 import MobileHeader from "@/components/layout/mobile-header";
 import LoadingSpinner from "@/components/common/loading-spinner";
@@ -66,8 +67,9 @@ function Router() {
 
   return (
     <Switch>
-      {/* Public route for client quote viewing */}
+      {/* Public routes for client viewing */}
       <Route path="/quote/:quoteNumber" component={PublicQuote} />
+      <Route path="/receipt/:quoteNumber" component={PublicReceipt} />
       
       <Route path="/" component={Dashboard} />
       <Route path="/clients" component={Clients} />

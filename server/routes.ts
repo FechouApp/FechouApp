@@ -629,123 +629,133 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const doc = new jsPDF();
       
-      // Header with logo space (future implementation)
-      let yPos = 30;
+      // Helper function to convert numbers to words in Portuguese
+      const numberToWords = (value: number): string => {
+        const units = ['', 'um', 'dois', 'três', 'quatro', 'cinco', 'seis', 'sete', 'oito', 'nove'];
+        const teens = ['dez', 'onze', 'doze', 'treze', 'quatorze', 'quinze', 'dezesseis', 'dezessete', 'dezoito', 'dezenove'];
+        const tens = ['', '', 'vinte', 'trinta', 'quarenta', 'cinquenta', 'sessenta', 'setenta', 'oitenta', 'noventa'];
+        const hundreds = ['', 'cento', 'duzentos', 'trezentos', 'quatrocentos', 'quinhentos', 'seiscentos', 'setecentos', 'oitocentos', 'novecentos'];
+        
+        if (value === 100) return 'cem reais';
+        if (value < 1000) {
+          const h = Math.floor(value / 100);
+          const t = Math.floor((value % 100) / 10);
+          const u = Math.floor(value % 10);
+          
+          let result = '';
+          if (h > 0) result += hundreds[h];
+          if (t > 1) {
+            if (result) result += ' e ';
+            result += tens[t];
+          } else if (t === 1) {
+            if (result) result += ' e ';
+            result += teens[u];
+            return result + ' reais';
+          }
+          if (u > 0 && t !== 1) {
+            if (result) result += ' e ';
+            result += units[u];
+          }
+          return result + (result ? ' reais' : 'zero reais');
+        }
+        
+        return `${value.toFixed(2)} reais`; // Fallback for larger values
+      };
+
+      // Compact header layout similar to quote format
+      let yPos = 25;
       
       // Title
-      doc.setFontSize(18);
+      doc.setFontSize(16);
       doc.setFont('helvetica', 'bold');
       doc.text('RECIBO DE PRESTAÇÃO DE SERVIÇOS', 105, yPos, { align: 'center' });
-      yPos += 20;
+      yPos += 15;
       
-      doc.setFontSize(12);
+      // Receipt info in compact format
+      doc.setFontSize(10);
       doc.setFont('helvetica', 'normal');
       doc.text(`Recibo Nº: ${quoteWithItems.quoteNumber}`, 20, yPos);
-      doc.text(`Data de Emissão: ${new Date().toLocaleDateString('pt-BR')}`, 130, yPos);
-      yPos += 20;
-      
-      // Professional info (who provided the service)
-      doc.setFont('helvetica', 'bold');
-      doc.text('DADOS DO PRESTADOR DE SERVIÇOS:', 20, yPos);
-      yPos += 10;
-      doc.setFont('helvetica', 'normal');
-      
-      const businessName = (user as any).businessName || (user.email || 'Profissional').split('@')[0];
-      doc.text(`Nome/Razão Social: ${businessName}`, 20, yPos);
-      yPos += 8;
-      
-      if ((user as any).document) {
-        doc.text(`CPF/CNPJ: ${(user as any).document}`, 20, yPos);
-        yPos += 8;
-      }
-      
-      if ((user as any).address) {
-        doc.text(`Endereço: ${(user as any).address}`, 20, yPos);
-        yPos += 8;
-      }
-      
-      if ((user as any).professionalRegistry) {
-        doc.text(`Registro Profissional: ${(user as any).professionalRegistry}`, 20, yPos);
-        yPos += 8;
-      }
-      
-      yPos += 10;
-      
-      // Client info (who received the service)
-      doc.setFont('helvetica', 'bold');
-      doc.text('DADOS DO CLIENTE (TOMADOR DO SERVIÇO):', 20, yPos);
-      yPos += 10;
-      doc.setFont('helvetica', 'normal');
-      
-      doc.text(`Nome: ${quoteWithItems.client.name}`, 20, yPos);
-      yPos += 8;
-      
-      if ((quoteWithItems.client as any).document) {
-        doc.text(`CPF/CNPJ: ${(quoteWithItems.client as any).document}`, 20, yPos);
-        yPos += 8;
-      }
-      
-      if (quoteWithItems.client.address) {
-        doc.text(`Endereço: ${quoteWithItems.client.address}`, 20, yPos);
-        yPos += 8;
-      }
-      
+      doc.text(`Data: ${new Date().toLocaleDateString('pt-BR')}`, 150, yPos);
       yPos += 15;
       
-      // Service description
+      // Compact sections with minimal spacing
+      const businessName = (user as any).businessName || (user.email || 'Profissional').split('@')[0];
+      
+      // Professional info (compact)
       doc.setFont('helvetica', 'bold');
-      doc.text('DESCRIÇÃO DOS SERVIÇOS PRESTADOS:', 20, yPos);
-      yPos += 10;
+      doc.text('PRESTADOR:', 20, yPos);
+      yPos += 6;
       doc.setFont('helvetica', 'normal');
-      
-      if (quoteWithItems.title) {
-        doc.text(`Serviço: ${quoteWithItems.title}`, 20, yPos);
-        yPos += 8;
+      doc.text(businessName, 20, yPos);
+      if ((user as any).document) {
+        doc.text(`CPF/CNPJ: ${(user as any).document}`, 20, yPos + 5);
+        yPos += 5;
       }
+      yPos += 10;
       
+      // Client info (compact)
+      doc.setFont('helvetica', 'bold');
+      doc.text('CLIENTE:', 20, yPos);
+      yPos += 6;
+      doc.setFont('helvetica', 'normal');
+      doc.text(quoteWithItems.client.name, 20, yPos);
+      if ((quoteWithItems.client as any).document) {
+        doc.text(`CPF/CNPJ: ${(quoteWithItems.client as any).document}`, 20, yPos + 5);
+        yPos += 5;
+      }
+      yPos += 15;
+      
+      // Services table format (similar to quote items)
+      doc.setFont('helvetica', 'bold');
+      doc.text('SERVIÇOS:', 20, yPos);
+      yPos += 8;
+      
+      // Items in table format
       quoteWithItems.items.forEach((item: any) => {
-        const description = `• ${item.description} - Qtd: ${item.quantity} - Valor unitário: R$ ${parseFloat(item.price).toFixed(2)}`;
-        doc.text(description, 20, yPos);
-        yPos += 8;
+        doc.setFont('helvetica', 'normal');
+        doc.text(`• ${item.description}`, 20, yPos);
+        doc.text(`Qtd: ${item.quantity}`, 130, yPos);
+        doc.text(`R$ ${parseFloat(item.price).toFixed(2)}`, 165, yPos);
+        yPos += 6;
       });
       
-      yPos += 15;
+      yPos += 10;
       
-      // Declaration text
+      // Declaration text (compact)
       doc.setFont('helvetica', 'bold');
       doc.text('DECLARAÇÃO:', 20, yPos);
-      yPos += 10;
+      yPos += 8;
       doc.setFont('helvetica', 'normal');
       
-      const declarationText = `Declaro, para os devidos fins, que recebi de ${quoteWithItems.client.name} o valor de R$ ${parseFloat(quoteWithItems.total).toFixed(2)}, referente à prestação de serviços profissionais descritos acima.`;
+      const totalValue = parseFloat(quoteWithItems.total);
+      const valueInWords = numberToWords(totalValue);
+      const declarationText = `Declaro que recebi de ${quoteWithItems.client.name} o valor de R$ ${totalValue.toFixed(2)} (${valueInWords}), referente aos serviços descritos acima.`;
       
-      // Split long text into multiple lines
       const splitText = doc.splitTextToSize(declarationText, 170);
       doc.text(splitText, 20, yPos);
-      yPos += splitText.length * 6 + 15;
+      yPos += splitText.length * 5 + 15;
       
-      // Total value (highlighted)
-      doc.setFontSize(14);
-      doc.setFont('helvetica', 'bold');
-      doc.text(`VALOR TOTAL RECEBIDO: R$ ${parseFloat(quoteWithItems.total).toFixed(2)}`, 20, yPos);
-      yPos += 20;
-      
-      // Date and location
+      // Total value (highlighted box)
+      doc.setFillColor(240, 248, 255);
+      doc.rect(20, yPos - 5, 170, 15, 'F');
       doc.setFontSize(12);
-      doc.setFont('helvetica', 'normal');
-      doc.text(`Local e Data: __________, ${new Date().toLocaleDateString('pt-BR')}`, 20, yPos);
-      yPos += 20;
+      doc.setFont('helvetica', 'bold');
+      doc.text(`TOTAL: R$ ${totalValue.toFixed(2)} (${valueInWords})`, 25, yPos + 3);
+      yPos += 25;
       
-      // Signature line
-      doc.text('_________________________________________________', 20, yPos);
-      yPos += 8;
-      doc.text(`Assinatura do Prestador: ${businessName}`, 20, yPos);
+      // Signature section (compact)
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`${new Date().toLocaleDateString('pt-BR')}`, 20, yPos);
+      yPos += 15;
+      doc.text('_________________________________', 20, yPos);
+      yPos += 6;
+      doc.text(businessName, 20, yPos);
       
       // Footer
-      yPos = 280;
-      doc.setFontSize(10);
+      doc.setFontSize(8);
       doc.setFont('helvetica', 'italic');
-      doc.text('Recibo emitido via Fechou!', 105, yPos, { align: 'center' });
+      doc.text('Recibo emitido via Fechou!', 105, 285, { align: 'center' });
       
       const pdfBuffer = doc.output('arraybuffer');
       
@@ -803,6 +813,33 @@ Obrigado pela confiança!`;
     } catch (error) {
       console.error("Error generating WhatsApp link:", error);
       res.status(500).json({ message: "Erro ao gerar link do WhatsApp" });
+    }
+  });
+
+  // Public endpoint to get receipt by quote number
+  app.get('/api/public-quotes/:quoteNumber/receipt', async (req, res) => {
+    try {
+      const { quoteNumber } = req.params;
+      
+      const quote = await storage.getQuoteByNumber(quoteNumber);
+      if (!quote) {
+        return res.status(404).json({ message: "Orçamento não encontrado" });
+      }
+
+      // Only allow access to paid quotes
+      if (quote.status !== 'paid') {
+        return res.status(400).json({ message: "Recibo disponível apenas para orçamentos pagos" });
+      }
+
+      const quoteWithItems = await storage.getQuote(quote.id, quote.userId);
+      if (!quoteWithItems) {
+        return res.status(404).json({ message: "Detalhes do orçamento não encontrados" });
+      }
+
+      res.json(quoteWithItems);
+    } catch (error) {
+      console.error("Error fetching public receipt:", error);
+      res.status(500).json({ message: "Erro ao buscar recibo" });
     }
   });
 

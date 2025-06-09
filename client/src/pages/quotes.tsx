@@ -450,24 +450,14 @@ export default function Quotes() {
                             <Edit className="w-4 h-4" />
                           </Button>
                           {quote.status === 'paid' ? (
-                            <>
-                              <Button 
-                                size="sm" 
-                                variant="ghost" 
-                                title="Ver Recibo"
-                                onClick={() => handleViewReceipt(quote.id)}
-                              >
-                                <FileText className="w-4 h-4 text-blue-600" />
-                              </Button>
-                              <Button 
-                                size="sm" 
-                                variant="ghost" 
-                                title="Compartilhar Recibo via WhatsApp"
-                                onClick={() => handleShareReceiptWhatsApp(quote.id)}
-                              >
-                                <MessageCircle className="w-4 h-4 text-green-600" />
-                              </Button>
-                            </>
+                            <Button 
+                              size="sm" 
+                              variant="ghost" 
+                              title="Ver Recibo"
+                              onClick={() => handleViewReceipt(quote.id)}
+                            >
+                              <FileText className="w-4 h-4 text-blue-600" />
+                            </Button>
                           ) : (
                             <Button 
                               size="sm" 
@@ -531,7 +521,7 @@ export default function Quotes() {
                             </p>
                           </div>
 
-                          <div className={`grid gap-1 pt-2 ${quote.status === 'paid' ? 'grid-cols-5' : 'grid-cols-4'}`}>
+                          <div className="grid grid-cols-4 gap-1 pt-2">
                             <Button 
                               size="sm" 
                               variant="outline" 
@@ -551,28 +541,16 @@ export default function Quotes() {
                               Editar
                             </Button>
                             {quote.status === 'paid' ? (
-                              <>
-                                <Button 
-                                  size="sm" 
-                                  variant="outline" 
-                                  onClick={() => handleViewReceipt(quote.id)}
-                                  className="flex items-center justify-center gap-1 px-1 py-1 text-xs h-8"
-                                  title="Ver Recibo"
-                                >
-                                  <FileText className="w-3 h-3 text-blue-600" />
-                                  Recibo
-                                </Button>
-                                <Button 
-                                  size="sm" 
-                                  variant="outline" 
-                                  onClick={() => handleShareReceiptWhatsApp(quote.id)}
-                                  className="flex items-center justify-center gap-1 px-1 py-1 text-xs h-8"
-                                  title="Compartilhar via WhatsApp"
-                                >
-                                  <MessageCircle className="w-3 h-3 text-green-600" />
-                                  WhatsApp
-                                </Button>
-                              </>
+                              <Button 
+                                size="sm" 
+                                variant="outline" 
+                                onClick={() => handleViewReceipt(quote.id)}
+                                className="flex items-center justify-center gap-1 px-1 py-1 text-xs h-8"
+                                title="Ver Recibo"
+                              >
+                                <FileText className="w-3 h-3 text-blue-600" />
+                                Recibo
+                              </Button>
                             ) : (
                               <Button 
                                 size="sm" 
