@@ -1,13 +1,17 @@
 
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import LoadingSpinner from "@/components/common/loading-spinner";
 import BackButton from "@/components/common/back-button";
-import { Link, useLocation } from "wouter";
-import { Crown, Lock, AlertTriangle, Eye } from "lucide-react";
+import { useLocation } from "wouter";
+import { Crown, Lock, AlertTriangle, Eye, ArrowLeft } from "lucide-react";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
+import { useState } from "react";
 import { 
   FileText, 
   CheckCircle, 
@@ -31,6 +35,9 @@ export default function Reports() {
   const { user, isLoading: userLoading, isPremium } = useAuth();
   const [, setLocation] = useLocation();
   const isMobile = useIsMobile();
+  const { toast } = useToast();
+  const [selectedQuote, setSelectedQuote] = useState<any>(null);
+  const [showReceiptDialog, setShowReceiptDialog] = useState(false);
 
   const { data: stats, isLoading: statsLoading } = useQuery({
     queryKey: ["/api/dashboard/stats"],
@@ -369,12 +376,26 @@ export default function Reports() {
                         <p className="text-sm text-gray-600">
                           {formatCurrency(quote.total)}
                         </p>
-                        <Link href={`/quotes/${quote.id}`}>
-                          <Button variant="outline" size="sm" className="flex items-center gap-2">
+                        <div className="flex gap-2">
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="flex items-center gap-2"
+                            onClick={() => setLocation(`/quotes/${quote.id}`)}
+                          >
                             <Eye className="w-4 h-4" />
                             Ver Orçamento
                           </Button>
-                        </Link>
+                          <Button 
+                            variant="default" 
+                            size="sm" 
+                            className="flex items-center gap-2 bg-green-600 hover:bg-green-700"
+                            onClick={() => handleConfirmPayment(quote)}
+                          >
+                            <CheckCircle className="w-4 h-4" />
+                            Confirmar Pagamento
+                          </Button>
+                        </div>
                       </div>
                     </div>
                   </div>

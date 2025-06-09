@@ -70,7 +70,7 @@ export default function NewQuote() {
   const [sendByWhatsapp, setSendByWhatsapp] = useState(true);
   const [sendByEmail, setSendByEmail] = useState(false);
   const [items, setItems] = useState<QuoteItemData[]>([
-    { id: "1", description: "", quantity: 0, unitPrice: "", total: "0" }
+    { id: "1", description: "", quantity: 1, unitPrice: "", total: "0" }
   ]);
   const [discount, setDiscount] = useState("");
   const [attachments, setAttachments] = useState<File[]>([]);
@@ -506,30 +506,8 @@ export default function NewQuote() {
 
   const selectedClient = clients?.find(client => client.id === selectedClientId);
   
-  // Debug validation
-  const validationChecks = {
-    hasClient: !!selectedClientId,
-    hasTitle: !!title.trim(),
-    hasItems: items.length > 0,
-    itemsValid: items.every(item => 
-      item.description.trim() && 
-      item.quantity > 0 && 
-      item.unitPrice && 
-      item.unitPrice !== "" &&
-      !isNaN(parseFloat(item.unitPrice)) &&
-      parseFloat(item.unitPrice) >= 0
-    ),
-    notPending: !createQuoteMutation.isPending
-  };
-  
-  console.log('Validation checks:', validationChecks);
-  console.log('Items:', items);
-  
-  const canProceed = validationChecks.hasClient && 
-                    validationChecks.hasTitle && 
-                    validationChecks.hasItems &&
-                    validationChecks.itemsValid &&
-                    validationChecks.notPending;
+  // Button should always be enabled, validations will show toasts
+  const canProceed = !createQuoteMutation.isPending;
 
 
 
