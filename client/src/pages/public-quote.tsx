@@ -431,13 +431,23 @@ export default function PublicQuote() {
               </Button>
               
               {quote.status === "paid" ? (
-                <Button 
-                  onClick={handleViewReceipt}
-                  className="w-full bg-green-600 hover:bg-green-700 text-white"
-                >
-                  <FileText className="w-4 h-4 mr-2" />
-                  Baixar Recibo de Pagamento
-                </Button>
+                <div className="space-y-2">
+                  <Button 
+                    onClick={handleViewReceipt}
+                    className="w-full bg-green-600 hover:bg-green-700 text-white"
+                  >
+                    <FileText className="w-4 h-4 mr-2" />
+                    Baixar Recibo em PDF
+                  </Button>
+                  <Button 
+                    onClick={() => window.open(`/receipt/${quote.quoteNumber}`, '_blank')}
+                    variant="outline"
+                    className="w-full"
+                  >
+                    <Eye className="w-4 h-4 mr-2" />
+                    Ver Recibo Completo
+                  </Button>
+                </div>
               ) : (
                 <Button 
                   onClick={copyPixKey}
