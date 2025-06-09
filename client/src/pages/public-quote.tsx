@@ -60,7 +60,7 @@ export default function PublicQuote() {
   const approveMutation = useMutation({
     mutationFn: async () => {
       const response = await fetch(`/api/quotes/${quote?.id}/approve`, {
-        method: "POST",
+        method: "PATCH",
         headers: {
           "Content-Type": "application/json",
         },

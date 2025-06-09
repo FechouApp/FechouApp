@@ -662,148 +662,162 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return `${value.toFixed(2)} reais`; // Fallback for larger values
       };
 
-      // Use exact same layout as quote PDF
-      let yPos = 30;
+      // Compact layout with better space utilization
+      let yPos = 20;
       
-      // Business header with logo space
+      // Business header with logo space (compact)
       const businessName = (user as any).businessName || (user.email || 'Profissional').split('@')[0];
       
-      // Logo placeholder (left side)
+      // Logo placeholder (smaller)
       doc.setFillColor(240, 240, 240);
-      doc.rect(20, 20, 30, 20, 'F'); // Logo space
+      doc.rect(20, 15, 25, 15, 'F');
       
-      // Business name and details (right side)
-      doc.setFontSize(14);
+      // Business name and details (right side, compact)
+      doc.setFontSize(12);
       doc.setFont('helvetica', 'bold');
-      doc.text(businessName, 60, 30);
+      doc.text(businessName, 50, 22);
       
-      doc.setFontSize(10);
+      doc.setFontSize(8);
       doc.setFont('helvetica', 'normal');
-      let businessYPos = 35;
+      let businessYPos = 26;
       
       if ((user as any).address) {
-        doc.text((user as any).address, 60, businessYPos);
-        businessYPos += 5;
+        doc.text((user as any).address, 50, businessYPos);
+        businessYPos += 4;
       }
       
       if ((user as any).document) {
-        doc.text(`CNPJ: ${(user as any).document}`, 60, businessYPos);
-        businessYPos += 5;
+        doc.text(`CNPJ: ${(user as any).document}`, 50, businessYPos);
+        businessYPos += 4;
       }
       
       if ((user as any).phone) {
-        doc.text(`Telefone: ${(user as any).phone}`, 60, businessYPos);
-        businessYPos += 5;
+        doc.text(`Tel: ${(user as any).phone}`, 50, businessYPos);
+        businessYPos += 4;
       }
       
       if (user.email) {
-        doc.text(`Email: ${user.email}`, 60, businessYPos);
-        businessYPos += 5;
+        doc.text(`Email: ${user.email}`, 50, businessYPos);
+        businessYPos += 4;
       }
       
-      yPos = Math.max(50, businessYPos + 10);
+      yPos = Math.max(45, businessYPos + 5);
       
-      // Centered title - simplified to just "RECIBO"
-      doc.setFontSize(18);
+      // Centered title
+      doc.setFontSize(16);
       doc.setFont('helvetica', 'bold');
       doc.text('RECIBO Nº ' + quoteWithItems.quoteNumber, 105, yPos, { align: 'center' });
-      yPos += 15;
       
-      // Date on right
-      doc.setFontSize(10);
+      // Date aligned right
+      doc.setFontSize(8);
       doc.setFont('helvetica', 'normal');
-      doc.text(new Date().toLocaleDateString('pt-BR'), 170, yPos);
-      yPos += 15;
+      doc.text(new Date().toLocaleDateString('pt-BR'), 185, yPos);
+      yPos += 12;
       
-      // Client data section with gray background (same as quote)
+      // Client data section (compact)
       doc.setFillColor(240, 240, 240);
-      doc.rect(20, yPos, 170, 15, 'F');
-      
-      doc.setFontSize(12);
-      doc.setFont('helvetica', 'bold');
-      doc.text('DADOS DO CLIENTE', 25, yPos + 10);
-      yPos += 25;
+      doc.rect(20, yPos, 170, 12, 'F');
       
       doc.setFontSize(10);
+      doc.setFont('helvetica', 'bold');
+      doc.text('DADOS DO CLIENTE', 25, yPos + 8);
+      yPos += 18;
+      
+      doc.setFontSize(9);
       doc.setFont('helvetica', 'normal');
       
-      // Client info in two columns
-      doc.text(`Razão social: ${quoteWithItems.client.name}`, 25, yPos);
+      // Client info in two columns (compact)
+      doc.text(`Cliente: ${quoteWithItems.client.name}`, 25, yPos);
       if (quoteWithItems.client.email) {
         doc.text(`E-mail: ${quoteWithItems.client.email}`, 105, yPos);
       }
-      yPos += 8;
+      yPos += 6;
       
       if (quoteWithItems.client.phone) {
         doc.text(`Telefone: ${quoteWithItems.client.phone}`, 25, yPos);
+        yPos += 6;
       }
-      yPos += 15;
+      yPos += 8;
       
-      // Services section with gray background
+      // Services section (compact)
       doc.setFillColor(240, 240, 240);
-      doc.rect(20, yPos, 170, 15, 'F');
-      
-      doc.setFontSize(12);
-      doc.setFont('helvetica', 'bold');
-      doc.text('SERVIÇOS OU PRODUTOS', 25, yPos + 10);
-      yPos += 25;
-      
-      // Table headers
-      doc.setFillColor(255, 255, 255);
-      doc.rect(20, yPos - 5, 170, 15, 'F');
-      doc.setDrawColor(0, 0, 0);
-      doc.rect(20, yPos - 5, 170, 15);
+      doc.rect(20, yPos, 170, 12, 'F');
       
       doc.setFontSize(10);
       doc.setFont('helvetica', 'bold');
-      doc.text('ITEM', 25, yPos + 5);
-      doc.text('NOME', 50, yPos + 5);
-      doc.text('QTD.', 130, yPos + 5);
-      doc.text('VR. UNIT.', 150, yPos + 5);
-      doc.text('SUBTOTAL', 175, yPos + 5);
-      yPos += 15;
+      doc.text('SERVIÇOS OU PRODUTOS', 25, yPos + 8);
+      yPos += 18;
       
-      // Items rows
+      // Table headers (compact columns)
+      doc.setFillColor(255, 255, 255);
+      doc.rect(20, yPos - 3, 170, 12, 'F');
+      doc.setDrawColor(0, 0, 0);
+      doc.rect(20, yPos - 3, 170, 12);
+      
+      doc.setFontSize(8);
+      doc.setFont('helvetica', 'bold');
+      doc.text('ITEM', 22, yPos + 5);
+      doc.text('NOME', 40, yPos + 5);
+      doc.text('QTD.', 125, yPos + 5);
+      doc.text('VR. UNIT.', 145, yPos + 5);
+      doc.text('SUBTOTAL', 170, yPos + 5);
+      yPos += 12;
+      
+      // Items rows (compact)
       let itemNumber = 1;
       quoteWithItems.items.forEach((item: any) => {
-        doc.rect(20, yPos - 5, 170, 12);
+        doc.rect(20, yPos - 3, 170, 10);
         doc.setFont('helvetica', 'normal');
-        doc.text(itemNumber.toString(), 25, yPos + 3);
-        doc.text(item.description, 50, yPos + 3);
-        doc.text(item.quantity.toString(), 130, yPos + 3);
-        doc.text(parseFloat(item.price).toFixed(2), 150, yPos + 3);
-        doc.text((item.quantity * parseFloat(item.price)).toFixed(2), 175, yPos + 3);
-        yPos += 12;
+        doc.setFontSize(8);
+        
+        doc.text(itemNumber.toString(), 22, yPos + 3);
+        
+        // Truncate long descriptions to fit
+        const maxDescLength = 35;
+        const description = item.description.length > maxDescLength 
+          ? item.description.substring(0, maxDescLength) + '...' 
+          : item.description;
+        doc.text(description, 40, yPos + 3);
+        
+        doc.text(item.quantity.toString(), 125, yPos + 3);
+        
+        const unitPrice = parseFloat(item.price) || 0;
+        const subtotal = item.quantity * unitPrice;
+        
+        doc.text(unitPrice.toFixed(2), 145, yPos + 3);
+        doc.text(subtotal.toFixed(2), 170, yPos + 3);
+        
+        yPos += 10;
         itemNumber++;
       });
       
-      // Total row
+      // Total row (compact)
       doc.setFillColor(240, 240, 240);
-      doc.rect(20, yPos - 5, 170, 15, 'F');
+      doc.rect(20, yPos - 3, 170, 12, 'F');
       doc.setFont('helvetica', 'bold');
-      doc.text('TOTAL', 80, yPos + 5);
-      doc.text('1', 130, yPos + 5);
-      doc.text('', 150, yPos + 5);
-      doc.text(parseFloat(quoteWithItems.total).toFixed(2), 175, yPos + 5);
-      yPos += 25;
+      doc.setFontSize(9);
+      doc.text('TOTAL', 75, yPos + 5);
+      doc.text(parseFloat(quoteWithItems.total).toFixed(2), 170, yPos + 5);
+      yPos += 18;
       
-      // Declaration text
+      // Declaration text (compact)
       doc.setFont('helvetica', 'normal');
+      doc.setFontSize(9);
       const totalValue = parseFloat(quoteWithItems.total);
       const valueInWords = numberToWords(totalValue);
       const declarationText = `Declaro que recebi de ${quoteWithItems.client.name} o valor de R$ ${totalValue.toFixed(2)} (${valueInWords}), referente aos serviços descritos acima.`;
       
       const splitText = doc.splitTextToSize(declarationText, 170);
       doc.text(splitText, 20, yPos);
-      yPos += splitText.length * 5 + 20;
+      yPos += splitText.length * 4 + 15;
       
-      // Signature line
+      // Signature line (compact)
       doc.text('_________________________________', 20, yPos);
-      yPos += 8;
+      yPos += 6;
       doc.text(`Assinatura: ${businessName}`, 20, yPos);
       
       // Footer
-      doc.setFontSize(8);
+      doc.setFontSize(7);
       doc.setFont('helvetica', 'italic');
       doc.text('Recibo emitido via Fechou!', 105, 285, { align: 'center' });
       
