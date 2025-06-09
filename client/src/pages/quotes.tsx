@@ -29,7 +29,8 @@ import {
   Calendar,
   Filter,
   Trash2,
-  ArrowLeft
+  ArrowLeft,
+  DollarSign
 } from "lucide-react";
 import type { QuoteWithClient } from "@/types";
 
@@ -106,6 +107,34 @@ export default function Quotes() {
     },
   });
 
+  // Mutation para confirmar pagamento e gerar recibo
+  const confirmPaymentMutation = useMutation({
+    mutationFn: async (quoteId: string) => {
+      // Primeiro aprovar o orçamento se não estiver aprovado
+      const quote = quotes?.find(q => q.id === quoteId);
+      if (quote?.status === 'pending') {
+        await apiRequest("PATCH", `/api/quotes/${quoteId}/approve`);
+      }
+      // Depois confirmar pagamento
+      return await apiRequest("PATCH", `/api/quotes/${quoteId}/confirm-payment`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/quotes"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/dashboard/stats"] });
+      toast({
+        title: "Sucesso",
+        description: "Pagamento confirmado e recibo gerado com sucesso!",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Erro",
+        description: error?.message || "Erro ao confirmar pagamento",
+        variant: "destructive",
+      });
+    }
+  });
+
   const handleDeleteQuote = (quoteId: string) => {
     if (confirm('Tem certeza que deseja remover este orçamento?')) {
       deleteQuoteMutation.mutate(quoteId);
@@ -141,6 +170,12 @@ export default function Quotes() {
       Você gostaria de configurar essas integrações?`,
       duration: 8000,
     });
+  };
+
+  const handleConfirmPayment = (quoteId: string) => {
+    if (confirm('Confirmar que este orçamento foi pago? Isso irá gerar um recibo automaticamente.')) {
+      confirmPaymentMutation.mutate(quoteId);
+    }
   };
 
   if (authLoading || isLoading) {
@@ -385,6 +420,16 @@ export default function Quotes() {
                           <Button 
                             size="sm" 
                             variant="ghost" 
+                            title="Confirmar Pagamento"
+                            onClick={() => handleConfirmPayment(quote.id)}
+                            disabled={confirmPaymentMutation.isPending || quote.status === 'paid'}
+                            className={quote.status === 'paid' ? 'opacity-50' : ''}
+                          >
+                            <DollarSign className="w-4 h-4 text-green-600" />
+                          </Button>
+                          <Button 
+                            size="sm" 
+                            variant="ghost" 
                             title="Excluir"
                             onClick={() => handleDeleteQuote(quote.id)}
                             disabled={deleteQuoteMutation.isPending}
@@ -434,12 +479,12 @@ export default function Quotes() {
                             </p>
                           </div>
 
-                          <div className="grid grid-cols-3 gap-2 pt-2">
+                          <div className="grid grid-cols-4 gap-1 pt-2">
                             <Button 
                               size="sm" 
                               variant="outline" 
                               onClick={() => handleViewQuote(quote.id)}
-                              className="flex items-center justify-center gap-1 px-2 py-1 text-xs h-8"
+                              className="flex items-center justify-center gap-1 px-1 py-1 text-xs h-8"
                             >
                               <Eye className="w-3 h-3" />
                               Ver
@@ -448,7 +493,7 @@ export default function Quotes() {
                               size="sm" 
                               variant="outline" 
                               onClick={() => handleEditQuote(quote.id)}
-                              className="flex items-center justify-center gap-1 px-2 py-1 text-xs h-8"
+                              className="flex items-center justify-center gap-1 px-1 py-1 text-xs h-8"
                             >
                               <Edit className="w-3 h-3" />
                               Editar
@@ -456,9 +501,20 @@ export default function Quotes() {
                             <Button 
                               size="sm" 
                               variant="outline" 
+                              onClick={() => handleConfirmPayment(quote.id)}
+                              disabled={confirmPaymentMutation.isPending || quote.status === 'paid'}
+                              className={`flex items-center justify-center gap-1 px-1 py-1 text-xs h-8 ${quote.status === 'paid' ? 'opacity-50' : ''}`}
+                              title="Confirmar Pagamento"
+                            >
+                              <DollarSign className="w-3 h-3 text-green-600" />
+                              $
+                            </Button>
+                            <Button 
+                              size="sm" 
+                              variant="outline" 
                               onClick={() => handleDeleteQuote(quote.id)}
                               disabled={deleteQuoteMutation.isPending}
-                              className="flex items-center justify-center gap-1 px-2 py-1 text-xs h-8"
+                              className="flex items-center justify-center gap-1 px-1 py-1 text-xs h-8"
                             >
                               <Trash2 className="w-3 h-3 text-red-500" />
                               Excluir

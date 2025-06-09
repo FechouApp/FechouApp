@@ -413,11 +413,11 @@ export default function Reports() {
                         <p className="text-sm text-gray-600">
                           {formatCurrency(quote.total)}
                         </p>
-                        <div className="flex gap-2">
+                        <div className="flex flex-col gap-2 w-full">
                           <Button 
                             variant="outline" 
                             size="sm" 
-                            className="flex items-center gap-2"
+                            className="flex items-center gap-2 w-full"
                             onClick={() => setLocation(`/quotes/${quote.id}`)}
                           >
                             <Eye className="w-4 h-4" />
@@ -426,7 +426,7 @@ export default function Reports() {
                           <Button 
                             variant="default" 
                             size="sm" 
-                            className="flex items-center gap-2 bg-green-600 hover:bg-green-700"
+                            className="flex items-center gap-2 bg-green-600 hover:bg-green-700 w-full"
                             onClick={() => handleConfirmPayment(quote)}
                           >
                             <CheckCircle className="w-4 h-4" />
