@@ -522,7 +522,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log("Confirming payment for quote:", id);
 
       // Check if user has Premium plan for receipt functionality
-      const user = await storage.getUser(parseInt(userId));
+      const user = await storage.getUser(userId);
       if (!user) {
         return res.status(404).json({ message: "Usuário não encontrado" });
       }
@@ -650,7 +650,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       yPos += 10;
       doc.setFont('helvetica', 'normal');
       
-      const businessName = (user as any).businessName || user.email.split('@')[0];
+      const businessName = (user as any).businessName || (user.email || 'Profissional').split('@')[0];
       doc.text(`Nome/Razão Social: ${businessName}`, 20, yPos);
       yPos += 8;
       
@@ -680,8 +680,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       doc.text(`Nome: ${quoteWithItems.client.name}`, 20, yPos);
       yPos += 8;
       
-      if (quoteWithItems.client.document) {
-        doc.text(`CPF/CNPJ: ${quoteWithItems.client.document}`, 20, yPos);
+      if ((quoteWithItems.client as any).document) {
+        doc.text(`CPF/CNPJ: ${(quoteWithItems.client as any).document}`, 20, yPos);
         yPos += 8;
       }
       
@@ -756,6 +756,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error generating receipt PDF:", error);
       res.status(500).json({ message: "Erro ao gerar PDF do recibo" });
+    }
+  });
+
+  // Generate WhatsApp link for receipt sharing
+  app.get('/api/quotes/:id/receipt/whatsapp', isAuthenticated, async (req: AuthenticatedRequest, res) => {
+    try {
+      const { id } = req.params;
+      const userId = req.user.claims.sub;
+      
+      const quote = await storage.getQuoteById(id);
+      if (!quote) {
+        return res.status(404).json({ message: "Orçamento não encontrado" });
+      }
+
+      if (quote.userId !== userId) {
+        return res.status(403).json({ message: "Acesso negado" });
+      }
+
+      if (quote.status !== 'paid') {
+        return res.status(400).json({ message: "Recibo disponível apenas para orçamentos pagos" });
+      }
+
+      const quoteWithItems = await storage.getQuote(id, quote.userId);
+      if (!quoteWithItems || !quoteWithItems.client.phone) {
+        return res.status(400).json({ message: "Número do cliente não encontrado" });
+      }
+
+      // Generate WhatsApp message
+      const receiptUrl = `${req.protocol}://${req.get('host')}/api/quotes/${id}/receipt/pdf`;
+      const message = `Olá ${quoteWithItems.client.name}! Segue o recibo do pagamento do seu orçamento.
+      
+📄 Recibo Nº: ${quoteWithItems.quoteNumber}
+💰 Valor: R$ ${parseFloat(quoteWithItems.total).toFixed(2)}
+📅 Data: ${new Date().toLocaleDateString('pt-BR')}
+
+🔗 Baixar recibo: ${receiptUrl}
+
+Obrigado pela confiança!`;
+
+      // Clean phone number and generate WhatsApp link
+      const cleanPhone = quoteWithItems.client.phone.replace(/\D/g, '');
+      const whatsappLink = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
+
+      res.json({ whatsappLink, message });
+    } catch (error) {
+      console.error("Error generating WhatsApp link:", error);
+      res.status(500).json({ message: "Erro ao gerar link do WhatsApp" });
     }
   });
 

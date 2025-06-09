@@ -30,7 +30,8 @@ import {
   Filter,
   Trash2,
   ArrowLeft,
-  DollarSign
+  DollarSign,
+  MessageCircle
 } from "lucide-react";
 import type { QuoteWithClient } from "@/types";
 
