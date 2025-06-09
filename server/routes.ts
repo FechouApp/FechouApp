@@ -521,6 +521,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log("Confirming payment for quote:", id);
 
+      // Check if user has Premium plan for receipt functionality
+      const user = await storage.getUser(parseInt(userId));
+      if (!user) {
+        return res.status(404).json({ message: "Usuário não encontrado" });
+      }
+      
+      const isPremium = user.plan === "PREMIUM" || user.plan === "PREMIUM_CORTESIA";
+      const isExpired = user.planExpiresAt && new Date() > user.planExpiresAt;
+      
+      if (!isPremium || isExpired) {
+        return res.status(403).json({ message: "Funcionalidade de recibos disponível apenas para usuários Premium" });
+      }
+
       // Get quote first to validate it exists and belongs to user
       const quote = await storage.getQuoteById(id);
       if (!quote) {
@@ -606,60 +619,133 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Detalhes do orçamento não encontrados" });
       }
 
+      // Get user details for professional info
+      const user = await storage.getUser(quote.userId);
+      if (!user) {
+        return res.status(404).json({ message: "Dados do profissional não encontrados" });
+      }
+
       const jsPDF = (await import('jspdf')).default;
-      const autoTable = (await import('jspdf-autotable')).default;
       
       const doc = new jsPDF();
       
-      // Header
-      doc.setFontSize(20);
-      doc.setFont('helvetica', 'bold');
-      doc.text('RECIBO DE PAGAMENTO', 105, 30, { align: 'center' });
+      // Header with logo space (future implementation)
+      let yPos = 30;
       
-      // Company info
+      // Title
+      doc.setFontSize(18);
+      doc.setFont('helvetica', 'bold');
+      doc.text('RECIBO DE PRESTAÇÃO DE SERVIÇOS', 105, yPos, { align: 'center' });
+      yPos += 20;
+      
       doc.setFontSize(12);
       doc.setFont('helvetica', 'normal');
-      doc.text('Fechou! - Sistema de Orçamentos', 20, 50);
+      doc.text(`Recibo Nº: ${quoteWithItems.quoteNumber}`, 20, yPos);
+      doc.text(`Data de Emissão: ${new Date().toLocaleDateString('pt-BR')}`, 130, yPos);
+      yPos += 20;
       
-      // Receipt info
-      doc.setFontSize(10);
-      doc.text(`Recibo Nº: ${quoteWithItems.quoteNumber}`, 20, 70);
-      doc.text(`Data do Pagamento: ${quoteWithItems.paidAt ? new Date(quoteWithItems.paidAt).toLocaleDateString('pt-BR') : 'N/A'}`, 20, 80);
-      doc.text(`Cliente: ${quoteWithItems.client?.name || 'N/A'}`, 20, 90);
-      if (quoteWithItems.client?.email) {
-        doc.text(`Email: ${quoteWithItems.client.email}`, 20, 100);
+      // Professional info (who provided the service)
+      doc.setFont('helvetica', 'bold');
+      doc.text('DADOS DO PRESTADOR DE SERVIÇOS:', 20, yPos);
+      yPos += 10;
+      doc.setFont('helvetica', 'normal');
+      
+      const businessName = (user as any).businessName || user.email.split('@')[0];
+      doc.text(`Nome/Razão Social: ${businessName}`, 20, yPos);
+      yPos += 8;
+      
+      if ((user as any).document) {
+        doc.text(`CPF/CNPJ: ${(user as any).document}`, 20, yPos);
+        yPos += 8;
       }
-      if (quoteWithItems.client?.phone) {
-        doc.text(`Telefone: ${quoteWithItems.client.phone}`, 20, 110);
+      
+      if ((user as any).address) {
+        doc.text(`Endereço: ${(user as any).address}`, 20, yPos);
+        yPos += 8;
       }
       
-      // Items table
-      const tableData = quoteWithItems.items.map((item: any) => [
-        item.description,
-        item.quantity.toString(),
-        `R$ ${parseFloat(item.unitPrice).toFixed(2)}`,
-        `R$ ${(item.quantity * parseFloat(item.unitPrice)).toFixed(2)}`
-      ]);
+      if ((user as any).professionalRegistry) {
+        doc.text(`Registro Profissional: ${(user as any).professionalRegistry}`, 20, yPos);
+        yPos += 8;
+      }
       
-      autoTable(doc, {
-        startY: 130,
-        head: [['Descrição', 'Qtd', 'Valor Unit.', 'Total']],
-        body: tableData,
-        styles: { fontSize: 9 },
-        headStyles: { fillColor: [59, 130, 246] }
+      yPos += 10;
+      
+      // Client info (who received the service)
+      doc.setFont('helvetica', 'bold');
+      doc.text('DADOS DO CLIENTE (TOMADOR DO SERVIÇO):', 20, yPos);
+      yPos += 10;
+      doc.setFont('helvetica', 'normal');
+      
+      doc.text(`Nome: ${quoteWithItems.client.name}`, 20, yPos);
+      yPos += 8;
+      
+      if (quoteWithItems.client.document) {
+        doc.text(`CPF/CNPJ: ${quoteWithItems.client.document}`, 20, yPos);
+        yPos += 8;
+      }
+      
+      if (quoteWithItems.client.address) {
+        doc.text(`Endereço: ${quoteWithItems.client.address}`, 20, yPos);
+        yPos += 8;
+      }
+      
+      yPos += 15;
+      
+      // Service description
+      doc.setFont('helvetica', 'bold');
+      doc.text('DESCRIÇÃO DOS SERVIÇOS PRESTADOS:', 20, yPos);
+      yPos += 10;
+      doc.setFont('helvetica', 'normal');
+      
+      if (quoteWithItems.title) {
+        doc.text(`Serviço: ${quoteWithItems.title}`, 20, yPos);
+        yPos += 8;
+      }
+      
+      quoteWithItems.items.forEach((item: any) => {
+        const description = `• ${item.description} - Qtd: ${item.quantity} - Valor unitário: R$ ${parseFloat(item.price).toFixed(2)}`;
+        doc.text(description, 20, yPos);
+        yPos += 8;
       });
       
-      // Total
-      const finalY = (doc as any).lastAutoTable.finalY + 20;
-      doc.setFontSize(12);
+      yPos += 15;
+      
+      // Declaration text
       doc.setFont('helvetica', 'bold');
-      doc.text(`VALOR TOTAL PAGO: R$ ${parseFloat(quote.total).toFixed(2)}`, 105, finalY, { align: 'center' });
+      doc.text('DECLARAÇÃO:', 20, yPos);
+      yPos += 10;
+      doc.setFont('helvetica', 'normal');
+      
+      const declarationText = `Declaro, para os devidos fins, que recebi de ${quoteWithItems.client.name} o valor de R$ ${parseFloat(quoteWithItems.total).toFixed(2)}, referente à prestação de serviços profissionais descritos acima.`;
+      
+      // Split long text into multiple lines
+      const splitText = doc.splitTextToSize(declarationText, 170);
+      doc.text(splitText, 20, yPos);
+      yPos += splitText.length * 6 + 15;
+      
+      // Total value (highlighted)
+      doc.setFontSize(14);
+      doc.setFont('helvetica', 'bold');
+      doc.text(`VALOR TOTAL RECEBIDO: R$ ${parseFloat(quoteWithItems.total).toFixed(2)}`, 20, yPos);
+      yPos += 20;
+      
+      // Date and location
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`Local e Data: __________, ${new Date().toLocaleDateString('pt-BR')}`, 20, yPos);
+      yPos += 20;
+      
+      // Signature line
+      doc.text('_________________________________________________', 20, yPos);
+      yPos += 8;
+      doc.text(`Assinatura do Prestador: ${businessName}`, 20, yPos);
       
       // Footer
-      doc.setFontSize(8);
+      yPos = 280;
+      doc.setFontSize(10);
       doc.setFont('helvetica', 'italic');
-      doc.text('Este documento comprova o pagamento do orçamento aprovado.', 105, finalY + 30, { align: 'center' });
-      doc.text(`Gerado em: ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}`, 105, finalY + 40, { align: 'center' });
+      doc.text('Recibo emitido via Fechou!', 105, yPos, { align: 'center' });
       
       const pdfBuffer = doc.output('arraybuffer');
       
