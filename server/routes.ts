@@ -513,7 +513,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Confirm payment (authenticated)
+  app.patch('/api/quotes/:id/confirm-payment', isAuthenticated, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const userId = req.user.claims.sub;
+      
+      console.log("Confirming payment for quote:", id);
 
+      // Get quote first to validate it exists and belongs to user
+      const quote = await storage.getQuoteById(id);
+      if (!quote) {
+        console.log("Quote not found for payment confirmation:", id);
+        return res.status(404).json({ message: "Orçamento não encontrado" });
+      }
+
+      // Check if quote belongs to the authenticated user
+      if (quote.userId !== userId) {
+        return res.status(403).json({ message: "Acesso negado" });
+      }
+
+      // Check if quote can be marked as paid (must be approved first)
+      if (quote.status !== 'approved') {
+        return res.status(400).json({ message: "Apenas orçamentos aprovados podem ter pagamento confirmado" });
+      }
+
+      const success = await storage.updateQuoteStatus(id, 'paid', { 
+        paidAt: new Date() 
+      });
+
+      if (!success) {
+        console.log("Failed to update quote status to paid:", id);
+        return res.status(500).json({ message: "Erro ao confirmar pagamento" });
+      }
+
+      console.log("Payment confirmed successfully for quote:", id);
+      res.json({ message: "Pagamento confirmado com sucesso!", status: "paid" });
+    } catch (error) {
+      console.error("Error confirming payment:", error);
+      res.status(500).json({ message: "Não foi possível confirmar pagamento" });
+    }
+  });
 
   app.post("/api/quotes", isAuthenticated, async (req: any, res) => {
     try {

@@ -44,6 +44,43 @@ export default function Reports() {
     retry: false,
   });
 
+  // Mutation para confirmar pagamento
+  const confirmPaymentMutation = useMutation({
+    mutationFn: async (quoteId: string) => {
+      return await apiRequest("PATCH", `/api/quotes/${quoteId}/confirm-payment`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/quotes"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/dashboard/stats"] });
+      toast({
+        title: "Sucesso",
+        description: "Pagamento confirmado com sucesso!",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Erro",
+        description: error?.message || "Erro ao confirmar pagamento",
+        variant: "destructive",
+      });
+    }
+  });
+
+  // Função para confirmar pagamento
+  const handleConfirmPayment = (quote: any) => {
+    setSelectedQuote(quote);
+    setShowReceiptDialog(true);
+  };
+
+  // Função para confirmar e gerar recibo
+  const confirmAndGenerateReceipt = () => {
+    if (selectedQuote) {
+      confirmPaymentMutation.mutate(selectedQuote.id);
+      setShowReceiptDialog(false);
+      setSelectedQuote(null);
+    }
+  };
+
   if (userLoading) {
     return <LoadingSpinner />;
   }
@@ -712,6 +749,46 @@ export default function Reports() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Dialog de Confirmação de Pagamento */}
+      <Dialog open={showReceiptDialog} onOpenChange={setShowReceiptDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Confirmar Pagamento</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            {selectedQuote && (
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <h4 className="font-medium text-gray-800">{selectedQuote.title}</h4>
+                <p className="text-sm text-gray-600">Cliente: {selectedQuote.client?.name}</p>
+                <p className="text-lg font-semibold text-green-600 mt-2">
+                  {formatCurrency(selectedQuote.total)}
+                </p>
+              </div>
+            )}
+            
+            <p className="text-sm text-gray-600">
+              Ao confirmar o pagamento, o orçamento será marcado como pago e você poderá gerar o recibo automaticamente.
+            </p>
+            
+            <div className="flex gap-3 justify-end">
+              <Button 
+                variant="outline" 
+                onClick={() => setShowReceiptDialog(false)}
+              >
+                Cancelar
+              </Button>
+              <Button 
+                onClick={confirmAndGenerateReceipt}
+                disabled={confirmPaymentMutation.isPending}
+                className="bg-green-600 hover:bg-green-700"
+              >
+                {confirmPaymentMutation.isPending ? "Confirmando..." : "Confirmar Pagamento"}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -95,12 +95,13 @@ export const quotes = pgTable("quotes", {
   subtotal: decimal("subtotal", { precision: 10, scale: 2 }).notNull(),
   discount: decimal("discount", { precision: 10, scale: 2 }).notNull().default("0"),
   total: decimal("total", { precision: 10, scale: 2 }).notNull(),
-  status: varchar("status").notNull().default("draft"), // draft, pending, approved, rejected
+  status: varchar("status").notNull().default("draft"), // draft, pending, approved, rejected, paid
   validUntil: date("valid_until").notNull(),
   viewedAt: timestamp("viewed_at"),
   approvedAt: timestamp("approved_at"),
   rejectedAt: timestamp("rejected_at"),
   rejectionReason: text("rejection_reason"),
+  paidAt: timestamp("paid_at"),
   sendByWhatsapp: boolean("send_by_whatsapp").notNull().default(true),
   sendByEmail: boolean("send_by_email").notNull().default(false),
   publicUrl: varchar("public_url").unique(),
