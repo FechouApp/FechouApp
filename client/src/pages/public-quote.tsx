@@ -478,7 +478,11 @@ export default function PublicQuote() {
                 <p className="text-gray-600">
                   {quote.status === "approved" && "✅ Este orçamento já foi aprovado"}
                   {quote.status === "rejected" && "❌ Este orçamento foi rejeitado"}
-                  {quote.status === "paid" && "💰 Este orçamento foi pago"}
+                  {quote.status === "paid" && (
+                    <span className="text-green-600 font-medium">
+                      💰 Este orçamento foi pago com sucesso! O recibo está disponível para download acima.
+                    </span>
+                  )}
                 </p>
               </div>
             )}
