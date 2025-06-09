@@ -429,7 +429,7 @@ export default function Reports() {
                             variant="outline" 
                             size="sm" 
                             className="flex items-center gap-2 w-full"
-                            onClick={() => setLocation(`/quotes/${quote.id}`)}
+                            onClick={() => setLocation(`/quotes/view/${quote.id}`)}
                           >
                             <Eye className="w-4 h-4" />
                             Ver Orçamento
