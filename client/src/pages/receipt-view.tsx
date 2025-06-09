@@ -13,6 +13,7 @@ import {
   Mail, 
   Phone,
   DollarSign,
+  MessageCircle,
   CheckCircle
 } from "lucide-react";
 import { useLocation } from "wouter";
@@ -215,6 +216,14 @@ export default function ReceiptView() {
             >
               <Download className="w-4 h-4 mr-2" />
               Baixar Recibo em PDF
+            </Button>
+            
+            <Button 
+              onClick={() => window.open(`/receipt/${receipt.quoteNumber}`, '_blank')}
+              className="flex-1 bg-green-600 hover:bg-green-700 text-white"
+            >
+              <MessageCircle className="w-4 h-4 mr-2" />
+              Ver Recibo com WhatsApp
             </Button>
             
             <Button 

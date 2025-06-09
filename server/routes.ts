@@ -708,10 +708,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       doc.setFont('helvetica', 'bold');
       doc.text('RECIBO Nº ' + quoteWithItems.quoteNumber, 105, yPos, { align: 'center' });
       
-      // Date aligned right
+      // Date aligned right (within margin)
       doc.setFontSize(8);
       doc.setFont('helvetica', 'normal');
-      doc.text(new Date().toLocaleDateString('pt-BR'), 185, yPos);
+      doc.text(new Date().toLocaleDateString('pt-BR'), 170, yPos);
       yPos += 12;
       
       // Client data section (compact)
@@ -814,7 +814,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Signature line (compact)
       doc.text('_________________________________', 20, yPos);
       yPos += 6;
-      doc.text(`Assinatura: ${businessName}`, 20, yPos);
+      doc.text(businessName, 20, yPos);
       
       // Footer
       doc.setFontSize(7);
