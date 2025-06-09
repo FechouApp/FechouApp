@@ -274,10 +274,15 @@ export default function Quotes() {
   };
 
   const filteredQuotes = quotes?.filter(quote => {
-    const matchesSearch = 
+    const matchesSearch = searchTerm === '' || 
       quote.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (quote.description || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
       quote.quoteNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (quote.client?.name || '').toLowerCase().includes(searchTerm.toLowerCase());
+      (quote.client?.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (quote.items || []).some(item => 
+        item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (item.description || '').toLowerCase().includes(searchTerm.toLowerCase())
+      );
 
     const matchesStatus = statusFilter === 'all' || quote.status === statusFilter;
 

@@ -320,7 +320,7 @@ export default function Reports() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div className="space-y-1">
-                <p className="text-sm font-medium text-gray-600">Taxa de Conversão</p>
+                <p className="text-sm font-medium text-gray-600">Taxa de Pagamento</p>
                 <p className="text-2xl font-bold text-green-600">{conversionRate}%</p>
               </div>
               <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
@@ -348,11 +348,11 @@ export default function Reports() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div className="space-y-1">
-                <p className="text-sm font-medium text-gray-600">Clientes Únicos</p>
-                <p className="text-2xl font-bold text-purple-600">{topClients.length}</p>
+                <p className="text-sm font-medium text-gray-600">Receita Total</p>
+                <p className="text-2xl font-bold text-purple-600">{formatCurrency(getTotalRevenue())}</p>
               </div>
               <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                <Users className="w-6 h-6 text-purple-600" />
+                <TrendingUp className="w-6 h-6 text-purple-600" />
               </div>
             </div>
           </CardContent>
@@ -362,11 +362,11 @@ export default function Reports() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div className="space-y-1">
-                <p className="text-sm font-medium text-gray-600">Avaliação Média</p>
-                <p className="text-2xl font-bold text-yellow-600">{stats?.averageRating?.toFixed(1) || "0.0"}</p>
+                <p className="text-sm font-medium text-gray-600">Orçamentos Pagos</p>
+                <p className="text-2xl font-bold text-yellow-600">{getPaidQuotesCount()}</p>
               </div>
               <div className="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center">
-                <Star className="w-6 h-6 text-yellow-600" />
+                <CheckCircle className="w-6 h-6 text-yellow-600" />
               </div>
             </div>
           </CardContent>
@@ -471,7 +471,7 @@ export default function Reports() {
                     color: "#3b82f6",
                   },
                   approved: {
-                    label: "Orçamentos Fechados",
+                    label: "Orçamentos Pagos",
                     color: "#10b981",
                   },
                   ticketMedio: {
@@ -566,7 +566,7 @@ export default function Reports() {
         <Card className="bg-white shadow-lg overflow-hidden">
           <CardHeader className="p-3 md:p-4">
             <CardTitle className="text-base md:text-lg font-semibold text-gray-800">
-              Taxa de Conversão por Mês
+              Taxa de Pagamento por Mês
             </CardTitle>
           </CardHeader>
           <CardContent className="p-2 md:p-4">
