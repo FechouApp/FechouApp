@@ -21,6 +21,7 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import BackButton from "@/components/common/back-button";
 import LoadingSpinner from "@/components/common/loading-spinner";
+import type { Quote } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
 
 export default function PublicReceipt() {

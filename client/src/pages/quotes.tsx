@@ -232,6 +232,8 @@ export default function Quotes() {
         return 'Aprovado';
       case 'rejected':
         return 'Recusado';
+      case 'paid':
+        return 'Pago';
       default:
         return status;
     }
@@ -247,6 +249,8 @@ export default function Quotes() {
         return 'bg-green-100 text-green-800';
       case 'rejected':
         return 'bg-red-100 text-red-800';
+      case 'paid':
+        return 'bg-purple-100 text-purple-800';
       default:
         return 'bg-gray-100 text-gray-800';
     }
