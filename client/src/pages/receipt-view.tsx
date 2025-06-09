@@ -29,18 +29,29 @@ export default function ReceiptView() {
     enabled: !!id,
   });
 
-  const handleDownloadPDF = () => {
-    if (id) {
-      window.open(`/api/quotes/${id}/receipt/pdf`, '_blank');
-    }
-  };
-
   const formatCurrency = (value: string) => {
     const num = parseFloat(value);
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
       currency: 'BRL'
     }).format(num);
+  };
+
+  const handleShareWhatsApp = async () => {
+    if (!receipt?.id) return;
+    
+    try {
+      const response = await fetch(`/api/quotes/${receipt.id}/receipt/whatsapp`);
+      const data = await response.json();
+      
+      if (response.ok) {
+        window.open(data.whatsappLink, '_blank');
+      } else {
+        console.error('Erro ao gerar link do WhatsApp:', data.message);
+      }
+    } catch (error) {
+      console.error('Erro ao compartilhar via WhatsApp:', error);
+    }
   };
 
   if (isLoading) {
@@ -219,11 +230,11 @@ export default function ReceiptView() {
             </Button>
             
             <Button 
-              onClick={() => window.open(`/receipt/${receipt.quoteNumber}`, '_blank')}
+              onClick={handleShareWhatsApp}
               className="flex-1 bg-green-600 hover:bg-green-700 text-white"
             >
               <MessageCircle className="w-4 h-4 mr-2" />
-              Ver Recibo com WhatsApp
+              Compartilhar via WhatsApp
             </Button>
             
             <Button 

@@ -631,35 +631,60 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Helper function to convert numbers to words in Portuguese
       const numberToWords = (value: number): string => {
+        if (value === 0) return 'zero reais';
+        
         const units = ['', 'um', 'dois', 'três', 'quatro', 'cinco', 'seis', 'sete', 'oito', 'nove'];
         const teens = ['dez', 'onze', 'doze', 'treze', 'quatorze', 'quinze', 'dezesseis', 'dezessete', 'dezoito', 'dezenove'];
         const tens = ['', '', 'vinte', 'trinta', 'quarenta', 'cinquenta', 'sessenta', 'setenta', 'oitenta', 'noventa'];
         const hundreds = ['', 'cento', 'duzentos', 'trezentos', 'quatrocentos', 'quinhentos', 'seiscentos', 'setecentos', 'oitocentos', 'novecentos'];
         
-        if (value === 100) return 'cem reais';
-        if (value < 1000) {
-          const h = Math.floor(value / 100);
-          const t = Math.floor((value % 100) / 10);
-          const u = Math.floor(value % 10);
+        // Handle thousands
+        if (value >= 1000) {
+          const thousands = Math.floor(value / 1000);
+          const remainder = value % 1000;
           
           let result = '';
-          if (h > 0) result += hundreds[h];
-          if (t > 1) {
-            if (result) result += ' e ';
-            result += tens[t];
-          } else if (t === 1) {
-            if (result) result += ' e ';
-            result += teens[u];
-            return result + ' reais';
+          if (thousands === 1) {
+            result = 'mil';
+          } else {
+            result = numberToWords(thousands).replace(' reais', '') + ' mil';
           }
-          if (u > 0 && t !== 1) {
-            if (result) result += ' e ';
-            result += units[u];
+          
+          if (remainder > 0) {
+            result += ' e ' + numberToWords(remainder).replace(' reais', '');
           }
-          return result + (result ? ' reais' : 'zero reais');
+          
+          return result + ' reais';
         }
         
-        return `${value.toFixed(2)} reais`; // Fallback for larger values
+        // Handle hundreds
+        if (value === 100) return 'cem reais';
+        
+        const h = Math.floor(value / 100);
+        const t = Math.floor((value % 100) / 10);
+        const u = Math.floor(value % 10);
+        
+        let result = '';
+        
+        if (h > 0) {
+          result += hundreds[h];
+        }
+        
+        if (t > 1) {
+          if (result) result += ' e ';
+          result += tens[t];
+        } else if (t === 1) {
+          if (result) result += ' e ';
+          result += teens[u];
+          return result + ' reais';
+        }
+        
+        if (u > 0 && t !== 1) {
+          if (result) result += ' e ';
+          result += units[u];
+        }
+        
+        return result + ' reais';
       };
 
       // Compact layout with better space utilization
