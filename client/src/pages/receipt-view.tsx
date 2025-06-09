@@ -27,7 +27,7 @@ export default function ReceiptView() {
   const { data: receipt, isLoading, error } = useQuery({
     queryKey: [`/api/quotes/${id}/receipt`],
     enabled: !!id,
-  });
+  }) as { data: any, isLoading: boolean, error: any };
 
   const formatCurrency = (value: string) => {
     const num = parseFloat(value);
@@ -35,6 +35,12 @@ export default function ReceiptView() {
       style: 'currency',
       currency: 'BRL'
     }).format(num);
+  };
+
+  const handleDownloadPDF = () => {
+    if (receipt?.id) {
+      window.open(`/api/quotes/${receipt.id}/receipt/pdf`, '_blank');
+    }
   };
 
   const handleShareWhatsApp = async () => {
