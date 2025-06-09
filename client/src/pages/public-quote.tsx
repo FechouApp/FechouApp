@@ -471,7 +471,7 @@ export default function PublicQuote() {
                   {approveMutation.isPending ? "Aprovando..." : "Aprovar Orçamento"}
                 </Button>
                 <Button 
-                  onClick={() => rejectMutation.mutate()}
+                  onClick={() => rejectMutation.mutate(undefined)}
                   disabled={rejectMutation.isPending}
                   variant="destructive"
                   className="flex-1"

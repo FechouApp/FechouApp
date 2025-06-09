@@ -21,7 +21,12 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import BackButton from "@/components/common/back-button";
 import LoadingSpinner from "@/components/common/loading-spinner";
-import type { Quote } from "@shared/schema";
+import type { Quote, QuoteItem, Client } from "@shared/schema";
+
+type QuoteWithDetails = Quote & {
+  items: QuoteItem[];
+  client: Client;
+};
 import { useToast } from "@/hooks/use-toast";
 
 export default function PublicReceipt() {
@@ -32,7 +37,7 @@ export default function PublicReceipt() {
   const { data: receipt, isLoading, error } = useQuery({
     queryKey: [`/api/public-quotes/${quoteNumber}/receipt`],
     enabled: !!quoteNumber,
-  });
+  }) as { data: QuoteWithDetails | undefined, isLoading: boolean, error: any };
 
   const handleDownloadPDF = () => {
     if (receipt?.id) {
