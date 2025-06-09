@@ -760,7 +760,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Generate WhatsApp link for receipt sharing
-  app.get('/api/quotes/:id/receipt/whatsapp', isAuthenticated, async (req: AuthenticatedRequest, res) => {
+  app.get('/api/quotes/:id/receipt/whatsapp', isAuthenticated, async (req: any, res) => {
     try {
       const { id } = req.params;
       const userId = req.user.claims.sub;
