@@ -533,9 +533,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Acesso negado" });
       }
 
-      // Check if quote can be marked as paid (must be approved first)
-      if (quote.status !== 'approved') {
-        return res.status(400).json({ message: "Apenas orçamentos aprovados podem ter pagamento confirmado" });
+      // Auto-approve quote if it's pending before marking as paid
+      if (quote.status === 'pending') {
+        console.log("Auto-approving pending quote before payment confirmation");
+        await storage.updateQuoteStatus(id, 'approved');
+      } else if (quote.status !== 'approved') {
+        return res.status(400).json({ message: "Apenas orçamentos pendentes ou aprovados podem ter pagamento confirmado" });
       }
 
       const success = await storage.updateQuoteStatus(id, 'paid', { 
@@ -570,7 +573,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Recibo disponível apenas para orçamentos pagos" });
       }
 
-      const quoteWithItems = await storage.getQuote(id, "");
+      // Get the quote with items using the quote owner's userId
+      const quoteWithItems = await storage.getQuote(id, quote.userId);
       if (!quoteWithItems) {
         return res.status(404).json({ message: "Detalhes do orçamento não encontrados" });
       }
@@ -597,7 +601,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Recibo disponível apenas para orçamentos pagos" });
       }
 
-      const quoteWithItems = await storage.getQuote(id, "");
+      const quoteWithItems = await storage.getQuote(id, quote.userId);
       if (!quoteWithItems) {
         return res.status(404).json({ message: "Detalhes do orçamento não encontrados" });
       }
