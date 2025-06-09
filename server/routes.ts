@@ -693,9 +693,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Business header with logo space (compact)
       const businessName = (user as any).businessName || (user.email || 'Profissional').split('@')[0];
       
-      // Logo placeholder (smaller)
-      doc.setFillColor(240, 240, 240);
-      doc.rect(20, 15, 25, 15, 'F');
+      // Logo handling
+      if ((user as any).logoUrl) {
+        try {
+          // Add the logo image
+          doc.addImage((user as any).logoUrl, 'JPEG', 20, 15, 25, 15);
+        } catch (error) {
+          console.error('Error adding logo to PDF:', error);
+          // Fallback to placeholder if logo fails
+          doc.setFillColor(240, 240, 240);
+          doc.rect(20, 15, 25, 15, 'F');
+        }
+      } else {
+        // Logo placeholder when no logo is set
+        doc.setFillColor(240, 240, 240);
+        doc.rect(20, 15, 25, 15, 'F');
+      }
       
       // Business name and details (right side, compact)
       doc.setFontSize(12);

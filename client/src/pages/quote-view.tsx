@@ -337,6 +337,19 @@ export default function QuoteView() {
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto px-4 py-6 max-w-md sm:max-w-2xl lg:max-w-4xl">
 
+        {/* Botão de Voltar - Show only in internal view */}
+        {!isPublicView && (
+          <div className="mb-6">
+            <Button
+              variant="ghost"
+              onClick={() => window.history.back()}
+              className="flex items-center gap-2 text-gray-600 hover:text-gray-900"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Voltar
+            </Button>
+          </div>
+        )}
 
         {/* Header */}
         <div className="text-center mb-8">
