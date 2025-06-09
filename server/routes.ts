@@ -555,6 +555,120 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get receipt for paid quote
+  app.get('/api/quotes/:id/receipt', async (req, res) => {
+    try {
+      const { id } = req.params;
+      
+      const quote = await storage.getQuoteById(id);
+      if (!quote) {
+        return res.status(404).json({ message: "Orçamento não encontrado" });
+      }
+
+      // Only allow receipt access for paid quotes
+      if (quote.status !== 'paid') {
+        return res.status(400).json({ message: "Recibo disponível apenas para orçamentos pagos" });
+      }
+
+      const quoteWithItems = await storage.getQuote(id, "");
+      if (!quoteWithItems) {
+        return res.status(404).json({ message: "Detalhes do orçamento não encontrados" });
+      }
+
+      res.json(quoteWithItems);
+    } catch (error) {
+      console.error("Error fetching receipt:", error);
+      res.status(500).json({ message: "Erro ao buscar recibo" });
+    }
+  });
+
+  // Generate receipt PDF for paid quote
+  app.get('/api/quotes/:id/receipt/pdf', async (req, res) => {
+    try {
+      const { id } = req.params;
+      
+      const quote = await storage.getQuoteById(id);
+      if (!quote) {
+        return res.status(404).json({ message: "Orçamento não encontrado" });
+      }
+
+      // Only allow PDF generation for paid quotes
+      if (quote.status !== 'paid') {
+        return res.status(400).json({ message: "Recibo disponível apenas para orçamentos pagos" });
+      }
+
+      const quoteWithItems = await storage.getQuote(id, "");
+      if (!quoteWithItems) {
+        return res.status(404).json({ message: "Detalhes do orçamento não encontrados" });
+      }
+
+      const jsPDF = (await import('jspdf')).default;
+      const autoTable = (await import('jspdf-autotable')).default;
+      
+      const doc = new jsPDF();
+      
+      // Header
+      doc.setFontSize(20);
+      doc.setFont('helvetica', 'bold');
+      doc.text('RECIBO DE PAGAMENTO', 105, 30, { align: 'center' });
+      
+      // Company info
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'normal');
+      doc.text('Fechou! - Sistema de Orçamentos', 20, 50);
+      
+      // Receipt info
+      doc.setFontSize(10);
+      doc.text(`Recibo Nº: ${quoteWithItems.quoteNumber}`, 20, 70);
+      doc.text(`Data do Pagamento: ${quoteWithItems.paidAt ? new Date(quoteWithItems.paidAt).toLocaleDateString('pt-BR') : 'N/A'}`, 20, 80);
+      doc.text(`Cliente: ${quoteWithItems.client?.name || 'N/A'}`, 20, 90);
+      if (quoteWithItems.client?.email) {
+        doc.text(`Email: ${quoteWithItems.client.email}`, 20, 100);
+      }
+      if (quoteWithItems.client?.phone) {
+        doc.text(`Telefone: ${quoteWithItems.client.phone}`, 20, 110);
+      }
+      
+      // Items table
+      const tableData = quoteWithItems.items.map((item: any) => [
+        item.description,
+        item.quantity.toString(),
+        `R$ ${parseFloat(item.unitPrice).toFixed(2)}`,
+        `R$ ${(item.quantity * parseFloat(item.unitPrice)).toFixed(2)}`
+      ]);
+      
+      autoTable(doc, {
+        startY: 130,
+        head: [['Descrição', 'Qtd', 'Valor Unit.', 'Total']],
+        body: tableData,
+        styles: { fontSize: 9 },
+        headStyles: { fillColor: [59, 130, 246] }
+      });
+      
+      // Total
+      const finalY = (doc as any).lastAutoTable.finalY + 20;
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'bold');
+      doc.text(`VALOR TOTAL PAGO: R$ ${parseFloat(quote.total).toFixed(2)}`, 105, finalY, { align: 'center' });
+      
+      // Footer
+      doc.setFontSize(8);
+      doc.setFont('helvetica', 'italic');
+      doc.text('Este documento comprova o pagamento do orçamento aprovado.', 105, finalY + 30, { align: 'center' });
+      doc.text(`Gerado em: ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}`, 105, finalY + 40, { align: 'center' });
+      
+      const pdfBuffer = doc.output('arraybuffer');
+      
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename="Recibo_${quote.quoteNumber}.pdf"`);
+      res.send(Buffer.from(pdfBuffer));
+      
+    } catch (error) {
+      console.error("Error generating receipt PDF:", error);
+      res.status(500).json({ message: "Erro ao gerar PDF do recibo" });
+    }
+  });
+
   app.post("/api/quotes", isAuthenticated, async (req: any, res) => {
     try {
       const { quote, items } = req.body;

@@ -178,6 +178,10 @@ export default function Quotes() {
     }
   };
 
+  const handleViewReceipt = (quoteId: string) => {
+    setLocation(`/quotes/${quoteId}/receipt`);
+  };
+
   if (authLoading || isLoading) {
     return <LoadingSpinner />;
   }
@@ -417,16 +421,26 @@ export default function Quotes() {
                           >
                             <Edit className="w-4 h-4" />
                           </Button>
-                          <Button 
-                            size="sm" 
-                            variant="ghost" 
-                            title="Confirmar Pagamento"
-                            onClick={() => handleConfirmPayment(quote.id)}
-                            disabled={confirmPaymentMutation.isPending || quote.status === 'paid'}
-                            className={quote.status === 'paid' ? 'opacity-50' : ''}
-                          >
-                            <DollarSign className="w-4 h-4 text-green-600" />
-                          </Button>
+                          {quote.status === 'paid' ? (
+                            <Button 
+                              size="sm" 
+                              variant="ghost" 
+                              title="Ver Recibo"
+                              onClick={() => handleViewReceipt(quote.id)}
+                            >
+                              <FileText className="w-4 h-4 text-blue-600" />
+                            </Button>
+                          ) : (
+                            <Button 
+                              size="sm" 
+                              variant="ghost" 
+                              title="Confirmar Pagamento"
+                              onClick={() => handleConfirmPayment(quote.id)}
+                              disabled={confirmPaymentMutation.isPending}
+                            >
+                              <DollarSign className="w-4 h-4 text-green-600" />
+                            </Button>
+                          )}
                           <Button 
                             size="sm" 
                             variant="ghost" 
@@ -498,17 +512,30 @@ export default function Quotes() {
                               <Edit className="w-3 h-3" />
                               Editar
                             </Button>
-                            <Button 
-                              size="sm" 
-                              variant="outline" 
-                              onClick={() => handleConfirmPayment(quote.id)}
-                              disabled={confirmPaymentMutation.isPending || quote.status === 'paid'}
-                              className={`flex items-center justify-center gap-1 px-1 py-1 text-xs h-8 ${quote.status === 'paid' ? 'opacity-50' : ''}`}
-                              title="Confirmar Pagamento"
-                            >
-                              <DollarSign className="w-3 h-3 text-green-600" />
-                              $
-                            </Button>
+                            {quote.status === 'paid' ? (
+                              <Button 
+                                size="sm" 
+                                variant="outline" 
+                                onClick={() => handleViewReceipt(quote.id)}
+                                className="flex items-center justify-center gap-1 px-1 py-1 text-xs h-8"
+                                title="Ver Recibo"
+                              >
+                                <FileText className="w-3 h-3 text-blue-600" />
+                                Recibo
+                              </Button>
+                            ) : (
+                              <Button 
+                                size="sm" 
+                                variant="outline" 
+                                onClick={() => handleConfirmPayment(quote.id)}
+                                disabled={confirmPaymentMutation.isPending}
+                                className="flex items-center justify-center gap-1 px-1 py-1 text-xs h-8"
+                                title="Confirmar Pagamento"
+                              >
+                                <DollarSign className="w-3 h-3 text-green-600" />
+                                $
+                              </Button>
+                            )}
                             <Button 
                               size="sm" 
                               variant="outline" 
