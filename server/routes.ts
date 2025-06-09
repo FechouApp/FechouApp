@@ -693,11 +693,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Business header with logo space (compact)
       const businessName = (user as any).businessName || (user.email || 'Profissional').split('@')[0];
       
-      // Logo handling
+      // Logo handling with proportional sizing
       if ((user as any).logoUrl) {
         try {
-          // Add the logo image
-          doc.addImage((user as any).logoUrl, 'JPEG', 20, 15, 25, 15);
+          // Add the logo image maintaining aspect ratio
+          doc.addImage((user as any).logoUrl, 'JPEG', 20, 15, 25, 0, '', 'FAST');
         } catch (error) {
           console.error('Error adding logo to PDF:', error);
           // Fallback to placeholder if logo fails

@@ -195,7 +195,7 @@ export default function Reports() {
         const monthData = months.find(m => m.month === monthKey);
         if (monthData) {
           monthData.total++;
-          if (quote.status === 'approved' || quote.status === 'paid') {
+          if (quote.status === 'paid') {
             monthData.approved++;
             monthData.revenue += parseFloat(quote.total);
           }
@@ -251,16 +251,27 @@ export default function Reports() {
 
   const getConversionRate = () => {
     if (!quotes || quotes.length === 0) return 0;
-    const approved = quotes.filter(q => q.status === 'approved' || q.status === 'paid').length;
-    return (approved / quotes.length * 100).toFixed(1);
+    const paid = quotes.filter(q => q.status === 'paid').length;
+    return (paid / quotes.length * 100).toFixed(1);
   };
 
   const getAverageQuoteValue = () => {
     if (!quotes || quotes.length === 0) return 0;
-    const approvedQuotes = quotes.filter(q => q.status === 'approved' || q.status === 'paid');
-    if (approvedQuotes.length === 0) return 0;
-    const total = approvedQuotes.reduce((sum, quote) => sum + parseFloat(quote.total), 0);
-    return total / approvedQuotes.length;
+    const paidQuotes = quotes.filter(q => q.status === 'paid');
+    if (paidQuotes.length === 0) return 0;
+    const total = paidQuotes.reduce((sum, quote) => sum + parseFloat(quote.total), 0);
+    return total / paidQuotes.length;
+  };
+
+  const getTotalRevenue = () => {
+    if (!quotes || quotes.length === 0) return 0;
+    return quotes.filter(q => q.status === 'paid')
+      .reduce((sum, quote) => sum + parseFloat(quote.total), 0);
+  };
+
+  const getPaidQuotesCount = () => {
+    if (!quotes || quotes.length === 0) return 0;
+    return quotes.filter(q => q.status === 'paid').length;
   };
 
   const getExpiringQuotes = () => {
@@ -673,6 +684,8 @@ export default function Reports() {
               {Object.entries(statusStats).map(([status, count]) => {
                 const getStatusInfo = (status) => {
                   switch (status.toLowerCase()) {
+                    case 'paid':
+                      return { label: 'Pago', color: 'text-green-600', bg: 'bg-green-100' };
                     case 'approved':
                       return { label: 'Aprovados', color: 'text-green-600', bg: 'bg-green-100' };
                     case 'pending':

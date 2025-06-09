@@ -240,7 +240,8 @@ export default function Dashboard() {
                       <Badge className={getStatusColor(quote.status)}>
                         {quote.status === 'approved' ? 'Aprovado' : 
                          quote.status === 'pending' ? 'Pendente' : 
-                         quote.status === 'rejected' ? 'Recusado' : 'Rascunho'}
+                         quote.status === 'rejected' ? 'Recusado' : 
+                         quote.status === 'paid' ? 'Pago' : 'Rascunho'}
                       </Badge>
                       <span className="font-semibold text-green-600">
                         {formatCurrency(quote.total)}
