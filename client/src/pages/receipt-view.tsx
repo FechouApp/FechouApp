@@ -38,8 +38,8 @@ export default function ReceiptView() {
   };
 
   const handleDownloadPDF = () => {
-    if (receipt?.id) {
-      window.open(`/api/quotes/${receipt.id}/receipt/pdf`, '_blank');
+    if (receipt?.quoteNumber) {
+      window.open(`/api/public-quotes/${receipt.quoteNumber}/receipt/pdf`, '_blank');
     }
   };
 

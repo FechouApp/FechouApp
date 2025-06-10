@@ -554,11 +554,10 @@ export default function Quotes() {
                                 size="sm" 
                                 variant="outline" 
                                 onClick={() => handleViewReceipt(quote.id)}
-                                className="flex items-center justify-center gap-1 px-1 py-1 text-xs h-8"
+                                className="flex items-center justify-center px-2 py-1 text-xs h-8"
                                 title="Ver Recibo"
                               >
                                 <FileText className="w-3 h-3 text-blue-600" />
-                                Recibo
                               </Button>
                             ) : (
                               <Button 
@@ -566,11 +565,10 @@ export default function Quotes() {
                                 variant="outline" 
                                 onClick={() => handleConfirmPayment(quote.id)}
                                 disabled={confirmPaymentMutation.isPending}
-                                className="flex items-center justify-center gap-1 px-1 py-1 text-xs h-8"
+                                className="flex items-center justify-center px-2 py-1 text-xs h-8"
                                 title="Confirmar Pagamento"
                               >
                                 <DollarSign className="w-3 h-3 text-green-600" />
-                                $
                               </Button>
                             )}
                             <Button 
@@ -578,10 +576,10 @@ export default function Quotes() {
                               variant="outline" 
                               onClick={() => handleDeleteQuote(quote.id)}
                               disabled={deleteQuoteMutation.isPending}
-                              className="flex items-center justify-center gap-1 px-1 py-1 text-xs h-8"
+                              className="flex items-center justify-center px-2 py-1 text-xs h-8"
+                              title="Excluir"
                             >
                               <Trash2 className="w-3 h-3 text-red-500" />
-                              Excluir
                             </Button>
                           </div>
                         </div>

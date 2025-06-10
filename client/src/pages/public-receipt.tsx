@@ -40,8 +40,8 @@ export default function PublicReceipt() {
   }) as { data: QuoteWithDetails | undefined, isLoading: boolean, error: any };
 
   const handleDownloadPDF = () => {
-    if (receipt?.id) {
-      window.open(`/api/quotes/${receipt.id}/receipt/pdf`, '_blank');
+    if (receipt?.quoteNumber) {
+      window.open(`/api/public-quotes/${receipt.quoteNumber}/receipt/pdf`, '_blank');
     }
   };
 
