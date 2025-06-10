@@ -83,13 +83,14 @@ export async function setupAuth(app: Express) {
     verified(null, user);
   };
 
-  // Use a fixed strategy name and handle domains dynamically in routes
+  // Use the correct domain for callback URL
+  const callbackURL = `https://workspace.agtgpereira.repl.co/api/callback`;
   const strategy = new Strategy(
     {
       name: "replitauth",
       config,
       scope: "openid email profile offline_access",
-      callbackURL: "/api/callback",
+      callbackURL,
     },
     verify,
   );
