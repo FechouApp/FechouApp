@@ -696,18 +696,18 @@ export async function generateReceiptPDF({ quote, user, isUserPremium }: PDFGene
   doc.text(businessName, marginLeft, yPos);
   yPos += 4;
   
-  if (user.cpfCnpj) {
-    doc.text(`CPF/CNPJ: ${formatCPF(user.cpfCnpj)}`, marginLeft, yPos);
+  if ((user as any).cpfCnpj) {
+    doc.text(`CPF/CNPJ: ${formatCPF((user as any).cpfCnpj)}`, marginLeft, yPos);
     yPos += 4;
   }
   
-  if (user.phone) {
-    doc.text(`Telefone: ${formatPhone(user.phone)}`, marginLeft, yPos);
+  if ((user as any).phone) {
+    doc.text(`Telefone: ${formatPhone((user as any).phone)}`, marginLeft, yPos);
     yPos += 4;
   }
   
-  if (user.address) {
-    doc.text(`Endereço: ${user.address}`, marginLeft, yPos);
+  if ((user as any).address) {
+    doc.text(`Endereço: ${(user as any).address}`, marginLeft, yPos);
     yPos += 4;
   }
   
@@ -722,13 +722,13 @@ export async function generateReceiptPDF({ quote, user, isUserPremium }: PDFGene
   doc.text(quote.client.name, marginLeft, yPos);
   yPos += 4;
   
-  if (quote.client.cpfCnpj) {
-    doc.text(`CPF/CNPJ: ${formatCPF(quote.client.cpfCnpj)}`, marginLeft, yPos);
+  if ((quote.client as any).cpfCnpj) {
+    doc.text(`CPF/CNPJ: ${formatCPF((quote.client as any).cpfCnpj)}`, marginLeft, yPos);
     yPos += 4;
   }
   
-  if (quote.client.phone) {
-    doc.text(`Telefone: ${formatPhone(quote.client.phone)}`, marginLeft, yPos);
+  if ((quote.client as any).phone) {
+    doc.text(`Telefone: ${formatPhone((quote.client as any).phone)}`, marginLeft, yPos);
     yPos += 4;
   }
   
@@ -753,8 +753,8 @@ export async function generateReceiptPDF({ quote, user, isUserPremium }: PDFGene
   // Itens
   doc.setFont('helvetica', 'normal');
   let itemNumber = 1;
-  quote.items.forEach((item) => {
-    const itemTotal = item.quantity * item.unitPrice;
+  (quote.items || []).forEach((item: any) => {
+    const itemTotal = Number(item.quantity) * Number(item.unitPrice);
     
     doc.text(itemNumber.toString(), marginLeft + 2, yPos);
     
@@ -766,7 +766,7 @@ export async function generateReceiptPDF({ quote, user, isUserPremium }: PDFGene
     });
     
     doc.text(item.quantity.toString(), pageWidth - 60, yPos);
-    doc.text(item.unitPrice.toFixed(2), pageWidth - 45, yPos);
+    doc.text(Number(item.unitPrice).toFixed(2), pageWidth - 45, yPos);
     doc.text(itemTotal.toFixed(2), pageWidth - 20, yPos);
     
     yPos += Math.max(5, descLines.length * 3) + 2;
