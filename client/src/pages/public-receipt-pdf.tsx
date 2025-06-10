@@ -12,8 +12,9 @@ export default function PublicReceiptPDF() {
     enabled: !!quoteNumber,
   }) as { data: any, isLoading: boolean, error: any };
 
-  const { data: user, isLoading: userLoading } = useQuery({
-    queryKey: [`/api/users/${quote?.userId}`],
+  // Fetch user data
+  const { data: user, isLoading: userLoading, error: userError } = useQuery({
+    queryKey: [`/api/public-users/${quote?.userId}`],
     enabled: !!quote?.userId,
   }) as { data: any, isLoading: boolean, error: any };
 
@@ -23,7 +24,7 @@ export default function PublicReceiptPDF() {
 
       try {
         console.log('Generating public receipt PDF...', { quoteNumber });
-        
+
         const pdfBlob = await generateReceiptPDF({
           quote,
           user,

@@ -381,6 +381,40 @@ Obrigado pela confiança!`;
     }
   });
 
+  // Public route to get user data for receipt generation
+  app.get('/api/public-users/:userId', async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      // Return only necessary data for PDF generation
+      const publicUserData = {
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        businessName: user.businessName,
+        plan: user.plan,
+        ...(user as any).address && { address: (user as any).address },
+        ...(user as any).number && { number: (user as any).number },
+        ...(user as any).city && { city: (user as any).city },
+        ...(user as any).state && { state: (user as any).state },
+        ...(user as any).cep && { cep: (user as any).cep },
+        ...(user as any).cpfCnpj && { cpfCnpj: (user as any).cpfCnpj },
+        ...(user as any).phone && { phone: (user as any).phone },
+        ...(user as any).logoUrl && { logoUrl: (user as any).logoUrl },
+      };
+      
+      res.json(publicUserData);
+    } catch (error) {
+      console.error("Error fetching public user data:", error);
+      res.status(500).json({ message: "Failed to fetch user data" });
+    }
+  });
+
   const server = createServer(app);
   return server;
 }

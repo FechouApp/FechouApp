@@ -71,6 +71,7 @@ function Router() {
       <Route path="/quote/:quoteNumber" component={PublicQuote} />
       <Route path="/receipt/:quoteNumber" component={PublicReceipt} />
       <Route path="/receipt/:quoteNumber/pdf" component={PublicReceiptPDF} />
+        <Route path="/public-receipt/:quoteNumber" component={PublicReceipt} />
         <Route path="/quotes/:id/receipt" component={ReceiptView} />
 
       <Route path="/" component={Dashboard} />

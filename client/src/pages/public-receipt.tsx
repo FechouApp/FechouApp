@@ -39,32 +39,75 @@ export default function PublicReceipt() {
     enabled: !!quoteNumber,
   }) as { data: QuoteWithDetails | undefined, isLoading: boolean, error: any };
 
-  const handleDownloadPDF = () => {
-    if (receipt?.quoteNumber) {
-      window.open(`/api/public-quotes/${receipt.quoteNumber}/receipt/pdf`, '_blank');
+  const handleDownloadPDF = async () => {
+    if (!receipt) return;
+    
+    try {
+      // Fetch user data first
+      const userResponse = await fetch(`/api/public-users/${receipt.userId}`);
+      const userData = await userResponse.json();
+      
+      if (!userResponse.ok) {
+        throw new Error('Erro ao buscar dados do usuário');
+      }
+
+      const isUserPremium = userData.plan === 'PREMIUM' || userData.plan === 'PREMIUM_CORTESIA';
+      
+      const { generateReceiptPDF, downloadPDF } = await import('@/lib/pdfGenerator');
+      
+      const pdfBlob = await generateReceiptPDF({
+        quote: receipt,
+        user: userData,
+        isUserPremium
+      });
+
+      downloadPDF(pdfBlob, `Recibo_${receipt.quoteNumber}.pdf`);
+      
+      toast({
+        title: "PDF gerado!",
+        description: "O recibo foi baixado com sucesso.",
+      });
+    } catch (error) {
+      console.error('Error generating receipt PDF:', error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível gerar o PDF do recibo.",
+        variant: "destructive",
+      });
     }
   };
 
   const handleShareWhatsApp = async () => {
-    if (!receipt?.id) return;
+    if (!receipt?.client?.phone) {
+      toast({
+        title: "Erro",
+        description: "Número do cliente não encontrado.",
+        variant: "destructive",
+      });
+      return;
+    }
     
     try {
-      const response = await fetch(`/api/quotes/${receipt.id}/receipt/whatsapp`);
-      const data = await response.json();
+      const pdfUrl = `${window.location.origin}/api/public-quotes/${receipt.quoteNumber}/receipt/pdf`;
+      const message = `Olá ${receipt.client.name}! Segue o recibo do pagamento do seu orçamento.
       
-      if (response.ok) {
-        window.open(data.whatsappLink, '_blank');
-        toast({
-          title: "WhatsApp aberto",
-          description: "Link do recibo compartilhado no WhatsApp!",
-        });
-      } else {
-        toast({
-          title: "Erro",
-          description: data.message || "Erro ao gerar link do WhatsApp",
-          variant: "destructive",
-        });
-      }
+📄 Recibo Nº: ${receipt.quoteNumber}
+💰 Valor: R$ ${parseFloat(receipt.total).toFixed(2)}
+📅 Data: ${new Date().toLocaleDateString('pt-BR')}
+
+🔗 Baixar recibo: ${pdfUrl}
+
+Obrigado pela confiança!`;
+
+      const cleanPhone = receipt.client.phone.replace(/\D/g, '');
+      const whatsappLink = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
+      
+      window.open(whatsappLink, '_blank');
+      
+      toast({
+        title: "WhatsApp aberto",
+        description: "Link do recibo compartilhado no WhatsApp!",
+      });
     } catch (error) {
       toast({
         title: "Erro",
