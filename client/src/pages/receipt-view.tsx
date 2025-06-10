@@ -19,10 +19,15 @@ import {
 import { useLocation } from "wouter";
 import BackButton from "@/components/common/back-button";
 import LoadingSpinner from "@/components/common/loading-spinner";
+import { generateReceiptPDF, downloadPDF } from "@/lib/pdfGenerator";
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
 
 export default function ReceiptView() {
   const { id } = useParams();
   const [, setLocation] = useLocation();
+  const { user } = useAuth();
+  const { toast } = useToast();
 
   const { data: receipt, isLoading, error } = useQuery({
     queryKey: [`/api/quotes/${id}/receipt`],
@@ -37,9 +42,36 @@ export default function ReceiptView() {
     }).format(num);
   };
 
-  const handleDownloadPDF = () => {
-    if (receipt?.quoteNumber) {
-      window.open(`/api/public-quotes/${receipt.quoteNumber}/receipt/pdf`, '_blank');
+  const handleDownloadPDF = async () => {
+    if (!receipt || !user) {
+      console.error('Receipt or user not available:', { receipt: !!receipt, user: !!user });
+      return;
+    }
+
+    try {
+      console.log('Starting receipt PDF generation...', { quoteNumber: receipt.quoteNumber });
+      const isUserPremium = (user as any)?.plan === 'PREMIUM';
+      
+      const pdfBlob = await generateReceiptPDF({
+        quote: receipt,
+        user: user as any,
+        isUserPremium
+      });
+
+      console.log('Receipt PDF generated successfully, blob size:', pdfBlob.size);
+      downloadPDF(pdfBlob, `Recibo_${receipt.quoteNumber}.pdf`);
+
+      toast({
+        title: "PDF gerado!",
+        description: "O recibo foi baixado com sucesso.",
+      });
+    } catch (error) {
+      console.error('Receipt PDF generation error:', error);
+      toast({
+        title: "Erro",
+        description: `Não foi possível gerar o PDF: ${(error as Error).message}`,
+        variant: "destructive",
+      });
     }
   };
 

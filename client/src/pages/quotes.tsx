@@ -535,18 +535,18 @@ export default function Quotes() {
                               size="sm" 
                               variant="outline" 
                               onClick={() => handleViewQuote(quote.id)}
-                              className="flex items-center justify-center gap-1 px-1 py-1 text-xs h-8"
+                              className="flex flex-col items-center justify-center px-1 py-2 text-xs h-12"
                             >
-                              <Eye className="w-3 h-3" />
+                              <Eye className="w-3 h-3 mb-1" />
                               Ver
                             </Button>
                             <Button 
                               size="sm" 
                               variant="outline" 
                               onClick={() => handleEditQuote(quote.id)}
-                              className="flex items-center justify-center gap-1 px-1 py-1 text-xs h-8"
+                              className="flex flex-col items-center justify-center px-1 py-2 text-xs h-12"
                             >
-                              <Edit className="w-3 h-3" />
+                              <Edit className="w-3 h-3 mb-1" />
                               Editar
                             </Button>
                             {quote.status === 'paid' ? (
@@ -554,10 +554,11 @@ export default function Quotes() {
                                 size="sm" 
                                 variant="outline" 
                                 onClick={() => handleViewReceipt(quote.id)}
-                                className="flex items-center justify-center px-2 py-1 text-xs h-8"
+                                className="flex flex-col items-center justify-center px-1 py-2 text-xs h-12"
                                 title="Ver Recibo"
                               >
-                                <FileText className="w-3 h-3 text-blue-600" />
+                                <FileText className="w-3 h-3 text-blue-600 mb-1" />
+                                Recibo
                               </Button>
                             ) : (
                               <Button 
@@ -565,10 +566,11 @@ export default function Quotes() {
                                 variant="outline" 
                                 onClick={() => handleConfirmPayment(quote.id)}
                                 disabled={confirmPaymentMutation.isPending}
-                                className="flex items-center justify-center px-2 py-1 text-xs h-8"
+                                className="flex flex-col items-center justify-center px-1 py-2 text-xs h-12"
                                 title="Confirmar Pagamento"
                               >
-                                <DollarSign className="w-3 h-3 text-green-600" />
+                                <DollarSign className="w-3 h-3 text-green-600 mb-1" />
+                                Pagar
                               </Button>
                             )}
                             <Button 
@@ -576,10 +578,11 @@ export default function Quotes() {
                               variant="outline" 
                               onClick={() => handleDeleteQuote(quote.id)}
                               disabled={deleteQuoteMutation.isPending}
-                              className="flex items-center justify-center px-2 py-1 text-xs h-8"
+                              className="flex flex-col items-center justify-center px-1 py-2 text-xs h-12"
                               title="Excluir"
                             >
-                              <Trash2 className="w-3 h-3 text-red-500" />
+                              <Trash2 className="w-3 h-3 text-red-500 mb-1" />
+                              Apagar
                             </Button>
                           </div>
                         </div>

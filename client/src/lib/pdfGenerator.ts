@@ -579,3 +579,238 @@ export function downloadPDF(blob: Blob, filename: string) {
 export function createPDFUrl(blob: Blob): string {
   return URL.createObjectURL(blob);
 }
+
+// Função para converter número em extenso
+function numberToWords(num: number): string {
+  const units = ['', 'um', 'dois', 'três', 'quatro', 'cinco', 'seis', 'sete', 'oito', 'nove'];
+  const teens = ['dez', 'onze', 'doze', 'treze', 'quatorze', 'quinze', 'dezesseis', 'dezessete', 'dezoito', 'dezenove'];
+  const tens = ['', '', 'vinte', 'trinta', 'quarenta', 'cinquenta', 'sessenta', 'setenta', 'oitenta', 'noventa'];
+  const hundreds = ['', 'cento', 'duzentos', 'trezentos', 'quatrocentos', 'quinhentos', 'seiscentos', 'setecentos', 'oitocentos', 'novecentos'];
+
+  if (num === 0) return 'zero reais';
+  if (num === 100) return 'cem reais';
+
+  let result = '';
+  const integerPart = Math.floor(num);
+  const decimalPart = Math.round((num - integerPart) * 100);
+
+  // Parte inteira
+  if (integerPart >= 1000) {
+    const thousands = Math.floor(integerPart / 1000);
+    if (thousands === 1) {
+      result += 'mil';
+    } else {
+      result += convertHundreds(thousands) + ' mil';
+    }
+    
+    const remainder = integerPart % 1000;
+    if (remainder > 0) {
+      if (remainder < 100) {
+        result += ' e ' + convertHundreds(remainder);
+      } else {
+        result += ' ' + convertHundreds(remainder);
+      }
+    }
+  } else {
+    result = convertHundreds(integerPart);
+  }
+
+  // Adicionar "reais"
+  if (integerPart === 1) {
+    result += ' real';
+  } else {
+    result += ' reais';
+  }
+
+  // Parte decimal (centavos)
+  if (decimalPart > 0) {
+    result += ' e ';
+    if (decimalPart === 1) {
+      result += 'um centavo';
+    } else {
+      result += convertHundreds(decimalPart) + ' centavos';
+    }
+  }
+
+  return result;
+
+  function convertHundreds(n: number): string {
+    if (n === 0) return '';
+    
+    let result = '';
+    const h = Math.floor(n / 100);
+    const remainder = n % 100;
+    
+    if (h > 0) {
+      result += hundreds[h];
+      if (remainder > 0) {
+        result += ' e ';
+      }
+    }
+    
+    if (remainder >= 20) {
+      const t = Math.floor(remainder / 10);
+      const u = remainder % 10;
+      result += tens[t];
+      if (u > 0) {
+        result += ' e ' + units[u];
+      }
+    } else if (remainder >= 10) {
+      result += teens[remainder - 10];
+    } else if (remainder > 0) {
+      result += units[remainder];
+    }
+    
+    return result;
+  }
+}
+
+export async function generateReceiptPDF({ quote, user, isUserPremium }: PDFGeneratorOptions): Promise<Blob> {
+  const doc = new jsPDF();
+  const pageWidth = doc.internal.pageSize.getWidth();
+  
+  // Margens
+  const marginLeft = 20;
+  const marginRight = 20;
+  let yPos = 20;
+
+  // Título
+  doc.setFontSize(16);
+  doc.setFont('helvetica', 'bold');
+  doc.text('RECIBO', pageWidth / 2, yPos, { align: 'center' });
+  yPos += 15;
+
+  // Número do recibo
+  doc.setFontSize(12);
+  doc.text(`Nº ${quote.quoteNumber}`, pageWidth / 2, yPos, { align: 'center' });
+  yPos += 20;
+
+  // Informações do profissional
+  doc.setFontSize(10);
+  doc.setFont('helvetica', 'bold');
+  doc.text('PRESTADOR DE SERVIÇOS:', marginLeft, yPos);
+  yPos += 5;
+  
+  doc.setFont('helvetica', 'normal');
+  const businessName = user.businessName || (user as any).name || user.firstName;
+  doc.text(businessName, marginLeft, yPos);
+  yPos += 4;
+  
+  if (user.cpfCnpj) {
+    doc.text(`CPF/CNPJ: ${formatCPF(user.cpfCnpj)}`, marginLeft, yPos);
+    yPos += 4;
+  }
+  
+  if (user.phone) {
+    doc.text(`Telefone: ${formatPhone(user.phone)}`, marginLeft, yPos);
+    yPos += 4;
+  }
+  
+  if (user.address) {
+    doc.text(`Endereço: ${user.address}`, marginLeft, yPos);
+    yPos += 4;
+  }
+  
+  yPos += 10;
+
+  // Informações do cliente
+  doc.setFont('helvetica', 'bold');
+  doc.text('CLIENTE:', marginLeft, yPos);
+  yPos += 5;
+  
+  doc.setFont('helvetica', 'normal');
+  doc.text(quote.client.name, marginLeft, yPos);
+  yPos += 4;
+  
+  if (quote.client.cpfCnpj) {
+    doc.text(`CPF/CNPJ: ${formatCPF(quote.client.cpfCnpj)}`, marginLeft, yPos);
+    yPos += 4;
+  }
+  
+  if (quote.client.phone) {
+    doc.text(`Telefone: ${formatPhone(quote.client.phone)}`, marginLeft, yPos);
+    yPos += 4;
+  }
+  
+  yPos += 15;
+
+  // Data de emissão
+  doc.text(`Data: ${format(new Date(), 'dd/MM/yyyy', { locale: ptBR })}`, marginLeft, yPos);
+  yPos += 15;
+
+  // Cabeçalho da tabela
+  doc.setFillColor(240, 240, 240);
+  doc.rect(marginLeft, yPos - 5, pageWidth - marginLeft - marginRight, 10, 'F');
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(9);
+  doc.text('Item', marginLeft + 2, yPos);
+  doc.text('Descrição', marginLeft + 15, yPos);
+  doc.text('Qtd', pageWidth - 60, yPos);
+  doc.text('Valor Unit.', pageWidth - 45, yPos);
+  doc.text('Total', pageWidth - 20, yPos);
+  yPos += 8;
+
+  // Itens
+  doc.setFont('helvetica', 'normal');
+  let itemNumber = 1;
+  quote.items.forEach((item) => {
+    const itemTotal = item.quantity * item.unitPrice;
+    
+    doc.text(itemNumber.toString(), marginLeft + 2, yPos);
+    
+    // Quebrar descrição se muito longa
+    const maxDescWidth = 120;
+    const descLines = doc.splitTextToSize(item.description, maxDescWidth);
+    descLines.forEach((line: string, index: number) => {
+      doc.text(line, marginLeft + 15, yPos + (index * 3));
+    });
+    
+    doc.text(item.quantity.toString(), pageWidth - 60, yPos);
+    doc.text(item.unitPrice.toFixed(2), pageWidth - 45, yPos);
+    doc.text(itemTotal.toFixed(2), pageWidth - 20, yPos);
+    
+    yPos += Math.max(5, descLines.length * 3) + 2;
+    
+    // Linha separadora
+    doc.setDrawColor(200, 200, 200);
+    doc.setLineWidth(0.1);
+    doc.line(marginLeft, yPos - 1, pageWidth - marginRight, yPos - 1);
+    
+    itemNumber++;
+  });
+
+  // Total
+  yPos += 5;
+  doc.setFillColor(240, 240, 240);
+  doc.rect(marginLeft, yPos - 3, pageWidth - marginLeft - marginRight, 10, 'F');
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(10);
+  doc.text('TOTAL GERAL', marginLeft + 2, yPos + 3);
+  doc.text(`R$ ${parseFloat(quote.total).toFixed(2)}`, pageWidth - 20, yPos + 3);
+  yPos += 15;
+
+  // Texto de declaração
+  const totalValue = parseFloat(quote.total);
+  const valueInWords = numberToWords(totalValue);
+  const declarationText = `Declaro que recebi de ${quote.client.name} o valor de R$ ${totalValue.toFixed(2)} (${valueInWords}), referente aos serviços descritos acima.`;
+  
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(9);
+  const splitText = doc.splitTextToSize(declarationText, pageWidth - marginLeft - marginRight);
+  splitText.forEach((line: string, index: number) => {
+    doc.text(line, marginLeft, yPos + (index * 4));
+  });
+  yPos += splitText.length * 4 + 20;
+
+  // Linha para assinatura
+  doc.text('_________________________________', marginLeft, yPos);
+  yPos += 8;
+  doc.text(businessName, marginLeft, yPos);
+
+  // Rodapé
+  doc.setFontSize(8);
+  doc.setFont('helvetica', 'italic');
+  doc.text('Recibo emitido via Fechou!', pageWidth / 2, 285, { align: 'center' });
+
+  return doc.output('blob');
+}
