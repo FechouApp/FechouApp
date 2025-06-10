@@ -1,14 +1,14 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { setupSimpleAuth, isAuthenticated } from "./simpleAuth";
+import { setupAuth, isAuthenticated } from "./replitAuth";
 import { insertClientSchema, insertQuoteSchema, insertQuoteItemSchema, insertReviewSchema, insertSavedItemSchema } from "@shared/schema";
 import { z } from "zod";
 import "./types";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
-  setupSimpleAuth(app);
+  await setupAuth(app);
 
   // Auth routes
   app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
@@ -19,23 +19,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching user:", error);
       res.status(500).json({ message: "Failed to fetch user" });
-    }
-  });
-
-  // Update user profile
-  app.post('/api/user/profile', isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = req.user.claims.sub;
-      const profileData = req.body;
-      
-      const updatedUser = await storage.updateUserProfile(userId, profileData);
-      if (!updatedUser) {
-        return res.status(404).json({ message: "User not found" });
-      }
-      res.json(updatedUser);
-    } catch (error) {
-      console.error("Error updating user profile:", error);
-      res.status(500).json({ message: "Failed to update profile" });
     }
   });
 
@@ -186,38 +169,11 @@ Obrigado pela confiança!`;
   app.post('/api/quotes', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      console.log("Creating quote with data:", req.body);
-      
-      // Extract quote and items from request body
-      const { quote: quoteInfo, items } = req.body;
-      
-      if (!quoteInfo) {
-        return res.status(400).json({ message: "Quote data is required" });
-      }
-      
-      // Prepare quote data for validation
-      const quoteData = {
-        ...quoteInfo,
-        userId,
-        subtotal: quoteInfo.subtotal.toString(),
-        discount: quoteInfo.discount.toString(),
-        total: quoteInfo.total.toString(),
-        validUntil: new Date(quoteInfo.validUntil)
-      };
-      
-      console.log("Prepared quote data:", quoteData);
-      
-      // Validate quote data
-      const validatedQuoteData = insertQuoteSchema.parse(quoteData);
-      
-      // Create quote with items
-      const quote = await storage.createQuote(validatedQuoteData, items || []);
+      const quoteData = insertQuoteSchema.parse({ ...req.body, userId });
+      const quote = await storage.createQuote(quoteData);
       res.json(quote);
     } catch (error) {
       console.error("Error creating quote:", error);
-      if (error instanceof Error) {
-        console.error("Error message:", error.message);
-      }
       res.status(500).json({ message: "Failed to create quote" });
     }
   });
@@ -225,39 +181,14 @@ Obrigado pela confiança!`;
   app.put('/api/quotes/:id', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      console.log("Updating quote with data:", req.body);
-      
-      // Extract quote and items from request body
-      const { quote: quoteInfo, items } = req.body;
-      
-      if (!quoteInfo) {
-        return res.status(400).json({ message: "Quote data is required" });
-      }
-      
-      // Prepare quote data for validation
-      const quoteData = {
-        ...quoteInfo,
-        userId,
-        subtotal: quoteInfo.subtotal.toString(),
-        discount: quoteInfo.discount.toString(),
-        total: quoteInfo.total.toString(),
-        validUntil: new Date(quoteInfo.validUntil)
-      };
-      
-      // Validate quote data
-      const validatedQuoteData = insertQuoteSchema.parse(quoteData);
-      
-      // Update quote with items
-      const quote = await storage.updateQuote(req.params.id, validatedQuoteData, userId, items);
+      const quoteData = insertQuoteSchema.parse({ ...req.body, userId });
+      const quote = await storage.updateQuote(req.params.id, quoteData, userId);
       if (!quote) {
         return res.status(404).json({ message: "Quote not found" });
       }
       res.json(quote);
     } catch (error) {
       console.error("Error updating quote:", error);
-      if (error instanceof Error) {
-        console.error("Error message:", error.message);
-      }
       res.status(500).json({ message: "Failed to update quote" });
     }
   });
@@ -290,7 +221,7 @@ Obrigado pela confiança!`;
     try {
       const userId = req.user.claims.sub;
       const itemData = insertQuoteItemSchema.parse({ ...req.body, quoteId: req.params.quoteId });
-      const item = await storage.updateQuoteItem(req.params.itemId, itemData);
+      const item = await storage.updateQuoteItem(req.params.itemId, itemData, userId);
       if (!item) {
         return res.status(404).json({ message: "Quote item not found" });
       }
@@ -304,7 +235,7 @@ Obrigado pela confiança!`;
   app.delete('/api/quotes/:quoteId/items/:itemId', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      await storage.deleteQuoteItem(req.params.itemId);
+      await storage.deleteQuoteItem(req.params.itemId, userId);
       res.json({ message: "Quote item deleted successfully" });
     } catch (error) {
       console.error("Error deleting quote item:", error);

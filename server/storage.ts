@@ -51,15 +51,15 @@ export interface IStorage {
   getQuoteByNumber(quoteNumber: string): Promise<(Quote & { client: Client; items: QuoteItem[] }) | undefined>;
   getQuoteById(id: string): Promise<Quote | undefined>;
   getQuotesInDateRange(userId: string, startDate: Date, endDate: Date): Promise<Quote[]>;
-  createQuote(quote: InsertQuote, items?: InsertQuoteItem[]): Promise<Quote>;
-  updateQuote(id: string, quote: Partial<InsertQuote>, userId: string, items?: InsertQuoteItem[]): Promise<Quote | undefined>;
+  createQuote(quote: InsertQuote, items: InsertQuoteItem[]): Promise<Quote>;
+  updateQuote(id: string, quote: Partial<InsertQuote>, userId: string): Promise<Quote | undefined>;
   deleteQuote(id: string, userId: string): Promise<boolean>;
   updateQuoteStatus(id: string, status: string, metadata?: any): Promise<boolean>;
 
   // Quote item operations
-  createQuoteItem(item: InsertQuoteItem, userId?: string): Promise<QuoteItem>;
-  updateQuoteItem(id: string, item: Partial<InsertQuoteItem>, userId?: string): Promise<QuoteItem | undefined>;
-  deleteQuoteItem(id: string, userId?: string): Promise<boolean>;
+  createQuoteItem(item: InsertQuoteItem): Promise<QuoteItem>;
+  updateQuoteItem(id: string, item: Partial<InsertQuoteItem>): Promise<QuoteItem | undefined>;
+  deleteQuoteItem(id: string): Promise<boolean>;
 
   // Review operations
   getReviews(userId: string): Promise<(Review & { client: Client })[]>;
@@ -442,7 +442,7 @@ export class DatabaseStorage implements IStorage {
     return result;
   }
 
-  async createQuote(quote: InsertQuote, items?: InsertQuoteItem[]): Promise<Quote> {
+  async createQuote(quote: InsertQuote, items: InsertQuoteItem[]): Promise<Quote> {
     const quoteId = nanoid();
     const quoteNumber = `FH${Date.now().toString().slice(-6)}`;
     const publicUrl = quoteNumber;
@@ -457,14 +457,14 @@ export class DatabaseStorage implements IStorage {
       })
       .returning();
 
-    // Insert quote items if provided
-    if (items && items.length > 0) {
+    // Insert quote items
+    if (items.length > 0) {
       await db.insert(quoteItems).values(
         items.map((item, index) => ({
           ...item,
           id: nanoid(),
           quoteId,
-          order: item.order !== undefined ? item.order : index,
+          order: index,
         }))
       );
     }
@@ -472,31 +472,12 @@ export class DatabaseStorage implements IStorage {
     return newQuote;
   }
 
-  async updateQuote(id: string, quote: Partial<InsertQuote>, userId: string, items?: InsertQuoteItem[]): Promise<Quote | undefined> {
+  async updateQuote(id: string, quote: Partial<InsertQuote>, userId: string): Promise<Quote | undefined> {
     const [updatedQuote] = await db
       .update(quotes)
       .set({ ...quote, updatedAt: new Date() })
       .where(and(eq(quotes.id, id), eq(quotes.userId, userId)))
       .returning();
-
-    // Update quote items if provided
-    if (items && updatedQuote) {
-      // Delete existing items
-      await db.delete(quoteItems).where(eq(quoteItems.quoteId, id));
-      
-      // Insert new items
-      if (items.length > 0) {
-        await db.insert(quoteItems).values(
-          items.map((item, index) => ({
-            ...item,
-            id: nanoid(),
-            quoteId: id,
-            order: item.order !== undefined ? item.order : index,
-          }))
-        );
-      }
-    }
-
     return updatedQuote;
   }
 
@@ -558,7 +539,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Quote item operations
-  async createQuoteItem(item: InsertQuoteItem, userId?: string): Promise<QuoteItem> {
+  async createQuoteItem(item: InsertQuoteItem): Promise<QuoteItem> {
     const [newItem] = await db
       .insert(quoteItems)
       .values({
@@ -569,7 +550,7 @@ export class DatabaseStorage implements IStorage {
     return newItem;
   }
 
-  async updateQuoteItem(id: string, item: Partial<InsertQuoteItem>, userId?: string): Promise<QuoteItem | undefined> {
+  async updateQuoteItem(id: string, item: Partial<InsertQuoteItem>): Promise<QuoteItem | undefined> {
     const [updatedItem] = await db
       .update(quoteItems)
       .set(item)
@@ -578,7 +559,7 @@ export class DatabaseStorage implements IStorage {
     return updatedItem;
   }
 
-  async deleteQuoteItem(id: string, userId?: string): Promise<boolean> {
+  async deleteQuoteItem(id: string): Promise<boolean> {
     const result = await db.delete(quoteItems).where(eq(quoteItems.id, id));
     return (result.rowCount ?? 0) > 0;
   }
