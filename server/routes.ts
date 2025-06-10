@@ -603,39 +603,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/quotes/:id/receipt/pdf', async (req, res) => {
     try {
       const { id } = req.params;
-      console.log('Generating receipt PDF for quote:', id);
       
       const quote = await storage.getQuoteById(id);
       if (!quote) {
-        console.log('Quote not found:', id);
         return res.status(404).json({ message: "Orçamento não encontrado" });
       }
 
       // Only allow PDF generation for paid quotes
       if (quote.status !== 'paid') {
-        console.log('Quote not paid:', quote.status);
         return res.status(400).json({ message: "Recibo disponível apenas para orçamentos pagos" });
       }
 
       const quoteWithItems = await storage.getQuote(id, quote.userId);
       if (!quoteWithItems) {
-        console.log('Quote with items not found');
         return res.status(404).json({ message: "Detalhes do orçamento não encontrados" });
       }
 
       // Get user details for professional info
       const user = await storage.getUser(quote.userId);
       if (!user) {
-        console.log('User not found:', quote.userId);
         return res.status(404).json({ message: "Dados do profissional não encontrados" });
       }
 
-      console.log('Importing jsPDF...');
       const jsPDF = (await import('jspdf')).default;
-      
-      console.log('Creating PDF document...');
       const doc = new jsPDF();
-      console.log('PDF document created successfully');
       
       // Helper function to convert numbers to words in Portuguese
       const numberToWords = (value: number): string => {
@@ -702,22 +693,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const businessName = (user as any).businessName || (user.email || 'Profissional').split('@')[0];
       
       // Logo handling with proportional sizing
-      console.log('Adding logo to PDF...');
       if ((user as any).logoUrl) {
         try {
-          console.log('Logo URL found:', (user as any).logoUrl);
           // Add the logo image maintaining aspect ratio
           doc.addImage((user as any).logoUrl, 'JPEG', 20, 15, 25, 0, '', 'FAST');
-          console.log('Logo added successfully');
         } catch (error) {
           console.error('Error adding logo to PDF:', error);
           // Fallback to placeholder if logo fails
           doc.setFillColor(240, 240, 240);
           doc.rect(20, 15, 25, 15, 'F');
-          console.log('Logo placeholder added due to error');
         }
       } else {
-        console.log('No logo URL, adding placeholder');
         // Logo placeholder when no logo is set
         doc.setFillColor(240, 240, 240);
         doc.rect(20, 15, 25, 15, 'F');
@@ -868,26 +854,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       doc.text(businessName, 20, yPos);
       
       // Footer
-      console.log('Adding footer...');
       doc.setFontSize(7);
       doc.setFont('helvetica', 'italic');
       doc.text('Recibo emitido via Fechou!', 105, 285, { align: 'center' });
       
-      console.log('Generating PDF buffer...');
       const pdfBuffer = doc.output('arraybuffer');
-      console.log('PDF buffer generated successfully');
       
-      console.log('Setting response headers...');
       res.setHeader('Content-Type', 'application/pdf');
       res.setHeader('Content-Disposition', `attachment; filename="Recibo_${quote.quoteNumber}.pdf"`);
-      
-      console.log('Sending PDF response...');
       res.send(Buffer.from(pdfBuffer));
-      console.log('PDF sent successfully');
       
     } catch (error) {
       console.error("Error generating receipt PDF:", error);
-      console.error("Error stack:", error.stack);
       res.status(500).json({ message: "Erro ao gerar PDF do recibo" });
     }
   });
