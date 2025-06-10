@@ -681,47 +681,64 @@ export async function generateReceiptPDF({ quote, user, isUserPremium }: PDFGene
     doc.rect(x, y, width, height, 'F');
   };
 
-  // ========== CABEÇALHO COM FUNDO CINZA ==========
+  // ========== CABEÇALHO SEM FUNDO ==========
   
-  // Fundo cinza para o cabeçalho
-  drawGrayBackground(marginLeft, yPos, pageWidth - marginLeft - marginRight, 30);
-  
-  // Linha de contorno
+  // Linha de contorno apenas
   doc.setLineWidth(0.5);
   doc.rect(marginLeft, yPos, pageWidth - marginLeft - marginRight, 30, 'S');
   
-  // Logo/ícone da empresa (simulado com um círculo azul)
-  doc.setFillColor(70, 130, 180); // azul similar ao da imagem
-  doc.circle(marginLeft + 12, yPos + 15, 8, 'F');
+  // Logo da empresa - usar o logo real do usuário ou criar um círculo simples
+  const logoSize = 20;
+  const logoX = marginLeft + 10;
+  const logoY = yPos + 5;
   
-  // Texto do logo
-  doc.setFontSize(6);
-  doc.setFont('helvetica', 'bold');
-  doc.setTextColor(255, 255, 255);
-  doc.text('ARCO VITA', marginLeft + 7, yPos + 12);
-  doc.text('ODONTOLOGIA', marginLeft + 5.5, yPos + 18);
-  
-  // Reset cor do texto
-  doc.setTextColor(0, 0, 0);
+  // Se o usuário tem logoUrl, tentar incluir (versão simplificada)
+  if ((user as any).logoUrl) {
+    console.log('Usuario tem logoUrl:', (user as any).logoUrl);
+    
+    // Por enquanto, vamos usar um círculo com as iniciais do usuário
+    const initials = companyName.split(' ').map(word => word.charAt(0)).join('').substring(0, 2).toUpperCase();
+    
+    doc.setFillColor(70, 130, 180);
+    doc.circle(logoX + logoSize/2, logoY + logoSize/2, 10, 'F');
+    
+    doc.setFontSize(8);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(255, 255, 255);
+    doc.text(initials, logoX + logoSize/2, logoY + logoSize/2 + 2, { align: 'center' });
+    doc.setTextColor(0, 0, 0);
+  } else {
+    // Logo com as iniciais da empresa
+    const initials = companyName.split(' ').map(word => word.charAt(0)).join('').substring(0, 2).toUpperCase();
+    
+    doc.setFillColor(70, 130, 180);
+    doc.circle(logoX + logoSize/2, logoY + logoSize/2, 10, 'F');
+    
+    doc.setFontSize(8);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(255, 255, 255);
+    doc.text(initials, logoX + logoSize/2, logoY + logoSize/2 + 2, { align: 'center' });
+    doc.setTextColor(0, 0, 0);
+  }
   
   // Nome da empresa
   doc.setFontSize(14);
   doc.setFont('helvetica', 'bold');
   const companyName = user.businessName || (user as any).name || user.firstName || 'André Gomes Pereira';
-  doc.text(companyName, marginLeft + 30, yPos + 10);
+  doc.text(companyName, marginLeft + 40, yPos + 10);
   
   // Informações da empresa
   doc.setFontSize(9);
   doc.setFont('helvetica', 'normal');
   const address = (user as any).address || 'Avenida Doutor Bernardino de Campos';
-  doc.text(address, marginLeft + 30, yPos + 16);
+  doc.text(address, marginLeft + 40, yPos + 16);
   
   let contactLine = '';
   if ((user as any).phone) contactLine += `Tel: ${(user as any).phone}`;
   if (user.email) contactLine += (contactLine ? '  ' : '') + `Email: ${user.email}`;
-  doc.text(contactLine, marginLeft + 30, yPos + 22);
+  doc.text(contactLine, marginLeft + 40, yPos + 22);
 
-  yPos += 40;
+  yPos += 30;
 
   // ========== TÍTULO DO RECIBO ==========
   
@@ -737,7 +754,7 @@ export async function generateReceiptPDF({ quote, user, isUserPremium }: PDFGene
   const currentDate = new Date().toLocaleDateString('pt-BR');
   doc.text(currentDate, pageWidth - marginRight, yPos, { align: 'right' });
   
-  yPos += 20;
+  yPos += 15;
 
   // ========== DADOS DO CLIENTE ==========
   
@@ -752,7 +769,7 @@ export async function generateReceiptPDF({ quote, user, isUserPremium }: PDFGene
   doc.setFont('helvetica', 'bold');
   doc.text('DADOS DO CLIENTE', marginLeft + 2, yPos + 5);
   
-  yPos += 15;
+  yPos += 12;
 
   // Informações do cliente em duas colunas
   doc.setFontSize(10);
@@ -760,7 +777,7 @@ export async function generateReceiptPDF({ quote, user, isUserPremium }: PDFGene
   
   // Coluna esquerda
   doc.text(`Cliente: ${quote.client.name}`, marginLeft, yPos);
-  yPos += 6;
+  yPos += 5;
   
   if (quote.client.phone) {
     doc.text(`Telefone: ${quote.client.phone}`, marginLeft, yPos);
@@ -769,10 +786,10 @@ export async function generateReceiptPDF({ quote, user, isUserPremium }: PDFGene
   // Coluna direita
   const rightColumnX = pageWidth / 2 + 20;
   if (quote.client.email) {
-    doc.text(`E-mail: ${quote.client.email}`, rightColumnX, yPos - 6);
+    doc.text(`E-mail: ${quote.client.email}`, rightColumnX, yPos - 5);
   }
   
-  yPos += 15;
+  yPos += 10;
 
   // ========== SERVIÇOS OU PRODUTOS ==========
   
