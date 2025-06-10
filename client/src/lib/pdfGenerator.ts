@@ -668,126 +668,190 @@ function numberToWords(num: number): string {
 export async function generateReceiptPDF({ quote, user, isUserPremium }: PDFGeneratorOptions): Promise<Blob> {
   const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
   
   // Margens
-  const marginLeft = 20;
-  const marginRight = 20;
-  let yPos = 20;
+  const marginLeft = 15;
+  const marginRight = 15;
+  let yPos = 15;
 
-  // Título
+  // Helper function for gray background
+  const drawGrayBackground = (x: number, y: number, width: number, height: number) => {
+    doc.setFillColor(240, 240, 240);
+    doc.rect(x, y, width, height, 'F');
+  };
+
+  // ========== CABEÇALHO COM FUNDO CINZA ==========
+  
+  // Fundo cinza para o cabeçalho
+  drawGrayBackground(marginLeft, yPos, pageWidth - marginLeft - marginRight, 30);
+  
+  // Linha de contorno
+  doc.setLineWidth(0.5);
+  doc.rect(marginLeft, yPos, pageWidth - marginLeft - marginRight, 30, 'S');
+  
+  // Logo/ícone da empresa (simulado com um círculo azul)
+  doc.setFillColor(70, 130, 180); // azul similar ao da imagem
+  doc.circle(marginLeft + 12, yPos + 15, 8, 'F');
+  
+  // Texto do logo
+  doc.setFontSize(6);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(255, 255, 255);
+  doc.text('ARCO VITA', marginLeft + 7, yPos + 12);
+  doc.text('ODONTOLOGIA', marginLeft + 5.5, yPos + 18);
+  
+  // Reset cor do texto
+  doc.setTextColor(0, 0, 0);
+  
+  // Nome da empresa
+  doc.setFontSize(14);
+  doc.setFont('helvetica', 'bold');
+  const companyName = user.businessName || (user as any).name || user.firstName || 'André Gomes Pereira';
+  doc.text(companyName, marginLeft + 30, yPos + 10);
+  
+  // Informações da empresa
+  doc.setFontSize(9);
+  doc.setFont('helvetica', 'normal');
+  const address = (user as any).address || 'Avenida Doutor Bernardino de Campos';
+  doc.text(address, marginLeft + 30, yPos + 16);
+  
+  let contactLine = '';
+  if ((user as any).phone) contactLine += `Tel: ${(user as any).phone}`;
+  if (user.email) contactLine += (contactLine ? '  ' : '') + `Email: ${user.email}`;
+  doc.text(contactLine, marginLeft + 30, yPos + 22);
+
+  yPos += 40;
+
+  // ========== TÍTULO DO RECIBO ==========
+  
   doc.setFontSize(16);
   doc.setFont('helvetica', 'bold');
-  doc.text('RECIBO', pageWidth / 2, yPos, { align: 'center' });
-  yPos += 15;
-
-  // Número do recibo
-  doc.setFontSize(12);
-  doc.text(`Nº ${quote.quoteNumber}`, pageWidth / 2, yPos, { align: 'center' });
+  const title = `RECIBO Nº ${quote.quoteNumber}`;
+  const titleWidth = doc.getTextWidth(title);
+  doc.text(title, (pageWidth - titleWidth) / 2, yPos);
+  
+  // Data no canto direito
+  doc.setFontSize(10);
+  doc.setFont('helvetica', 'normal');
+  const currentDate = new Date().toLocaleDateString('pt-BR');
+  doc.text(currentDate, pageWidth - marginRight, yPos, { align: 'right' });
+  
   yPos += 20;
 
-  // Informações do profissional
+  // ========== DADOS DO CLIENTE ==========
+  
+  // Fundo cinza para a seção DADOS DO CLIENTE
+  drawGrayBackground(marginLeft, yPos, pageWidth - marginLeft - marginRight, 8);
+  
+  // Linha de contorno
+  doc.setLineWidth(0.5);
+  doc.rect(marginLeft, yPos, pageWidth - marginLeft - marginRight, 8, 'S');
+  
   doc.setFontSize(10);
   doc.setFont('helvetica', 'bold');
-  doc.text('PRESTADOR DE SERVIÇOS:', marginLeft, yPos);
-  yPos += 5;
+  doc.text('DADOS DO CLIENTE', marginLeft + 2, yPos + 5);
   
-  doc.setFont('helvetica', 'normal');
-  const businessName = user.businessName || (user as any).name || user.firstName;
-  doc.text(businessName, marginLeft, yPos);
-  yPos += 4;
-  
-  if ((user as any).cpfCnpj) {
-    doc.text(`CPF/CNPJ: ${formatCPF((user as any).cpfCnpj)}`, marginLeft, yPos);
-    yPos += 4;
-  }
-  
-  if ((user as any).phone) {
-    doc.text(`Telefone: ${formatPhone((user as any).phone)}`, marginLeft, yPos);
-    yPos += 4;
-  }
-  
-  if ((user as any).address) {
-    doc.text(`Endereço: ${(user as any).address}`, marginLeft, yPos);
-    yPos += 4;
-  }
-  
-  yPos += 10;
+  yPos += 15;
 
-  // Informações do cliente
-  doc.setFont('helvetica', 'bold');
-  doc.text('CLIENTE:', marginLeft, yPos);
-  yPos += 5;
-  
+  // Informações do cliente em duas colunas
+  doc.setFontSize(10);
   doc.setFont('helvetica', 'normal');
-  doc.text(quote.client.name, marginLeft, yPos);
-  yPos += 4;
   
-  if ((quote.client as any).cpfCnpj) {
-    doc.text(`CPF/CNPJ: ${formatCPF((quote.client as any).cpfCnpj)}`, marginLeft, yPos);
-    yPos += 4;
+  // Coluna esquerda
+  doc.text(`Cliente: ${quote.client.name}`, marginLeft, yPos);
+  yPos += 6;
+  
+  if (quote.client.phone) {
+    doc.text(`Telefone: ${quote.client.phone}`, marginLeft, yPos);
   }
   
-  if ((quote.client as any).phone) {
-    doc.text(`Telefone: ${formatPhone((quote.client as any).phone)}`, marginLeft, yPos);
-    yPos += 4;
+  // Coluna direita
+  const rightColumnX = pageWidth / 2 + 20;
+  if (quote.client.email) {
+    doc.text(`E-mail: ${quote.client.email}`, rightColumnX, yPos - 6);
   }
   
   yPos += 15;
 
-  // Data de emissão
-  doc.text(`Data: ${format(new Date(), 'dd/MM/yyyy', { locale: ptBR })}`, marginLeft, yPos);
+  // ========== SERVIÇOS OU PRODUTOS ==========
+  
+  // Fundo cinza para a seção SERVIÇOS OU PRODUTOS
+  drawGrayBackground(marginLeft, yPos, pageWidth - marginLeft - marginRight, 8);
+  
+  // Linha de contorno
+  doc.setLineWidth(0.5);
+  doc.rect(marginLeft, yPos, pageWidth - marginLeft - marginRight, 8, 'S');
+  
+  doc.setFontSize(10);
+  doc.setFont('helvetica', 'bold');
+  doc.text('SERVIÇOS OU PRODUTOS', marginLeft + 2, yPos + 5);
+  
   yPos += 15;
 
-  // Cabeçalho da tabela
-  doc.setFillColor(240, 240, 240);
-  doc.rect(marginLeft, yPos - 5, pageWidth - marginLeft - marginRight, 10, 'F');
-  doc.setFont('helvetica', 'bold');
+  // Cabeçalho da tabela de itens
+  const tableWidth = pageWidth - marginLeft - marginRight;
+  const itemColWidth = 15;
+  const nameColWidth = 80;
+  const qtyColWidth = 20;
+  const unitPriceColWidth = 25;
+  const subtotalColWidth = 25;
+
+  // Linha superior da tabela
+  doc.setLineWidth(0.5);
+  doc.rect(marginLeft, yPos, tableWidth, 8, 'S');
+  
   doc.setFontSize(9);
-  doc.text('Item', marginLeft + 2, yPos);
-  doc.text('Descrição', marginLeft + 15, yPos);
-  doc.text('Qtd', pageWidth - 60, yPos);
-  doc.text('Valor Unit.', pageWidth - 45, yPos);
-  doc.text('Total', pageWidth - 20, yPos);
+  doc.setFont('helvetica', 'bold');
+  doc.text('ITEM', marginLeft + itemColWidth/2, yPos + 5, { align: 'center' });
+  doc.text('NOME', marginLeft + itemColWidth + nameColWidth/2, yPos + 5, { align: 'center' });
+  doc.text('QTD.', marginLeft + itemColWidth + nameColWidth + qtyColWidth/2, yPos + 5, { align: 'center' });
+  doc.text('VR. UNIT.', marginLeft + itemColWidth + nameColWidth + qtyColWidth + unitPriceColWidth/2, yPos + 5, { align: 'center' });
+  doc.text('SUBTOTAL', marginLeft + itemColWidth + nameColWidth + qtyColWidth + unitPriceColWidth + subtotalColWidth/2, yPos + 5, { align: 'center' });
+
+  // Linhas verticais do cabeçalho
+  doc.line(marginLeft + itemColWidth, yPos, marginLeft + itemColWidth, yPos + 8);
+  doc.line(marginLeft + itemColWidth + nameColWidth, yPos, marginLeft + itemColWidth + nameColWidth, yPos + 8);
+  doc.line(marginLeft + itemColWidth + nameColWidth + qtyColWidth, yPos, marginLeft + itemColWidth + nameColWidth + qtyColWidth, yPos + 8);
+  doc.line(marginLeft + itemColWidth + nameColWidth + qtyColWidth + unitPriceColWidth, yPos, marginLeft + itemColWidth + nameColWidth + qtyColWidth + unitPriceColWidth, yPos + 8);
+
   yPos += 8;
 
-  // Itens
+  // Itens da tabela
   doc.setFont('helvetica', 'normal');
   let itemNumber = 1;
   (quote.items || []).forEach((item: any) => {
     const itemTotal = Number(item.quantity) * Number(item.unitPrice);
     
-    doc.text(itemNumber.toString(), marginLeft + 2, yPos);
+    // Linha para o item
+    doc.rect(marginLeft, yPos, tableWidth, 8, 'S');
     
-    // Quebrar descrição se muito longa
-    const maxDescWidth = 120;
-    const descLines = doc.splitTextToSize(item.description, maxDescWidth);
-    descLines.forEach((line: string, index: number) => {
-      doc.text(line, marginLeft + 15, yPos + (index * 3));
-    });
+    // Conteúdo do item
+    doc.text(itemNumber.toString(), marginLeft + itemColWidth/2, yPos + 5, { align: 'center' });
+    doc.text(item.description, marginLeft + itemColWidth + 2, yPos + 5);
+    doc.text(item.quantity.toString(), marginLeft + itemColWidth + nameColWidth + qtyColWidth/2, yPos + 5, { align: 'center' });
+    doc.text(Number(item.unitPrice).toFixed(2), marginLeft + itemColWidth + nameColWidth + qtyColWidth + unitPriceColWidth/2, yPos + 5, { align: 'center' });
+    doc.text(itemTotal.toFixed(2), marginLeft + itemColWidth + nameColWidth + qtyColWidth + unitPriceColWidth + subtotalColWidth/2, yPos + 5, { align: 'center' });
     
-    doc.text(item.quantity.toString(), pageWidth - 60, yPos);
-    doc.text(Number(item.unitPrice).toFixed(2), pageWidth - 45, yPos);
-    doc.text(itemTotal.toFixed(2), pageWidth - 20, yPos);
+    // Linhas verticais
+    doc.line(marginLeft + itemColWidth, yPos, marginLeft + itemColWidth, yPos + 8);
+    doc.line(marginLeft + itemColWidth + nameColWidth, yPos, marginLeft + itemColWidth + nameColWidth, yPos + 8);
+    doc.line(marginLeft + itemColWidth + nameColWidth + qtyColWidth, yPos, marginLeft + itemColWidth + nameColWidth + qtyColWidth, yPos + 8);
+    doc.line(marginLeft + itemColWidth + nameColWidth + qtyColWidth + unitPriceColWidth, yPos, marginLeft + itemColWidth + nameColWidth + qtyColWidth + unitPriceColWidth, yPos + 8);
     
-    yPos += Math.max(5, descLines.length * 3) + 2;
-    
-    // Linha separadora
-    doc.setDrawColor(200, 200, 200);
-    doc.setLineWidth(0.1);
-    doc.line(marginLeft, yPos - 1, pageWidth - marginRight, yPos - 1);
-    
+    yPos += 8;
     itemNumber++;
   });
 
-  // Total
-  yPos += 5;
-  doc.setFillColor(240, 240, 240);
-  doc.rect(marginLeft, yPos - 3, pageWidth - marginLeft - marginRight, 10, 'F');
+  // Simplificar o final do recibo sem repetir toda a estrutura do orçamento
+  yPos += 10;
+
+  // Total geral
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(10);
-  doc.text('TOTAL GERAL', marginLeft + 2, yPos + 3);
-  doc.text(`R$ ${parseFloat(quote.total).toFixed(2)}`, pageWidth - 20, yPos + 3);
-  yPos += 15;
+  doc.setFontSize(12);
+  doc.text('TOTAL GERAL:', pageWidth - 80, yPos, { align: 'right' });
+  doc.text(`R$ ${parseFloat(quote.total).toFixed(2)}`, pageWidth - marginRight, yPos, { align: 'right' });
+  yPos += 20;
 
   // Texto de declaração
   const totalValue = parseFloat(quote.total);
@@ -805,7 +869,7 @@ export async function generateReceiptPDF({ quote, user, isUserPremium }: PDFGene
   // Linha para assinatura
   doc.text('_________________________________', marginLeft, yPos);
   yPos += 8;
-  doc.text(businessName, marginLeft, yPos);
+  doc.text(companyName, marginLeft, yPos);
 
   // Rodapé
   doc.setFontSize(8);
