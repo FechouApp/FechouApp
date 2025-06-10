@@ -364,12 +364,36 @@ Obrigado pela confiança!`;
       
       const quote = await storage.getQuoteByNumber(quoteNumber);
       if (!quote) {
-        return res.status(404).json({ message: "Orçamento não encontrado" });
+        return res.status(404).send(`
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <title>Recibo não encontrado</title>
+            <meta charset="UTF-8">
+          </head>
+          <body style="font-family: Arial, sans-serif; text-align: center; padding: 50px;">
+            <h2>Recibo não encontrado</h2>
+            <p>Este recibo não existe ou não está disponível.</p>
+          </body>
+          </html>
+        `);
       }
 
       // Only allow PDF generation for paid quotes
       if (quote.status !== 'paid') {
-        return res.status(400).json({ message: "Recibo disponível apenas para orçamentos pagos" });
+        return res.status(400).send(`
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <title>Recibo não disponível</title>
+            <meta charset="UTF-8">
+          </head>
+          <body style="font-family: Arial, sans-serif; text-align: center; padding: 50px;">
+            <h2>Recibo não disponível</h2>
+            <p>O recibo só está disponível para orçamentos pagos.</p>
+          </body>
+          </html>
+        `);
       }
 
       // Redirect to frontend page that generates PDF
@@ -377,7 +401,19 @@ Obrigado pela confiança!`;
       res.redirect(frontendUrl);
     } catch (error) {
       console.error("Error redirecting to receipt PDF:", error);
-      res.status(500).json({ message: "Erro ao acessar recibo" });
+      res.status(500).send(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Erro</title>
+          <meta charset="UTF-8">
+        </head>
+        <body style="font-family: Arial, sans-serif; text-align: center; padding: 50px;">
+          <h2>Erro ao acessar recibo</h2>
+          <p>Ocorreu um erro ao tentar acessar o recibo.</p>
+        </body>
+        </html>
+      `);
     }
   });
 

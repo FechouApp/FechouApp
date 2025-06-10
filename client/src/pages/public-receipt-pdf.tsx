@@ -8,7 +8,7 @@ export default function PublicReceiptPDF() {
   const { quoteNumber } = useParams();
 
   const { data: quote, isLoading, error } = useQuery({
-    queryKey: [`/api/quotes/public/${quoteNumber}`],
+    queryKey: [`/api/public-quotes/${quoteNumber}/receipt`],
     enabled: !!quoteNumber,
   }) as { data: any, isLoading: boolean, error: any };
 

@@ -88,7 +88,7 @@ export default function PublicReceipt() {
     }
     
     try {
-      const pdfUrl = `${window.location.origin}/api/public-quotes/${receipt.quoteNumber}/receipt/pdf`;
+      const pdfUrl = `${window.location.origin}/receipt/${receipt.quoteNumber}/pdf`;
       const message = `Olá ${receipt.client.name}! Segue o recibo do pagamento do seu orçamento.
       
 📄 Recibo Nº: ${receipt.quoteNumber}

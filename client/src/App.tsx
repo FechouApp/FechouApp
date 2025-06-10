@@ -39,19 +39,22 @@ function Router() {
     );
   }
 
-  // Check if this is a public quote route
-  const isPublicQuoteRoute = window.location.pathname.startsWith('/quote/');
+  // Check if this is a public route (quote or receipt)
+  const isPublicRoute = window.location.pathname.startsWith('/quote/') || 
+                       window.location.pathname.startsWith('/receipt/');
 
-  // Allow public access to quote pages
-  if (!isAuthenticated && !isPublicQuoteRoute) {
+  // Allow public access to quote and receipt pages
+  if (!isAuthenticated && !isPublicRoute) {
     return <Landing />;
   }
 
-  // If not authenticated but accessing public quote, show only the public quote
-  if (!isAuthenticated && isPublicQuoteRoute) {
+  // If not authenticated but accessing public route, show only the public pages
+  if (!isAuthenticated && isPublicRoute) {
     return (
       <Switch>
         <Route path="/quote/:quoteNumber" component={PublicQuote} />
+        <Route path="/receipt/:quoteNumber" component={PublicReceipt} />
+        <Route path="/receipt/:quoteNumber/pdf" component={PublicReceiptPDF} />
         <Route component={Landing} />
       </Switch>
     );
@@ -101,8 +104,9 @@ function AppLayout() {
     return <LoadingSpinner />;
   }
 
-  // Check if this is a public quote route
-  const isPublicQuoteRoute = window.location.pathname.startsWith('/quote/');
+  // Check if this is a public route (quote or receipt)
+  const isPublicRoute = window.location.pathname.startsWith('/quote/') || 
+                       window.location.pathname.startsWith('/receipt/');
 
   if (!isAuthenticated) {
     return <Router />;
