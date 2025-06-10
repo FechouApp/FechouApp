@@ -273,7 +273,7 @@ Obrigado pela confiança!`;
     try {
       const userId = req.user.claims.sub;
       const itemData = insertQuoteItemSchema.parse({ ...req.body, quoteId: req.params.quoteId });
-      const item = await storage.updateQuoteItem(req.params.itemId, itemData, userId);
+      const item = await storage.updateQuoteItem(req.params.itemId, itemData);
       if (!item) {
         return res.status(404).json({ message: "Quote item not found" });
       }
@@ -287,7 +287,7 @@ Obrigado pela confiança!`;
   app.delete('/api/quotes/:quoteId/items/:itemId', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      await storage.deleteQuoteItem(req.params.itemId, userId);
+      await storage.deleteQuoteItem(req.params.itemId);
       res.json({ message: "Quote item deleted successfully" });
     } catch (error) {
       console.error("Error deleting quote item:", error);
