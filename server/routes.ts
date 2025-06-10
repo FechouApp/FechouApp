@@ -894,15 +894,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Número do cliente não encontrado" });
       }
 
-      // Generate WhatsApp message with public receipt URL
-      const publicReceiptUrl = `${req.protocol}://${req.get('host')}/receipt/${quoteWithItems.quoteNumber}`;
+      // Generate WhatsApp message with direct PDF URL
+      const pdfUrl = `${req.protocol}://${req.get('host')}/api/quotes/${id}/receipt/pdf`;
       const message = `Olá ${quoteWithItems.client.name}! Segue o recibo do pagamento do seu orçamento.
       
 📄 Recibo Nº: ${quoteWithItems.quoteNumber}
 💰 Valor: R$ ${parseFloat(quoteWithItems.total).toFixed(2)}
 📅 Data: ${new Date().toLocaleDateString('pt-BR')}
 
-🔗 Ver recibo: ${publicReceiptUrl}
+🔗 Baixar recibo: ${pdfUrl}
 
 Obrigado pela confiança!`;
 
