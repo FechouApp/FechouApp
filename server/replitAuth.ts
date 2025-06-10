@@ -83,13 +83,13 @@ export async function setupAuth(app: Express) {
     verified(null, user);
   };
 
-  // Use dynamic domain detection instead of hardcoded REPLIT_DOMAINS
+  // Use a fixed strategy name and handle domains dynamically in routes
   const strategy = new Strategy(
     {
       name: "replitauth",
       config,
       scope: "openid email profile offline_access",
-      callbackURL: (req: any) => `${req.protocol}://${req.get('host')}/api/callback`,
+      callbackURL: "/api/callback",
     },
     verify,
   );
@@ -99,14 +99,14 @@ export async function setupAuth(app: Express) {
   passport.deserializeUser((user: Express.User, cb) => cb(null, user));
 
   app.get("/api/login", (req, res, next) => {
-    passport.authenticate(`replitauth:${req.hostname}`, {
+    passport.authenticate("replitauth", {
       prompt: "login consent",
       scope: ["openid", "email", "profile", "offline_access"],
     })(req, res, next);
   });
 
   app.get("/api/callback", (req, res, next) => {
-    passport.authenticate(`replitauth:${req.hostname}`, {
+    passport.authenticate("replitauth", {
       successReturnToOrRedirect: "/",
       failureRedirect: "/api/login",
     })(req, res, next);
