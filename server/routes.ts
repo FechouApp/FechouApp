@@ -22,6 +22,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Update user profile
+  app.post('/api/user/profile', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const profileData = req.body;
+      
+      const updatedUser = await storage.updateUserProfile(userId, profileData);
+      if (!updatedUser) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      res.json(updatedUser);
+    } catch (error) {
+      console.error("Error updating user profile:", error);
+      res.status(500).json({ message: "Failed to update profile" });
+    }
+  });
+
   // Get user by ID (for PIX key retrieval)
   app.get('/api/users/:id', async (req, res) => {
     try {

@@ -253,15 +253,27 @@ export default function UserOnboarding({ onComplete }: UserOnboardingProps) {
         </CardContent>
 
         <div className="flex justify-between p-6 border-t bg-gray-50">
-          <Button
-            variant="outline"
-            onClick={handlePrevious}
-            disabled={currentStep === 1}
-            className="flex items-center gap-2"
-          >
-            <ChevronLeft className="w-4 h-4" />
-            Voltar
-          </Button>
+          <div className="flex gap-3">
+            <Button
+              variant="outline"
+              onClick={handlePrevious}
+              disabled={currentStep === 1}
+              className="flex items-center gap-2"
+            >
+              <ChevronLeft className="w-4 h-4" />
+              Voltar
+            </Button>
+            
+            {currentStep !== 4 && (
+              <Button
+                variant="ghost"
+                onClick={onComplete}
+                className="text-gray-600 hover:text-gray-800"
+              >
+                Pular configuração
+              </Button>
+            )}
+          </div>
 
           <Button
             onClick={handleNext}
