@@ -237,9 +237,9 @@ export default function UserOnboarding({ onComplete }: UserOnboardingProps) {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50 flex items-center justify-center p-4">
-      <Card className="w-full max-w-2xl shadow-xl">
-        <CardHeader className="text-center border-b">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50 flex items-center justify-center p-2 sm:p-4">
+      <Card className="w-full max-w-2xl shadow-xl mx-2 sm:mx-0">
+        <CardHeader className="text-center border-b px-4 sm:px-6 py-4">
           <div className="mb-4">
             <Progress value={progress} className="w-full h-2" />
           </div>
@@ -248,17 +248,17 @@ export default function UserOnboarding({ onComplete }: UserOnboardingProps) {
           </div>
         </CardHeader>
         
-        <CardContent className="p-6">
+        <CardContent className="p-4 sm:p-6">
           {renderStepContent()}
         </CardContent>
 
-        <div className="flex justify-between p-6 border-t bg-gray-50">
-          <div className="flex gap-3">
+        <div className="flex flex-col sm:flex-row justify-between gap-3 p-4 sm:p-6 border-t bg-gray-50">
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 order-2 sm:order-1">
             <Button
               variant="outline"
               onClick={handlePrevious}
               disabled={currentStep === 1}
-              className="flex items-center gap-2"
+              className="flex items-center justify-center gap-2 w-full sm:w-auto"
             >
               <ChevronLeft className="w-4 h-4" />
               Voltar
@@ -268,7 +268,7 @@ export default function UserOnboarding({ onComplete }: UserOnboardingProps) {
               <Button
                 variant="ghost"
                 onClick={onComplete}
-                className="text-gray-600 hover:text-gray-800"
+                className="text-gray-600 hover:text-gray-800 w-full sm:w-auto"
               >
                 Pular configuração
               </Button>
@@ -278,7 +278,7 @@ export default function UserOnboarding({ onComplete }: UserOnboardingProps) {
           <Button
             onClick={handleNext}
             disabled={!isStepValid() || saveUserDataMutation.isPending}
-            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700"
+            className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 w-full sm:w-auto order-1 sm:order-2"
           >
             {currentStep === 1 ? "Iniciar" : 
              currentStep === 4 ? "Finalizar" : 

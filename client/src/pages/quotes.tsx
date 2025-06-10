@@ -214,8 +214,22 @@ export default function Quotes() {
     return <LoadingSpinner />;
   }
 
-  const formatCurrency = (value: string) => {
-    const num = parseFloat(value);
+  const formatCurrency = (value: string | number | null | undefined) => {
+    if (!value || value === null || value === undefined) {
+      return new Intl.NumberFormat('pt-BR', {
+        style: 'currency',
+        currency: 'BRL'
+      }).format(0);
+    }
+    
+    const num = typeof value === 'string' ? parseFloat(value) : value;
+    if (isNaN(num)) {
+      return new Intl.NumberFormat('pt-BR', {
+        style: 'currency',
+        currency: 'BRL'
+      }).format(0);
+    }
+    
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
       currency: 'BRL'
@@ -279,10 +293,7 @@ export default function Quotes() {
       (quote.description || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
       quote.quoteNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (quote.client?.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (quote.items || []).some(item => 
-        item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (item.description || '').toLowerCase().includes(searchTerm.toLowerCase())
-      );
+      false; // QuoteWithClient doesn't include items for performance
 
     const matchesStatus = statusFilter === 'all' || quote.status === statusFilter;
 
