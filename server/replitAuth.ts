@@ -83,14 +83,13 @@ export async function setupAuth(app: Express) {
     verified(null, user);
   };
 
-  // Use the correct domain for callback URL
-  const callbackURL = `https://workspace.agtgpereira.repl.co/api/callback`;
+  // Simple fixed strategy for Replit
   const strategy = new Strategy(
     {
       name: "replitauth",
       config,
       scope: "openid email profile offline_access",
-      callbackURL,
+      callbackURL: "https://workspace.agtgpereira.repl.co/api/callback",
     },
     verify,
   );
@@ -118,7 +117,7 @@ export async function setupAuth(app: Express) {
       res.redirect(
         client.buildEndSessionUrl(config, {
           client_id: process.env.REPL_ID!,
-          post_logout_redirect_uri: `${req.protocol}://${req.hostname}`,
+          post_logout_redirect_uri: "https://workspace.agtgpereira.repl.co",
         }).href
       );
     });
