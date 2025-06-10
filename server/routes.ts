@@ -116,6 +116,220 @@ Obrigado pela confiança!`;
     }
   });
 
+  // Clients routes
+  app.get('/api/clients', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const clients = await storage.getClients(userId);
+      res.json(clients);
+    } catch (error) {
+      console.error("Error fetching clients:", error);
+      res.status(500).json({ message: "Failed to fetch clients" });
+    }
+  });
+
+  app.post('/api/clients', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const clientData = insertClientSchema.parse({ ...req.body, userId });
+      const client = await storage.createClient(clientData);
+      res.json(client);
+    } catch (error) {
+      console.error("Error creating client:", error);
+      res.status(500).json({ message: "Failed to create client" });
+    }
+  });
+
+  // Quotes routes
+  app.get('/api/quotes', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const quotes = await storage.getQuotes(userId);
+      res.json(quotes);
+    } catch (error) {
+      console.error("Error fetching quotes:", error);
+      res.status(500).json({ message: "Failed to fetch quotes" });
+    }
+  });
+
+  app.get('/api/quotes/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const quote = await storage.getQuote(req.params.id, userId);
+      if (!quote) {
+        return res.status(404).json({ message: "Quote not found" });
+      }
+      res.json(quote);
+    } catch (error) {
+      console.error("Error fetching quote:", error);
+      res.status(500).json({ message: "Failed to fetch quote" });
+    }
+  });
+
+  app.post('/api/quotes', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const quoteData = insertQuoteSchema.parse({ ...req.body, userId });
+      const quote = await storage.createQuote(quoteData);
+      res.json(quote);
+    } catch (error) {
+      console.error("Error creating quote:", error);
+      res.status(500).json({ message: "Failed to create quote" });
+    }
+  });
+
+  app.put('/api/quotes/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const quoteData = insertQuoteSchema.parse({ ...req.body, userId });
+      const quote = await storage.updateQuote(req.params.id, quoteData, userId);
+      if (!quote) {
+        return res.status(404).json({ message: "Quote not found" });
+      }
+      res.json(quote);
+    } catch (error) {
+      console.error("Error updating quote:", error);
+      res.status(500).json({ message: "Failed to update quote" });
+    }
+  });
+
+  app.delete('/api/quotes/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      await storage.deleteQuote(req.params.id, userId);
+      res.json({ message: "Quote deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting quote:", error);
+      res.status(500).json({ message: "Failed to delete quote" });
+    }
+  });
+
+  // Quote Items routes
+  app.post('/api/quotes/:quoteId/items', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const itemData = insertQuoteItemSchema.parse({ ...req.body, quoteId: req.params.quoteId });
+      const item = await storage.createQuoteItem(itemData, userId);
+      res.json(item);
+    } catch (error) {
+      console.error("Error creating quote item:", error);
+      res.status(500).json({ message: "Failed to create quote item" });
+    }
+  });
+
+  app.put('/api/quotes/:quoteId/items/:itemId', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const itemData = insertQuoteItemSchema.parse({ ...req.body, quoteId: req.params.quoteId });
+      const item = await storage.updateQuoteItem(req.params.itemId, itemData, userId);
+      if (!item) {
+        return res.status(404).json({ message: "Quote item not found" });
+      }
+      res.json(item);
+    } catch (error) {
+      console.error("Error updating quote item:", error);
+      res.status(500).json({ message: "Failed to update quote item" });
+    }
+  });
+
+  app.delete('/api/quotes/:quoteId/items/:itemId', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      await storage.deleteQuoteItem(req.params.itemId, userId);
+      res.json({ message: "Quote item deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting quote item:", error);
+      res.status(500).json({ message: "Failed to delete quote item" });
+    }
+  });
+
+  // Update quote status
+  app.patch('/api/quotes/:id/status', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { status } = req.body;
+      const quote = await storage.updateQuoteStatus(req.params.id, status, userId);
+      if (!quote) {
+        return res.status(404).json({ message: "Quote not found" });
+      }
+      res.json(quote);
+    } catch (error) {
+      console.error("Error updating quote status:", error);
+      res.status(500).json({ message: "Failed to update quote status" });
+    }
+  });
+
+  // Dashboard stats
+  app.get('/api/dashboard/stats', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const stats = await storage.getDashboardStats(userId);
+      res.json(stats);
+    } catch (error) {
+      console.error("Error fetching dashboard stats:", error);
+      res.status(500).json({ message: "Failed to fetch dashboard stats" });
+    }
+  });
+
+  // Reviews routes
+  app.get('/api/reviews', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const reviews = await storage.getReviews(userId);
+      res.json(reviews);
+    } catch (error) {
+      console.error("Error fetching reviews:", error);
+      res.status(500).json({ message: "Failed to fetch reviews" });
+    }
+  });
+
+  app.post('/api/reviews', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const reviewData = insertReviewSchema.parse({ ...req.body, userId });
+      const review = await storage.createReview(reviewData);
+      res.json(review);
+    } catch (error) {
+      console.error("Error creating review:", error);
+      res.status(500).json({ message: "Failed to create review" });
+    }
+  });
+
+  // Saved items routes
+  app.get('/api/saved-items', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const savedItems = await storage.getSavedItems(userId);
+      res.json(savedItems);
+    } catch (error) {
+      console.error("Error fetching saved items:", error);
+      res.status(500).json({ message: "Failed to fetch saved items" });
+    }
+  });
+
+  app.post('/api/saved-items', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const itemData = insertSavedItemSchema.parse({ ...req.body, userId });
+      const savedItem = await storage.createSavedItem(itemData);
+      res.json(savedItem);
+    } catch (error) {
+      console.error("Error creating saved item:", error);
+      res.status(500).json({ message: "Failed to create saved item" });
+    }
+  });
+
+  app.delete('/api/saved-items/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      await storage.deleteSavedItem(req.params.id, userId);
+      res.json({ message: "Saved item deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting saved item:", error);
+      res.status(500).json({ message: "Failed to delete saved item" });
+    }
+  });
+
   const server = createServer(app);
   return server;
 }
