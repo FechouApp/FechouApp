@@ -599,7 +599,277 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Generate receipt PDF for paid quote
+  // Public route to generate receipt PDF by quote number
+  app.get('/api/public-quotes/:quoteNumber/receipt/pdf', async (req, res) => {
+    try {
+      const { quoteNumber } = req.params;
+      
+      const quote = await storage.getQuoteByNumber(quoteNumber);
+      if (!quote) {
+        return res.status(404).json({ message: "Orçamento não encontrado" });
+      }
+
+      // Only allow PDF generation for paid quotes
+      if (quote.status !== 'paid') {
+        return res.status(400).json({ message: "Recibo disponível apenas para orçamentos pagos" });
+      }
+
+      const quoteWithItems = await storage.getQuote(quote.id, quote.userId);
+      if (!quoteWithItems) {
+        return res.status(404).json({ message: "Detalhes do orçamento não encontrados" });
+      }
+
+      // Get user details for professional info
+      const user = await storage.getUser(quote.userId);
+      if (!user) {
+        return res.status(404).json({ message: "Dados do profissional não encontrados" });
+      }
+
+      const jsPDF = (await import('jspdf')).default;
+      const doc = new jsPDF();
+      
+      // Helper function to convert numbers to words in Portuguese
+      const numberToWords = (value: number): string => {
+        if (value === 0) return 'zero reais';
+        
+        const units = ['', 'um', 'dois', 'três', 'quatro', 'cinco', 'seis', 'sete', 'oito', 'nove'];
+        const teens = ['dez', 'onze', 'doze', 'treze', 'quatorze', 'quinze', 'dezesseis', 'dezessete', 'dezoito', 'dezenove'];
+        const tens = ['', '', 'vinte', 'trinta', 'quarenta', 'cinquenta', 'sessenta', 'setenta', 'oitenta', 'noventa'];
+        const hundreds = ['', 'cento', 'duzentos', 'trezentos', 'quatrocentos', 'quinhentos', 'seiscentos', 'setecentos', 'oitocentos', 'novecentos'];
+        
+        // Handle thousands
+        if (value >= 1000) {
+          const thousands = Math.floor(value / 1000);
+          const remainder = value % 1000;
+          
+          let result = '';
+          if (thousands === 1) {
+            result = 'mil';
+          } else {
+            result = numberToWords(thousands).replace(' reais', '') + ' mil';
+          }
+          
+          if (remainder > 0) {
+            result += ' e ' + numberToWords(remainder).replace(' reais', '');
+          }
+          
+          return result + ' reais';
+        }
+        
+        // Handle hundreds
+        if (value === 100) return 'cem reais';
+        
+        const h = Math.floor(value / 100);
+        const t = Math.floor((value % 100) / 10);
+        const u = Math.floor(value % 10);
+        
+        let result = '';
+        
+        if (h > 0) {
+          result += hundreds[h];
+        }
+        
+        if (t > 1) {
+          if (result) result += ' e ';
+          result += tens[t];
+        } else if (t === 1) {
+          if (result) result += ' e ';
+          result += teens[u];
+          return result + ' reais';
+        }
+        
+        if (u > 0 && t !== 1) {
+          if (result) result += ' e ';
+          result += units[u];
+        }
+        
+        return result + ' reais';
+      };
+
+      // Compact layout with better space utilization
+      let yPos = 20;
+      
+      // Business header with logo space (compact)
+      const businessName = (user as any).businessName || (user.email || 'Profissional').split('@')[0];
+      
+      // Logo handling with proportional sizing
+      if ((user as any).logoUrl) {
+        try {
+          // Add the logo image maintaining aspect ratio
+          doc.addImage((user as any).logoUrl, 'JPEG', 20, 15, 25, 0, '', 'FAST');
+        } catch (error) {
+          console.error('Error adding logo to PDF:', error);
+          // Fallback to placeholder if logo fails
+          doc.setFillColor(240, 240, 240);
+          doc.rect(20, 15, 25, 15, 'F');
+        }
+      } else {
+        // Logo placeholder when no logo is set
+        doc.setFillColor(240, 240, 240);
+        doc.rect(20, 15, 25, 15, 'F');
+      }
+      
+      // Business name and details (right side, compact)
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'bold');
+      doc.text(businessName, 50, 22);
+      
+      doc.setFontSize(8);
+      doc.setFont('helvetica', 'normal');
+      let businessYPos = 26;
+      
+      if ((user as any).address) {
+        doc.text((user as any).address, 50, businessYPos);
+        businessYPos += 4;
+      }
+      
+      if ((user as any).document) {
+        doc.text(`CNPJ: ${(user as any).document}`, 50, businessYPos);
+        businessYPos += 4;
+      }
+      
+      if ((user as any).phone) {
+        doc.text(`Tel: ${(user as any).phone}`, 50, businessYPos);
+        businessYPos += 4;
+      }
+      
+      if (user.email) {
+        doc.text(`Email: ${user.email}`, 50, businessYPos);
+        businessYPos += 4;
+      }
+      
+      yPos = Math.max(45, businessYPos + 5);
+      
+      // Centered title
+      doc.setFontSize(16);
+      doc.setFont('helvetica', 'bold');
+      doc.text('RECIBO Nº ' + quoteWithItems.quoteNumber, 105, yPos, { align: 'center' });
+      
+      // Date aligned right (within margin)
+      doc.setFontSize(8);
+      doc.setFont('helvetica', 'normal');
+      doc.text(new Date().toLocaleDateString('pt-BR'), 170, yPos);
+      yPos += 12;
+      
+      // Client data section (compact)
+      doc.setFillColor(240, 240, 240);
+      doc.rect(20, yPos, 170, 12, 'F');
+      
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'bold');
+      doc.text('DADOS DO CLIENTE', 25, yPos + 8);
+      yPos += 18;
+      
+      doc.setFontSize(9);
+      doc.setFont('helvetica', 'normal');
+      
+      // Client info in two columns (compact)
+      doc.text(`Cliente: ${quoteWithItems.client.name}`, 25, yPos);
+      if (quoteWithItems.client.email) {
+        doc.text(`E-mail: ${quoteWithItems.client.email}`, 105, yPos);
+      }
+      yPos += 6;
+      
+      if (quoteWithItems.client.phone) {
+        doc.text(`Telefone: ${quoteWithItems.client.phone}`, 25, yPos);
+        yPos += 6;
+      }
+      yPos += 8;
+      
+      // Services section (compact)
+      doc.setFillColor(240, 240, 240);
+      doc.rect(20, yPos, 170, 12, 'F');
+      
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'bold');
+      doc.text('SERVIÇOS OU PRODUTOS', 25, yPos + 8);
+      yPos += 18;
+      
+      // Table headers (compact columns)
+      doc.setFillColor(255, 255, 255);
+      doc.rect(20, yPos - 3, 170, 12, 'F');
+      doc.setDrawColor(0, 0, 0);
+      doc.rect(20, yPos - 3, 170, 12);
+      
+      doc.setFontSize(8);
+      doc.setFont('helvetica', 'bold');
+      doc.text('ITEM', 22, yPos + 5);
+      doc.text('NOME', 40, yPos + 5);
+      doc.text('QTD.', 125, yPos + 5);
+      doc.text('VR. UNIT.', 145, yPos + 5);
+      doc.text('SUBTOTAL', 165, yPos + 5);
+      yPos += 12;
+      
+      // Items rows (compact)
+      let itemNumber = 1;
+      quoteWithItems.items.forEach((item: any) => {
+        doc.setFillColor(255, 255, 255);
+        doc.rect(20, yPos - 3, 170, 10, 'F');
+        doc.rect(20, yPos - 3, 170, 10);
+        
+        doc.setFontSize(7);
+        doc.setFont('helvetica', 'normal');
+        
+        const subtotal = item.quantity * parseFloat(item.price);
+        
+        doc.text(itemNumber.toString(), 22, yPos + 3);
+        
+        // Wrap item description if too long
+        const maxWidth = 80;
+        const wrappedDescription = doc.splitTextToSize(item.description, maxWidth);
+        doc.text(wrappedDescription[0], 40, yPos + 3);
+        
+        doc.text(item.quantity.toString(), 125, yPos + 3);
+        doc.text(parseFloat(item.price).toFixed(2), 145, yPos + 3);
+        doc.text(subtotal.toFixed(2), 170, yPos + 3);
+        
+        yPos += 10;
+        itemNumber++;
+      });
+      
+      // Total row (compact)
+      doc.setFillColor(240, 240, 240);
+      doc.rect(20, yPos - 3, 170, 12, 'F');
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(9);
+      doc.text('TOTAL', 75, yPos + 5);
+      doc.text(parseFloat(quoteWithItems.total).toFixed(2), 170, yPos + 5);
+      yPos += 18;
+      
+      // Declaration text (compact)
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(9);
+      const totalValue = parseFloat(quoteWithItems.total);
+      const valueInWords = numberToWords(totalValue);
+      const declarationText = `Declaro que recebi de ${quoteWithItems.client.name} o valor de R$ ${totalValue.toFixed(2)} (${valueInWords}), referente aos serviços descritos acima.`;
+      
+      const splitText = doc.splitTextToSize(declarationText, 170);
+      doc.text(splitText, 20, yPos);
+      yPos += splitText.length * 4 + 15;
+      
+      // Signature line (compact)
+      doc.text('_________________________________', 20, yPos);
+      yPos += 6;
+      doc.text(businessName, 20, yPos);
+      
+      // Footer
+      doc.setFontSize(7);
+      doc.setFont('helvetica', 'italic');
+      doc.text('Recibo emitido via Fechou!', 105, 285, { align: 'center' });
+      
+      const pdfBuffer = doc.output('arraybuffer');
+      
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename="Recibo_${quote.quoteNumber}.pdf"`);
+      res.send(Buffer.from(pdfBuffer));
+      
+    } catch (error) {
+      console.error("Error generating public receipt PDF:", error);
+      res.status(500).json({ message: "Erro ao gerar PDF do recibo" });
+    }
+  });
+
+  // Generate receipt PDF for paid quote (authenticated)
   app.get('/api/quotes/:id/receipt/pdf', async (req, res) => {
     try {
       const { id } = req.params;
@@ -894,8 +1164,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Número do cliente não encontrado" });
       }
 
-      // Generate WhatsApp message with direct PDF URL
-      const pdfUrl = `${req.protocol}://${req.get('host')}/api/quotes/${id}/receipt/pdf`;
+      // Generate WhatsApp message with public PDF URL (no authentication required)
+      const pdfUrl = `${req.protocol}://${req.get('host')}/api/public-quotes/${quoteWithItems.quoteNumber}/receipt/pdf`;
       const message = `Olá ${quoteWithItems.client.name}! Segue o recibo do pagamento do seu orçamento.
       
 📄 Recibo Nº: ${quoteWithItems.quoteNumber}
