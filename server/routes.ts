@@ -169,11 +169,38 @@ Obrigado pela confiança!`;
   app.post('/api/quotes', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      const quoteData = insertQuoteSchema.parse({ ...req.body, userId });
-      const quote = await storage.createQuote(quoteData);
+      console.log("Creating quote with data:", req.body);
+      
+      // Extract quote and items from request body
+      const { quote: quoteInfo, items } = req.body;
+      
+      if (!quoteInfo) {
+        return res.status(400).json({ message: "Quote data is required" });
+      }
+      
+      // Prepare quote data for validation
+      const quoteData = {
+        ...quoteInfo,
+        userId,
+        subtotal: quoteInfo.subtotal.toString(),
+        discount: quoteInfo.discount.toString(),
+        total: quoteInfo.total.toString(),
+        validUntil: new Date(quoteInfo.validUntil)
+      };
+      
+      console.log("Prepared quote data:", quoteData);
+      
+      // Validate quote data
+      const validatedQuoteData = insertQuoteSchema.parse(quoteData);
+      
+      // Create quote with items
+      const quote = await storage.createQuote(validatedQuoteData, items || []);
       res.json(quote);
     } catch (error) {
       console.error("Error creating quote:", error);
+      if (error instanceof Error) {
+        console.error("Error message:", error.message);
+      }
       res.status(500).json({ message: "Failed to create quote" });
     }
   });
@@ -181,14 +208,39 @@ Obrigado pela confiança!`;
   app.put('/api/quotes/:id', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      const quoteData = insertQuoteSchema.parse({ ...req.body, userId });
-      const quote = await storage.updateQuote(req.params.id, quoteData, userId);
+      console.log("Updating quote with data:", req.body);
+      
+      // Extract quote and items from request body
+      const { quote: quoteInfo, items } = req.body;
+      
+      if (!quoteInfo) {
+        return res.status(400).json({ message: "Quote data is required" });
+      }
+      
+      // Prepare quote data for validation
+      const quoteData = {
+        ...quoteInfo,
+        userId,
+        subtotal: quoteInfo.subtotal.toString(),
+        discount: quoteInfo.discount.toString(),
+        total: quoteInfo.total.toString(),
+        validUntil: new Date(quoteInfo.validUntil)
+      };
+      
+      // Validate quote data
+      const validatedQuoteData = insertQuoteSchema.parse(quoteData);
+      
+      // Update quote with items
+      const quote = await storage.updateQuote(req.params.id, validatedQuoteData, userId, items || []);
       if (!quote) {
         return res.status(404).json({ message: "Quote not found" });
       }
       res.json(quote);
     } catch (error) {
       console.error("Error updating quote:", error);
+      if (error instanceof Error) {
+        console.error("Error message:", error.message);
+      }
       res.status(500).json({ message: "Failed to update quote" });
     }
   });
