@@ -1104,6 +1104,63 @@ export class DatabaseStorage implements IStorage {
     return user?.isAdmin === true;
   }
 
+  async getDashboardStats(userId: string): Promise<{
+    totalQuotes: number;
+    approvedQuotes: number;
+    pendingQuotes: number;
+    draftQuotes: number;
+    totalRevenue: string;
+    thisMonthQuotes: number;
+    thisMonthRevenue: string;
+    averageQuoteValue: string;
+    conversionRate: number;
+  }> {
+    const [quoteStats] = await db
+      .select({
+        totalQuotes: count(),
+        approvedQuotes: count(sql`CASE WHEN status IN ('approved', 'paid') THEN 1 END`),
+        pendingQuotes: count(sql`CASE WHEN status = 'pending' THEN 1 END`),
+        draftQuotes: count(sql`CASE WHEN status = 'draft' THEN 1 END`),
+        totalRevenue: sql<string>`COALESCE(SUM(CASE WHEN status IN ('approved', 'paid') THEN total ELSE 0 END), 0)`,
+      })
+      .from(quotes)
+      .where(eq(quotes.userId, userId));
+
+    const [thisMonthStats] = await db
+      .select({
+        thisMonthQuotes: count(),
+        thisMonthRevenue: sql<string>`COALESCE(SUM(CASE WHEN status IN ('approved', 'paid') THEN total ELSE 0 END), 0)`,
+      })
+      .from(quotes)
+      .where(
+        and(
+          eq(quotes.userId, userId),
+          sql`created_at >= date_trunc('month', current_date)`
+        )
+      );
+
+    const totalRevenue = parseFloat(quoteStats.totalRevenue);
+    const averageQuoteValue = quoteStats.approvedQuotes > 0 
+      ? (totalRevenue / quoteStats.approvedQuotes).toFixed(2)
+      : "0";
+
+    const conversionRate = quoteStats.totalQuotes > 0 
+      ? (quoteStats.approvedQuotes / quoteStats.totalQuotes) * 100
+      : 0;
+
+    return {
+      totalQuotes: quoteStats.totalQuotes,
+      approvedQuotes: quoteStats.approvedQuotes,
+      pendingQuotes: quoteStats.pendingQuotes,
+      draftQuotes: quoteStats.draftQuotes,
+      totalRevenue: quoteStats.totalRevenue,
+      thisMonthQuotes: thisMonthStats.thisMonthQuotes,
+      thisMonthRevenue: thisMonthStats.thisMonthRevenue,
+      averageQuoteValue,
+      conversionRate: Number(conversionRate.toFixed(1)),
+    };
+  }
+
   async getAdminStats(): Promise<{
     totalUsers: number;
     premiumUsers: number;
@@ -1185,35 +1242,7 @@ export class DatabaseStorage implements IStorage {
     };
   }
 
-  async getQuoteById(quoteId: string): Promise<Quote | null> {
-    try {
-      const result = await this.db
-        .select()
-        .from(quotes)
-        .where(eq(quotes.id, quoteId))
-        .limit(1);
-
-      return result[0] || null;
-    } catch (error) {
-      console.error("Error fetching quote by ID:", error);
-      throw error;
-    }
-  }
-
-  async getQuoteByNumber(quoteNumber: string): Promise<Quote | null> {
-    try {
-      const result = await this.db
-        .select()
-        .from(quotes)
-        .where(eq(quotes.quoteNumber, quoteNumber))
-        .limit(1);
-
-      return result[0] || null;
-    } catch (error) {
-      console.error("Error fetching quote by number:", error);
-      throw error;
-    }
-  }
+  
 }
 
 export const storage = new DatabaseStorage();
