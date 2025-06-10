@@ -357,7 +357,7 @@ Obrigado pela confiança!`;
     }
   });
 
-  // Public route to redirect to receipt PDF page
+  // Public route to serve receipt PDF page directly
   app.get('/api/public-quotes/:quoteNumber/receipt/pdf', async (req, res) => {
     try {
       const { quoteNumber } = req.params;
@@ -396,11 +396,51 @@ Obrigado pela confiança!`;
         `);
       }
 
-      // Redirect to frontend page that generates PDF
-      const frontendUrl = `/receipt/${quoteNumber}/pdf`;
-      res.redirect(frontendUrl);
+      // Serve HTML page that will generate and download PDF automatically
+      const htmlResponse = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Gerando Recibo...</title>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <style>
+            body {
+              font-family: Arial, sans-serif;
+              text-align: center;
+              padding: 50px;
+              background-color: #f5f5f5;
+            }
+            .loader {
+              border: 4px solid #f3f3f3;
+              border-top: 4px solid #3498db;
+              border-radius: 50%;
+              width: 40px;
+              height: 40px;
+              animation: spin 2s linear infinite;
+              margin: 20px auto;
+            }
+            @keyframes spin {
+              0% { transform: rotate(0deg); }
+              100% { transform: rotate(360deg); }
+            }
+          </style>
+        </head>
+        <body>
+          <h2>Gerando recibo...</h2>
+          <div class="loader"></div>
+          <p>O download do recibo será iniciado automaticamente.</p>
+          <script>
+            // Redirect to the React app page that handles PDF generation
+            window.location.href = '${req.protocol}://${req.get('host')}/receipt/${quoteNumber}/pdf';
+          </script>
+        </body>
+        </html>
+      `;
+      
+      res.send(htmlResponse);
     } catch (error) {
-      console.error("Error redirecting to receipt PDF:", error);
+      console.error("Error serving receipt PDF page:", error);
       res.status(500).send(`
         <!DOCTYPE html>
         <html>
