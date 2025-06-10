@@ -698,24 +698,62 @@ export async function generateReceiptPDF({ quote, user, isUserPremium }: PDFGene
 
   const businessName = user.businessName || `${user.firstName} ${user.lastName}`.trim();
   
-  // Logo simples com iniciais
-  const logoSize = 20;
-  const logoX = marginLeft;
-  const logoY = yPosition;
-  
-  const initials = businessName.split(' ').map((word: string) => word.charAt(0)).join('').substring(0, 2).toUpperCase();
-  
-  doc.setFillColor(70, 130, 180);
-  doc.circle(logoX + logoSize/2, logoY + logoSize/2, 10, 'F');
-  
-  doc.setFontSize(8);
-  doc.setFont('helvetica', 'bold');
-  doc.setTextColor(255, 255, 255);
-  doc.text(initials, logoX + logoSize/2, logoY + logoSize/2 + 2, { align: 'center' });
-  doc.setTextColor(0, 0, 0);
+  // Logo da empresa (se disponível)
+  let logoWidth = 0;
+  let logoHeight = 0;
+  if ((user as any)?.logoUrl) {
+    try {
+      const logoSize = 25;
+      const logoUrl = (user as any).logoUrl;
+      if (logoUrl && logoUrl.trim() !== '') {
+        let format = 'JPEG';
+        if (logoUrl.includes('data:image/png')) {
+          format = 'PNG';
+        } else if (logoUrl.includes('data:image/gif')) {
+          format = 'GIF';
+        }
+        doc.addImage(logoUrl, format, marginLeft, yPosition, logoSize, logoSize);
+        logoWidth = logoSize + 5;
+        logoHeight = logoSize;
+      }
+    } catch (error) {
+      console.error('Erro ao carregar logo:', error);
+      // Fallback para iniciais se o logo falhar
+      const logoSize = 20;
+      const initials = businessName.split(' ').map((word: string) => word.charAt(0)).join('').substring(0, 2).toUpperCase();
+      
+      doc.setFillColor(70, 130, 180);
+      doc.circle(marginLeft + logoSize/2, yPosition + logoSize/2, 10, 'F');
+      
+      doc.setFontSize(8);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(255, 255, 255);
+      doc.text(initials, marginLeft + logoSize/2, yPosition + logoSize/2 + 2, { align: 'center' });
+      doc.setTextColor(0, 0, 0);
+      
+      logoWidth = logoSize + 5;
+      logoHeight = logoSize;
+    }
+  } else {
+    // Logo com iniciais se não houver logoUrl
+    const logoSize = 20;
+    const initials = businessName.split(' ').map((word: string) => word.charAt(0)).join('').substring(0, 2).toUpperCase();
+    
+    doc.setFillColor(70, 130, 180);
+    doc.circle(marginLeft + logoSize/2, yPosition + logoSize/2, 10, 'F');
+    
+    doc.setFontSize(8);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(255, 255, 255);
+    doc.text(initials, marginLeft + logoSize/2, yPosition + logoSize/2 + 2, { align: 'center' });
+    doc.setTextColor(0, 0, 0);
+    
+    logoWidth = logoSize + 5;
+    logoHeight = logoSize;
+  }
 
   // Informações da empresa ao lado do logo
-  const textStartX = marginLeft + logoSize + 10;
+  const textStartX = marginLeft + logoWidth;
   
   doc.setFontSize(14);
   doc.setFont('helvetica', 'bold');
@@ -724,10 +762,30 @@ export async function generateReceiptPDF({ quote, user, isUserPremium }: PDFGene
   doc.setFontSize(9);
   doc.setFont('helvetica', 'normal');
   
+  let currentY = yPosition + 14;
+  
+  // Endereço completo
   if ((user as any).address) {
-    doc.text((user as any).address, textStartX, yPosition + 16);
+    let fullAddress = (user as any).address;
+    if ((user as any).number) fullAddress += `, ${(user as any).number}`;
+    if ((user as any).neighborhood) fullAddress += `, ${(user as any).neighborhood}`;
+    doc.text(fullAddress, textStartX, currentY);
+    currentY += 4;
+    
+    // Cidade, estado e CEP
+    if ((user as any).city || (user as any).state || (user as any).cep) {
+      let cityStateZip = '';
+      if ((user as any).city) cityStateZip += (user as any).city;
+      if ((user as any).state) cityStateZip += (cityStateZip ? '/' : '') + (user as any).state;
+      if ((user as any).cep) cityStateZip += (cityStateZip ? ' - CEP: ' : 'CEP: ') + (user as any).cep;
+      if (cityStateZip) {
+        doc.text(cityStateZip, textStartX, currentY);
+        currentY += 4;
+      }
+    }
   }
   
+  // Informações de contato
   let contactInfo = '';
   if ((user as any).phone) {
     contactInfo += `Tel: ${formatPhoneNumber((user as any).phone)}`;
@@ -735,8 +793,11 @@ export async function generateReceiptPDF({ quote, user, isUserPremium }: PDFGene
   if (user.email) {
     contactInfo += (contactInfo ? '  ' : '') + `Email: ${user.email}`;
   }
+  if ((user as any).cpfCnpj) {
+    contactInfo += (contactInfo ? '  ' : '') + `${(user as any).cpfCnpj.length <= 14 ? 'CPF' : 'CNPJ'}: ${formatCPF((user as any).cpfCnpj)}`;
+  }
   if (contactInfo) {
-    doc.text(contactInfo, textStartX, yPosition + 22);
+    doc.text(contactInfo, textStartX, currentY);
   }
 
   // Linha de contorno do cabeçalho
@@ -780,19 +841,58 @@ export async function generateReceiptPDF({ quote, user, isUserPremium }: PDFGene
   doc.setFontSize(10);
   doc.setFont('helvetica', 'normal');
   
-  // Coluna esquerda
-  doc.text(`Cliente: ${quote.client.name}`, marginLeft, yPosition);
-  yPosition += 5;
+  let clientY = yPosition;
+  
+  // Coluna esquerda - Dados básicos
+  doc.text(`Cliente: ${quote.client.name}`, marginLeft, clientY);
+  clientY += 4;
   
   if (quote.client.phone) {
-    doc.text(`Telefone: ${formatPhoneNumber(quote.client.phone)}`, marginLeft, yPosition);
+    doc.text(`Telefone: ${formatPhoneNumber(quote.client.phone)}`, marginLeft, clientY);
+    clientY += 4;
   }
   
-  // Coluna direita
-  const rightColumnX = pageWidth / 2 + 20;
-  if (quote.client.email) {
-    doc.text(`E-mail: ${quote.client.email}`, rightColumnX, yPosition - 5);
+  if ((quote.client as any).cpf) {
+    doc.text(`CPF: ${formatCPF((quote.client as any).cpf)}`, marginLeft, clientY);
+    clientY += 4;
   }
+  
+  // Endereço do cliente se disponível
+  if (quote.client.address) {
+    let clientFullAddress = quote.client.address;
+    if ((quote.client as any).number) clientFullAddress += `, ${(quote.client as any).number}`;
+    if ((quote.client as any).neighborhood) clientFullAddress += `, ${(quote.client as any).neighborhood}`;
+    doc.text(`Endereço: ${clientFullAddress}`, marginLeft, clientY);
+    clientY += 4;
+    
+    if ((quote.client as any).city || (quote.client as any).state || (quote.client as any).cep) {
+      let clientCityStateZip = '';
+      if ((quote.client as any).city) clientCityStateZip += (quote.client as any).city;
+      if ((quote.client as any).state) clientCityStateZip += (clientCityStateZip ? '/' : '') + (quote.client as any).state;
+      if ((quote.client as any).cep) clientCityStateZip += (clientCityStateZip ? ' - CEP: ' : 'CEP: ') + (quote.client as any).cep;
+      if (clientCityStateZip) {
+        doc.text(clientCityStateZip, marginLeft, clientY);
+        clientY += 4;
+      }
+    }
+  }
+  
+  // Coluna direita - E-mail e observações
+  const rightColumnX = pageWidth / 2 + 20;
+  let rightY = yPosition;
+  
+  if (quote.client.email) {
+    doc.text(`E-mail: ${quote.client.email}`, rightColumnX, rightY);
+    rightY += 4;
+  }
+  
+  if ((quote.client as any).notes) {
+    doc.text(`Observações: ${(quote.client as any).notes}`, rightColumnX, rightY);
+    rightY += 4;
+  }
+  
+  // Ajustar yPosition para o maior valor entre as duas colunas
+  yPosition = Math.max(clientY, rightY);
   
   yPosition += 15;
 
