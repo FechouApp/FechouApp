@@ -231,7 +231,7 @@ Obrigado pela confiança!`;
       const validatedQuoteData = insertQuoteSchema.parse(quoteData);
       
       // Update quote with items
-      const quote = await storage.updateQuote(req.params.id, validatedQuoteData, userId, items || []);
+      const quote = await storage.updateQuote(req.params.id, validatedQuoteData, userId, items);
       if (!quote) {
         return res.status(404).json({ message: "Quote not found" });
       }
