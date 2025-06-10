@@ -1,4 +1,3 @@
-
 import { Switch, Route } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
@@ -42,7 +41,7 @@ function Router() {
 
   // Check if this is a public quote route
   const isPublicQuoteRoute = window.location.pathname.startsWith('/quote/');
-  
+
   // Allow public access to quote pages
   if (!isAuthenticated && !isPublicQuoteRoute) {
     return <Landing />;
@@ -60,7 +59,7 @@ function Router() {
 
   // Check if user needs onboarding
   const hasCompletedOnboarding = localStorage.getItem('fechou_onboarding_completed');
-  
+
   // Show onboarding for new users
   if (!hasCompletedOnboarding) {
     return <Welcome />;
@@ -72,7 +71,7 @@ function Router() {
       <Route path="/quote/:quoteNumber" component={PublicQuote} />
       <Route path="/receipt/:quoteNumber" component={PublicReceipt} />
       <Route path="/receipt/:quoteNumber/pdf" component={PublicReceiptPDF} />
-      
+
       <Route path="/" component={Dashboard} />
       <Route path="/clients" component={Clients} />
       <Route path="/clients/:clientId" component={ClientProfile} />
@@ -109,7 +108,7 @@ function AppLayout() {
 
   // Check if user needs onboarding
   const hasCompletedOnboarding = localStorage.getItem('fechou_onboarding_completed');
-  
+
   // Show onboarding for new users
   if (!hasCompletedOnboarding) {
     return <Welcome />;

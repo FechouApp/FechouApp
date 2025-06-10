@@ -93,8 +93,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Número do cliente não encontrado" });
       }
 
-      // Generate WhatsApp message with frontend PDF URL that works on mobile
-      const pdfUrl = `${req.protocol}://${req.get('host')}/receipt/${quoteWithItems.quoteNumber}/pdf`;
+      // Generate WhatsApp message with public PDF URL (no authentication required)
+      const pdfUrl = `${req.protocol}://${req.get('host')}/api/public-quotes/${quoteWithItems.quoteNumber}/receipt/pdf`;
       const message = `Olá ${quoteWithItems.client.name}! Segue o recibo do pagamento do seu orçamento.
       
 📄 Recibo Nº: ${quoteWithItems.quoteNumber}
@@ -327,6 +327,57 @@ Obrigado pela confiança!`;
     } catch (error) {
       console.error("Error deleting saved item:", error);
       res.status(500).json({ message: "Failed to delete saved item" });
+    }
+  });
+
+  // Public endpoints for receipts (no authentication required)
+  app.get('/api/public-quotes/:quoteNumber/receipt', async (req, res) => {
+    try {
+      const { quoteNumber } = req.params;
+      
+      const quote = await storage.getQuoteByNumber(quoteNumber);
+      if (!quote) {
+        return res.status(404).json({ message: "Orçamento não encontrado" });
+      }
+
+      // Only allow access to paid quotes
+      if (quote.status !== 'paid') {
+        return res.status(400).json({ message: "Recibo disponível apenas para orçamentos pagos" });
+      }
+
+      const quoteWithItems = await storage.getQuote(quote.id, quote.userId);
+      if (!quoteWithItems) {
+        return res.status(404).json({ message: "Detalhes do orçamento não encontrados" });
+      }
+
+      res.json(quoteWithItems);
+    } catch (error) {
+      console.error("Error fetching public receipt:", error);
+      res.status(500).json({ message: "Erro ao acessar recibo" });
+    }
+  });
+
+  // Public route to redirect to receipt PDF page
+  app.get('/api/public-quotes/:quoteNumber/receipt/pdf', async (req, res) => {
+    try {
+      const { quoteNumber } = req.params;
+      
+      const quote = await storage.getQuoteByNumber(quoteNumber);
+      if (!quote) {
+        return res.status(404).json({ message: "Orçamento não encontrado" });
+      }
+
+      // Only allow PDF generation for paid quotes
+      if (quote.status !== 'paid') {
+        return res.status(400).json({ message: "Recibo disponível apenas para orçamentos pagos" });
+      }
+
+      // Redirect to frontend page that generates PDF
+      const frontendUrl = `/receipt/${quoteNumber}/pdf`;
+      res.redirect(frontendUrl);
+    } catch (error) {
+      console.error("Error redirecting to receipt PDF:", error);
+      res.status(500).json({ message: "Erro ao acessar recibo" });
     }
   });
 

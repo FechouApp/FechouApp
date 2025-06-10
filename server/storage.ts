@@ -1078,14 +1078,14 @@ export class DatabaseStorage implements IStorage {
 
     const now = new Date();
     const lastReset = user.lastQuoteReset ? new Date(user.lastQuoteReset) : new Date(0);
-    
+
     // Se o último reset foi em um mês diferente do atual
     const shouldReset = lastReset.getFullYear() !== now.getFullYear() || 
                        lastReset.getMonth() !== now.getMonth();
 
     if (shouldReset) {
       console.log(`Auto-resetting monthly quotes for user ${userId}`);
-      
+
       await db
         .update(users)
         .set({ 
@@ -1094,7 +1094,7 @@ export class DatabaseStorage implements IStorage {
           updatedAt: now
         })
         .where(eq(users.id, userId));
-      
+
       console.log(`Monthly quotes reset completed for user ${userId}`);
     }
   }
@@ -1183,6 +1183,36 @@ export class DatabaseStorage implements IStorage {
       activeUsersWeek: 0, // Would need login tracking to calculate
       activeUsersMonth: 0, // Would need login tracking to calculate
     };
+  }
+
+  async getQuoteById(quoteId: string): Promise<Quote | null> {
+    try {
+      const result = await this.db
+        .select()
+        .from(quotes)
+        .where(eq(quotes.id, quoteId))
+        .limit(1);
+
+      return result[0] || null;
+    } catch (error) {
+      console.error("Error fetching quote by ID:", error);
+      throw error;
+    }
+  }
+
+  async getQuoteByNumber(quoteNumber: string): Promise<Quote | null> {
+    try {
+      const result = await this.db
+        .select()
+        .from(quotes)
+        .where(eq(quotes.quoteNumber, quoteNumber))
+        .limit(1);
+
+      return result[0] || null;
+    } catch (error) {
+      console.error("Error fetching quote by number:", error);
+      throw error;
+    }
   }
 }
 
