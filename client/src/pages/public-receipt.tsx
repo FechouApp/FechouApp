@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { useLocation } from "wouter";
 import { format } from "date-fns";
+import Logo from "@/components/ui/logo";
 import { ptBR } from "date-fns/locale";
 import BackButton from "@/components/common/back-button";
 import LoadingSpinner from "@/components/common/loading-spinner";
@@ -196,8 +197,8 @@ _Gerado pelo Fechou! - www.meufechou.com.br_`;
       <div className="bg-white shadow-sm border-b">
         <div className="max-w-4xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <BackButton />
+            <div className="flex items-center gap-4">
+              <Logo size="md" />
               <div>
                 <h1 className="text-xl font-semibold text-gray-900">
                   Recibo de Pagamento
