@@ -247,7 +247,7 @@ export default function PublicQuote() {
           <div className="flex justify-center mb-4">
             <Logo size="lg" />
           </div>
-          <p className="text-gray-600">Orçamento da Marcenaria Estrela</p>
+          <p className="text-gray-600">Orçamento profissional</p>
         </div>
 
         {/* Quote Details */}

@@ -299,7 +299,7 @@ export default function QuoteForm({
           </div>
 
           {/* Lista de Itens do Orçamento */}
-          <div className="space-y-4">
+          <div className="space-y-6">
             {items.length === 0 ? (
               <div className="text-center py-8 text-gray-500">
                 <p>Nenhum item adicionado ainda.</p>

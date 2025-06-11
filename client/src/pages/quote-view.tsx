@@ -18,6 +18,7 @@ import { useToast } from "@/hooks/use-toast";
 import LoadingSpinner from "@/components/common/loading-spinner";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { formatPhone, formatCPF, formatCEP } from "@/lib/utils";
+import Logo from "@/components/ui/logo";
 
 export default function QuoteView() {
   const { quoteNumber, quoteId } = useParams<{ quoteNumber?: string; quoteId?: string }>();
@@ -382,11 +383,8 @@ _Gerado pelo Fechou! - www.meufechou.com.br_`;
 
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <div className="w-12 h-12 bg-green-500 rounded-xl flex items-center justify-center">
-              <CheckCircle className="w-6 h-6 text-white" />
-            </div>
-            <h1 className="text-3xl font-bold text-gray-800">Fechou!</h1>
+          <div className="flex justify-center mb-4">
+            <Logo size="lg" />
           </div>
           <p className="text-gray-600">
             {quote.client ? 

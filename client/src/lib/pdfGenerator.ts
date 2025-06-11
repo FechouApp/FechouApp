@@ -109,7 +109,7 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
   }
 
   // Informações da empresa - posição depende se há logo
-  const textStartX = logoHeight > 0 ? marginLeft + 80 : marginLeft;
+  const textStartX = logoHeight > 0 ? marginLeft + 65 : marginLeft;
   
   doc.setFontSize(12);
   doc.setFont('helvetica', 'bold');
