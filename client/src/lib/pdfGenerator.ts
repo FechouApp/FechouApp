@@ -1,4 +1,3 @@
-
 import jsPDF from 'jspdf';
 import { format, addDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -31,6 +30,26 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
     return (yPosition + requiredSpace) > (pageHeight - marginBottom);
   };
 
+  // Função para adicionar marca d'água para usuários gratuitos
+  const addWatermark = () => {
+    if (!isUserPremium) {
+      try {
+        // Adicionar logo como marca d'água no centro da página
+        const logoSize = 80;
+        const logoX = (pageWidth - logoSize) / 2;
+        const logoY = (pageHeight - logoSize) / 2;
+        
+        // Salvar estado atual
+        doc.saveGraphicsState();
+        doc.setGState({ opacity: 0.1 });
+        doc.addImage(fechouLogoPath, 'PNG', logoX, logoY, logoSize, logoSize);
+        doc.restoreGraphicsState();
+      } catch (error) {
+        console.error('Erro ao adicionar marca d\'água:', error);
+      }
+    }
+  };
+
   // Função para adicionar nova página
   const addNewPage = () => {
     doc.addPage();
@@ -52,54 +71,31 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
     doc.rect(x, y, width, height, 'F');
   };
 
-  // Função para adicionar marca d'água para usuários gratuitos
-  const addWatermark = () => {
-    if (!isUserPremium) {
-      try {
-        // Salvar estado atual
-        const currentFillColor = doc.getFillColor();
-        const currentTextColor = doc.getTextColor();
-        
-        // Adicionar logo como marca d'água no centro da página
-        const logoSize = 60;
-        const logoX = (pageWidth - logoSize) / 2;
-        const logoY = (pageHeight - logoSize) / 2;
-        
-        // Adicionar logo como marca d'água (usando o logo oficial)
-        doc.addImage(fechouLogoPath, 'PNG', logoX, logoY, logoSize, logoSize, undefined, 'NONE', 0, 0.15);
-        
-        // Restaurar estado
-        doc.setFillColor(currentFillColor);
-        doc.setTextColor(currentTextColor);
-      } catch (error) {
-        console.error('Erro ao adicionar marca d\'água:', error);
-      }
-    }
-  };
-
   // Função para formatar telefone corretamente
   const formatPhoneNumber = (phone: string): string => {
     // Remove todos os caracteres não numéricos
     const cleanPhone = phone.replace(/\D/g, '');
     
     if (cleanPhone.length === 11) {
-      // Formato: (XX) XXXXX-XXXX
+      // Celular: (XX) 9XXXX-XXXX
       return `(${cleanPhone.substring(0,2)}) ${cleanPhone.substring(2,7)}-${cleanPhone.substring(7)}`;
     } else if (cleanPhone.length === 10) {
-      // Formato: (XX) XXXX-XXXX
+      // Fixo: (XX) XXXX-XXXX
       return `(${cleanPhone.substring(0,2)}) ${cleanPhone.substring(2,6)}-${cleanPhone.substring(6)}`;
     }
-    return phone; // Retorna original se não conseguir formatar
+    return phone;
   };
 
   // ========== CABEÇALHO DA EMPRESA ==========
 
-  // Logo no canto superior esquerdo (se premium e tiver logo)
+  const businessName = user.businessName || `${user.firstName} ${user.lastName}`.trim();
+  
+  // Logo da empresa (se disponível)
   let logoWidth = 0;
   let logoHeight = 0;
-  if (isUserPremium && (user as any)?.logoUrl) {
+  if ((user as any)?.logoUrl) {
     try {
-      const logoSize = 20;
+      const logoSize = 25;
       const logoUrl = (user as any).logoUrl;
       if (logoUrl && logoUrl.trim() !== '') {
         let format = 'JPEG';
@@ -109,12 +105,43 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
           format = 'GIF';
         }
         doc.addImage(logoUrl, format, marginLeft, yPosition, logoSize, logoSize);
-        logoWidth = logoSize + 5; // Espaço após o logo
+        logoWidth = logoSize + 5;
         logoHeight = logoSize;
       }
     } catch (error) {
       console.error('Erro ao carregar logo:', error);
+      // Fallback para iniciais se o logo falhar
+      const logoSize = 20;
+      const initials = businessName.split(' ').map((word: string) => word.charAt(0)).join('').substring(0, 2).toUpperCase();
+      
+      doc.setFillColor(70, 130, 180);
+      doc.circle(marginLeft + logoSize/2, yPosition + logoSize/2, 10, 'F');
+      
+      doc.setFontSize(8);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(255, 255, 255);
+      doc.text(initials, marginLeft + logoSize/2, yPosition + logoSize/2 + 2, { align: 'center' });
+      doc.setTextColor(0, 0, 0);
+      
+      logoWidth = logoSize + 5;
+      logoHeight = logoSize;
     }
+  } else {
+    // Logo com iniciais se não houver logoUrl
+    const logoSize = 20;
+    const initials = businessName.split(' ').map((word: string) => word.charAt(0)).join('').substring(0, 2).toUpperCase();
+    
+    doc.setFillColor(70, 130, 180);
+    doc.circle(marginLeft + logoSize/2, yPosition + logoSize/2, 10, 'F');
+    
+    doc.setFontSize(8);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(255, 255, 255);
+    doc.text(initials, marginLeft + logoSize/2, yPosition + logoSize/2 + 2, { align: 'center' });
+    doc.setTextColor(0, 0, 0);
+    
+    logoWidth = logoSize + 5;
+    logoHeight = logoSize;
   }
 
   // Informações da empresa ao lado do logotipo
@@ -122,7 +149,6 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
   doc.setFontSize(14);
   doc.setFont('helvetica', 'bold');
 
-  const businessName = user.businessName || `${user.firstName} ${user.lastName}`.trim();
   const textStartX = logoWidth > 0 ? marginLeft + logoWidth + 5 : marginLeft;
 
   // Nome da empresa
@@ -166,332 +192,277 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
 
   // Ajustar yPosition baseado no conteúdo
   yPosition = Math.max(yPosition + logoHeight + 5, infoY);
+  yPosition += 8;
 
-  yPosition += 3; // Espaçamento reduzido antes da linha
+  // ========== TÍTULO DO ORÇAMENTO ==========
+
   drawHorizontalLine(yPosition);
-  yPosition += 6;
+  yPosition += 8;
 
-  // ========== TÍTULO E NÚMERO DO ORÇAMENTO ==========
-
-  doc.setFontSize(16);
+  doc.setFontSize(18);
   doc.setFont('helvetica', 'bold');
-  doc.text(`ORÇAMENTO Nº ${quote.quoteNumber}`, pageWidth / 2, yPosition, { align: 'center' });
+  doc.text('ORÇAMENTO', marginLeft, yPosition);
 
-  // Data no canto direito
+  // Número do orçamento à direita
+  doc.setFontSize(12);
+  doc.text(`Nº ${quote.quoteNumber}`, pageWidth - marginRight, yPosition, { align: 'right' });
+
+  yPosition += 12;
+
+  // Data de criação e validade
   doc.setFontSize(10);
   doc.setFont('helvetica', 'normal');
-  doc.text(format(new Date(), 'dd/MM/yyyy', { locale: ptBR }), pageWidth - marginRight, yPosition, { align: 'right' });
+  
+  const createdDate = format(new Date(quote.createdAt), 'dd/MM/yyyy', { locale: ptBR });
+  const validDate = format(new Date(quote.validUntil), 'dd/MM/yyyy', { locale: ptBR });
+  
+  doc.text(`Data: ${createdDate}`, marginLeft, yPosition);
+  doc.text(`Válido até: ${validDate}`, pageWidth - marginRight, yPosition, { align: 'right' });
 
+  yPosition += 8;
+  drawHorizontalLine(yPosition);
   yPosition += 12;
 
   // ========== DADOS DO CLIENTE ==========
 
-  drawGrayBackground(marginLeft, yPosition - 2, pageWidth - marginLeft - marginRight, 8);
-  doc.setFontSize(10);
+  doc.setFontSize(12);
   doc.setFont('helvetica', 'bold');
-  doc.text('DADOS DO CLIENTE', marginLeft + 2, yPosition + 3);
-  yPosition += 10;
+  doc.text('DADOS DO CLIENTE', marginLeft, yPosition);
+  yPosition += 8;
 
-  // Informações do cliente em duas colunas
-  doc.setFontSize(9);
+  doc.setFontSize(10);
   doc.setFont('helvetica', 'normal');
 
-  const rightColumnX = pageWidth / 2 + 10;
-  let leftColumnY = yPosition;
-  let rightColumnY = yPosition;
+  // Nome do cliente
+  doc.text(`Nome: ${quote.client.name}`, marginLeft, yPosition);
+  yPosition += 5;
 
-  // Coluna esquerda
-  doc.text('Razão social:', marginLeft + 2, leftColumnY);
-  doc.text(quote.client.name, marginLeft + 25, leftColumnY);
-  leftColumnY += 5;
-
-  // CPF/CNPJ (só mostra se existir)
-  if (quote.client.cpf) {
-    doc.text('CPF/CNPJ:', marginLeft + 2, leftColumnY);
-    doc.text(formatCPF(quote.client.cpf), marginLeft + 25, leftColumnY);
-    leftColumnY += 5;
-  }
-
-  // CEP (só mostra se existir)
-  if (quote.client.zipCode) {
-    doc.text('CEP:', marginLeft + 2, leftColumnY);
-    doc.text(formatCEP(quote.client.zipCode), marginLeft + 25, leftColumnY);
-    leftColumnY += 5;
-  }
-
-  // Telefone (só mostra se existir)
-  if (quote.client.phone) {
-    doc.text('Telefone:', marginLeft + 2, leftColumnY);
-    doc.text(formatPhoneNumber(quote.client.phone), marginLeft + 25, leftColumnY);
-    leftColumnY += 5;
-  }
-
-  // Coluna direita
-  // Endereço (só mostra se existir)
-  if (quote.client.address) {
-    doc.text('Endereço:', rightColumnX, rightColumnY);
-    const address = `${quote.client.address}${quote.client.number ? `, ${quote.client.number}` : ''}`;
-    doc.text(address, rightColumnX + 20, rightColumnY);
-    rightColumnY += 5;
-  }
-
-  // Cidade/UF (só mostra se ambos existirem)
-  if (quote.client.city && quote.client.state) {
-    doc.text('Cidade/UF:', rightColumnX, rightColumnY);
-    doc.text(`${quote.client.city}/${quote.client.state}`, rightColumnX + 22, rightColumnY);
-    rightColumnY += 5;
-  }
-
-  // E-mail (só mostra se existir)
+  // Email e telefone
   if (quote.client.email) {
-    doc.text('E-mail:', rightColumnX, rightColumnY);
-    doc.text(quote.client.email, rightColumnX + 15, rightColumnY);
-    rightColumnY += 5;
-  }
-
-  // Ajustar yPosition baseado na coluna que ficou mais alta
-  yPosition = Math.max(leftColumnY, rightColumnY) + 1;
-
-  // ========== FOTOS DO ORÇAMENTO ==========
-
-  console.log('Checking photos for PDF:', quote.photos);
-  
-  // Parse photos if they are stored as JSON string
-  let quotePhotos = [];
-  if (quote.photos) {
-    try {
-      quotePhotos = typeof quote.photos === 'string' ? JSON.parse(quote.photos) : quote.photos;
-    } catch (error) {
-      console.error('Error parsing photos:', error);
-      quotePhotos = [];
-    }
-  }
-  
-  if (quotePhotos && Array.isArray(quotePhotos) && quotePhotos.length > 0) {
-    if (checkPageBreak(30)) {
-      addNewPage();
-    }
-
-    drawGrayBackground(marginLeft, yPosition - 2, pageWidth - marginLeft - marginRight, 8);
-    doc.setFontSize(10);
-    doc.setFont('helvetica', 'bold');
-    doc.text('FOTOS DO ORÇAMENTO', marginLeft + 2, yPosition + 3);
-    yPosition += 12;
-
-    // Adicionar texto explicativo
-    doc.setFontSize(9);
-    doc.setFont('helvetica', 'normal');
-    doc.text(`Este orçamento contém ${quotePhotos.length} foto${quotePhotos.length > 1 ? 's' : ''} anexada${quotePhotos.length > 1 ? 's' : ''}.`, marginLeft + 2, yPosition);
+    doc.text(`E-mail: ${quote.client.email}`, marginLeft, yPosition);
     yPosition += 5;
-    doc.text('Para visualizar as fotos, acesse o link do orçamento ou entre em contato.', marginLeft + 2, yPosition);
-    yPosition += 8;
+  }
 
-    // Listar apenas os nomes das fotos (se disponíveis)
-    doc.setFontSize(8);
-    doc.setFont('helvetica', 'italic');
-    quotePhotos.forEach((photo, index) => {
-      if (checkPageBreak(4)) {
-        addNewPage();
+  if (quote.client.phone) {
+    doc.text(`Telefone: ${formatPhoneNumber(quote.client.phone)}`, marginLeft, yPosition);
+    yPosition += 5;
+  }
+
+  // CPF se disponível
+  if ((quote.client as any).cpf) {
+    doc.text(`CPF: ${formatCPF((quote.client as any).cpf)}`, marginLeft, yPosition);
+    yPosition += 5;
+  }
+
+  // Endereço se disponível
+  if (quote.client.address) {
+    let fullAddress = quote.client.address;
+    if ((quote.client as any).number) fullAddress += `, ${(quote.client as any).number}`;
+    if ((quote.client as any).neighborhood) fullAddress += `, ${(quote.client as any).neighborhood}`;
+    doc.text(`Endereço: ${fullAddress}`, marginLeft, yPosition);
+    yPosition += 5;
+
+    // Cidade, estado e CEP
+    if ((quote.client as any).city || (quote.client as any).state || (quote.client as any).cep) {
+      let cityStateZip = '';
+      if ((quote.client as any).city) cityStateZip += (quote.client as any).city;
+      if ((quote.client as any).state) cityStateZip += (cityStateZip ? '/' : '') + (quote.client as any).state;
+      if ((quote.client as any).cep) cityStateZip += (cityStateZip ? ' - CEP: ' : 'CEP: ') + (quote.client as any).cep;
+      if (cityStateZip) {
+        doc.text(cityStateZip, marginLeft, yPosition);
+        yPosition += 5;
       }
-      const photoName = photo.name || `Foto ${index + 1}`;
-      doc.text(`• ${photoName}`, marginLeft + 4, yPosition);
-      yPosition += 4;
-    });
-
-    yPosition += 5;
+    }
   }
 
-  // ========== TABELA DE SERVIÇOS OU PRODUTOS ==========
+  yPosition += 8;
+  drawHorizontalLine(yPosition);
+  yPosition += 12;
 
-  if (checkPageBreak(60)) {
+  // ========== ITENS DO ORÇAMENTO ==========
+
+  doc.setFontSize(12);
+  doc.setFont('helvetica', 'bold');
+  doc.text('ITENS DO ORÇAMENTO', marginLeft, yPosition);
+  yPosition += 10;
+
+  // Cabeçalho da tabela
+  const tableStartY = yPosition;
+  const tableWidth = pageWidth - marginLeft - marginRight;
+  const itemColWidth = 15;
+  const descColWidth = 100;
+  const qtyColWidth = 15;
+  const unitColWidth = 25;
+  const totalColWidth = 25;
+
+  // Verificar se precisa de nova página para a tabela
+  if (checkPageBreak(20 + (quote.items?.length || 0) * 8)) {
     addNewPage();
   }
 
-  drawGrayBackground(marginLeft, yPosition - 2, pageWidth - marginLeft - marginRight, 8);
-  doc.setFontSize(10);
-  doc.setFont('helvetica', 'bold');
-  doc.text('SERVIÇOS OU PRODUTOS', marginLeft + 2, yPosition + 3);
-  yPosition += 10;
-
-  // Cabeçalho da tabela com margens ajustadas
-  const tableStartY = yPosition;
-  const tableWidth = pageWidth - marginLeft - marginRight;
-
-  // Definir larguras das colunas
-  const itemColWidth = 12;
-  const nameColWidth = 90;
-  const qtyColWidth = 20;
-  const unitPriceColWidth = 25;
-  const subtotalColWidth = tableWidth - itemColWidth - nameColWidth - qtyColWidth - unitPriceColWidth;
-
-  doc.setDrawColor(0, 0, 0);
-  doc.setLineWidth(0.5);
-
-  drawGrayBackground(marginLeft, yPosition - 2, tableWidth, 8);
-  doc.rect(marginLeft, yPosition - 2, tableWidth, 8, 'S');
+  // Cabeçalho da tabela com fundo cinza
+  drawGrayBackground(marginLeft, yPosition, tableWidth, 8);
+  doc.rect(marginLeft, yPosition, tableWidth, 8, 'S');
 
   doc.setFontSize(9);
   doc.setFont('helvetica', 'bold');
-  doc.text('ITEM', marginLeft + itemColWidth/2, yPosition + 3, { align: 'center' });
-  doc.text('NOME', marginLeft + itemColWidth + nameColWidth/2, yPosition + 3, { align: 'center' });
-  doc.text('QTD.', marginLeft + itemColWidth + nameColWidth + qtyColWidth/2, yPosition + 3, { align: 'center' });
-  doc.text('VR. UNIT.', marginLeft + itemColWidth + nameColWidth + qtyColWidth + unitPriceColWidth/2, yPosition + 3, { align: 'center' });
-  doc.text('SUBTOTAL', marginLeft + itemColWidth + nameColWidth + qtyColWidth + unitPriceColWidth + subtotalColWidth/2, yPosition + 3, { align: 'center' });
+  doc.text('Item', marginLeft + 2, yPosition + 5);
+  doc.text('Descrição', marginLeft + itemColWidth + 2, yPosition + 5);
+  doc.text('Qtd.', marginLeft + itemColWidth + descColWidth + 2, yPosition + 5);
+  doc.text('Vr. Unit.', marginLeft + itemColWidth + descColWidth + qtyColWidth + 2, yPosition + 5);
+  doc.text('Total', marginLeft + itemColWidth + descColWidth + qtyColWidth + unitColWidth + 2, yPosition + 5);
 
   // Linhas verticais do cabeçalho
-  doc.line(marginLeft + itemColWidth, yPosition - 2, marginLeft + itemColWidth, yPosition + 6);
-  doc.line(marginLeft + itemColWidth + nameColWidth, yPosition - 2, marginLeft + itemColWidth + nameColWidth, yPosition + 6);
-  doc.line(marginLeft + itemColWidth + nameColWidth + qtyColWidth, yPosition - 2, marginLeft + itemColWidth + nameColWidth + qtyColWidth, yPosition + 6);
-  doc.line(marginLeft + itemColWidth + nameColWidth + qtyColWidth + unitPriceColWidth, yPosition - 2, marginLeft + itemColWidth + nameColWidth + qtyColWidth + unitPriceColWidth, yPosition + 6);
+  doc.line(marginLeft + itemColWidth, yPosition, marginLeft + itemColWidth, yPosition + 8);
+  doc.line(marginLeft + itemColWidth + descColWidth, yPosition, marginLeft + itemColWidth + descColWidth, yPosition + 8);
+  doc.line(marginLeft + itemColWidth + descColWidth + qtyColWidth, yPosition, marginLeft + itemColWidth + descColWidth + qtyColWidth, yPosition + 8);
+  doc.line(marginLeft + itemColWidth + descColWidth + qtyColWidth + unitColWidth, yPosition, marginLeft + itemColWidth + descColWidth + qtyColWidth + unitColWidth, yPosition + 8);
 
   yPosition += 8;
 
   // Itens da tabela
   doc.setFont('helvetica', 'normal');
-  quote.items.forEach((item, index) => {
+  let itemNumber = 1;
+  let subtotal = 0;
+
+  (quote.items || []).forEach((item: any) => {
     if (checkPageBreak(8)) {
       addNewPage();
     }
 
-    // Linha da tabela
-    doc.rect(marginLeft, yPosition - 2, tableWidth, 8, 'S');
+    const itemTotal = Number(item.quantity) * Number(item.unitPrice);
+    subtotal += itemTotal;
 
-    doc.text((index + 1).toString(), marginLeft + itemColWidth/2, yPosition + 3, { align: 'center' });
+    // Linha do item
+    doc.rect(marginLeft, yPosition, tableWidth, 8, 'S');
 
-    const description = doc.splitTextToSize(item.description, nameColWidth - 4);
-    doc.text(description[0], marginLeft + itemColWidth + 2, yPosition + 3);
-
-    doc.text(item.quantity.toString(), marginLeft + itemColWidth + nameColWidth + qtyColWidth/2, yPosition + 3, { align: 'center' });
-
-    const unitPrice = parseFloat(item.unitPrice);
-    const total = parseFloat(item.total);
-    doc.text(unitPrice.toFixed(2).replace('.', ','), marginLeft + itemColWidth + nameColWidth + qtyColWidth + unitPriceColWidth/2, yPosition + 3, { align: 'center' });
-    doc.text(total.toFixed(2).replace('.', ','), marginLeft + itemColWidth + nameColWidth + qtyColWidth + unitPriceColWidth + subtotalColWidth/2, yPosition + 3, { align: 'center' });
+    doc.text(itemNumber.toString(), marginLeft + 2, yPosition + 5);
+    
+    // Quebrar descrição se muito longa
+    const maxDescWidth = descColWidth - 4;
+    const splitDesc = doc.splitTextToSize(item.description, maxDescWidth);
+    doc.text(splitDesc[0], marginLeft + itemColWidth + 2, yPosition + 5);
+    
+    doc.text(item.quantity.toString(), marginLeft + itemColWidth + descColWidth + 2, yPosition + 5);
+    doc.text(`R$ ${Number(item.unitPrice).toFixed(2)}`, marginLeft + itemColWidth + descColWidth + qtyColWidth + 2, yPosition + 5);
+    doc.text(`R$ ${itemTotal.toFixed(2)}`, marginLeft + itemColWidth + descColWidth + qtyColWidth + unitColWidth + 2, yPosition + 5);
 
     // Linhas verticais
-    doc.line(marginLeft + itemColWidth, yPosition - 2, marginLeft + itemColWidth, yPosition + 6);
-    doc.line(marginLeft + itemColWidth + nameColWidth, yPosition - 2, marginLeft + itemColWidth + nameColWidth, yPosition + 6);
-    doc.line(marginLeft + itemColWidth + nameColWidth + qtyColWidth, yPosition - 2, marginLeft + itemColWidth + nameColWidth + qtyColWidth, yPosition + 6);
-    doc.line(marginLeft + itemColWidth + nameColWidth + qtyColWidth + unitPriceColWidth, yPosition - 2, marginLeft + itemColWidth + nameColWidth + qtyColWidth + unitPriceColWidth, yPosition + 6);
+    doc.line(marginLeft + itemColWidth, yPosition, marginLeft + itemColWidth, yPosition + 8);
+    doc.line(marginLeft + itemColWidth + descColWidth, yPosition, marginLeft + itemColWidth + descColWidth, yPosition + 8);
+    doc.line(marginLeft + itemColWidth + descColWidth + qtyColWidth, yPosition, marginLeft + itemColWidth + descColWidth + qtyColWidth, yPosition + 8);
+    doc.line(marginLeft + itemColWidth + descColWidth + qtyColWidth + unitColWidth, yPosition, marginLeft + itemColWidth + descColWidth + qtyColWidth + unitColWidth, yPosition + 8);
 
     yPosition += 8;
+    itemNumber++;
   });
 
-  // Total da seção SERVIÇOS OU PRODUTOS
-  drawGrayBackground(marginLeft, yPosition - 2, tableWidth, 6);
-  doc.rect(marginLeft, yPosition - 2, tableWidth, 6, 'S');
+  yPosition += 8;
 
-  doc.setFont('helvetica', 'bold');
-  doc.text('TOTAL', marginLeft + itemColWidth + 2, yPosition + 2);
-  doc.text(quote.items.length.toString(), marginLeft + itemColWidth + nameColWidth + qtyColWidth/2, yPosition + 2, { align: 'center' });
+  // ========== TOTAIS ==========
 
-  const totalServices = parseFloat(quote.total);
-  doc.text(totalServices.toFixed(2).replace('.', ','), marginLeft + itemColWidth + nameColWidth + qtyColWidth + unitPriceColWidth + subtotalColWidth/2, yPosition + 2, { align: 'center' });
-
-  // Linhas verticais
-  doc.line(marginLeft + itemColWidth, yPosition - 2, marginLeft + itemColWidth, yPosition + 4);
-  doc.line(marginLeft + itemColWidth + nameColWidth, yPosition - 2, marginLeft + itemColWidth + nameColWidth, yPosition + 4);
-  doc.line(marginLeft + itemColWidth + nameColWidth + qtyColWidth, yPosition - 2, marginLeft + itemColWidth + nameColWidth + qtyColWidth, yPosition + 4);
-  doc.line(marginLeft + itemColWidth + nameColWidth + qtyColWidth + unitPriceColWidth, yPosition - 2, marginLeft + itemColWidth + nameColWidth + qtyColWidth + unitPriceColWidth, yPosition + 4);
-
-  yPosition += 10;
-
-  // ========== PRAZO DE ENTREGA ==========
-
-  drawGrayBackground(marginLeft, yPosition - 2, pageWidth - marginLeft - marginRight, 6);
-  doc.setFontSize(10);
-  doc.setFont('helvetica', 'bold');
-  doc.text('PRAZO DE ENTREGA:', marginLeft + 2, yPosition + 2);
-  doc.text(quote.executionDeadline || 'A definir', marginLeft + 50, yPosition + 2);
-  yPosition += 10;
-
-  // ========== VALIDADE DO ORÇAMENTO ==========
-
-  drawGrayBackground(marginLeft, yPosition - 2, pageWidth - marginLeft - marginRight, 6);
-  doc.setFontSize(10);
-  doc.setFont('helvetica', 'bold');
-  doc.text('VALIDADE DO ORÇAMENTO:', marginLeft + 2, yPosition + 2);
-  
-  // Usar a data de validade correta do orçamento
-  const validityDate = new Date(quote.validUntil);
-  const validityDateFormatted = format(validityDate, 'dd/MM/yyyy', { locale: ptBR });
-  doc.text(validityDateFormatted, marginLeft + 65, yPosition + 2);
-  yPosition += 10;
-
-  // ========== RESUMO FINANCEIRO ==========
-
-  if (checkPageBreak(25)) {
-    addNewPage();
-  }
-
-  // Totais no lado direito
-  const summaryX = pageWidth - 80;
-
-  doc.setFontSize(10);
-  doc.setFont('helvetica', 'normal');
-  doc.text('SERVIÇOS:', summaryX, yPosition, { align: 'right' });
-  doc.text(`${totalServices.toFixed(2).replace('.', ',')}`, summaryX + 25, yPosition, { align: 'right' });
-  yPosition += 5;
-
-  doc.text('DESCONTOS:', summaryX, yPosition, { align: 'right' });
-  doc.text('0,00', summaryX + 25, yPosition, { align: 'right' });
-  yPosition += 5;
-
-  // Total geral
-  doc.setFont('helvetica', 'bold');
   doc.setFontSize(12);
-  doc.text('TOTAL:', summaryX, yPosition, { align: 'right' });
-  doc.text(`R$ ${totalServices.toFixed(2).replace('.', ',')}`, summaryX + 25, yPosition, { align: 'right' });
-  yPosition += 12;
+  doc.setFont('helvetica', 'bold');
 
-  // ========== INFORMAÇÕES ADICIONAIS DO ORÇAMENTO ==========
+  // Subtotal
+  doc.text('Subtotal:', pageWidth - 60, yPosition, { align: 'right' });
+  doc.text(`R$ ${subtotal.toFixed(2)}`, pageWidth - marginRight, yPosition, { align: 'right' });
+  yPosition += 6;
 
-  if (quote.observations || quote.paymentTerms || quote.warranty) {
-    doc.setFontSize(9);
-    doc.setFont('helvetica', 'normal');
-
-    let additionalInfoY = yPosition;
-    const leftColumnX = marginLeft;
-    const rightColumnX = pageWidth / 2 + 10;
-
-    // Coluna esquerda
-    if (quote.observations) {
-      doc.text('Observações:', leftColumnX, additionalInfoY);
-      const obsLines = doc.splitTextToSize(quote.observations, 80);
-      obsLines.forEach((line: string, index: number) => {
-        doc.text(line, leftColumnX + (index === 0 ? 25 : 0), additionalInfoY + (index * 3.5));
-      });
-      additionalInfoY += Math.max(6, obsLines.length * 3.5);
-    }
-
-    // Coluna direita
-    let rightInfoY = yPosition;
-    if (quote.paymentTerms) {
-      doc.text('Condições de Pagamento:', rightColumnX, rightInfoY);
-      rightInfoY += 6;
-      const paymentLines = doc.splitTextToSize(quote.paymentTerms, 80);
-      paymentLines.forEach((line: string, index: number) => {
-        doc.text(line, rightColumnX, rightInfoY + (index * 3.5));
-      });
-      rightInfoY += Math.max(6, paymentLines.length * 3.5) + 4;
-    }
-
-    if (quote.warranty) {
-      doc.text('Garantia:', rightColumnX, rightInfoY);
-      rightInfoY += 4;
-      const warrantyLines = doc.splitTextToSize(quote.warranty, 80);
-      warrantyLines.forEach((line: string, index: number) => {
-        doc.text(line, rightColumnX, rightInfoY + (index * 3.5));
-      });
-      rightInfoY += Math.max(6, warrantyLines.length * 3.5);
-    }
-
-    yPosition = Math.max(additionalInfoY, rightInfoY) + 4;
+  // Desconto se aplicável
+  const discount = Number(quote.discount || 0);
+  if (discount > 0) {
+    doc.text('Desconto:', pageWidth - 60, yPosition, { align: 'right' });
+    doc.text(`- R$ ${discount.toFixed(2)}`, pageWidth - marginRight, yPosition, { align: 'right' });
+    yPosition += 6;
   }
 
-  // ========== FRASE DE CORTESIA ==========
+  // Total final
+  drawHorizontalLine(yPosition - 2, pageWidth - 70, pageWidth - marginRight);
+  doc.setFontSize(14);
+  doc.text('TOTAL:', pageWidth - 60, yPosition + 4, { align: 'right' });
+  doc.text(`R$ ${parseFloat(quote.total).toFixed(2)}`, pageWidth - marginRight, yPosition + 4, { align: 'right' });
 
-  if (checkPageBreak(35)) {
+  yPosition += 20;
+
+  // ========== OBSERVAÇÕES ==========
+
+  if (quote.notes) {
+    if (checkPageBreak(20)) {
+      addNewPage();
+    }
+
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'bold');
+    doc.text('OBSERVAÇÕES:', marginLeft, yPosition);
+    yPosition += 6;
+
+    doc.setFont('helvetica', 'normal');
+    const splitNotes = doc.splitTextToSize(quote.notes, pageWidth - marginLeft - marginRight);
+    splitNotes.forEach((line: string) => {
+      if (checkPageBreak(4)) {
+        addNewPage();
+      }
+      doc.text(line, marginLeft, yPosition);
+      yPosition += 4;
+    });
+
+    yPosition += 8;
+  }
+
+  // ========== CONDIÇÕES DE PAGAMENTO ==========
+
+  if (quote.paymentTerms) {
+    if (checkPageBreak(20)) {
+      addNewPage();
+    }
+
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'bold');
+    doc.text('CONDIÇÕES DE PAGAMENTO:', marginLeft, yPosition);
+    yPosition += 6;
+
+    doc.setFont('helvetica', 'normal');
+    const splitTerms = doc.splitTextToSize(quote.paymentTerms, pageWidth - marginLeft - marginRight);
+    splitTerms.forEach((line: string) => {
+      if (checkPageBreak(4)) {
+        addNewPage();
+      }
+      doc.text(line, marginLeft, yPosition);
+      yPosition += 4;
+    });
+
+    yPosition += 8;
+  }
+
+  // ========== GARANTIA ==========
+
+  if ((quote as any).warranty) {
+    if (checkPageBreak(20)) {
+      addNewPage();
+    }
+
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'bold');
+    doc.text('GARANTIA:', marginLeft, yPosition);
+    yPosition += 6;
+
+    doc.setFont('helvetica', 'normal');
+    const splitWarranty = doc.splitTextToSize((quote as any).warranty, pageWidth - marginLeft - marginRight);
+    splitWarranty.forEach((line: string) => {
+      if (checkPageBreak(4)) {
+        addNewPage();
+      }
+      doc.text(line, marginLeft, yPosition);
+      yPosition += 4;
+    });
+
+    yPosition += 8;
+  }
+
+  // ========== MENSAGEM FINAL ==========
+
+  if (checkPageBreak(30)) {
     addNewPage();
   }
 
@@ -551,7 +522,7 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
 
   signatureY += 3;
 
-  // Aplicar marca d'água logo na primeira página para usuários gratuitos
+  // Aplicar marca d'água na primeira página para usuários gratuitos
   addWatermark();
 
   // Rodapé
@@ -565,107 +536,7 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
   return pdfBlob;
 }
 
-export function downloadPDF(blob: Blob, filename: string) {
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = filename;
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  URL.revokeObjectURL(url);
-}
-
-export function createPDFUrl(blob: Blob): string {
-  return URL.createObjectURL(blob);
-}
-
-// Função para converter número em extenso
-function numberToWords(num: number): string {
-  const units = ['', 'um', 'dois', 'três', 'quatro', 'cinco', 'seis', 'sete', 'oito', 'nove'];
-  const teens = ['dez', 'onze', 'doze', 'treze', 'quatorze', 'quinze', 'dezesseis', 'dezessete', 'dezoito', 'dezenove'];
-  const tens = ['', '', 'vinte', 'trinta', 'quarenta', 'cinquenta', 'sessenta', 'setenta', 'oitenta', 'noventa'];
-  const hundreds = ['', 'cento', 'duzentos', 'trezentos', 'quatrocentos', 'quinhentos', 'seiscentos', 'setecentos', 'oitocentos', 'novecentos'];
-
-  if (num === 0) return 'zero reais';
-  if (num === 100) return 'cem reais';
-
-  let result = '';
-  const integerPart = Math.floor(num);
-  const decimalPart = Math.round((num - integerPart) * 100);
-
-  // Parte inteira
-  if (integerPart >= 1000) {
-    const thousands = Math.floor(integerPart / 1000);
-    if (thousands === 1) {
-      result += 'mil';
-    } else {
-      result += convertHundreds(thousands) + ' mil';
-    }
-    
-    const remainder = integerPart % 1000;
-    if (remainder > 0) {
-      if (remainder < 100) {
-        result += ' e ' + convertHundreds(remainder);
-      } else {
-        result += ' ' + convertHundreds(remainder);
-      }
-    }
-  } else {
-    result = convertHundreds(integerPart);
-  }
-
-  // Adicionar "reais"
-  if (integerPart === 1) {
-    result += ' real';
-  } else {
-    result += ' reais';
-  }
-
-  // Parte decimal (centavos)
-  if (decimalPart > 0) {
-    result += ' e ';
-    if (decimalPart === 1) {
-      result += 'um centavo';
-    } else {
-      result += convertHundreds(decimalPart) + ' centavos';
-    }
-  }
-
-  return result;
-
-  function convertHundreds(n: number): string {
-    if (n === 0) return '';
-    
-    let result = '';
-    const h = Math.floor(n / 100);
-    const remainder = n % 100;
-    
-    if (h > 0) {
-      result += hundreds[h];
-      if (remainder > 0) {
-        result += ' e ';
-      }
-    }
-    
-    if (remainder >= 20) {
-      const t = Math.floor(remainder / 10);
-      const u = remainder % 10;
-      result += tens[t];
-      if (u > 0) {
-        result += ' e ' + units[u];
-      }
-    } else if (remainder >= 10) {
-      result += teens[remainder - 10];
-    } else if (remainder > 0) {
-      result += units[remainder];
-    }
-    
-    return result;
-  }
-}
-
-export async function generateReceiptPDF({ quote, user, isUserPremium }: PDFGeneratorOptions): Promise<Blob> {
+async function generateReceiptPDF({ quote, user, isUserPremium }: PDFGeneratorOptions): Promise<Blob> {
   const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
@@ -688,21 +559,16 @@ export async function generateReceiptPDF({ quote, user, isUserPremium }: PDFGene
   const addWatermark = () => {
     if (!isUserPremium) {
       try {
-        // Salvar estado atual
-        const currentFillColor = doc.getFillColor();
-        const currentTextColor = doc.getTextColor();
-        
         // Adicionar logo como marca d'água no centro da página
-        const logoSize = 60;
+        const logoSize = 80;
         const logoX = (pageWidth - logoSize) / 2;
         const logoY = (pageHeight - logoSize) / 2;
         
-        // Adicionar logo como marca d'água (usando o logo oficial)
-        doc.addImage(fechouLogoPath, 'PNG', logoX, logoY, logoSize, logoSize, undefined, 'NONE', 0, 0.15);
-        
-        // Restaurar estado
-        doc.setFillColor(currentFillColor);
-        doc.setTextColor(currentTextColor);
+        // Salvar estado atual
+        doc.saveGraphicsState();
+        doc.setGState({ opacity: 0.1 });
+        doc.addImage(fechouLogoPath, 'PNG', logoX, logoY, logoSize, logoSize);
+        doc.restoreGraphicsState();
       } catch (error) {
         console.error('Erro ao adicionar marca d\'água:', error);
       }
@@ -1017,6 +883,9 @@ export async function generateReceiptPDF({ quote, user, isUserPremium }: PDFGene
   yPosition += 8;
   doc.text(businessName, marginLeft, yPosition);
 
+  // Aplicar marca d'água para usuários gratuitos
+  addWatermark();
+
   // Rodapé
   doc.setFontSize(8);
   doc.setFont('helvetica', 'italic');
@@ -1024,3 +893,50 @@ export async function generateReceiptPDF({ quote, user, isUserPremium }: PDFGene
 
   return doc.output('blob');
 }
+
+// Helper function to convert number to words (simplified)
+function numberToWords(num: number): string {
+  if (num === 0) return 'zero reais';
+  
+  const units = ['', 'um', 'dois', 'três', 'quatro', 'cinco', 'seis', 'sete', 'oito', 'nove'];
+  const teens = ['dez', 'onze', 'doze', 'treze', 'quatorze', 'quinze', 'dezesseis', 'dezessete', 'dezoito', 'dezenove'];
+  const tens = ['', '', 'vinte', 'trinta', 'quarenta', 'cinquenta', 'sessenta', 'setenta', 'oitenta', 'noventa'];
+  const hundreds = ['', 'cento', 'duzentos', 'trezentos', 'quatrocentos', 'quinhentos', 'seiscentos', 'setecentos', 'oitocentos', 'novecentos'];
+  
+  if (num < 1000) {
+    const h = Math.floor(num / 100);
+    const t = Math.floor((num % 100) / 10);
+    const u = num % 10;
+    
+    let result = '';
+    if (h > 0) result += hundreds[h];
+    if (t > 1) {
+      if (result) result += ' e ';
+      result += tens[t];
+    } else if (t === 1) {
+      if (result) result += ' e ';
+      result += teens[u];
+      return result + ' reais';
+    }
+    if (u > 0 && t !== 1) {
+      if (result) result += ' e ';
+      result += units[u];
+    }
+    return result + ' reais';
+  }
+  
+  return `${num.toFixed(2)} reais`; // Fallback para valores maiores
+}
+
+export function downloadPDF(blob: Blob, filename: string) {
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+}
+
+export { generateReceiptPDF };
