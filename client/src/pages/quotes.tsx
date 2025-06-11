@@ -278,15 +278,15 @@ export default function Quotes() {
       quote.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (quote.description || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
       quote.quoteNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (quote.client?.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (quote.items || []).some(item => 
-        item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (item.description || '').toLowerCase().includes(searchTerm.toLowerCase())
-      );
+      (quote.client?.name || '').toLowerCase().includes(searchTerm.toLowerCase());
 
     const matchesStatus = statusFilter === 'all' || quote.status === statusFilter;
 
     return matchesSearch && matchesStatus;
+  })?.sort((a, b) => {
+    const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+    const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+    return dateB - dateA;
   }) || [];
 
   return (
@@ -391,6 +391,7 @@ export default function Quotes() {
                       <TableHead>Cliente</TableHead>
                       <TableHead>Valor</TableHead>
                       <TableHead>Status</TableHead>
+                      <TableHead>Criado em</TableHead>
                       <TableHead>Validade</TableHead>
                       <TableHead>Ações</TableHead>
                     </TableRow>
@@ -429,6 +430,16 @@ export default function Quotes() {
                         >
                           {getStatusText(quote.status)}
                         </span>
+                      </TableCell>
+                      <TableCell className="hidden md:table-cell">
+                        <div>
+                          <p className="text-gray-800">
+                            {quote.createdAt ? new Date(quote.createdAt).toLocaleDateString('pt-BR') : 'N/A'}
+                          </p>
+                          <p className="text-sm text-gray-500">
+                            {quote.createdAt ? new Date(quote.createdAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : ''}
+                          </p>
+                        </div>
                       </TableCell>
                       <TableCell className="hidden md:table-cell">
                         <div>
@@ -520,14 +531,22 @@ export default function Quotes() {
                             </div>
                           </div>
 
-                          <div className="text-center">
-                            <p className="text-sm text-gray-600">Válido até</p>
-                            <p className="text-gray-800">
-                              {new Date(quote.validUntil).toLocaleDateString('pt-BR')}
-                            </p>
-                            <p className={`text-xs ${validityStatus.color}`}>
-                              {validityStatus.text}
-                            </p>
+                          <div className="flex items-center justify-between">
+                            <div className="text-center flex-1">
+                              <p className="text-sm text-gray-600">Criado em</p>
+                              <p className="text-gray-800 text-sm">
+                                {quote.createdAt ? new Date(quote.createdAt).toLocaleDateString('pt-BR') : 'N/A'}
+                              </p>
+                            </div>
+                            <div className="text-center flex-1">
+                              <p className="text-sm text-gray-600">Válido até</p>
+                              <p className="text-gray-800 text-sm">
+                                {new Date(quote.validUntil).toLocaleDateString('pt-BR')}
+                              </p>
+                              <p className={`text-xs ${validityStatus.color}`}>
+                                {validityStatus.text}
+                              </p>
+                            </div>
                           </div>
 
                           <div className="grid grid-cols-4 gap-1 pt-2">

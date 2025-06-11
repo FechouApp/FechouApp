@@ -757,6 +757,45 @@ Obrigado pela confiança!`;
     }
   });
 
+  // Mark quote as sent via WhatsApp
+  app.post('/api/quotes/:id/mark-sent', isAuthenticated, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const userId = req.user.claims.sub;
+      
+      console.log("Marking quote as sent:", id);
+
+      // Get quote first to validate it exists and belongs to user
+      const quote = await storage.getQuoteById(id);
+      if (!quote) {
+        console.log("Quote not found for mark-sent:", id);
+        return res.status(404).json({ message: "Orçamento não encontrado" });
+      }
+
+      // Check if quote belongs to the authenticated user
+      if (quote.userId !== userId) {
+        return res.status(403).json({ message: "Acesso negado" });
+      }
+
+      // Update quote status to pending and mark as sent
+      const success = await storage.updateQuoteStatus(id, 'pending', { 
+        sentViaWhatsApp: true,
+        sentAt: new Date()
+      });
+
+      if (!success) {
+        console.log("Failed to update quote status to sent:", id);
+        return res.status(500).json({ message: "Erro ao marcar orçamento como enviado" });
+      }
+
+      console.log("Quote marked as sent successfully:", id);
+      res.json({ message: "Orçamento marcado como enviado com sucesso!", status: "pending" });
+    } catch (error) {
+      console.error("Error marking quote as sent:", error);
+      res.status(500).json({ message: "Não foi possível marcar orçamento como enviado" });
+    }
+  });
+
   // Reviews routes
   app.get('/api/reviews', isAuthenticated, async (req: any, res) => {
     try {
