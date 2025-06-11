@@ -206,7 +206,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
 🔗 Baixar recibo: ${pdfUrl}
 
-Obrigado pela confiança!`;
+Obrigado pela confiança!
+
+_Gerado pelo Fechou! - www.meufechou.com.br_`;
 
       // Clean phone number and generate WhatsApp link
       const cleanPhone = quoteWithItems.client.phone.replace(/\D/g, '');

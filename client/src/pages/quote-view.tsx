@@ -84,7 +84,9 @@ export default function QuoteView() {
     const message = `Olá, ${quote.client.name}! Aqui está o seu orçamento gerado via *Fechou!*.
 ✅ Profissional: ${profesionalName}
 📄 Orçamento válido até: ${format(new Date(quote.validUntil), 'dd/MM/yyyy', { locale: ptBR })}
-🔗 Acesse os detalhes aqui: ${publicUrl}`;
+🔗 Acesse os detalhes aqui: ${publicUrl}
+
+_Gerado pelo Fechou! - www.meufechou.com.br_`;
 
     return `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
   };

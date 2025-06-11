@@ -97,7 +97,9 @@ export default function PublicReceipt() {
 
 🔗 Baixar recibo: ${pdfUrl}
 
-Obrigado pela confiança!`;
+Obrigado pela confiança!
+
+_Gerado pelo Fechou! - www.meufechou.com.br_`;
 
       const cleanPhone = receipt.client.phone.replace(/\D/g, '');
       const whatsappLink = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
