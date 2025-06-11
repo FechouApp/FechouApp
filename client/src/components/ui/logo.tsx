@@ -1,4 +1,4 @@
-import fechouLogoPath from "@assets/ChatGPT Image 11 de jun. de 2025, 16_19_11alterado.png";
+import fechouLogoPath from "@assets/fundo transparente cortado.png";
 
 interface LogoProps {
   className?: string;
@@ -14,9 +14,9 @@ export default function Logo({
   size = 'md'
 }: LogoProps) {
   const sizeClasses = {
-    sm: 'h-8',
-    md: 'h-12',  
-    lg: 'h-16'
+    sm: 'h-10',
+    md: 'h-16',  
+    lg: 'h-20'
   };
 
   return (

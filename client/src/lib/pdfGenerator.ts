@@ -3,7 +3,7 @@ import { format, addDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import type { QuoteWithDetails, User } from '@/types';
 import { formatPhone, formatCPF, formatCEP } from './utils';
-import fechouLogoPath from "@assets/ChatGPT Image 11 de jun. de 2025, 16_19_11alterado.png";
+import fechouLogoPath from "@assets/fundo transparente cortado.png";
 
 interface PDFGeneratorOptions {
   quote: QuoteWithDetails;
@@ -34,7 +34,7 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
   const addWatermark = () => {
     if (!isUserPremium) {
       try {
-        const logoSize = 80;
+        const logoSize = 104; // 80 * 1.3 = 104
         const logoX = (pageWidth - logoSize) / 2;
         const logoY = (pageHeight - logoSize) / 2;
         
@@ -103,8 +103,8 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
   // Se não tem logo da empresa, usar o logo do sistema
   if (logoHeight === 0) {
     try {
-      const logoWidth = 80;
-      const logoHeight_calc = 25;
+      const logoWidth = 104; // 80 * 1.3 = 104
+      const logoHeight_calc = 33; // 25 * 1.3 = 32.5, arredondado para 33
       doc.addImage(fechouLogoPath, 'PNG', marginLeft, yPosition, logoWidth, logoHeight_calc);
       logoHeight = logoHeight_calc;
     } catch (error) {
@@ -114,7 +114,7 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
   }
 
   // Informações da empresa ao lado do logo
-  const textStartX = marginLeft + 85;
+  const textStartX = marginLeft + 110;
   
   doc.setFontSize(12);
   doc.setFont('helvetica', 'bold');
@@ -433,7 +433,7 @@ async function generateReceiptPDF({ quote, user, isUserPremium }: PDFGeneratorOp
   const addWatermark = () => {
     if (!isUserPremium) {
       try {
-        const logoSize = 80;
+        const logoSize = 104; // 80 * 1.3 = 104
         const logoX = (pageWidth - logoSize) / 2;
         const logoY = (pageHeight - logoSize) / 2;
         
