@@ -340,7 +340,7 @@ Obrigado pela confiança!`;
             Este documento comprova o pagamento do serviço prestado.
           </p>
           <p className="text-xs text-gray-400 mt-1">
-            Gerado pelo Fechou! - Sistema de Orçamentos
+            Gerado pelo Fechou! - www.meufechou.com.br
           </p>
         </div>
       </div>

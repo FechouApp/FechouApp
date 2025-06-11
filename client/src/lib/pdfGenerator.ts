@@ -558,7 +558,7 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
   const footerY = pageHeight - 10;
   doc.setFontSize(8);
   doc.setTextColor(100, 100, 100);
-  doc.text('Orçamento emitido no Fechou! - www.fechou.com.br', pageWidth / 2, footerY, { align: 'center' });
+  doc.text('Orçamento gerado pelo Fechou! - www.meufechou.com.br', pageWidth / 2, footerY, { align: 'center' });
 
   // Converter para blob
   const pdfBlob = doc.output('blob');
@@ -995,7 +995,7 @@ export async function generateReceiptPDF({ quote, user, isUserPremium }: PDFGene
   // Rodapé
   doc.setFontSize(8);
   doc.setFont('helvetica', 'italic');
-  doc.text('Recibo emitido via Fechou!', pageWidth / 2, pageHeight - 15, { align: 'center' });
+  doc.text('Recibo gerado pelo Fechou! - www.meufechou.com.br', pageWidth / 2, pageHeight - 15, { align: 'center' });
 
   return doc.output('blob');
 }

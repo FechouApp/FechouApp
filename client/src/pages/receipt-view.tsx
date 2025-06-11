@@ -290,7 +290,7 @@ export default function ReceiptView() {
               Este documento comprova o pagamento do orçamento aprovado.
             </p>
             <p className="text-xs text-gray-400 mt-1">
-              Gerado pelo sistema Fechou! - Sistema de Orçamentos
+              Gerado pelo Fechou! - www.meufechou.com.br
             </p>
           </div>
         </CardContent>
