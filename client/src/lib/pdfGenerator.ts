@@ -100,21 +100,16 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
     }
   }
 
-  // Se não tem logo da empresa, usar o logo do sistema
-  if (logoHeight === 0) {
-    try {
-      const logoWidth = 104; // 80 * 1.3 = 104
-      const logoHeight_calc = 33; // 25 * 1.3 = 32.5, arredondado para 33
-      doc.addImage(fechouLogoPath, 'PNG', marginLeft, yPosition, logoWidth, logoHeight_calc);
-      logoHeight = logoHeight_calc;
-    } catch (error) {
-      console.error('Erro ao carregar logo do sistema:', error);
-      logoHeight = 20;
-    }
+  // Se não tem logo da empresa e é plano premium, deixar espaço reservado
+  // Se é plano gratuito, não mostrar nenhum logo no cabeçalho
+  if (logoHeight === 0 && !isUserPremium) {
+    logoHeight = 0; // Não reservar espaço para logo em plano gratuito
+  } else if (logoHeight === 0 && isUserPremium) {
+    logoHeight = 20; // Reservar espaço mínimo para logo em plano premium
   }
 
-  // Informações da empresa ao lado do logo
-  const textStartX = marginLeft + 110;
+  // Informações da empresa - posição depende se há logo
+  const textStartX = logoHeight > 0 ? marginLeft + 110 : marginLeft;
   
   doc.setFontSize(12);
   doc.setFont('helvetica', 'bold');
@@ -482,20 +477,16 @@ async function generateReceiptPDF({ quote, user, isUserPremium }: PDFGeneratorOp
     }
   }
 
-  if (logoHeight === 0) {
-    try {
-      const logoWidth = 70;
-      const logoHeight_calc = 20;
-      doc.addImage(fechouLogoPath, 'PNG', marginLeft, yPosition, logoWidth, logoHeight_calc);
-      logoHeight = logoHeight_calc;
-    } catch (error) {
-      console.error('Erro ao carregar logo do sistema:', error);
-      logoHeight = 15;
-    }
+  // Se não tem logo da empresa e é plano premium, deixar espaço reservado
+  // Se é plano gratuito, não mostrar nenhum logo no cabeçalho
+  if (logoHeight === 0 && !isUserPremium) {
+    logoHeight = 0; // Não reservar espaço para logo em plano gratuito
+  } else if (logoHeight === 0 && isUserPremium) {
+    logoHeight = 15; // Reservar espaço mínimo para logo em plano premium
   }
 
-  // Informações da empresa
-  const textStartX = marginLeft + 75;
+  // Informações da empresa - posição depende se há logo
+  const textStartX = logoHeight > 0 ? marginLeft + 75 : marginLeft;
   
   doc.setFontSize(11);
   doc.setFont('helvetica', 'bold');
