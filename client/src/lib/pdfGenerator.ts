@@ -65,11 +65,8 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
         const logoX = (pageWidth - logoSize) / 2;
         const logoY = (pageHeight - logoSize) / 2;
         
-        // Adicionar logo com transparência
-        doc.setFillColor(255, 255, 255);
-        doc.setGlobalAlpha(0.1);
-        doc.addImage(fechouLogoPath, 'PNG', logoX, logoY, logoSize, logoSize);
-        doc.setGlobalAlpha(1.0);
+        // Adicionar logo como marca d'água (usando o logo oficial)
+        doc.addImage(fechouLogoPath, 'PNG', logoX, logoY, logoSize, logoSize, undefined, 'NONE', 0, 0.15);
         
         // Restaurar estado
         doc.setFillColor(currentFillColor);
@@ -554,35 +551,8 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
 
   signatureY += 3;
 
-  // Marca d'água para plano gratuito
-  if (!isUserPremium) {
-    doc.setGState(doc.GState({ opacity: 0.1 }));
-    doc.setTextColor(100, 100, 100);
-    doc.setFontSize(24);
-    doc.setFont('helvetica', 'bold');
-
-    const watermarkX = pageWidth - 50;
-    const watermarkY = pageHeight - 60;
-
-    doc.text('Fechou!', watermarkX, watermarkY, { 
-      align: 'center',
-      angle: 45
-    });
-
-    doc.setFontSize(10);
-    doc.setFont('helvetica', 'normal');
-    doc.text('O jeito moderno', watermarkX, watermarkY + 8, { 
-      align: 'center',
-      angle: 45
-    });
-    doc.text('de fechar negócios', watermarkX, watermarkY + 15, { 
-      align: 'center',
-      angle: 45
-    });
-
-    doc.setGState(doc.GState({ opacity: 1.0 }));
-    doc.setTextColor(0, 0, 0);
-  }
+  // Aplicar marca d'água logo na primeira página para usuários gratuitos
+  addWatermark();
 
   // Rodapé
   const footerY = pageHeight - 10;
@@ -712,6 +682,31 @@ export async function generateReceiptPDF({ quote, user, isUserPremium }: PDFGene
   const drawGrayBackground = (x: number, y: number, width: number, height: number) => {
     doc.setFillColor(240, 240, 240);
     doc.rect(x, y, width, height, 'F');
+  };
+
+  // Função para adicionar marca d'água para usuários gratuitos
+  const addWatermark = () => {
+    if (!isUserPremium) {
+      try {
+        // Salvar estado atual
+        const currentFillColor = doc.getFillColor();
+        const currentTextColor = doc.getTextColor();
+        
+        // Adicionar logo como marca d'água no centro da página
+        const logoSize = 60;
+        const logoX = (pageWidth - logoSize) / 2;
+        const logoY = (pageHeight - logoSize) / 2;
+        
+        // Adicionar logo como marca d'água (usando o logo oficial)
+        doc.addImage(fechouLogoPath, 'PNG', logoX, logoY, logoSize, logoSize, undefined, 'NONE', 0, 0.15);
+        
+        // Restaurar estado
+        doc.setFillColor(currentFillColor);
+        doc.setTextColor(currentTextColor);
+      } catch (error) {
+        console.error('Erro ao adicionar marca d\'água:', error);
+      }
+    }
   };
 
   const formatPhoneNumber = (phone: string): string => {
