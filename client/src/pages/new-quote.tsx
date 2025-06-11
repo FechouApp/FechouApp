@@ -349,7 +349,8 @@ export default function NewQuote() {
       unitPrice: "",
       total: "0"
     };
-    setItems([...items, newItem]);
+    // Adicionar novo item no topo da lista
+    setItems([newItem, ...items]);
   };
 
   const removeItem = (id: string) => {

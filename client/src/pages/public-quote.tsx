@@ -15,6 +15,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { generateQuotePDF, downloadPDF } from "@/lib/pdfGenerator";
 import { useToast } from "@/hooks/use-toast";
 import { formatPhone, formatCPF, formatCEP } from "@/lib/utils";
+import Logo from "@/components/ui/logo";
 
 export default function PublicQuote() {
   const { quoteNumber } = useParams<{ quoteNumber: string }>();
@@ -243,11 +244,8 @@ export default function PublicQuote() {
       <div className="container mx-auto px-4 py-4 sm:py-6 max-w-md sm:max-w-2xl lg:max-w-4xl">
         {/* Header */}
         <div className="text-center mb-6 sm:mb-8">
-          <div className="flex items-center justify-center gap-2 sm:gap-3 mb-4">
-            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-green-500 rounded-xl flex items-center justify-center">
-              <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
-            </div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">Fechou!</h1>
+          <div className="flex justify-center mb-4">
+            <Logo size="lg" />
           </div>
           <p className="text-gray-600">Orçamento da Marcenaria Estrela</p>
         </div>

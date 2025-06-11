@@ -325,7 +325,7 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
 
   // ========== OBSERVAÇÕES COMPACTAS ==========
 
-  if ((quote as any).notes) {
+  if ((quote as any).observations) {
     if (checkPageBreak(15)) {
       addNewPage();
     }
@@ -336,7 +336,7 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
     yPosition += 4;
 
     doc.setFont('helvetica', 'normal');
-    const splitNotes = doc.splitTextToSize((quote as any).notes, pageWidth - marginLeft - marginRight);
+    const splitNotes = doc.splitTextToSize((quote as any).observations, pageWidth - marginLeft - marginRight);
     splitNotes.forEach((line: string) => {
       if (checkPageBreak(3)) {
         addNewPage();
@@ -350,7 +350,7 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
 
   // ========== PRAZO DE EXECUÇÃO ==========
 
-  if ((quote as any).executionTime || (quote as any).deliveryTime) {
+  if ((quote as any).executionDeadline) {
     if (checkPageBreak(15)) {
       addNewPage();
     }
@@ -361,8 +361,7 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
     yPosition += 4;
 
     doc.setFont('helvetica', 'normal');
-    const executionTime = (quote as any).executionTime || (quote as any).deliveryTime;
-    const splitTime = doc.splitTextToSize(executionTime, pageWidth - marginLeft - marginRight);
+    const splitTime = doc.splitTextToSize((quote as any).executionDeadline, pageWidth - marginLeft - marginRight);
     splitTime.forEach((line: string) => {
       if (checkPageBreak(3)) {
         addNewPage();
