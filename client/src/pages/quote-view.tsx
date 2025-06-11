@@ -53,6 +53,23 @@ export default function QuoteView() {
     },
   });
 
+  // Mutation to update quote status from draft to pending
+  const updateStatusToPendingMutation = useMutation({
+    mutationFn: async () => {
+      await apiRequest("PATCH", `/api/quotes/${quote?.id}/status`, {
+        body: { status: "pending" }
+      });
+    },
+    onSuccess: () => {
+      // Reload to show updated status
+      window.location.reload();
+    },
+    onError: () => {
+      // Silent error - don't show toast as this is background action
+      console.error("Failed to update quote status to pending");
+    },
+  });
+
   // Funções do WhatsApp
   const generateWhatsAppLink = () => {
     if (!quote || !quote.client.phone) return "";
@@ -117,6 +134,10 @@ export default function QuoteView() {
   const sendViaWhatsApp = () => {
     const link = generateWhatsAppLink();
     if (link) {
+      // Update status to pending if it's currently draft
+      if (quote?.status === 'draft') {
+        updateStatusToPendingMutation.mutate();
+      }
       window.open(link, '_blank');
       markAsSentMutation.mutate();
     } else {
@@ -268,6 +289,12 @@ export default function QuoteView() {
 
     try {
       console.log('Starting PDF generation...', { quote: quote.quoteNumber, user: (user as any).id });
+      
+      // Update status to pending if it's currently draft
+      if (quote.status === 'draft') {
+        updateStatusToPendingMutation.mutate();
+      }
+      
       const isUserPremium = (user as any)?.plan === 'PREMIUM';
       console.log('User plan:', (user as any)?.plan, 'isUserPremium:', isUserPremium);
 

@@ -105,6 +105,11 @@ export default function UserOnboarding({ onComplete }: UserOnboardingProps) {
     }
   };
 
+  const handleSkip = () => {
+    // Skip onboarding and go directly to the app
+    onComplete();
+  };
+
   const handlePrevious = () => {
     if (currentStep > 1) {
       setCurrentStep(prev => prev - 1);
@@ -252,7 +257,7 @@ export default function UserOnboarding({ onComplete }: UserOnboardingProps) {
           {renderStepContent()}
         </CardContent>
 
-        <div className="flex justify-between p-6 border-t bg-gray-50">
+        <div className="flex justify-between items-center p-6 border-t bg-gray-50">
           <Button
             variant="outline"
             onClick={handlePrevious}
@@ -263,16 +268,29 @@ export default function UserOnboarding({ onComplete }: UserOnboardingProps) {
             Voltar
           </Button>
 
-          <Button
-            onClick={handleNext}
-            disabled={!isStepValid() || saveUserDataMutation.isPending}
-            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700"
-          >
-            {currentStep === 1 ? "Iniciar" : 
-             currentStep === 4 ? "Finalizar" : 
-             currentStep === 3 ? "Salvar" : "Próximo"}
-            {currentStep < 4 && <ChevronRight className="w-4 h-4" />}
-          </Button>
+          <div className="flex gap-3 items-center">
+            {/* Skip button - only show on first 3 steps */}
+            {currentStep < 4 && (
+              <Button
+                variant="ghost"
+                onClick={handleSkip}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                Pular
+              </Button>
+            )}
+
+            <Button
+              onClick={handleNext}
+              disabled={!isStepValid() || saveUserDataMutation.isPending}
+              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700"
+            >
+              {currentStep === 1 ? "Iniciar" : 
+               currentStep === 4 ? "Finalizar" : 
+               currentStep === 3 ? "Salvar" : "Próximo"}
+              {currentStep < 4 && <ChevronRight className="w-4 h-4" />}
+            </Button>
+          </div>
         </div>
       </Card>
     </div>
