@@ -68,10 +68,10 @@ export default function QuoteItem({
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-12 gap-4 p-4 bg-gray-50 rounded-lg">
+    <div className="grid grid-cols-1 md:grid-cols-12 gap-4 p-4 bg-white border-2 border-gray-200 rounded-lg shadow-sm hover:border-blue-300 transition-colors">
       {/* Item Number */}
       <div className="md:col-span-1 flex items-center justify-center">
-        <span className="text-lg font-semibold text-gray-700 bg-white rounded-full w-8 h-8 flex items-center justify-center">#{index}</span>
+        <span className="text-lg font-semibold text-white bg-blue-500 rounded-full w-8 h-8 flex items-center justify-center">#{index}</span>
       </div>
 
       {/* Description */}

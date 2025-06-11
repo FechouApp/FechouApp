@@ -92,7 +92,8 @@ export default function QuoteForm({
       unitPrice: "",
       total: "0"
     };
-    setItems([...items, newItem]);
+    // Adicionar novo item no topo da lista
+    setItems([newItem, ...items]);
   };
 
   const removeItem = (id: string) => {
@@ -264,33 +265,58 @@ export default function QuoteForm({
             </Button>
           </div>
         </CardHeader>
-        <CardContent className="p-4 pt-0 space-y-3">
+        <CardContent className="p-4 pt-0 space-y-4">
           {/* Seção de Itens Salvos */}
           <SavedItemsSection 
             onAddItem={(savedItem) => {
               const newItem: QuoteItemData = {
                 id: Math.random().toString(36).substr(2, 9),
-                description: savedItem.description,
-                quantity: savedItem.quantity,
+                description: savedItem.name,
+                quantity: 1,
                 unitPrice: savedItem.unitPrice,
-                total: (parseFloat(savedItem.unitPrice.replace(',', '.')) * savedItem.quantity).toFixed(2).replace('.', ',')
+                total: savedItem.unitPrice
               };
-              setItems(prev => [...prev, newItem]);
+              setItems(prev => [newItem, ...prev]);
             }}
           />
 
+          {/* Botão Adicionar Sempre Visível */}
+          <div className="sticky top-4 z-10 bg-white p-3 border border-gray-200 rounded-lg shadow-sm">
+            <Button
+              onClick={addItem}
+              className="brand-gradient text-white w-full"
+              disabled={!isUserPremium && items.length >= maxItemsForFreeUser}
+              size="sm"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Adicionar Novo Item
+              {!isUserPremium && (
+                <span className="ml-2 text-xs bg-white/20 px-2 py-1 rounded">
+                  {items.length}/{maxItemsForFreeUser}
+                </span>
+              )}
+            </Button>
+          </div>
+
           {/* Lista de Itens do Orçamento */}
-          <div className="space-y-3">
-            {items.map((item, index) => (
-              <QuoteItem
-                key={item.id}
-                item={item}
-                onUpdate={(field, value) => updateItem(item.id, field, value)}
-                onRemove={() => removeItem(item.id)}
-                canRemove={items.length > 1}
-                index={index + 1}
-              />
-            ))}
+          <div className="space-y-4">
+            {items.length === 0 ? (
+              <div className="text-center py-8 text-gray-500">
+                <p>Nenhum item adicionado ainda.</p>
+                <p className="text-sm">Clique em "Adicionar Novo Item" para começar.</p>
+              </div>
+            ) : (
+              items.map((item, index) => (
+                <QuoteItem
+                  key={item.id}
+                  item={item}
+                  onUpdate={(field, value) => updateItem(item.id, field, value)}
+                  onRemove={() => removeItem(item.id)}
+                  canRemove={items.length > 1}
+                  index={index + 1}
+                />
+              ))
+            )}
           </div>
         </CardContent>
       </Card>

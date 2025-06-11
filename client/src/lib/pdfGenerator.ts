@@ -109,7 +109,7 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
   }
 
   // Informações da empresa - posição depende se há logo
-  const textStartX = logoHeight > 0 ? marginLeft + 110 : marginLeft;
+  const textStartX = logoHeight > 0 ? marginLeft + 80 : marginLeft;
   
   doc.setFontSize(12);
   doc.setFont('helvetica', 'bold');
@@ -348,6 +348,32 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
     yPosition += 4;
   }
 
+  // ========== PRAZO DE EXECUÇÃO ==========
+
+  if ((quote as any).executionTime || (quote as any).deliveryTime) {
+    if (checkPageBreak(15)) {
+      addNewPage();
+    }
+
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'bold');
+    doc.text('PRAZO DE EXECUÇÃO:', marginLeft, yPosition);
+    yPosition += 4;
+
+    doc.setFont('helvetica', 'normal');
+    const executionTime = (quote as any).executionTime || (quote as any).deliveryTime;
+    const splitTime = doc.splitTextToSize(executionTime, pageWidth - marginLeft - marginRight);
+    splitTime.forEach((line: string) => {
+      if (checkPageBreak(3)) {
+        addNewPage();
+      }
+      doc.text(line, marginLeft, yPosition);
+      yPosition += 3;
+    });
+
+    yPosition += 4;
+  }
+
   // ========== CONDIÇÕES DE PAGAMENTO ==========
 
   if (quote.paymentTerms) {
@@ -486,7 +512,7 @@ async function generateReceiptPDF({ quote, user, isUserPremium }: PDFGeneratorOp
   }
 
   // Informações da empresa - posição depende se há logo
-  const textStartX = logoHeight > 0 ? marginLeft + 75 : marginLeft;
+  const textStartX = logoHeight > 0 ? marginLeft + 60 : marginLeft;
   
   doc.setFontSize(11);
   doc.setFont('helvetica', 'bold');
