@@ -2,9 +2,23 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
-import { insertClientSchema, insertQuoteSchema, insertQuoteItemSchema, insertReviewSchema, insertSavedItemSchema } from "@shared/schema";
+import { insertClientSchema, insertQuoteSchema, insertQuoteItemSchema, insertReviewSchema, insertSavedItemSchema, insertQuoteItemWithoutQuoteIdSchema } from "@shared/schema";
 import { z } from "zod";
 import "./types";
+
+// Admin middleware
+const isAdmin = async (req: any, res: any, next: any) => {
+  try {
+    const userId = req.user.claims.sub;
+    const user = await storage.getUser(userId);
+    if (!user || !user.isAdmin) {
+      return res.status(403).json({ message: "Admin access required" });
+    }
+    next();
+  } catch (error) {
+    res.status(500).json({ message: "Error checking admin status" });
+  }
+};
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
@@ -33,6 +47,95 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching user:", error);
       res.status(500).json({ message: "Failed to fetch user" });
+    }
+  });
+
+  // Update user profile
+  app.put('/api/auth/user', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const updateData = req.body;
+
+      const updatedUser = await storage.upsertUser({
+        id: userId,
+        ...updateData,
+        updatedAt: new Date(),
+      });
+
+      res.json(updatedUser);
+    } catch (error) {
+      console.error("Error updating user:", error);
+      res.status(500).json({ message: "Failed to update user" });
+    }
+  });
+
+  app.patch('/api/auth/user', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const updateData = req.body;
+
+      const updatedUser = await storage.upsertUser({
+        id: userId,
+        ...updateData,
+        updatedAt: new Date(),
+      });
+
+      res.json(updatedUser);
+    } catch (error) {
+      console.error("Error updating user:", error);
+      res.status(500).json({ message: "Failed to update user" });
+    }
+  });
+
+  // Admin routes
+  app.get('/api/admin/users', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const users = await storage.getAllUsers();
+      res.json(users);
+    } catch (error) {
+      console.error("Error fetching admin users:", error);
+      res.status(500).json({ message: "Failed to fetch users" });
+    }
+  });
+
+  app.get('/api/admin/stats', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const stats = await storage.getAdminStats();
+      res.json(stats);
+    } catch (error) {
+      console.error("Error fetching admin stats:", error);
+      res.status(500).json({ message: "Failed to fetch admin stats" });
+    }
+  });
+
+  app.patch('/api/admin/users/:userId/plan', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const { plan, paymentStatus, paymentMethod } = req.body;
+
+      console.log("Updating user plan:", { userId, plan, paymentStatus, paymentMethod });
+
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      const planExpiresAt = plan === "PREMIUM" ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) : null;
+
+      const updatedUser = await storage.upsertUser({
+        id: userId,
+        plan,
+        paymentStatus,
+        paymentMethod,
+        planExpiresAt,
+        updatedAt: new Date(),
+      });
+
+      console.log("User plan updated successfully:", updatedUser);
+      res.json(updatedUser);
+    } catch (error) {
+      console.error("Error updating user plan:", error);
+      res.status(500).json({ message: "Failed to update user plan" });
     }
   });
 
@@ -116,11 +219,85 @@ Obrigado pela confiança!`;
     }
   });
 
+  // Dashboard stats
+  app.get('/api/dashboard/stats', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const stats = await storage.getUserStats(userId);
+      res.json(stats);
+    } catch (error) {
+      console.error("Error fetching dashboard stats:", error);
+      res.status(500).json({ message: "Failed to fetch dashboard stats" });
+    }
+  });
+
+  // User plan limits
+  app.get('/api/user/plan-limits', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+
+      // Get fresh user stats (which includes auto-reset check)
+      await storage.getUserStats(userId);
+      const user = await storage.getUser(userId);
+
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      const isPremium = user.plan === "PREMIUM" || user.plan === "PREMIUM_CORTESIA";
+      const isExpired = user.planExpiresAt && new Date() > user.planExpiresAt;
+
+      let monthlyQuoteLimit, itemsPerQuoteLimit;
+
+      // PREMIUM_CORTESIA nunca expira
+      if (user.plan === "PREMIUM_CORTESIA" || (isPremium && !isExpired)) {
+        monthlyQuoteLimit = null; // Unlimited
+        itemsPerQuoteLimit = null; // Unlimited
+      } else {
+        // Plano gratuito: 5 orçamentos base + orçamentos bônus de indicações
+        const baseLimit = user.quotesLimit || 5;
+        const bonusQuotes = user.bonusQuotes || 0;
+        monthlyQuoteLimit = baseLimit + bonusQuotes;
+        itemsPerQuoteLimit = 10;
+      }
+
+      const currentMonthQuotes = user.quotesUsedThisMonth || 0;
+
+      const canCreateQuote = user.plan === "PREMIUM_CORTESIA" || 
+                            (isPremium && !isExpired) || 
+                            currentMonthQuotes < (monthlyQuoteLimit || 0);
+
+      const response = {
+        plan: user.plan,
+        isPremium: user.plan === "PREMIUM_CORTESIA" || (isPremium && !isExpired),
+        monthlyQuoteLimit,
+        itemsPerQuoteLimit,
+        currentMonthQuotes,
+        canCreateQuote,
+        bonusQuotes: user.bonusQuotes || 0,
+        referralCount: user.referralCount || 0
+      };
+
+      res.json(response);
+    } catch (error) {
+      console.error("Error fetching plan limits:", error);
+      res.status(500).json({ message: "Failed to fetch plan limits" });
+    }
+  });
+
   // Clients routes
   app.get('/api/clients', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      const clients = await storage.getClients(userId);
+      const { search } = req.query;
+
+      let clients;
+      if (search) {
+        clients = await storage.searchClients(userId, search as string);
+      } else {
+        clients = await storage.getClients(userId);
+      }
+
       res.json(clients);
     } catch (error) {
       console.error("Error fetching clients:", error);
@@ -128,15 +305,72 @@ Obrigado pela confiança!`;
     }
   });
 
+  app.get('/api/clients/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const client = await storage.getClient(req.params.id, userId);
+
+      if (!client) {
+        return res.status(404).json({ message: "Client not found" });
+      }
+
+      res.json(client);
+    } catch (error) {
+      console.error("Error fetching client:", error);
+      res.status(500).json({ message: "Failed to fetch client" });
+    }
+  });
+
   app.post('/api/clients', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const clientData = insertClientSchema.parse({ ...req.body, userId });
+
       const client = await storage.createClient(clientData);
-      res.json(client);
+      res.status(201).json(client);
     } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid client data", errors: error.errors });
+      }
       console.error("Error creating client:", error);
       res.status(500).json({ message: "Failed to create client" });
+    }
+  });
+
+  app.put('/api/clients/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const clientData = insertClientSchema.partial().parse(req.body);
+
+      const client = await storage.updateClient(req.params.id, clientData, userId);
+
+      if (!client) {
+        return res.status(404).json({ message: "Client not found" });
+      }
+
+      res.json(client);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid client data", errors: error.errors });
+      }
+      console.error("Error updating client:", error);
+      res.status(500).json({ message: "Failed to update client" });
+    }
+  });
+
+  app.delete('/api/clients/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const success = await storage.deleteClient(req.params.id, userId);
+
+      if (!success) {
+        return res.status(404).json({ message: "Client not found" });
+      }
+
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting client:", error);
+      res.status(500).json({ message: "Failed to delete client" });
     }
   });
 
@@ -152,13 +386,42 @@ Obrigado pela confiança!`;
     }
   });
 
+  // Public quote view (no authentication required) - MUST come before /api/quotes/:id
+  app.get('/api/quotes/public/:quoteNumber', async (req, res) => {
+    try {
+      const { quoteNumber } = req.params;
+      // Try both uppercase and lowercase for backward compatibility
+      let quote = await storage.getQuoteByNumber(quoteNumber.toUpperCase());
+      if (!quote) {
+        quote = await storage.getQuoteByNumber(quoteNumber.toLowerCase());
+      }
+
+      if (!quote) {
+        return res.status(404).json({ message: "Quote not found" });
+      }
+
+      // Mark as viewed if not already
+      if (!quote.viewedAt) {
+        await storage.updateQuoteStatus(quote.id, quote.status, { viewedAt: new Date() });
+      }
+
+      res.json(quote);
+    } catch (error) {
+      console.error("Error fetching public quote:", error);
+      res.status(500).json({ message: "Failed to fetch quote" });
+    }
+  });
+
+  // Get individual quote for editing (authenticated)
   app.get('/api/quotes/:id', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const quote = await storage.getQuote(req.params.id, userId);
+
       if (!quote) {
         return res.status(404).json({ message: "Quote not found" });
       }
+
       res.json(quote);
     } catch (error) {
       console.error("Error fetching quote:", error);
@@ -166,13 +429,86 @@ Obrigado pela confiança!`;
     }
   });
 
-  app.post('/api/quotes', isAuthenticated, async (req: any, res) => {
+  // Create new quote with comprehensive validation
+  app.post("/api/quotes", isAuthenticated, async (req: any, res) => {
     try {
+      const { quote, items } = req.body;
       const userId = req.user.claims.sub;
-      const quoteData = insertQuoteSchema.parse({ ...req.body, userId });
-      const quote = await storage.createQuote(quoteData);
-      res.json(quote);
+
+      // Verificar se o plano permite criar mais orçamentos
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      console.log(`Plan limits for user ${userId}:`, {
+        plan: user.plan,
+        planExpiresAt: user.planExpiresAt,
+        quotesUsedThisMonth: user.quotesUsedThisMonth
+      });
+
+      const isPremium = user.plan === "PREMIUM" || user.plan === "PREMIUM_CORTESIA";
+      const isExpired = user.planExpiresAt && new Date() > user.planExpiresAt;
+
+      let monthlyQuoteLimit, itemsPerQuoteLimit;
+
+      // PREMIUM_CORTESIA nunca expira
+      if (user.plan === "PREMIUM_CORTESIA" || (isPremium && !isExpired)) {
+        monthlyQuoteLimit = null; // Unlimited
+        itemsPerQuoteLimit = null; // Unlimited
+      } else {
+        // Plano gratuito: 5 orçamentos base + orçamentos bônus de indicações
+        const baseLimit = user.quotesLimit || 5;
+        const bonusQuotes = user.bonusQuotes || 0;
+        monthlyQuoteLimit = baseLimit + bonusQuotes;
+        itemsPerQuoteLimit = 10;
+      }
+
+      // Check current month usage
+      const currentMonthQuotes = user.quotesUsedThisMonth || 0;
+
+      // Check if user can create more quotes
+      if (monthlyQuoteLimit !== null && currentMonthQuotes >= monthlyQuoteLimit) {
+        return res.status(403).json({
+          message: `Limite de ${monthlyQuoteLimit} orçamentos mensais atingido. Atualize para Premium para orçamentos ilimitados.`,
+          upgradeRequired: true
+        });
+      }
+
+      // Check items limit for free plan
+      if (itemsPerQuoteLimit !== null && items && items.length > itemsPerQuoteLimit) {
+        return res.status(403).json({
+          message: `Plano gratuito permite até ${itemsPerQuoteLimit} itens por orçamento. Atualize para Premium para itens ilimitados.`,
+          upgradeRequired: true
+        });
+      }
+
+      // Validate quote data
+      const quoteData = insertQuoteSchema.parse({
+        ...quote,
+        userId,
+      });
+
+      // Validate items
+      const validatedItems = items?.map((item: any) =>
+        insertQuoteItemWithoutQuoteIdSchema.parse(item)
+      ) || [];
+
+      console.log("Creating quote with data:", { quoteData, itemsCount: validatedItems.length });
+
+      // Create quote with items
+      const createdQuote = await storage.createQuote(quoteData, validatedItems);
+
+      console.log("Quote created successfully:", createdQuote.id);
+      res.status(201).json(createdQuote);
     } catch (error) {
+      if (error instanceof z.ZodError) {
+        console.error("Validation error creating quote:", error.errors);
+        return res.status(400).json({
+          message: "Dados do orçamento inválidos",
+          errors: error.errors
+        });
+      }
       console.error("Error creating quote:", error);
       res.status(500).json({ message: "Failed to create quote" });
     }
@@ -201,6 +537,171 @@ Obrigado pela confiança!`;
     } catch (error) {
       console.error("Error deleting quote:", error);
       res.status(500).json({ message: "Failed to delete quote" });
+    }
+  });
+
+  // Approve quote (public)
+  app.patch('/api/quotes/:id/approve', async (req, res) => {
+    try {
+      const { id } = req.params;
+      console.log("Approving quote:", id);
+
+      // Get quote first to validate it exists and check if it can be approved
+      const quote = await storage.getQuoteById(id);
+      if (!quote) {
+        console.log("Quote not found for approval:", id);
+        return res.status(404).json({ message: "Orçamento não encontrado" });
+      }
+
+      // Check if quote is still pending and not expired
+      if (quote.status !== 'pending') {
+        return res.status(400).json({ message: "Este orçamento não pode ser aprovado" });
+      }
+
+      const isExpired = new Date(quote.validUntil) < new Date();
+      if (isExpired) {
+        return res.status(400).json({ message: "Este orçamento expirou e não pode ser aprovado" });
+      }
+
+      const success = await storage.updateQuoteStatus(id, 'approved', { 
+        approvedAt: new Date() 
+      });
+
+      if (!success) {
+        console.log("Failed to update quote status for approval:", id);
+        return res.status(500).json({ message: "Erro ao aprovar orçamento" });
+      }
+
+      // Create notification for quote approval
+      try {
+        await storage.createNotification({
+          userId: quote.userId,
+          title: "Orçamento Aprovado",
+          message: `Seu orçamento ${quote.quoteNumber} foi aprovado pelo cliente!`,
+          type: "QUOTE_APPROVED",
+          data: { quoteId: quote.id, quoteNumber: quote.quoteNumber },
+          isRead: false,
+        });
+      } catch (notificationError) {
+        console.error("Error creating notification:", notificationError);
+        // Don't fail the approval if notification fails
+      }
+
+      console.log("Quote approved successfully:", id);
+      res.json({ message: "Orçamento aprovado com sucesso!", status: "approved" });
+    } catch (error) {
+      console.error("Error approving quote:", error);
+      res.status(500).json({ message: "Não foi possível aprovar o orçamento" });
+    }
+  });
+
+  // Reject quote (public)
+  app.patch('/api/quotes/:id/reject', async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { reason } = req.body;
+      console.log("Rejecting quote:", id, "with reason:", reason);
+
+      // Get quote first to validate it exists and check if it can be rejected
+      const quote = await storage.getQuoteById(id);
+      if (!quote) {
+        console.log("Quote not found for rejection:", id);
+        return res.status(404).json({ message: "Orçamento não encontrado" });
+      }
+
+      // Check if quote is still pending
+      if (quote.status !== 'pending') {
+        return res.status(400).json({ message: "Este orçamento não pode ser rejeitado" });
+      }
+
+      const success = await storage.updateQuoteStatus(id, 'rejected', { 
+        rejectedAt: new Date(),
+        rejectionReason: reason || null
+      });
+
+      if (!success) {
+        console.log("Failed to update quote status for rejection:", id);
+        return res.status(500).json({ message: "Erro ao rejeitar orçamento" });
+      }
+
+      // Create notification for quote rejection
+      try {
+        await storage.createNotification({
+          userId: quote.userId,
+          title: "Orçamento Rejeitado",
+          message: `Seu orçamento ${quote.quoteNumber} foi rejeitado pelo cliente.${reason ? ` Motivo: ${reason}` : ''}`,
+          type: "QUOTE_REJECTED",
+          data: { quoteId: quote.id, quoteNumber: quote.quoteNumber, reason },
+          isRead: false,
+        });
+      } catch (notificationError) {
+        console.error("Error creating notification:", notificationError);
+        // Don't fail the rejection if notification fails
+      }
+
+      console.log("Quote rejected successfully:", id);
+      res.json({ message: "Orçamento rejeitado com sucesso!", status: "rejected" });
+    } catch (error) {
+      console.error("Error rejecting quote:", error);
+      res.status(500).json({ message: "Não foi possível rejeitar o orçamento" });
+    }
+  });
+
+  // Confirm payment (authenticated)
+  app.patch('/api/quotes/:id/confirm-payment', isAuthenticated, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const userId = req.user.claims.sub;
+      
+      console.log("Confirming payment for quote:", id);
+
+      // Check if user has Premium plan for receipt functionality
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "Usuário não encontrado" });
+      }
+      
+      const isPremium = user.plan === "PREMIUM" || user.plan === "PREMIUM_CORTESIA";
+      const isExpired = user.planExpiresAt && new Date() > user.planExpiresAt;
+      
+      if (!isPremium || isExpired) {
+        return res.status(403).json({ message: "Funcionalidade de recibos disponível apenas para usuários Premium" });
+      }
+
+      // Get quote first to validate it exists and belongs to user
+      const quote = await storage.getQuoteById(id);
+      if (!quote) {
+        console.log("Quote not found for payment confirmation:", id);
+        return res.status(404).json({ message: "Orçamento não encontrado" });
+      }
+
+      // Check if quote belongs to the authenticated user
+      if (quote.userId !== userId) {
+        return res.status(403).json({ message: "Acesso negado" });
+      }
+
+      // Auto-approve quote if it's pending before marking as paid
+      if (quote.status === 'pending') {
+        console.log("Auto-approving pending quote before payment confirmation");
+        await storage.updateQuoteStatus(id, 'approved');
+      } else if (quote.status !== 'approved') {
+        return res.status(400).json({ message: "Apenas orçamentos pendentes ou aprovados podem ter pagamento confirmado" });
+      }
+
+      const success = await storage.updateQuoteStatus(id, 'paid', { 
+        paidAt: new Date() 
+      });
+
+      if (!success) {
+        console.log("Failed to update quote status to paid:", id);
+        return res.status(500).json({ message: "Erro ao confirmar pagamento" });
+      }
+
+      console.log("Payment confirmed successfully for quote:", id);
+      res.json({ message: "Pagamento confirmado com sucesso!", status: "paid" });
+    } catch (error) {
+      console.error("Error confirming payment:", error);
+      res.status(500).json({ message: "Não foi possível confirmar pagamento" });
     }
   });
 
@@ -256,18 +757,6 @@ Obrigado pela confiança!`;
     } catch (error) {
       console.error("Error updating quote status:", error);
       res.status(500).json({ message: "Failed to update quote status" });
-    }
-  });
-
-  // Dashboard stats
-  app.get('/api/dashboard/stats', isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = req.user.claims.sub;
-      const stats = await storage.getDashboardStats(userId);
-      res.json(stats);
-    } catch (error) {
-      console.error("Error fetching dashboard stats:", error);
-      res.status(500).json({ message: "Failed to fetch dashboard stats" });
     }
   });
 
