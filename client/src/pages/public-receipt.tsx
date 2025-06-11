@@ -337,7 +337,14 @@ _Gerado pelo Fechou! - www.meufechou.com.br_`;
         </Card>
 
         {/* Footer */}
-        <div className="text-center py-6">
+        <div className="text-center py-6 border-t border-gray-100">
+          <div className="flex justify-center mb-3">
+            <img 
+              src="https://replit.com/fs/c/attached_assets/ChatGPT%20Image%2011%20de%20jun.%20de%202025%2C%2016_19_11alterado.png" 
+              alt="Fechou!" 
+              className="h-8 object-contain"
+            />
+          </div>
           <p className="text-sm text-gray-500">
             Este documento comprova o pagamento do serviço prestado.
           </p>

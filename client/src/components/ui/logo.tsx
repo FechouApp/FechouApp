@@ -1,4 +1,4 @@
-import fechouLogoPath from "@assets/fundo transparente.png";
+import fechouLogoPath from "@assets/ChatGPT Image 11 de jun. de 2025, 16_19_11alterado.png";
 
 interface LogoProps {
   className?: string;

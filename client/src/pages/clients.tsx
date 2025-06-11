@@ -518,8 +518,8 @@ export default function Clients() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredClients.map((client) => (
-                      <TableRow key={client.id} className="hover:bg-gray-50">
+                    {filteredClients.map((client, index) => (
+                      <TableRow key={client.id} className={`hover:bg-gray-50 ${index > 0 ? 'border-t-2 border-gray-100' : ''}`}>
                         {/* Desktop view */}
                         <TableCell className="hidden md:table-cell">
                           <div className="flex items-center">
