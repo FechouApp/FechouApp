@@ -4,6 +4,7 @@ import { format, addDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import type { QuoteWithDetails, User } from '@/types';
 import { formatPhone, formatCPF, formatCEP } from './utils';
+import fechouLogoPath from "@assets/fundo transparente.png";
 
 interface PDFGeneratorOptions {
   quote: QuoteWithDetails;
@@ -35,6 +36,7 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
     doc.addPage();
     currentPage++;
     yPosition = marginTop;
+    addWatermark(); // Adicionar marca d'água na nova página
   };
 
   // Função para desenhar linha horizontal
@@ -48,6 +50,34 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
   const drawGrayBackground = (x: number, y: number, width: number, height: number) => {
     doc.setFillColor(230, 230, 230);
     doc.rect(x, y, width, height, 'F');
+  };
+
+  // Função para adicionar marca d'água para usuários gratuitos
+  const addWatermark = () => {
+    if (!isUserPremium) {
+      try {
+        // Salvar estado atual
+        const currentFillColor = doc.getFillColor();
+        const currentTextColor = doc.getTextColor();
+        
+        // Adicionar logo como marca d'água no centro da página
+        const logoSize = 60;
+        const logoX = (pageWidth - logoSize) / 2;
+        const logoY = (pageHeight - logoSize) / 2;
+        
+        // Adicionar logo com transparência
+        doc.setFillColor(255, 255, 255);
+        doc.setGlobalAlpha(0.1);
+        doc.addImage(fechouLogoPath, 'PNG', logoX, logoY, logoSize, logoSize);
+        doc.setGlobalAlpha(1.0);
+        
+        // Restaurar estado
+        doc.setFillColor(currentFillColor);
+        doc.setTextColor(currentTextColor);
+      } catch (error) {
+        console.error('Erro ao adicionar marca d\'água:', error);
+      }
+    }
   };
 
   // Função para formatar telefone corretamente
