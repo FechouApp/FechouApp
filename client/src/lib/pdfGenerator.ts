@@ -265,13 +265,13 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
   doc.text('SERVIÇOS OU PRODUTOS', marginLeft + 2, yPosition + 3);
   yPosition += 10;
 
-  // Cabeçalho da tabela otimizado
+  // Cabeçalho da tabela otimizado com campos maiores para valores
   const tableWidth = pageWidth - marginLeft - marginRight;
   const itemColWidth = 12;
-  const descColWidth = 110;
+  const descColWidth = 95;
   const qtyColWidth = 18;
-  const unitColWidth = 25;
-  const totalColWidth = 25;
+  const unitColWidth = 35;
+  const totalColWidth = 35;
 
   // Verificar se precisa de nova página
   if (checkPageBreak(15 + (quote.items?.length || 0) * 6)) {

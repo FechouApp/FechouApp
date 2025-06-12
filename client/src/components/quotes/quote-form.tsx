@@ -136,6 +136,20 @@ export default function QuoteForm({
 
   const handleSubmit = (action: 'preview' | 'save') => {
     if (!selectedClientId || !title || items.some(item => !item.description)) {
+      toast({
+        title: "Campos obrigatórios",
+        description: "Preencha todos os campos obrigatórios.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (items.some(item => !item.unitPrice.trim() || parseFloat(item.unitPrice) <= 0)) {
+      toast({
+        title: "Valor obrigatório", 
+        description: "Preencha o valor unitário de todos os itens.",
+        variant: "destructive",
+      });
       return;
     }
 

@@ -433,6 +433,15 @@ export default function NewQuote() {
       return;
     }
 
+    if (items.some(item => !item.unitPrice.trim() || parseFloat(item.unitPrice) <= 0)) {
+      toast({
+        title: "Valor obrigatório",
+        description: "Preencha o valor unitário de todos os itens.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (items.some(item => parseFloat(item.unitPrice) < 0)) {
       toast({
         title: "Valor inválido",
