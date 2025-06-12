@@ -161,6 +161,8 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
   doc.setFontSize(10);
   doc.text(`Nº ${quote.quoteNumber}`, pageWidth - marginRight, yPosition, { align: 'right' });
 
+  yPosition += 6;
+  drawHorizontalLine(yPosition, marginLeft, pageWidth - marginRight, 0.5);
   yPosition += 8;
 
   // Data compacta
@@ -173,8 +175,6 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
   doc.text(`Data: ${createdDate}`, marginLeft, yPosition);
   doc.text(`Válido até: ${validityDate}`, pageWidth - marginRight, yPosition, { align: 'right' });
 
-  yPosition += 4;
-  drawHorizontalLine(yPosition, marginLeft, pageWidth - marginRight, 0.5);
   yPosition += 8;
 
   // ========== DADOS DO CLIENTE ==========
@@ -358,7 +358,7 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
   }
 
   // Total final
-  drawHorizontalLine(yPosition - 1, pageWidth - 60, pageWidth - marginRight, 0.5);
+  drawHorizontalLine(yPosition - 1, pageWidth - 48, pageWidth - marginRight, 0.5);
   doc.setFontSize(12);
   doc.text('TOTAL:', pageWidth - 50, yPosition + 4, { align: 'right' });
   doc.text(`R$ ${parseFloat(quote.total).toFixed(2)}`, pageWidth - marginRight, yPosition + 4, { align: 'right' });
