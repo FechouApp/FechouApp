@@ -28,40 +28,7 @@ export default function Plans() {
     }
   }, [isAuthenticated, authLoading, toast]);
 
-  const updatePlanMutation = useMutation({
-    mutationFn: async (plan: string) => {
-      await apiRequest("PATCH", "/api/user/plan", { plan });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
-      toast({
-        title: "Sucesso",
-        description: "Plano atualizado com sucesso!",
-      });
-    },
-    onError: (error) => {
-      if (isUnauthorizedError(error)) {
-        toast({
-          title: "Unauthorized",
-          description: "You are logged out. Logging in again...",
-          variant: "destructive",
-        });
-        setTimeout(() => {
-          window.location.href = "/api/login";
-        }, 500);
-        return;
-      }
-      toast({
-        title: "Erro",
-        description: "Erro ao atualizar plano. Tente novamente.",
-        variant: "destructive",
-      });
-    },
-  });
 
-  const handleUpgrade = () => {
-    updatePlanMutation.mutate("PREMIUM");
-  };
 
   if (authLoading) {
     return <LoadingSpinner />;
@@ -81,22 +48,7 @@ export default function Plans() {
         <p className="text-gray-600">Escolha o plano ideal para o seu negócio</p>
       </div>
 
-      <Card className="bg-yellow-50 border-yellow-200 mb-8">
-        <CardContent className="p-4">
-          <div className="flex items-start gap-3">
-            <div className="w-6 h-6 bg-yellow-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-              <span className="text-yellow-600 text-xs font-bold">β</span>
-            </div>
-            <div>
-              <h3 className="font-semibold text-yellow-800 mb-1">Versão Beta</h3>
-              <p className="text-yellow-700 text-sm">
-                Estamos em fase beta! Por tempo limitado, você pode alternar entre os planos gratuitamente 
-                para testar todas as funcionalidades premium.
-              </p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+
 
       <div className="max-w-6xl mx-auto">
         <div className="grid lg:grid-cols-2 gap-8">
@@ -137,7 +89,7 @@ export default function Plans() {
                 variant={currentPlan === "FREE" ? "secondary" : "outline"}
                 disabled
               >
-                {currentPlan === "FREE" ? "Plano Atual" : "Fazer Downgrade"}
+                {currentPlan === "FREE" ? "Plano Atual" : "Plano Gratuito"}
               </Button>
             </CardContent>
           </Card>
@@ -183,21 +135,46 @@ export default function Plans() {
 
               <Button 
                 className="w-full" 
-                variant={currentPlan === "PREMIUM" ? "secondary" : "default"}
-                onClick={handleUpgrade}
-                disabled={updatePlanMutation.isPending}
+                variant={currentPlan === "PREMIUM" || currentPlan === "PREMIUM_CORTESIA" ? "secondary" : "default"}
+                disabled
               >
-                {currentPlan === "PREMIUM" ? "Plano Atual" : "Ativar Premium"}
+                {currentPlan === "PREMIUM" || currentPlan === "PREMIUM_CORTESIA" ? "Plano Atual" : "Entrar em Contato"}
               </Button>
 
-              {currentPlan === "FREE" && (
+              {!(currentPlan === "PREMIUM" || currentPlan === "PREMIUM_CORTESIA") && (
                 <p className="text-center text-sm text-gray-600 mt-3">
-                  7 dias grátis para testar
+                  Entre em contato para contratar
                 </p>
               )}
             </CardContent>
           </Card>
         </div>
+
+        {/* Beta Version Notice */}
+        <Card className="bg-blue-50 border-blue-200 mt-12 mx-auto max-w-4xl">
+          <CardContent className="p-6">
+            <div className="text-center">
+              <div className="flex items-center justify-center gap-2 mb-3">
+                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                  <span className="text-blue-600 text-sm font-bold">β</span>
+                </div>
+                <h3 className="text-lg font-semibold text-blue-800">Versão Beta</h3>
+              </div>
+              <p className="text-blue-700 mb-4 leading-relaxed">
+                O Fechou! ainda está em versão beta, trabalhando continuamente para melhorar sua experiência. 
+                Sua opinião é muito importante para nós!
+              </p>
+              <div className="bg-white rounded-lg p-4 border border-blue-200">
+                <p className="text-blue-800 font-medium mb-2">
+                  Tem dúvidas, problemas ou sugestões?
+                </p>
+                <p className="text-blue-700">
+                  Entre em contato conosco: <span className="font-semibold">suporte@meufechou.com.br</span>
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
