@@ -559,11 +559,13 @@ export default function NewQuote() {
                 <SelectValue placeholder="Selecione um cliente..." />
               </SelectTrigger>
               <SelectContent>
-                {clients?.map((client) => (
-                  <SelectItem key={client.id} value={client.id}>
-                    {client.name}
-                  </SelectItem>
-                ))}
+                {clients
+                  ?.sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'))
+                  .map((client) => (
+                    <SelectItem key={client.id} value={client.id}>
+                      {client.name}
+                    </SelectItem>
+                  ))}
               </SelectContent>
             </Select>
             {selectedClient && (

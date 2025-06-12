@@ -92,7 +92,7 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
         } else if (logoUrl.includes('data:image/gif')) {
           format = 'GIF';
         }
-        doc.addImage(logoUrl, format, marginLeft, yPosition, logoSize, logoSize);
+        doc.addImage(logoUrl, format, marginLeft + 10, yPosition, logoSize, logoSize);
         logoHeight = logoSize;
       }
     } catch (error) {
@@ -109,7 +109,7 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
   }
 
   // Informações da empresa - posição depende se há logo
-  const textStartX = logoHeight > 0 ? marginLeft + 65 : marginLeft;
+  const textStartX = logoHeight > 0 ? marginLeft + 75 : marginLeft;
   
   doc.setFontSize(12);
   doc.setFont('helvetica', 'bold');

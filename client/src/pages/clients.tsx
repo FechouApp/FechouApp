@@ -102,7 +102,7 @@ export default function Clients() {
 
   const updateClientMutation = useMutation({
     mutationFn: async ({ clientId, clientData }: { clientId: string; clientData: any }) => {
-      await apiRequest("PATCH", `/api/clients/${clientId}`, clientData);
+      await apiRequest("PUT", `/api/clients/${clientId}`, clientData);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/clients"] });
