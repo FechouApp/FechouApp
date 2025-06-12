@@ -44,11 +44,11 @@ export default function Plans() {
   });
 
   const currentPlan = user?.plan || "FREE";
-  const hasPremiumAccess = planLimits?.isPremium || false;
-  const isExpired = planLimits?.isExpired || false;
-  const planExpiresAt = planLimits?.planExpiresAt;
-  const quotesUsed = planLimits?.currentMonthQuotes || 0;
-  const quotesLimit = planLimits?.monthlyQuoteLimit;
+  const hasPremiumAccess = (planLimits as any)?.isPremium || false;
+  const isExpired = (planLimits as any)?.isExpired || false;
+  const planExpiresAt = (planLimits as any)?.planExpiresAt;
+  const quotesUsed = (planLimits as any)?.currentMonthQuotes || 0;
+  const quotesLimit = (planLimits as any)?.monthlyQuoteLimit;
 
   return (
     <div className="min-h-screen bg-gray-50 p-4">
@@ -198,15 +198,19 @@ export default function Plans() {
 
               <Button 
                 className="w-full" 
-                variant={currentPlan === "PREMIUM" || currentPlan === "PREMIUM_CORTESIA" ? "secondary" : "default"}
-                disabled={currentPlan === "PREMIUM" || currentPlan === "PREMIUM_CORTESIA"}
+                variant={hasPremiumAccess ? "secondary" : "default"}
+                disabled={hasPremiumAccess && !isExpired}
                 onClick={() => {
-                  if (!(currentPlan === "PREMIUM" || currentPlan === "PREMIUM_CORTESIA")) {
+                  if (!hasPremiumAccess || isExpired) {
                     window.open("https://www.mercadopago.com.br/subscriptions/checkout?preapproval_plan_id=2c9380849763dae001976518e1ce0072", "_blank");
                   }
                 }}
               >
-                {currentPlan === "PREMIUM" || currentPlan === "PREMIUM_CORTESIA" ? "Plano Atual" : "ATIVE AGORA"}
+                {hasPremiumAccess && !isExpired ? (
+                  currentPlan === "PREMIUM_CORTESIA" ? "Plano Cortesia Ativo" : "Plano Premium Ativo"
+                ) : (
+                  isExpired ? "RENOVAR AGORA" : "ATIVE AGORA"
+                )}
               </Button>
             </CardContent>
           </Card>
