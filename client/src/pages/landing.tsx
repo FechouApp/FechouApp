@@ -108,7 +108,11 @@ export default function Landing() {
                 </li>
                 <li className="flex items-center gap-3">
                   <CheckCircle className="w-5 h-5 text-green-500" />
-                  <span className="font-medium">Link personalizado</span>
+                  <span className="font-medium">Emissão de recibo</span>
+                </li>
+                <li className="flex items-center gap-3">
+                  <CheckCircle className="w-5 h-5 text-green-500" />
+                  <span className="font-medium">Relatórios estatísticos</span>
                 </li>
               </ul>
               <Button className="w-full brand-gradient text-white" onClick={handleLogin}>

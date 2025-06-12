@@ -84,8 +84,18 @@ export default function PlanComparison() {
       premium: true,
       icon: <Crown className="w-4 h-4" />
     },
-
-
+    {
+      name: "Emissão de recibo",
+      free: false,
+      premium: true,
+      icon: <Crown className="w-4 h-4" />
+    },
+    {
+      name: "Relatórios estatísticos",
+      free: false,
+      premium: true,
+      icon: <Crown className="w-4 h-4" />
+    },
     {
       name: "Notificações em tempo real",
       free: false,

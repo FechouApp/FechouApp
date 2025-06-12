@@ -530,6 +530,7 @@ export default function Reports() {
                         return null;
                       }}
                     />
+                    <ChartLegend />
                     <Line 
                       type="monotone" 
                       dataKey="total" 
