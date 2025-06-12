@@ -115,8 +115,11 @@ export default function Landing() {
                   <span className="font-medium">Relatórios estatísticos</span>
                 </li>
               </ul>
-              <Button className="w-full brand-gradient text-white" onClick={handleLogin}>
-                Começar Teste Grátis
+              <Button 
+                className="w-full brand-gradient text-white"
+                onClick={() => window.open("https://www.mercadopago.com.br/subscriptions/checkout?preapproval_plan_id=2c9380849763dae001976518e1ce0072", "_blank")}
+              >
+                ATIVE AGORA
                 <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
             </CardContent>

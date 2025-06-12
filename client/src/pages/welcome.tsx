@@ -10,11 +10,13 @@ export default function Welcome() {
 
   useEffect(() => {
     if (user) {
-      // Check if user has personal data filled
-      const hasPersonalData = user.company && user.phone && user.address;
+      // Check if user has essential personal data filled
+      const hasPersonalData = user.firstName && user.lastName && user.businessName && user.phone;
       if (!hasPersonalData) {
         setShowOnboarding(true);
       } else {
+        // User already has personal data, mark onboarding as completed and redirect
+        localStorage.setItem('fechou_onboarding_completed', 'true');
         setLocation('/');
       }
     }
