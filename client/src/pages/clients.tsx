@@ -251,7 +251,7 @@ export default function Clients() {
     client.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     client.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     client.phone.includes(searchTerm)
-  ) || [];
+  ).sort((a, b) => a.name.localeCompare(b.name)) || [];
 
   return (
     <div className="space-y-6">

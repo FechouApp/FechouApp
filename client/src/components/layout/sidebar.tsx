@@ -86,7 +86,7 @@ export default function Sidebar() {
                 }`}
               >
                 <Icon className="w-5 h-5" />
-                <span className="font-medium">{item.name}</span>
+                <span className="font-medium hidden lg:block">{item.name}</span>
               </button>
             );
           })}
