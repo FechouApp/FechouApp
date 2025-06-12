@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -52,6 +52,8 @@ export default function QuoteForm({
   const isUserPremium = (user as any)?.plan === "PREMIUM";
   const maxItemsForFreeUser = 3;
   const [selectedClientId, setSelectedClientId] = useState(existingQuote?.clientId || "");
+  const [clientSearch, setClientSearch] = useState("");
+  const [showClientDropdown, setShowClientDropdown] = useState(false);
   const [title, setTitle] = useState(existingQuote?.title || "");
   const [description, setDescription] = useState(existingQuote?.description || "");
   const [observations, setObservations] = useState(existingQuote?.observations || "");
@@ -73,6 +75,47 @@ export default function QuoteForm({
   );
   const [discount, setDiscount] = useState(existingQuote?.discount || "");
   const [attachments, setAttachments] = useState<File[]>([]);
+
+  // Filter clients based on search input
+  const filteredClients = clients.filter(client =>
+    client.name.toLowerCase().includes(clientSearch.toLowerCase())
+  ).sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'));
+
+  // Get selected client object
+  const currentSelectedClient = clients.find(client => client.id === selectedClientId);
+
+  // Initialize client search with existing client name if editing
+  useEffect(() => {
+    if (existingQuote?.clientId && clients.length > 0) {
+      const client = clients.find(c => c.id === existingQuote.clientId);
+      if (client) {
+        setClientSearch(client.name);
+      }
+    }
+  }, [existingQuote?.clientId, clients]);
+
+  // Handle client selection
+  const handleClientSelect = (client: Client) => {
+    setSelectedClientId(client.id);
+    setClientSearch(client.name);
+    setShowClientDropdown(false);
+  };
+
+  // Handle client search input
+  const handleClientSearchChange = (value: string) => {
+    setClientSearch(value);
+    setShowClientDropdown(true);
+    
+    // If search matches exactly one client, auto-select it
+    const exactMatch = clients.find(client => 
+      client.name.toLowerCase() === value.toLowerCase()
+    );
+    if (exactMatch) {
+      setSelectedClientId(exactMatch.id);
+    } else {
+      setSelectedClientId("");
+    }
+  };
 
   const addItem = () => {
     // Verificar limitação do plano gratuito
@@ -183,7 +226,6 @@ export default function QuoteForm({
     onSubmit(quoteData);
   };
 
-  const selectedClient = clients.find(client => client.id === selectedClientId);
   const canProceed = selectedClientId && title && items.every(item => item.description);
 
   return (
@@ -197,33 +239,55 @@ export default function QuoteForm({
         </CardHeader>
         <CardContent className="p-3 sm:p-4 pt-0 space-y-3 sm:space-y-4">
           <div className="grid grid-cols-1 gap-3 sm:gap-4">
-            <div>
+            <div className="relative">
               <Label className="text-sm font-medium text-gray-700 mb-2 block">Cliente *</Label>
-              <Select value={selectedClientId} onValueChange={setSelectedClientId}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Selecione um cliente..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {clients
-                    .sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'))
-                    .map((client) => (
-                      <SelectItem key={client.id} value={client.id}>
-                        {client.name}
-                      </SelectItem>
-                    ))}
-                </SelectContent>
-              </Select>
-              {selectedClient && (
+              <Input
+                value={clientSearch}
+                onChange={(e) => handleClientSearchChange(e.target.value)}
+                onFocus={() => setShowClientDropdown(true)}
+                placeholder="Digite o nome do cliente..."
+                className="w-full"
+                autoComplete="off"
+              />
+              
+              {/* Dropdown com clientes filtrados */}
+              {showClientDropdown && clientSearch && filteredClients.length > 0 && (
+                <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                  {filteredClients.map((client) => (
+                    <div
+                      key={client.id}
+                      onClick={() => handleClientSelect(client)}
+                      className="p-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0"
+                    >
+                      <p className="font-medium text-gray-900">{client.name}</p>
+                      <p className="text-sm text-gray-600">
+                        {client.email && `${client.email} • `}
+                        {client.phone}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Informações do cliente selecionado */}
+              {currentSelectedClient && (
                 <div className="mt-3 p-3 bg-gray-50 rounded-lg">
                   <p className="text-sm text-gray-600">
-                    {selectedClient.email && `${selectedClient.email} • `}
-                    {selectedClient.phone}
+                    {currentSelectedClient.email && `${currentSelectedClient.email} • `}
+                    {currentSelectedClient.phone}
                   </p>
-                  {selectedClient.city && selectedClient.state && (
+                  {currentSelectedClient.city && currentSelectedClient.state && (
                     <p className="text-sm text-gray-600">
-                      {selectedClient.city}, {selectedClient.state}
+                      {currentSelectedClient.city}, {currentSelectedClient.state}
                     </p>
                   )}
+                </div>
+              )}
+              
+              {/* Mensagem quando não há clientes correspondentes */}
+              {showClientDropdown && clientSearch && filteredClients.length === 0 && (
+                <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg p-3">
+                  <p className="text-sm text-gray-500">Nenhum cliente encontrado</p>
                 </div>
               )}
             </div>
