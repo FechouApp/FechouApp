@@ -79,9 +79,9 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
 
   const businessName = user.businessName || `${user.firstName} ${user.lastName}`.trim();
   
-  // Logo da empresa grande (se disponível)
+  // Logo da empresa (apenas para usuários premium)
   let logoHeight = 0;
-  if ((user as any)?.logoUrl) {
+  if (isUserPremium && (user as any)?.logoUrl) {
     try {
       const logoSize = 30;
       const logoUrl = (user as any).logoUrl;
@@ -100,12 +100,9 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
     }
   }
 
-  // Se não tem logo da empresa e é plano premium, deixar espaço reservado
-  // Se é plano gratuito, não mostrar nenhum logo no cabeçalho
-  if (logoHeight === 0 && !isUserPremium) {
-    logoHeight = 0; // Não reservar espaço para logo em plano gratuito
-  } else if (logoHeight === 0 && isUserPremium) {
-    logoHeight = 20; // Reservar espaço mínimo para logo em plano premium
+  // Para usuários premium sem logo, reservar espaço
+  if (logoHeight === 0 && isUserPremium) {
+    logoHeight = 20; // Reservar espaço para logo em plano premium
   }
 
   // Informações da empresa - posição depende se há logo
@@ -549,9 +546,9 @@ async function generateReceiptPDF({ quote, user, isUserPremium }: PDFGeneratorOp
 
   const businessName = user.businessName || `${user.firstName} ${user.lastName}`.trim();
   
-  // Logo da empresa ou sistema
+  // Logo da empresa (apenas para usuários premium)
   let logoHeight = 0;
-  if ((user as any)?.logoUrl) {
+  if (isUserPremium && (user as any)?.logoUrl) {
     try {
       const logoSize = 25;
       const logoUrl = (user as any).logoUrl;
@@ -570,12 +567,9 @@ async function generateReceiptPDF({ quote, user, isUserPremium }: PDFGeneratorOp
     }
   }
 
-  // Se não tem logo da empresa e é plano premium, deixar espaço reservado
-  // Se é plano gratuito, não mostrar nenhum logo no cabeçalho
-  if (logoHeight === 0 && !isUserPremium) {
-    logoHeight = 0; // Não reservar espaço para logo em plano gratuito
-  } else if (logoHeight === 0 && isUserPremium) {
-    logoHeight = 15; // Reservar espaço mínimo para logo em plano premium
+  // Para usuários premium sem logo, reservar espaço
+  if (logoHeight === 0 && isUserPremium) {
+    logoHeight = 15; // Reservar espaço para logo em plano premium
   }
 
   // Informações da empresa - posição depende se há logo
