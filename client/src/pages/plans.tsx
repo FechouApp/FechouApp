@@ -1,14 +1,17 @@
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import LoadingSpinner from "@/components/common/loading-spinner";
 import BackButton from "@/components/common/back-button";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { Crown, Check, X } from "lucide-react";
+import { Crown, Check, X, Calendar, Zap } from "lucide-react";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
 
 export default function Plans() {
   const { toast } = useToast();
@@ -34,10 +37,18 @@ export default function Plans() {
     return <LoadingSpinner />;
   }
 
+  // Get detailed plan information
+  const { data: planLimits } = useQuery({
+    queryKey: ["/api/user/plan-limits"],
+    enabled: !!user,
+  });
+
   const currentPlan = user?.plan || "FREE";
-  const quotesUsed = user?.monthlyQuotes || 0;
-  const quotesLimit = user?.quotesLimit || 5;
-  const quotesRemaining = Math.max(0, quotesLimit - quotesUsed);
+  const hasPremiumAccess = planLimits?.isPremium || false;
+  const isExpired = planLimits?.isExpired || false;
+  const planExpiresAt = planLimits?.planExpiresAt;
+  const quotesUsed = planLimits?.currentMonthQuotes || 0;
+  const quotesLimit = planLimits?.monthlyQuoteLimit;
 
   return (
     <div className="min-h-screen bg-gray-50 p-4">
@@ -46,6 +57,58 @@ export default function Plans() {
       <div className="text-center mb-8">
         <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-2">Planos</h1>
         <p className="text-gray-600">Escolha o plano ideal para o seu negócio</p>
+        
+        {/* Status atual do usuário */}
+        {currentPlan !== "FREE" && (
+          <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200 max-w-md mx-auto">
+            <div className="flex items-center justify-center gap-2 mb-2">
+              <Crown className="w-5 h-5 text-blue-600" />
+              <span className="font-semibold text-blue-800">
+                {currentPlan === "PREMIUM_CORTESIA" ? "Premium Cortesia" : "Premium"}
+              </span>
+              {hasPremiumAccess && <Badge variant="secondary">Ativo</Badge>}
+              {isExpired && <Badge variant="destructive">Expirado</Badge>}
+            </div>
+            
+            {hasPremiumAccess && (
+              <div className="text-center">
+                <p className="text-sm text-blue-700 mb-1">Orçamentos ilimitados este mês</p>
+                <p className="text-xs text-blue-600">{quotesUsed} orçamentos criados</p>
+                {planExpiresAt && currentPlan === "PREMIUM" && (
+                  <p className="text-xs text-blue-600 mt-1">
+                    Expira em: {format(new Date(planExpiresAt), "dd/MM/yyyy", { locale: ptBR })}
+                  </p>
+                )}
+                {currentPlan === "PREMIUM_CORTESIA" && (
+                  <p className="text-xs text-blue-600 mt-1">Sem data de expiração</p>
+                )}
+              </div>
+            )}
+            
+            {isExpired && (
+              <p className="text-xs text-red-600 text-center">
+                Plano expirado - acesso limitado ativado
+              </p>
+            )}
+          </div>
+        )}
+        
+        {currentPlan === "FREE" && (
+          <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200 max-w-md mx-auto">
+            <div className="text-center">
+              <p className="text-sm text-gray-700 mb-1">Plano Gratuito Ativo</p>
+              <p className="text-xs text-gray-600">
+                {quotesUsed} de {quotesLimit || 5} orçamentos utilizados este mês
+              </p>
+              <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
+                <div 
+                  className="bg-blue-600 h-2 rounded-full" 
+                  style={{ width: `${Math.min(100, ((quotesUsed / (quotesLimit || 5)) * 100))}%` }}
+                />
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
 

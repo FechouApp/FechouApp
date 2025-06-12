@@ -130,21 +130,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.patch('/api/admin/users/:userId/plan', isAuthenticated, isAdmin, async (req, res) => {
     try {
       const { userId } = req.params;
-      const { plan, paymentStatus, paymentMethod } = req.body;
+      const { plan, paymentStatus, paymentMethod, customExpiryDate } = req.body;
 
-      console.log("Updating user plan:", { userId, plan, paymentStatus, paymentMethod });
+      console.log("Updating user plan:", { userId, plan, paymentStatus, paymentMethod, customExpiryDate });
 
       const user = await storage.getUser(userId);
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
 
-      const planExpiresAt = plan === "PREMIUM" ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) : null;
+      let planExpiresAt = null;
+      
+      // Regras de expiração dos planos
+      if (plan === "PREMIUM") {
+        // Premium pago: 30 dias a partir da ativação
+        planExpiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+      } else if (plan === "PREMIUM_CORTESIA") {
+        // Premium cortesia: sem expiração (null)
+        planExpiresAt = null;
+      } else if (plan === "FREE") {
+        // Plano gratuito: sem expiração
+        planExpiresAt = null;
+      }
+
+      // Se for cancelamento manual e tiver data customizada
+      if (customExpiryDate && plan === "PREMIUM") {
+        planExpiresAt = new Date(customExpiryDate);
+      }
 
       const updatedUser = await storage.upsertUser({
         id: userId,
         plan,
-        paymentStatus,
+        paymentStatus: paymentStatus || "ativo",
         paymentMethod,
         planExpiresAt,
         updatedAt: new Date(),
@@ -265,13 +282,29 @@ _Gerado pelo Fechou! - www.meufechou.com.br_`;
         return res.status(404).json({ message: "User not found" });
       }
 
-      const isPremium = user.plan === "PREMIUM" || user.plan === "PREMIUM_CORTESIA";
+      // Verificar se o plano expirou
       const isExpired = user.planExpiresAt && new Date() > user.planExpiresAt;
+      
+      // Se o plano premium expirou, revertê-lo automaticamente para FREE
+      if (user.plan === "PREMIUM" && isExpired) {
+        await storage.upsertUser({
+          id: userId,
+          plan: "FREE",
+          planExpiresAt: null,
+          paymentStatus: "vencido",
+          updatedAt: new Date(),
+        });
+        user.plan = "FREE";
+        user.planExpiresAt = null;
+      }
+
+      // Determinar se o usuário tem acesso premium
+      const hasPremiumAccess = user.plan === "PREMIUM_CORTESIA" || 
+                              (user.plan === "PREMIUM" && !isExpired);
 
       let monthlyQuoteLimit, itemsPerQuoteLimit;
 
-      // PREMIUM_CORTESIA nunca expira
-      if (user.plan === "PREMIUM_CORTESIA" || (isPremium && !isExpired)) {
+      if (hasPremiumAccess) {
         monthlyQuoteLimit = null; // Unlimited
         itemsPerQuoteLimit = null; // Unlimited
       } else {
@@ -283,14 +316,13 @@ _Gerado pelo Fechou! - www.meufechou.com.br_`;
       }
 
       const currentMonthQuotes = user.quotesUsedThisMonth || 0;
-
-      const canCreateQuote = user.plan === "PREMIUM_CORTESIA" || 
-                            (isPremium && !isExpired) || 
-                            currentMonthQuotes < (monthlyQuoteLimit || 0);
+      const canCreateQuote = hasPremiumAccess || currentMonthQuotes < (monthlyQuoteLimit || 0);
 
       const response = {
         plan: user.plan,
-        isPremium: user.plan === "PREMIUM_CORTESIA" || (isPremium && !isExpired),
+        isPremium: hasPremiumAccess,
+        isExpired: isExpired && user.plan === "PREMIUM",
+        planExpiresAt: user.planExpiresAt,
         monthlyQuoteLimit,
         itemsPerQuoteLimit,
         currentMonthQuotes,

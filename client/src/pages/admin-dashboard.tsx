@@ -68,11 +68,12 @@ export default function AdminDashboard() {
   });
 
   const updatePlanMutation = useMutation({
-    mutationFn: async ({ userId, newPlan }: { userId: string; newPlan: string }) => {
+    mutationFn: async ({ userId, newPlan, customExpiryDate }: { userId: string; newPlan: string; customExpiryDate?: string }) => {
       return await apiRequest("PATCH", `/api/admin/users/${userId}/plan`, {
         plan: newPlan,
-        paymentStatus: "ativo",
-        paymentMethod: "manual"
+        paymentStatus: newPlan === "FREE" ? "vencido" : "ativo",
+        paymentMethod: "manual",
+        customExpiryDate
       });
     },
     onSuccess: () => {
@@ -113,7 +114,15 @@ export default function AdminDashboard() {
   });
 
   const handleTogglePlan = (user: User, planType: string) => {
-    updatePlanMutation.mutate({ userId: user.id, newPlan: planType });
+    if (planType === "PREMIUM" && user.plan === "PREMIUM") {
+      // Cancelamento manual - perguntar até que data manter
+      const expiryDate = prompt("Até que data manter o plano Premium? (YYYY-MM-DD)");
+      if (expiryDate) {
+        updatePlanMutation.mutate({ userId: user.id, newPlan: planType, customExpiryDate: expiryDate });
+      }
+    } else {
+      updatePlanMutation.mutate({ userId: user.id, newPlan: planType });
+    }
   };
 
   // Filter users based on search term
