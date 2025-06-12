@@ -75,6 +75,7 @@ export default function QuoteForm({
   );
   const [discount, setDiscount] = useState(existingQuote?.discount || "");
   const [attachments, setAttachments] = useState<File[]>([]);
+  const clientDropdownRef = useRef<HTMLDivElement>(null);
 
   // Filter clients based on search input
   const filteredClients = clients.filter(client =>
@@ -93,6 +94,18 @@ export default function QuoteForm({
       }
     }
   }, [existingQuote?.clientId, clients]);
+
+  // Handle clicking outside dropdown to close it
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (clientDropdownRef.current && !clientDropdownRef.current.contains(event.target as Node)) {
+        setShowClientDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   // Handle client selection
   const handleClientSelect = (client: Client) => {
@@ -239,7 +252,7 @@ export default function QuoteForm({
         </CardHeader>
         <CardContent className="p-3 sm:p-4 pt-0 space-y-3 sm:space-y-4">
           <div className="grid grid-cols-1 gap-3 sm:gap-4">
-            <div className="relative">
+            <div className="relative" ref={clientDropdownRef}>
               <Label className="text-sm font-medium text-gray-700 mb-2 block">Cliente *</Label>
               <Input
                 value={clientSearch}
