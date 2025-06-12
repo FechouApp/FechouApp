@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import LoadingSpinner from "@/components/common/loading-spinner";
 import BackButton from "@/components/common/back-button";
-import { useLocation } from "wouter";
+import { useLocation, Link } from "wouter";
 import { Crown, Lock, AlertTriangle, Eye, ArrowLeft } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -41,6 +41,16 @@ export default function Reports() {
 
   const { data: stats, isLoading: statsLoading } = useQuery({
     queryKey: ["/api/dashboard/stats"],
+    retry: false,
+  });
+
+  const { data: quotes } = useQuery({
+    queryKey: ["/api/quotes"],
+    retry: false,
+  });
+
+  const { data: reviews } = useQuery({
+    queryKey: ["/api/reviews"],
     retry: false,
   });
 
@@ -144,21 +154,11 @@ export default function Reports() {
     );
   }
 
-  const { data: quotes } = useQuery({
-    queryKey: ["/api/quotes"],
-    retry: false,
-  });
-
-  const { data: reviews } = useQuery({
-    queryKey: ["/api/reviews"],
-    retry: false,
-  });
-
   if (statsLoading) {
     return <LoadingSpinner />;
   }
 
-  const formatCurrency = (value) => {
+  const formatCurrency = (value: any) => {
     const num = typeof value === 'string' ? parseFloat(value) : value;
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
@@ -167,11 +167,11 @@ export default function Reports() {
   };
 
   const calculateMonthlyData = () => {
-    if (!quotes) return [];
+    if (!quotes || !Array.isArray(quotes)) return [];
 
     // Para mobile usar 6 meses, desktop 12 meses
     const monthsCount = isMobile ? 6 : 12;
-    const months = [];
+    const months: any[] = [];
     const now = new Date();
 
     for (let i = monthsCount - 1; i >= 0; i--) {
@@ -629,6 +629,7 @@ export default function Reports() {
                         return null;
                       }}
                     />
+                    <ChartLegend />
                     <Line 
                       type="monotone" 
                       dataKey="conversionRate" 
