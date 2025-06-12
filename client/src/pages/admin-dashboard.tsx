@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
@@ -54,6 +55,7 @@ export default function AdminDashboard() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [selectedTab, setSelectedTab] = useState("overview");
+  const [userSearchTerm, setUserSearchTerm] = useState("");
 
   const { data: users = [], isLoading: usersLoading } = useQuery<User[]>({
     queryKey: ["/api/admin/users"],
@@ -113,6 +115,19 @@ export default function AdminDashboard() {
   const handleTogglePlan = (user: User, planType: string) => {
     updatePlanMutation.mutate({ userId: user.id, newPlan: planType });
   };
+
+  // Filter users based on search term
+  const filteredUsers = useMemo(() => {
+    if (!userSearchTerm.trim()) return users;
+    
+    const searchLower = userSearchTerm.toLowerCase();
+    return users.filter(user => 
+      user.email.toLowerCase().includes(searchLower) ||
+      user.firstName?.toLowerCase().includes(searchLower) ||
+      user.lastName?.toLowerCase().includes(searchLower) ||
+      user.id.toLowerCase().includes(searchLower)
+    );
+  }, [users, userSearchTerm]);
 
   if (usersLoading || statsLoading) {
     return (
@@ -557,6 +572,166 @@ export default function AdminDashboard() {
                 </CardContent>
               </Card>
             </div>
+
+            {/* User Management Section */}
+            <Card>
+              <CardHeader>
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                  <CardTitle className="text-lg md:text-xl">Gerenciamento de Usuários</CardTitle>
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    <Input
+                      placeholder="Buscar por e-mail, nome ou ID..."
+                      value={userSearchTerm}
+                      onChange={(e) => setUserSearchTerm(e.target.value)}
+                      className="w-full sm:w-64"
+                    />
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => setUserSearchTerm("")}
+                      className="w-full sm:w-auto"
+                    >
+                      Limpar
+                    </Button>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="text-sm text-gray-600 mb-4">
+                  Mostrando {filteredUsers.length} de {users.length} usuários
+                </div>
+                
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Usuário</TableHead>
+                        <TableHead>Plano</TableHead>
+                        <TableHead>Orçamentos</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Cadastro</TableHead>
+                        <TableHead>Ações</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredUsers.map((user) => (
+                        <TableRow key={user.id}>
+                          <TableCell>
+                            <div>
+                              <p className="font-medium">{user.firstName || user.lastName ? `${user.firstName || ''} ${user.lastName || ''}`.trim() : 'Sem nome'}</p>
+                              <p className="text-sm text-gray-500">{user.email}</p>
+                              <p className="text-xs text-gray-400">ID: {user.id}</p>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <Badge 
+                              variant={
+                                user.plan === "PREMIUM" ? "default" :
+                                user.plan === "PREMIUM_CORTESIA" ? "secondary" :
+                                "outline"
+                              }
+                              className={
+                                user.plan === "PREMIUM" ? "bg-yellow-500 text-white" :
+                                user.plan === "PREMIUM_CORTESIA" ? "bg-purple-500 text-white" :
+                                ""
+                              }
+                            >
+                              {user.plan === "PREMIUM" ? "Premium Pago" :
+                               user.plan === "PREMIUM_CORTESIA" ? "Premium Cortesia" :
+                               "Gratuito"}
+                            </Badge>
+                            {user.planExpiresAt && (
+                              <p className="text-xs text-gray-500 mt-1">
+                                Expira: {format(new Date(user.planExpiresAt), "dd/MM/yyyy", { locale: ptBR })}
+                              </p>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            <div className="text-sm">
+                              <p>{user.quotesUsedThisMonth}/{user.quotesLimit}</p>
+                              <div className="w-16 bg-gray-200 rounded-full h-1.5 mt-1">
+                                <div 
+                                  className="bg-blue-500 h-1.5 rounded-full" 
+                                  style={{ 
+                                    width: `${Math.min((user.quotesUsedThisMonth / user.quotesLimit) * 100, 100)}%` 
+                                  }}
+                                ></div>
+                              </div>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <Badge 
+                              variant={user.paymentStatus === "ativo" ? "default" : "destructive"}
+                              className={user.paymentStatus === "ativo" ? "bg-green-500" : ""}
+                            >
+                              {user.paymentStatus === "ativo" ? "Ativo" : "Inativo"}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <p className="text-sm">
+                              {format(new Date(user.createdAt), "dd/MM/yyyy", { locale: ptBR })}
+                            </p>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex flex-col gap-1">
+                              {user.plan === "FREE" ? (
+                                <>
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => handleTogglePlan(user, "PREMIUM")}
+                                    disabled={updatePlanMutation.isPending}
+                                    className="text-xs"
+                                  >
+                                    Premium Pago
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => handleTogglePlan(user, "PREMIUM_CORTESIA")}
+                                    disabled={updatePlanMutation.isPending}
+                                    className="text-xs"
+                                  >
+                                    Premium Cortesia
+                                  </Button>
+                                </>
+                              ) : (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => handleTogglePlan(user, "FREE")}
+                                  disabled={updatePlanMutation.isPending}
+                                  className="text-xs"
+                                >
+                                  Tornar Gratuito
+                                </Button>
+                              )}
+                              {user.plan === "FREE" && user.quotesUsedThisMonth > 0 && (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => resetQuotesMutation.mutate(user.id)}
+                                  disabled={resetQuotesMutation.isPending}
+                                  className="text-xs"
+                                >
+                                  Reset Orçamentos
+                                </Button>
+                              )}
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+
+                {filteredUsers.length === 0 && userSearchTerm && (
+                  <div className="text-center py-8">
+                    <p className="text-gray-500">Nenhum usuário encontrado para "{userSearchTerm}"</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
           </TabsContent>
 
           {/* Financeiro */}
