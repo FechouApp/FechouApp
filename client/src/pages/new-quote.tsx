@@ -131,6 +131,65 @@ export default function NewQuote() {
     retry: false,
   });
 
+  // Filter clients based on search input with comprehensive search
+  const filteredClients = useMemo(() => {
+    if (!clientSearch.trim()) return [];
+    return (clients || []).filter(client =>
+      client.name.toLowerCase().includes(clientSearch.toLowerCase()) ||
+      client.email?.toLowerCase().includes(clientSearch.toLowerCase()) ||
+      client.phone.includes(clientSearch)
+    ).sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'));
+  }, [clients, clientSearch]);
+
+  // Get selected client object
+  const currentSelectedClient = clients?.find(client => client.id === selectedClientId);
+
+  // Handle client search input change
+  const handleClientSearchChange = (value: string) => {
+    setClientSearch(value);
+    setShowClientDropdown(true);
+    
+    // Auto-select if exact match found
+    if (value.trim() && clients) {
+      const exactMatch = clients.find(client => 
+        client.name.toLowerCase() === value.toLowerCase()
+      );
+      if (exactMatch) {
+        setSelectedClientId(exactMatch.id);
+      }
+    }
+  };
+
+  // Handle client selection from dropdown
+  const handleClientSelect = (client: Client) => {
+    setSelectedClientId(client.id);
+    setClientSearch(client.name);
+    setShowClientDropdown(false);
+    scrollToNextField('client-search');
+  };
+
+  // Handle clicking outside dropdown to close it
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (clientDropdownRef.current && !clientDropdownRef.current.contains(event.target as Node)) {
+        setShowClientDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Initialize client search with existing client name if editing
+  useEffect(() => {
+    if (selectedClientId && clients && clients.length > 0) {
+      const client = clients.find(c => c.id === selectedClientId);
+      if (client) {
+        setClientSearch(client.name);
+      }
+    }
+  }, [selectedClientId, clients]);
+
   // Check plan limits
   const { data: planLimits } = useQuery({
     queryKey: ["/api/user/plan-limits"],
@@ -517,8 +576,6 @@ export default function NewQuote() {
     return <LoadingSpinner />;
   }
 
-  const selectedClient = clients?.find(client => client.id === selectedClientId);
-  
   // Button should always be enabled, validations will show toasts
   const canProceed = !createQuoteMutation.isPending;
 
@@ -540,7 +597,7 @@ export default function NewQuote() {
       {/* Main Content */}
       <div className="p-3 space-y-4 pb-24">
         {/* Plan limit warning */}
-        {planLimits && !(planLimits as any).isPremium && !(planLimits as any).canCreateQuote && (
+        {planLimits && !(planLimits as any).isPremium && !(planLimits as any).canCreateQuote ? (
           <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg">
             <div className="flex items-start gap-2">
               <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
@@ -552,10 +609,14 @@ export default function NewQuote() {
               </div>
             </div>
           </div>
-        )}
+        ) : null}
 
         {/* Quick Setup */}
-        {(!clients || clients.length === 0) && <div><QuickSetup /></div>}
+        {(!clients || clients.length === 0) && (
+          <div>
+            <QuickSetup />
+          </div>
+        )}
 
         {/* Client Selection */}
         <Card>
@@ -563,27 +624,49 @@ export default function NewQuote() {
             <CardTitle className="text-base">Cliente *</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            <Select value={selectedClientId} onValueChange={(value) => {
-              setSelectedClientId(value);
-              scrollToNextField('client-select');
-            }}>
-              <SelectTrigger id="client-select">
-                <SelectValue placeholder="Selecione um cliente..." />
-              </SelectTrigger>
-              <SelectContent>
-                {clients
-                  ?.sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'))
-                  .map((client) => (
-                    <SelectItem key={client.id} value={client.id}>
-                      {client.name}
-                    </SelectItem>
+            <div className="relative" ref={clientDropdownRef}>
+              <Input
+                id="client-search"
+                value={clientSearch}
+                onChange={(e) => handleClientSearchChange(e.target.value)}
+                onFocus={() => setShowClientDropdown(true)}
+                placeholder="Digite o nome do cliente..."
+                className="w-full"
+                autoComplete="off"
+              />
+              
+              {/* Dropdown com clientes filtrados */}
+              {showClientDropdown && clientSearch && filteredClients.length > 0 && (
+                <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                  {filteredClients.map((client) => (
+                    <div
+                      key={client.id}
+                      onClick={() => handleClientSelect(client)}
+                      className="p-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0"
+                    >
+                      <p className="font-medium text-gray-900">{client.name}</p>
+                      <p className="text-sm text-gray-600">
+                        {client.email && `${client.email} • `}
+                        {client.phone}
+                      </p>
+                    </div>
                   ))}
-              </SelectContent>
-            </Select>
-            {selectedClient && (
+                </div>
+              )}
+
+              {/* Mensagem quando não há clientes correspondentes */}
+              {showClientDropdown && clientSearch && filteredClients.length === 0 && (
+                <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg p-3">
+                  <p className="text-sm text-gray-500">Nenhum cliente encontrado</p>
+                </div>
+              )}
+            </div>
+
+            {/* Informações do cliente selecionado */}
+            {currentSelectedClient && (
               <div className="p-2 bg-gray-50 rounded text-xs text-gray-600">
-                {selectedClient.email && `${selectedClient.email} • `}
-                {selectedClient.phone}
+                {currentSelectedClient.email && `${currentSelectedClient.email} • `}
+                {currentSelectedClient.phone}
               </div>
             )}
           </CardContent>
