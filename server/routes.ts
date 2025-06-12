@@ -519,12 +519,40 @@ _Gerado pelo Fechou! - www.meufechou.com.br_`;
   app.put('/api/quotes/:id', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      const quoteData = insertQuoteSchema.parse({ ...req.body, userId });
-      const quote = await storage.updateQuote(req.params.id, quoteData, userId);
-      if (!quote) {
+      const { items, ...quote } = req.body;
+      const id = req.params.id;
+
+      // Verificar se o orçamento existe e pertence ao usuário
+      const existingQuote = await storage.getQuote(id, userId);
+      if (!existingQuote) {
         return res.status(404).json({ message: "Quote not found" });
       }
-      res.json(quote);
+
+      // Serializar fotos para JSON string se existirem
+      const quoteData = { ...quote };
+      if (quote.photos && Array.isArray(quote.photos)) {
+        quoteData.photos = JSON.stringify(quote.photos);
+      }
+
+      // Atualizar o orçamento
+      const updatedQuote = await storage.updateQuote(id, quoteData, userId);
+
+      if (!updatedQuote) {
+        return res.status(404).json({ message: "Quote not found" });
+      }
+
+      // Deletar itens existentes e criar novos
+      await storage.deleteQuoteItems(id);
+      if (items && items.length > 0) {
+        await storage.createQuoteItems(items.map((item: any) => ({
+          ...item,
+          quoteId: id,
+        })));
+      }
+
+      // Retornar o orçamento atualizado com os itens
+      const completeQuote = await storage.getQuote(id, userId);
+      res.json(completeQuote);
     } catch (error) {
       console.error("Error updating quote:", error);
       res.status(500).json({ message: "Failed to update quote" });

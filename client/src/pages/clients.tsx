@@ -100,6 +100,38 @@ export default function Clients() {
     },
   });
 
+  const updateClientMutation = useMutation({
+    mutationFn: async ({ clientId, clientData }: { clientId: string; clientData: any }) => {
+      await apiRequest("PATCH", `/api/clients/${clientId}`, clientData);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/clients"] });
+      toast({
+        title: "Sucesso",
+        description: "Cliente atualizado com sucesso!",
+      });
+      setEditingClient(null);
+    },
+    onError: (error) => {
+      if (isUnauthorizedError(error)) {
+        toast({
+          title: "Unauthorized",
+          description: "You are logged out. Logging in again...",
+          variant: "destructive",
+        });
+        setTimeout(() => {
+          window.location.href = "/api/login";
+        }, 500);
+        return;
+      }
+      toast({
+        title: "Erro",
+        description: "Erro ao atualizar cliente. Tente novamente.",
+        variant: "destructive",
+      });
+    },
+  });
+
   const deleteClientMutation = useMutation({
     mutationFn: async (clientId: string) => {
       await apiRequest("DELETE", `/api/clients/${clientId}`);
@@ -357,9 +389,10 @@ export default function Clients() {
                   zipCode: formData.get('zipCode') as string,
                   notes: formData.get('notes') as string,
                 };
-                // Implementar updateClientMutation
-                console.log('Editando cliente:', clientData);
-                setEditingClient(null);
+                updateClientMutation.mutate({
+                  clientId: editingClient.id,
+                  clientData
+                });
               }} className="space-y-3">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
