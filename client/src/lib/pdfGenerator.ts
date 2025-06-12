@@ -168,60 +168,102 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
   doc.setFont('helvetica', 'normal');
   
   const createdDate = format(new Date(quote.createdAt || new Date()), 'dd/MM/yyyy', { locale: ptBR });
-  const validDate = format(new Date(quote.validUntil || new Date()), 'dd/MM/yyyy', { locale: ptBR });
+  const validityDate = format(new Date(quote.validUntil || new Date()), 'dd/MM/yyyy', { locale: ptBR });
   
   doc.text(`Data: ${createdDate}`, marginLeft, yPosition);
-  doc.text(`Válido até: ${validDate}`, pageWidth - marginRight, yPosition, { align: 'right' });
+  doc.text(`Válido até: ${validityDate}`, pageWidth - marginRight, yPosition, { align: 'right' });
 
   yPosition += 4;
   drawHorizontalLine(yPosition, marginLeft, pageWidth - marginRight, 0.5);
   yPosition += 8;
 
-  // ========== DADOS DO CLIENTE COMPACTOS ==========
+  // ========== DADOS DO CLIENTE ==========
+
+  // Fundo cinza para seção do cliente
+  doc.setFillColor(240, 240, 240);
+  doc.rect(marginLeft, yPosition - 2, pageWidth - marginLeft - marginRight, 8, 'F');
 
   doc.setFontSize(10);
   doc.setFont('helvetica', 'bold');
-  doc.text('CLIENTE:', marginLeft, yPosition);
+  doc.setTextColor(0, 0, 0);
+  doc.text('DADOS DO CLIENTE', marginLeft + 2, yPosition + 3);
   
+  yPosition += 10;
+
+  // Layout em duas colunas para dados do cliente
+  const leftColumnX = marginLeft + 2;
+  const rightColumnX = (pageWidth / 2) + 10;
+  
+  doc.setFontSize(8);
   doc.setFont('helvetica', 'normal');
-  doc.text(quote.client.name, marginLeft + 20, yPosition);
-  yPosition += 4;
-
-  // Linha de contatos do cliente
-  const clientContacts = [];
-  if (quote.client.phone) clientContacts.push(`Tel: ${formatPhoneNumber(quote.client.phone)}`);
-  if (quote.client.email) clientContacts.push(`Email: ${quote.client.email}`);
-  if ((quote.client as any).cpf) clientContacts.push(`CPF: ${formatCPF((quote.client as any).cpf)}`);
   
-  if (clientContacts.length > 0) {
-    doc.setFontSize(8);
-    doc.text(clientContacts.join(' | '), marginLeft, yPosition);
-    yPosition += 3;
+  // Coluna esquerda
+  let leftY = yPosition;
+  
+  doc.setFont('helvetica', 'bold');
+  doc.text('Razão social:', leftColumnX, leftY);
+  doc.setFont('helvetica', 'normal');
+  doc.text(quote.client.name, leftColumnX + 25, leftY);
+  leftY += 4;
+  
+  if ((quote.client as any).cpf) {
+    doc.setFont('helvetica', 'bold');
+    doc.text('CEP:', leftColumnX, leftY);
+    doc.setFont('helvetica', 'normal');
+    doc.text((quote.client as any).zipCode || '00000-000', leftColumnX + 25, leftY);
+    leftY += 4;
+  }
+  
+  if (quote.client.phone) {
+    doc.setFont('helvetica', 'bold');
+    doc.text('Telefone:', leftColumnX, leftY);
+    doc.setFont('helvetica', 'normal');
+    doc.text(formatPhoneNumber(quote.client.phone), leftColumnX + 25, leftY);
+    leftY += 4;
   }
 
-  // Endereço do cliente se disponível
+  // Coluna direita
+  let rightY = yPosition;
+  
   if (quote.client.address) {
-    let fullAddress = quote.client.address;
-    if ((quote.client as any).number) fullAddress += `, ${(quote.client as any).number}`;
-    if ((quote.client as any).neighborhood) fullAddress += `, ${(quote.client as any).neighborhood}`;
-    if ((quote.client as any).city) fullAddress += `, ${(quote.client as any).city}`;
-    if ((quote.client as any).state) fullAddress += `/${(quote.client as any).state}`;
-    if ((quote.client as any).cep) fullAddress += ` - ${(quote.client as any).cep}`;
-    
-    doc.text(fullAddress, marginLeft, yPosition);
-    yPosition += 3;
+    doc.setFont('helvetica', 'bold');
+    doc.text('Endereço:', rightColumnX, rightY);
+    doc.setFont('helvetica', 'normal');
+    let address = quote.client.address;
+    if ((quote.client as any).number) address += `, ${(quote.client as any).number}`;
+    doc.text(address, rightColumnX + 25, rightY);
+    rightY += 4;
+  }
+  
+  if ((quote.client as any).city && (quote.client as any).state) {
+    doc.setFont('helvetica', 'bold');
+    doc.text('Cidade/UF:', rightColumnX, rightY);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`${(quote.client as any).city}/${(quote.client as any).state}`, rightColumnX + 25, rightY);
+    rightY += 4;
+  }
+  
+  if (quote.client.email) {
+    doc.setFont('helvetica', 'bold');
+    doc.text('E-mail:', rightColumnX, rightY);
+    doc.setFont('helvetica', 'normal');
+    doc.text(quote.client.email, rightColumnX + 25, rightY);
+    rightY += 4;
   }
 
-  yPosition += 5;
-  drawHorizontalLine(yPosition, marginLeft, pageWidth - marginRight, 0.3);
-  yPosition += 8;
+  yPosition = Math.max(leftY, rightY) + 5;
 
-  // ========== TABELA DE ITENS COMPACTA ==========
+  // ========== SERVIÇOS OU PRODUTOS ==========
+
+  // Fundo cinza para seção de serviços
+  doc.setFillColor(240, 240, 240);
+  doc.rect(marginLeft, yPosition - 2, pageWidth - marginLeft - marginRight, 8, 'F');
 
   doc.setFontSize(10);
   doc.setFont('helvetica', 'bold');
-  doc.text('ITENS DO ORÇAMENTO', marginLeft, yPosition);
-  yPosition += 6;
+  doc.setTextColor(0, 0, 0);
+  doc.text('SERVIÇOS OU PRODUTOS', marginLeft + 2, yPosition + 3);
+  yPosition += 10;
 
   // Cabeçalho da tabela otimizado
   const tableWidth = pageWidth - marginLeft - marginRight;
@@ -348,38 +390,73 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
     yPosition += 4;
   }
 
-  // ========== PRAZO DE EXECUÇÃO ==========
+  // ========== PRAZO DE ENTREGA E VALIDADE ==========
 
-  if ((quote as any).executionDeadline) {
-    if (checkPageBreak(15)) {
-      addNewPage();
-    }
-
-    doc.setFontSize(9);
-    doc.setFont('helvetica', 'bold');
-    doc.text('PRAZO DE EXECUÇÃO:', marginLeft, yPosition);
-    yPosition += 4;
-
-    doc.setFont('helvetica', 'normal');
-    const splitTime = doc.splitTextToSize((quote as any).executionDeadline, pageWidth - marginLeft - marginRight);
-    splitTime.forEach((line: string) => {
-      if (checkPageBreak(3)) {
-        addNewPage();
-      }
-      doc.text(line, marginLeft, yPosition);
-      yPosition += 3;
-    });
-
-    yPosition += 4;
+  if (checkPageBreak(20)) {
+    addNewPage();
   }
+
+  // Seção prazo de entrega com fundo cinza
+  doc.setFillColor(240, 240, 240);
+  doc.rect(marginLeft, yPosition - 2, pageWidth - marginLeft - marginRight, 8, 'F');
+
+  doc.setFontSize(10);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(0, 0, 0);
+  doc.text('PRAZO DE ENTREGA:', marginLeft + 2, yPosition + 3);
+  
+  doc.setFontSize(8);
+  doc.setFont('helvetica', 'normal');
+  const prazoTexto = (quote as any).executionDeadline || 'A definir';
+  doc.text(prazoTexto, marginLeft + 35, yPosition + 3);
+  
+  yPosition += 12;
+
+  // Seção validade do orçamento com fundo cinza
+  doc.setFillColor(240, 240, 240);
+  doc.rect(marginLeft, yPosition - 2, pageWidth - marginLeft - marginRight, 8, 'F');
+
+  doc.setFontSize(10);
+  doc.setFont('helvetica', 'bold');
+  doc.text('VALIDADE DO ORÇAMENTO:', marginLeft + 2, yPosition + 3);
+  
+  doc.setFontSize(8);
+  doc.setFont('helvetica', 'normal');
+  const validUntilDate = format(new Date(quote.validUntil || new Date()), 'dd/MM/yyyy', { locale: ptBR });
+  doc.text(validUntilDate, marginLeft + 55, yPosition + 3);
+  
+  yPosition += 12;
+
+  // ========== RESUMO FINANCEIRO ==========
+
+  // Seção de valores em layout de tabela simples
+  doc.setFillColor(240, 240, 240);
+  doc.rect(marginLeft, yPosition - 2, pageWidth - marginLeft - marginRight, 8, 'F');
+
+  doc.setFontSize(10);
+  doc.setFont('helvetica', 'bold');
+  doc.text('SERVIÇOS:', marginLeft + 2, yPosition + 3);
+  doc.text(`R$ ${parseFloat(quote.total).toFixed(2)}`, pageWidth - marginRight - 30, yPosition + 3, { align: 'right' });
+  
+  yPosition += 10;
+
+  if (Number(quote.discount || 0) > 0) {
+    doc.text('DESCONTOS:', marginLeft + 2, yPosition + 3);
+    doc.text('0,00', pageWidth - marginRight - 30, yPosition + 3, { align: 'right' });
+    yPosition += 6;
+  }
+
+  // Total final com destaque
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(12);
+  doc.text('TOTAL:', marginLeft + 2, yPosition + 3);
+  doc.text(`R$ ${parseFloat(quote.total).toFixed(2)}`, pageWidth - marginRight - 30, yPosition + 3, { align: 'right' });
+  
+  yPosition += 15;
 
   // ========== CONDIÇÕES DE PAGAMENTO ==========
 
   if (quote.paymentTerms) {
-    if (checkPageBreak(15)) {
-      addNewPage();
-    }
-
     doc.setFontSize(9);
     doc.setFont('helvetica', 'bold');
     doc.text('CONDIÇÕES DE PAGAMENTO:', marginLeft, yPosition);
