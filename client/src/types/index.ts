@@ -7,6 +7,13 @@ export interface User {
   cpfCnpj: string | null;
   profession: string | null;
   businessName: string | null;
+  phone: string | null;
+  address: string | null;
+  cep: string | null;
+  numero: string | null;
+  complemento: string | null;
+  cidade: string | null;
+  estado: string | null;
   logoUrl: string | null;
   customDomain: string | null;
   plan: string;
@@ -15,6 +22,8 @@ export interface User {
   paymentGatewayId: string | null;
   monthlyQuotes: number;
   quotesLimit: number;
+  primaryColor: string | null;
+  secondaryColor: string | null;
   whatsappNotifications: boolean;
   emailNotifications: boolean;
   createdAt: Date | null;
@@ -84,7 +93,7 @@ export interface QuoteItem {
 export interface QuoteWithDetails extends Quote {
   client: Client;
   items: QuoteItem[];
-  photos?: QuotePhoto[];
+  photos?: any[];
 }
 
 export interface QuoteWithClient extends Quote {
