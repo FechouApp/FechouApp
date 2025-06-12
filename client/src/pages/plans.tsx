@@ -136,16 +136,15 @@ export default function Plans() {
               <Button 
                 className="w-full" 
                 variant={currentPlan === "PREMIUM" || currentPlan === "PREMIUM_CORTESIA" ? "secondary" : "default"}
-                disabled
+                disabled={currentPlan === "PREMIUM" || currentPlan === "PREMIUM_CORTESIA"}
+                onClick={() => {
+                  if (!(currentPlan === "PREMIUM" || currentPlan === "PREMIUM_CORTESIA")) {
+                    window.open("https://www.mercadopago.com.br/subscriptions/checkout?preapproval_plan_id=2c9380849763dae001976518e1ce0072", "_blank");
+                  }
+                }}
               >
-                {currentPlan === "PREMIUM" || currentPlan === "PREMIUM_CORTESIA" ? "Plano Atual" : "Entrar em Contato"}
+                {currentPlan === "PREMIUM" || currentPlan === "PREMIUM_CORTESIA" ? "Plano Atual" : "ATIVE AGORA"}
               </Button>
-
-              {!(currentPlan === "PREMIUM" || currentPlan === "PREMIUM_CORTESIA") && (
-                <p className="text-center text-sm text-gray-600 mt-3">
-                  Entre em contato para contratar
-                </p>
-              )}
             </CardContent>
           </Card>
         </div>
