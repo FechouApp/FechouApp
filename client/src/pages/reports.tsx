@@ -736,8 +736,8 @@ export default function Reports() {
             {topClients.map((client, index) => (
               <div key={index} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                 <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-sm">
-                    #{index + 1}
+                  <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                    {index + 1}
                   </div>
                   <div>
                     <p className="font-medium text-gray-800">{client.name}</p>

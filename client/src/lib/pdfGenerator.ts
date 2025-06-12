@@ -745,6 +745,28 @@ async function generateReceiptPDF({ quote, user, isUserPremium }: PDFGeneratorOp
   // Aplicar marca d'água
   addWatermark();
 
+  // Timestamp e IP do recibo
+  yPosition += 8;
+  doc.setFontSize(6);
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(120, 120, 120);
+  
+  const now = new Date();
+  const timestamp = now.toLocaleString('pt-BR', {
+    day: '2-digit',
+    month: '2-digit', 
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+  
+  // Obter IP do usuário (se disponível)
+  const userIP = (globalThis as any)?.userIP || 'N/A';
+  
+  doc.text(`Recibo emitido por Fechou! no dia ${timestamp}`, marginLeft, yPosition);
+  yPosition += 3;
+  doc.text(`IP Address: ${userIP}`, marginLeft, yPosition);
+
   // Rodapé
   doc.setFontSize(7);
   doc.setFont('helvetica', 'italic');

@@ -129,20 +129,22 @@ export default function AdminDashboard() {
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto px-4 py-6">
         {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-6">
+        <div className="mb-6 md:mb-8">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl flex items-center justify-center">
-                <Shield className="w-6 h-6 text-white" />
+              <div className="w-10 h-10 md:w-12 md:h-12 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl flex items-center justify-center">
+                <Shield className="w-5 h-5 md:w-6 md:h-6 text-white" />
               </div>
               <div>
-                <h1 className="text-3xl font-bold text-gray-800">Painel Administrativo</h1>
-                <p className="text-gray-600">Monitoramento completo do negócio</p>
+                <h1 className="text-xl md:text-3xl font-bold text-gray-800">Painel Administrativo</h1>
+                <p className="text-sm md:text-base text-gray-600">Monitoramento completo do negócio</p>
               </div>
             </div>
-            <div className="flex gap-2">
+            <div className="flex flex-col sm:flex-row gap-2">
               <Button 
                 variant="outline" 
+                size="sm"
+                className="w-full sm:w-auto"
                 onClick={() => {
                   queryClient.invalidateQueries();
                   toast({ title: "Dados atualizados", description: "Informações recarregadas com sucesso!" });
@@ -153,6 +155,8 @@ export default function AdminDashboard() {
               </Button>
               <Button 
                 variant="outline" 
+                size="sm"
+                className="w-full sm:w-auto"
                 onClick={async () => {
                   try {
                     await apiRequest("POST", "/api/admin/refresh-counts");
@@ -177,69 +181,69 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        <Tabs value={selectedTab} onValueChange={setSelectedTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="overview">Visão Geral</TabsTrigger>
-            <TabsTrigger value="users">Usuários</TabsTrigger>
-            <TabsTrigger value="financial">Financeiro</TabsTrigger>
-            <TabsTrigger value="analytics">Analytics</TabsTrigger>
+        <Tabs value={selectedTab} onValueChange={setSelectedTab} className="space-y-4 md:space-y-6">
+          <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 gap-1">
+            <TabsTrigger value="overview" className="text-xs md:text-sm">Visão Geral</TabsTrigger>
+            <TabsTrigger value="users" className="text-xs md:text-sm">Usuários</TabsTrigger>
+            <TabsTrigger value="financial" className="text-xs md:text-sm">Financeiro</TabsTrigger>
+            <TabsTrigger value="analytics" className="text-xs md:text-sm">Analytics</TabsTrigger>
           </TabsList>
 
           {/* Visão Geral */}
           <TabsContent value="overview" className="space-y-6">
             {/* KPIs Principais */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
               <Card className="bg-gradient-to-r from-blue-500 to-blue-600 text-white">
-                <CardContent className="p-6">
+                <CardContent className="p-4 md:p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-blue-100 text-sm font-medium">Total Usuários</p>
-                      <p className="text-3xl font-bold">{stats?.totalUsers || users.length}</p>
+                      <p className="text-blue-100 text-xs md:text-sm font-medium">Total Usuários</p>
+                      <p className="text-2xl md:text-3xl font-bold">{stats?.totalUsers || users.length}</p>
                       <p className="text-blue-100 text-xs mt-1">
                         +{stats?.userGrowthRate || 0}% este mês
                       </p>
                     </div>
-                    <Users className="w-8 h-8 text-blue-200" />
+                    <Users className="w-6 h-6 md:w-8 md:h-8 text-blue-200" />
                   </div>
                 </CardContent>
               </Card>
 
               <Card className="bg-gradient-to-r from-green-500 to-green-600 text-white">
-                <CardContent className="p-6">
+                <CardContent className="p-4 md:p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-green-100 text-sm font-medium">Receita Total</p>
-                      <p className="text-3xl font-bold">R$ {stats?.totalRevenue || "0,00"}</p>
+                      <p className="text-green-100 text-xs md:text-sm font-medium">Receita Total</p>
+                      <p className="text-2xl md:text-3xl font-bold">R$ {stats?.totalRevenue || "0,00"}</p>
                       <p className="text-green-100 text-xs mt-1">
                         R$ {stats?.monthlyRevenue || "0,00"} este mês
                       </p>
                     </div>
-                    <DollarSign className="w-8 h-8 text-green-200" />
+                    <DollarSign className="w-6 h-6 md:w-8 md:h-8 text-green-200" />
                   </div>
                 </CardContent>
               </Card>
 
               <Card className="bg-gradient-to-r from-purple-500 to-purple-600 text-white">
-                <CardContent className="p-6">
+                <CardContent className="p-4 md:p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-purple-100 text-sm font-medium">Orçamentos</p>
-                      <p className="text-3xl font-bold">{stats?.totalQuotes || 0}</p>
+                      <p className="text-purple-100 text-xs md:text-sm font-medium">Orçamentos</p>
+                      <p className="text-2xl md:text-3xl font-bold">{stats?.totalQuotes || 0}</p>
                       <p className="text-purple-100 text-xs mt-1">
                         {stats?.approvedQuotes || 0} aprovados
                       </p>
                     </div>
-                    <FileText className="w-8 h-8 text-purple-200" />
+                    <FileText className="w-6 h-6 md:w-8 md:h-8 text-purple-200" />
                   </div>
                 </CardContent>
               </Card>
 
               <Card className="bg-gradient-to-r from-orange-500 to-orange-600 text-white">
-                <CardContent className="p-6">
+                <CardContent className="p-4 md:p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-orange-100 text-sm font-medium">Taxa Conversão</p>
-                      <p className="text-3xl font-bold">{stats?.conversionRate || 0}%</p>
+                      <p className="text-orange-100 text-xs md:text-sm font-medium">Taxa Conversão</p>
+                      <p className="text-2xl md:text-3xl font-bold">{stats?.conversionRate || 0}%</p>
                       <p className="text-orange-100 text-xs mt-1">
                         Orçamentos → Vendas
                       </p>

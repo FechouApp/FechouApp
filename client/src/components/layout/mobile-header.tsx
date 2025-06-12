@@ -89,9 +89,6 @@ export default function MobileHeader() {
             <div className="brand-gradient p-6">
               <div className="flex items-center gap-3 mb-4">
                 <Logo size="sm" />
-                <div>
-                  <p className="text-white/80 text-sm">Feche negócios</p>
-                </div>
               </div>
               
               {/* User Info */}
