@@ -383,7 +383,7 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
   doc.setFontSize(8);
   doc.setFont('helvetica', 'normal');
   const prazoTexto = (quote as any).executionDeadline || 'A definir';
-  doc.text(prazoTexto, marginLeft + 40, yPosition + 3);
+  doc.text(prazoTexto, marginLeft + 50, yPosition + 3);
   
   yPosition += 12;
 
@@ -423,6 +423,47 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
     yPosition += 12;
   }
 
+  // ========== OBSERVAÇÕES ==========
+
+  if ((quote as any).observations) {
+    if (checkPageBreak(15)) {
+      addNewPage();
+    }
+
+    doc.setFillColor(240, 240, 240);
+    doc.rect(marginLeft, yPosition - 2, pageWidth - marginLeft - marginRight, 8, 'F');
+
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(0, 0, 0);
+    doc.text('OBSERVAÇÕES:', marginLeft + 2, yPosition + 3);
+    
+    doc.setFontSize(8);
+    doc.setFont('helvetica', 'normal');
+    
+    // Dividir observações em linhas se for muito longo
+    const maxWidth = pageWidth - marginLeft - marginRight - 4;
+    const splitNotes = doc.splitTextToSize((quote as any).observations, maxWidth);
+    
+    let obsY = yPosition + 3;
+    if (splitNotes.length === 1 && splitNotes[0].length < 60) {
+      // Se for curto, coloca na mesma linha
+      doc.text(splitNotes[0], marginLeft + 35, obsY);
+      yPosition += 12;
+    } else {
+      // Se for longo, coloca embaixo
+      yPosition += 10;
+      splitNotes.forEach((line: string) => {
+        if (checkPageBreak(3)) {
+          addNewPage();
+        }
+        doc.text(line, marginLeft + 2, yPosition);
+        yPosition += 3;
+      });
+      yPosition += 8;
+    }
+  }
+
   // ========== ASSINATURA COMPACTA ==========
 
   if (checkPageBreak(20)) {
@@ -450,32 +491,6 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
   doc.text(businessName, marginLeft, yPosition);
 
   yPosition += 15;
-
-  // ========== OBSERVAÇÕES ==========
-
-  if ((quote as any).observations) {
-    if (checkPageBreak(15)) {
-      addNewPage();
-    }
-
-    doc.setFontSize(9);
-    doc.setFont('helvetica', 'bold');
-    doc.setTextColor(0, 0, 0);
-    doc.text('OBSERVAÇÕES:', marginLeft, yPosition);
-    yPosition += 4;
-
-    doc.setFont('helvetica', 'normal');
-    const splitNotes = doc.splitTextToSize((quote as any).observations, pageWidth - marginLeft - marginRight);
-    splitNotes.forEach((line: string) => {
-      if (checkPageBreak(3)) {
-        addNewPage();
-      }
-      doc.text(line, marginLeft, yPosition);
-      yPosition += 3;
-    });
-
-    yPosition += 4;
-  }
 
   // Aplicar marca d'água na primeira página
   addWatermark();
