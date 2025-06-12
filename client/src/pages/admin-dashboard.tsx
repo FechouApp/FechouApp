@@ -248,7 +248,7 @@ export default function AdminDashboard() {
                         Orçamentos → Vendas
                       </p>
                     </div>
-                    <Target className="w-8 h-8 text-orange-200" />
+                    <Target className="w-6 h-6 md:w-8 md:h-8 text-orange-200" />
                   </div>
                 </CardContent>
               </Card>
