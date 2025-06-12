@@ -606,11 +606,17 @@ export default function Settings() {
                   )}
                 </div>
                 <p className="text-sm text-gray-600">
-                  {user?.quotesUsedThisMonth !== null && user?.quotesLimit ? `${user.quotesUsedThisMonth || 0}/${user.quotesLimit} orçamentos este mês` : "Orçamentos ilimitados"}
+                  {(user?.plan === "PREMIUM" || user?.plan === "PREMIUM_CORTESIA") ? 
+                    "Orçamentos ilimitados" : 
+                    `${user?.quotesUsedThisMonth || 0}/5 orçamentos este mês`
+                  }
                 </p>
               </div>
               {!(user?.plan === "PREMIUM" || user?.plan === "PREMIUM_CORTESIA") && (
-                <Button variant="outline">
+                <Button 
+                  variant="outline"
+                  onClick={() => window.open("https://www.mercadopago.com.br/subscriptions/checkout?preapproval_plan_id=2c9380849763dae001976518e1ce0072", "_blank")}
+                >
                   Fazer Upgrade
                 </Button>
               )}
@@ -621,17 +627,26 @@ export default function Settings() {
               <ul className="mt-2 space-y-1">
                 {(user?.plan === "PREMIUM" || user?.plan === "PREMIUM_CORTESIA") ? (
                   <>
-                    <li>✓ Orçamentos ilimitados</li>
-                    <li>✓ Upload de fotos nos orçamentos</li>
-                    <li>✓ Envio por WhatsApp</li>
-                    <li>✓ Suporte prioritário</li>
+                    <li>✓ Emissão de orçamentos ilimitados</li>
+                    <li>✓ Emissão de recibos ilimitados</li>
+                    <li>✓ Envio de recibos por WhatsApp</li>
+                    <li>✓ Logotipo no orçamento e no recibo</li>
+                    <li>✓ Relatórios estatísticos avançados</li>
+                    <li>✓ Salvamento de até 15 itens favoritos</li>
+                    <li>✓ Monitoramento de prazos</li>
+                    <li>✓ Suporte técnico prioritário</li>
+                    <li>✓ 7 dias de garantia com devolução</li>
                   </>
                 ) : (
                   <>
                     <li>✓ Até 5 orçamentos por mês</li>
-                    <li>✓ Envio por WhatsApp</li>
-                    <li>✗ Upload de fotos</li>
-                    <li>✗ Suporte prioritário</li>
+                    <li>✗ Recibos ilimitados</li>
+                    <li>✗ Envio de recibos por WhatsApp</li>
+                    <li>✗ Logotipo no orçamento e recibo</li>
+                    <li>✗ Relatórios estatísticos avançados</li>
+                    <li>✗ 15 itens favoritos salvos</li>
+                    <li>✗ Monitoramento de prazos</li>
+                    <li>✗ Suporte técnico prioritário</li>
                   </>
                 )}
               </ul>

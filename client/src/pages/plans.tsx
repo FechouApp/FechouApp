@@ -130,20 +130,32 @@ export default function Plans() {
                   <span className="text-gray-700">5 orçamentos por mês</span>
                 </li>
                 <li className="flex items-center gap-3">
-                  <Check className="w-5 h-5 text-green-500 flex-shrink-0" />
-                  <span className="text-gray-700">10 itens por orçamento</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <Check className="w-5 h-5 text-green-500 flex-shrink-0" />
-                  <span className="text-gray-700">Gerenciamento básico de clientes</span>
+                  <X className="w-5 h-5 text-red-500 flex-shrink-0" />
+                  <span className="text-gray-500">Recibos ilimitados</span>
                 </li>
                 <li className="flex items-center gap-3">
                   <X className="w-5 h-5 text-red-500 flex-shrink-0" />
-                  <span className="text-gray-500">Relatórios avançados</span>
+                  <span className="text-gray-500">Envio de recibos por WhatsApp</span>
+                </li>
+                <li className="flex items-center gap-3">
+                  <X className="w-5 h-5 text-red-500 flex-shrink-0" />
+                  <span className="text-gray-500">Logotipo no orçamento e recibo</span>
+                </li>
+                <li className="flex items-center gap-3">
+                  <X className="w-5 h-5 text-red-500 flex-shrink-0" />
+                  <span className="text-gray-500">Relatórios estatísticos avançados</span>
+                </li>
+                <li className="flex items-center gap-3">
+                  <X className="w-5 h-5 text-red-500 flex-shrink-0" />
+                  <span className="text-gray-500">15 itens favoritos salvos</span>
                 </li>
                 <li className="flex items-center gap-3">
                   <X className="w-5 h-5 text-red-500 flex-shrink-0" />
                   <span className="text-gray-500">Monitoramento de prazos</span>
+                </li>
+                <li className="flex items-center gap-3">
+                  <X className="w-5 h-5 text-red-500 flex-shrink-0" />
+                  <span className="text-gray-500">Suporte técnico prioritário</span>
                 </li>
               </ul>
 
@@ -176,23 +188,39 @@ export default function Plans() {
               <ul className="space-y-3 mb-8">
                 <li className="flex items-center gap-3">
                   <Check className="w-5 h-5 text-green-500 flex-shrink-0" />
-                  <span className="text-gray-700">Orçamentos ilimitados</span>
+                  <span className="text-gray-700">Emissão de orçamentos ilimitados</span>
                 </li>
                 <li className="flex items-center gap-3">
                   <Check className="w-5 h-5 text-green-500 flex-shrink-0" />
-                  <span className="text-gray-700">Itens ilimitados por orçamento</span>
+                  <span className="text-gray-700">Emissão de recibos ilimitados</span>
                 </li>
                 <li className="flex items-center gap-3">
                   <Check className="w-5 h-5 text-green-500 flex-shrink-0" />
-                  <span className="text-gray-700">Relatórios avançados e gráficos</span>
+                  <span className="text-gray-700">Envio de recibos por WhatsApp</span>
                 </li>
                 <li className="flex items-center gap-3">
                   <Check className="w-5 h-5 text-green-500 flex-shrink-0" />
-                  <span className="text-gray-700">Monitoramento de prazos vencendo</span>
+                  <span className="text-gray-700">Logotipo no orçamento e no recibo</span>
                 </li>
                 <li className="flex items-center gap-3">
                   <Check className="w-5 h-5 text-green-500 flex-shrink-0" />
-                  <span className="text-gray-700">Suporte prioritário</span>
+                  <span className="text-gray-700">Relatórios estatísticos avançados</span>
+                </li>
+                <li className="flex items-center gap-3">
+                  <Check className="w-5 h-5 text-green-500 flex-shrink-0" />
+                  <span className="text-gray-700">Salvamento de até 15 itens favoritos</span>
+                </li>
+                <li className="flex items-center gap-3">
+                  <Check className="w-5 h-5 text-green-500 flex-shrink-0" />
+                  <span className="text-gray-700">Monitoramento de prazos</span>
+                </li>
+                <li className="flex items-center gap-3">
+                  <Check className="w-5 h-5 text-green-500 flex-shrink-0" />
+                  <span className="text-gray-700">Suporte técnico prioritário</span>
+                </li>
+                <li className="flex items-center gap-3">
+                  <Check className="w-5 h-5 text-green-500 flex-shrink-0" />
+                  <span className="text-gray-700">7 dias de garantia com devolução</span>
                 </li>
               </ul>
 
