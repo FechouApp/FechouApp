@@ -4,13 +4,13 @@ import ReferralShare from "@/components/referral/referral-share";
 export default function ReferralsPage() {
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="container mx-auto px-4 py-6">
+      <div className="max-w-4xl mx-auto px-4 py-6">
         <BackButton />
         
         <div className="mt-6">
           <div className="mb-6">
-            <h1 className="text-2xl md:text-3xl font-bold text-gray-800">Sistema de Indicações</h1>
-            <p className="text-gray-600 mt-2">
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800">Sistema de Indicações</h1>
+            <p className="text-sm sm:text-base text-gray-600 mt-2">
               Indique amigos e ganhe recompensas incríveis no Fechou!
             </p>
           </div>

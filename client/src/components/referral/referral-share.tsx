@@ -103,13 +103,14 @@ export default function ReferralShare() {
                 <Input
                   value={referralCode || ""}
                   readOnly
-                  className="font-mono text-center text-lg font-bold"
+                  className="font-mono text-center text-sm sm:text-lg font-bold"
                 />
                 <Button
                   variant="outline"
                   size="icon"
                   onClick={() => copyToClipboard(referralCode || "")}
                   disabled={!referralCode}
+                  className="shrink-0"
                 >
                   <Copy className="w-4 h-4" />
                 </Button>
@@ -123,12 +124,13 @@ export default function ReferralShare() {
                 <Input
                   value={shareUrl}
                   readOnly
-                  className="text-sm"
+                  className="text-xs sm:text-sm"
                 />
                 <Button
                   variant="outline"
                   size="icon"
                   onClick={() => copyToClipboard(shareUrl)}
+                  className="shrink-0"
                 >
                   <Copy className="w-4 h-4" />
                 </Button>
@@ -136,10 +138,10 @@ export default function ReferralShare() {
             </div>
 
             {/* Botões de Compartilhamento */}
-            <div className="flex gap-2">
+            <div className="flex flex-col sm:flex-row gap-2">
               <Button
                 onClick={shareViaWhatsApp}
-                className="flex-1 bg-green-600 hover:bg-green-700"
+                className="w-full bg-green-600 hover:bg-green-700"
               >
                 <MessageCircle className="w-4 h-4 mr-2" />
                 Compartilhar no WhatsApp
@@ -147,7 +149,7 @@ export default function ReferralShare() {
               <Button
                 variant="outline"
                 onClick={() => copyToClipboard(shareText)}
-                className="flex-1"
+                className="w-full"
               >
                 <Copy className="w-4 h-4 mr-2" />
                 Copiar Mensagem
@@ -166,18 +168,18 @@ export default function ReferralShare() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-            <div className="text-center p-4 bg-blue-50 rounded-lg">
-              <div className="text-2xl font-bold text-blue-600">{user?.referralCount || 0}</div>
-              <div className="text-sm text-gray-600">Total de Indicações</div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-4">
+            <div className="text-center p-3 bg-blue-50 rounded-lg">
+              <div className="text-xl sm:text-2xl font-bold text-blue-600">{user?.referralCount || 0}</div>
+              <div className="text-xs sm:text-sm text-gray-600">Total de Indicações</div>
             </div>
-            <div className="text-center p-4 bg-green-50 rounded-lg">
-              <div className="text-2xl font-bold text-green-600">{user?.bonusQuotes || 0}</div>
-              <div className="text-sm text-gray-600">Orçamentos Bônus</div>
+            <div className="text-center p-3 bg-green-50 rounded-lg">
+              <div className="text-xl sm:text-2xl font-bold text-green-600">{user?.bonusQuotes || 0}</div>
+              <div className="text-xs sm:text-sm text-gray-600">Orçamentos Bônus</div>
             </div>
-            <div className="text-center p-4 bg-purple-50 rounded-lg">
-              <div className="text-2xl font-bold text-purple-600">{myReferrals.length}</div>
-              <div className="text-sm text-gray-600">Indicações Ativas</div>
+            <div className="text-center p-3 bg-purple-50 rounded-lg col-span-2 sm:col-span-1">
+              <div className="text-xl sm:text-2xl font-bold text-purple-600">{myReferrals.length}</div>
+              <div className="text-xs sm:text-sm text-gray-600">Indicações Ativas</div>
             </div>
           </div>
 
