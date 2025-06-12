@@ -6,6 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -41,6 +42,9 @@ export default function Quotes() {
   const [, setLocation] = useLocation();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [dateFilter, setDateFilter] = useState("all");
+  const [clientFilter, setClientFilter] = useState("all");
+  const [validityFilter, setValidityFilter] = useState("all");
 
   // Redirect to home if not authenticated
   useEffect(() => {
@@ -273,6 +277,9 @@ export default function Quotes() {
     }
   };
 
+  // Get unique clients for filter
+  const uniqueClients = quotes ? Array.from(new Set(quotes.map(q => q.client?.name).filter(Boolean))) : [];
+
   const filteredQuotes = quotes?.filter(quote => {
     const matchesSearch = searchTerm === '' || 
       quote.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -281,9 +288,59 @@ export default function Quotes() {
       (quote.client?.name || '').toLowerCase().includes(searchTerm.toLowerCase());
 
     const matchesStatus = statusFilter === 'all' || quote.status === statusFilter;
+    
+    const matchesClient = clientFilter === 'all' || quote.client?.name === clientFilter;
 
-    return matchesSearch && matchesStatus;
+    // Date filter logic
+    const matchesDate = (() => {
+      if (dateFilter === 'all') return true;
+      if (!quote.createdAt) return false;
+      
+      const quoteDate = new Date(quote.createdAt);
+      const today = new Date();
+      
+      switch (dateFilter) {
+        case 'today':
+          return quoteDate.toDateString() === today.toDateString();
+        case 'week':
+          const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+          return quoteDate >= weekAgo;
+        case 'month':
+          const monthAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
+          return quoteDate >= monthAgo;
+        case 'older':
+          const threeMonthsAgo = new Date(today.getTime() - 90 * 24 * 60 * 60 * 1000);
+          return quoteDate < threeMonthsAgo;
+        default:
+          return true;
+      }
+    })();
+
+    // Validity filter logic
+    const matchesValidity = (() => {
+      if (validityFilter === 'all') return true;
+      if (!quote.validUntil) return false;
+      
+      const validUntil = new Date(quote.validUntil);
+      const today = new Date();
+      const diffTime = validUntil.getTime() - today.getTime();
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      
+      switch (validityFilter) {
+        case 'expired':
+          return diffDays < 0;
+        case 'expiring':
+          return diffDays >= 0 && diffDays <= 7;
+        case 'valid':
+          return diffDays > 7;
+        default:
+          return true;
+      }
+    })();
+
+    return matchesSearch && matchesStatus && matchesClient && matchesDate && matchesValidity;
   })?.sort((a, b) => {
+    // Sort by creation date (newest first)
     const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
     const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
     return dateB - dateA;
@@ -333,9 +390,9 @@ export default function Quotes() {
                   className="pl-10"
                 />
               </div>
-              <div className="flex flex-col md:flex-row gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                 <select 
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-primary text-sm"
+                  className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-primary text-sm"
                   value={statusFilter}
                   onChange={(e) => setStatusFilter(e.target.value)}
                 >
@@ -344,11 +401,41 @@ export default function Quotes() {
                   <option value="pending">Pendente</option>
                   <option value="approved">Aprovado</option>
                   <option value="rejected">Recusado</option>
+                  <option value="paid">Pago</option>
                 </select>
-                <select className="flex-1 md:flex-none px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-primary text-sm">
-                  <option>Último mês</option>
-                  <option>Últimos 3 meses</option>
-                  <option>Último ano</option>
+
+                <select 
+                  className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-primary text-sm"
+                  value={dateFilter}
+                  onChange={(e) => setDateFilter(e.target.value)}
+                >
+                  <option value="all">Data de criação</option>
+                  <option value="today">Hoje</option>
+                  <option value="week">Última semana</option>
+                  <option value="month">Último mês</option>
+                  <option value="older">Mais antigos</option>
+                </select>
+
+                <select 
+                  className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-primary text-sm"
+                  value={clientFilter}
+                  onChange={(e) => setClientFilter(e.target.value)}
+                >
+                  <option value="all">Todos os clientes</option>
+                  {uniqueClients.map(client => (
+                    <option key={client} value={client}>{client}</option>
+                  ))}
+                </select>
+
+                <select 
+                  className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-primary text-sm"
+                  value={validityFilter}
+                  onChange={(e) => setValidityFilter(e.target.value)}
+                >
+                  <option value="all">Data de validade</option>
+                  <option value="expired">Expirados</option>
+                  <option value="expiring">Expirando (7 dias)</option>
+                  <option value="valid">Válidos</option>
                 </select>
               </div>
             </div>
