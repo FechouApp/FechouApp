@@ -27,6 +27,7 @@ import SavedItemsPage from "@/pages/saved-items";
 import ClientProfile from "@/pages/client-profile";
 import AdminPanel from "@/pages/admin-dashboard";
 import Welcome from "@/pages/welcome";
+import ReferralsPage from "@/pages/referrals";
 
 function Router() {
   const { isAuthenticated, isLoading, user } = useAuth();
@@ -90,6 +91,7 @@ function Router() {
       <Route path="/reports" component={Reports} />
       <Route path="/plans" component={Plans} />
       <Route path="/settings" component={Settings} />
+      <Route path="/referrals" component={ReferralsPage} />
       <Route path="/admin" component={AdminPanel} />
       <Route path="/welcome" component={Welcome} />
       <Route component={NotFound} />

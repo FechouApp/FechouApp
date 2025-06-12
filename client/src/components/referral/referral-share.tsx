@@ -15,13 +15,13 @@ export default function ReferralShare() {
   const [copied, setCopied] = useState(false);
 
   // Buscar código de indicação
-  const { data: referralData, isLoading } = useQuery({
+  const { data: referralData, isLoading } = useQuery<{ referralCode: string }>({
     queryKey: ["/api/referrals/my-code"],
     enabled: !!user
   });
 
   // Buscar minhas indicações
-  const { data: myReferrals = [] } = useQuery({
+  const { data: myReferrals = [] } = useQuery<any[]>({
     queryKey: ["/api/referrals/my-referrals"],
     enabled: !!user
   });

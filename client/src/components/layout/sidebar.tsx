@@ -9,7 +9,8 @@ import {
   Star, 
   Crown, 
   Settings, 
-  LogOut
+  LogOut,
+  Share2
 } from "lucide-react";
 import Logo from "@/components/ui/logo";
 
@@ -19,6 +20,7 @@ const navigation = [
   { name: "Orçamentos", href: "/quotes", icon: FileText },
   { name: "Novo Orçamento", href: "/new-quote", icon: Plus },
   { name: "Avaliações", href: "/reviews", icon: Star },
+  { name: "Indicações", href: "/referrals", icon: Share2 },
   { name: "Planos", href: "/plans", icon: Crown },
   { name: "Configurações", href: "/settings", icon: Settings },
 ];
