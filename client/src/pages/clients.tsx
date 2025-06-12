@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { useLocation } from "wouter";
@@ -64,7 +64,7 @@ export default function Clients() {
   }, [isAuthenticated, authLoading, toast]);
 
   const { data: clients, isLoading } = useQuery<Client[]>({
-    queryKey: ["/api/clients", searchTerm],
+    queryKey: ["/api/clients"],
     retry: false,
   });
 

@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -77,10 +77,15 @@ export default function QuoteForm({
   const [attachments, setAttachments] = useState<File[]>([]);
   const clientDropdownRef = useRef<HTMLDivElement>(null);
 
-  // Filter clients based on search input
-  const filteredClients = clients.filter(client =>
-    client.name.toLowerCase().includes(clientSearch.toLowerCase())
-  ).sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'));
+  // Filter clients based on search input with more comprehensive search
+  const filteredClients = useMemo(() => {
+    if (!clientSearch.trim()) return [];
+    return clients.filter(client =>
+      client.name.toLowerCase().includes(clientSearch.toLowerCase()) ||
+      client.email?.toLowerCase().includes(clientSearch.toLowerCase()) ||
+      client.phone.includes(clientSearch)
+    ).sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'));
+  }, [clients, clientSearch]);
 
   // Get selected client object
   const currentSelectedClient = clients.find(client => client.id === selectedClientId);
