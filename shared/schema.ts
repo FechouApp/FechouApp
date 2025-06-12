@@ -37,6 +37,11 @@ export const users = pgTable("users", {
   businessName: varchar("business_name"),
   phone: varchar("phone"),
   address: varchar("address"),
+  cep: varchar("cep"),
+  numero: varchar("numero"),
+  complemento: varchar("complemento"),
+  cidade: varchar("cidade"),
+  estado: varchar("estado"),
   logoUrl: text("logo_url"),
   customDomain: varchar("custom_domain").unique(),
   plan: varchar("plan").notNull().default("FREE"), // FREE, PREMIUM, PREMIUM_CORTESIA
