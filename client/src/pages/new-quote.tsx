@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
@@ -61,6 +61,8 @@ export default function NewQuote() {
   
   // Form states
   const [selectedClientId, setSelectedClientId] = useState("");
+  const [clientSearch, setClientSearch] = useState("");
+  const [showClientDropdown, setShowClientDropdown] = useState(false);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [observations, setObservations] = useState("");
@@ -74,6 +76,7 @@ export default function NewQuote() {
   ]);
   const [discount, setDiscount] = useState("");
   const [attachments, setAttachments] = useState<File[]>([]);
+  const clientDropdownRef = useRef<HTMLDivElement>(null);
   const [showFavorites, setShowFavorites] = useState(false);
 
   // Auto-scroll helper for mobile
