@@ -201,7 +201,7 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
   let leftY = yPosition;
   
   doc.setFont('helvetica', 'bold');
-  doc.text('Razão social:', leftColumnX, leftY);
+  doc.text('Nome:', leftColumnX, leftY);
   doc.setFont('helvetica', 'normal');
   doc.text(quote.client.name, leftColumnX + 25, leftY);
   leftY += 4;
@@ -365,31 +365,6 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
 
   yPosition += 12;
 
-  // ========== OBSERVAÇÕES COMPACTAS ==========
-
-  if ((quote as any).observations) {
-    if (checkPageBreak(15)) {
-      addNewPage();
-    }
-
-    doc.setFontSize(9);
-    doc.setFont('helvetica', 'bold');
-    doc.text('OBSERVAÇÕES:', marginLeft, yPosition);
-    yPosition += 4;
-
-    doc.setFont('helvetica', 'normal');
-    const splitNotes = doc.splitTextToSize((quote as any).observations, pageWidth - marginLeft - marginRight);
-    splitNotes.forEach((line: string) => {
-      if (checkPageBreak(3)) {
-        addNewPage();
-      }
-      doc.text(line, marginLeft, yPosition);
-      yPosition += 3;
-    });
-
-    yPosition += 4;
-  }
-
   // ========== PRAZO DE ENTREGA E VALIDADE ==========
 
   if (checkPageBreak(20)) {
@@ -408,7 +383,7 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
   doc.setFontSize(8);
   doc.setFont('helvetica', 'normal');
   const prazoTexto = (quote as any).executionDeadline || 'A definir';
-  doc.text(prazoTexto, marginLeft + 35, yPosition + 3);
+  doc.text(prazoTexto, marginLeft + 40, yPosition + 3);
   
   yPosition += 12;
 
@@ -427,52 +402,25 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
   
   yPosition += 12;
 
-  // ========== RESUMO FINANCEIRO ==========
 
-  // Seção de valores em layout de tabela simples
-  doc.setFillColor(240, 240, 240);
-  doc.rect(marginLeft, yPosition - 2, pageWidth - marginLeft - marginRight, 8, 'F');
-
-  doc.setFontSize(10);
-  doc.setFont('helvetica', 'bold');
-  doc.text('SERVIÇOS:', marginLeft + 2, yPosition + 3);
-  doc.text(`R$ ${parseFloat(quote.total).toFixed(2)}`, pageWidth - marginRight - 30, yPosition + 3, { align: 'right' });
-  
-  yPosition += 10;
-
-  if (Number(quote.discount || 0) > 0) {
-    doc.text('DESCONTOS:', marginLeft + 2, yPosition + 3);
-    doc.text('0,00', pageWidth - marginRight - 30, yPosition + 3, { align: 'right' });
-    yPosition += 6;
-  }
-
-  // Total final com destaque
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(12);
-  doc.text('TOTAL:', marginLeft + 2, yPosition + 3);
-  doc.text(`R$ ${parseFloat(quote.total).toFixed(2)}`, pageWidth - marginRight - 30, yPosition + 3, { align: 'right' });
-  
-  yPosition += 15;
 
   // ========== CONDIÇÕES DE PAGAMENTO ==========
 
   if (quote.paymentTerms) {
-    doc.setFontSize(9);
+    // Seção condições de pagamento com fundo cinza
+    doc.setFillColor(240, 240, 240);
+    doc.rect(marginLeft, yPosition - 2, pageWidth - marginLeft - marginRight, 8, 'F');
+
+    doc.setFontSize(10);
     doc.setFont('helvetica', 'bold');
-    doc.text('CONDIÇÕES DE PAGAMENTO:', marginLeft, yPosition);
-    yPosition += 4;
-
+    doc.setTextColor(0, 0, 0);
+    doc.text('CONDIÇÕES DE PAGAMENTO:', marginLeft + 2, yPosition + 3);
+    
+    doc.setFontSize(8);
     doc.setFont('helvetica', 'normal');
-    const splitTerms = doc.splitTextToSize(quote.paymentTerms, pageWidth - marginLeft - marginRight);
-    splitTerms.forEach((line: string) => {
-      if (checkPageBreak(3)) {
-        addNewPage();
-      }
-      doc.text(line, marginLeft, yPosition);
-      yPosition += 3;
-    });
-
-    yPosition += 4;
+    doc.text(quote.paymentTerms, marginLeft + 60, yPosition + 3);
+    
+    yPosition += 12;
   }
 
   // ========== ASSINATURA COMPACTA ==========
@@ -500,6 +448,34 @@ export async function generateQuotePDF({ quote, user, isUserPremium }: PDFGenera
   doc.setFontSize(9);
   doc.setFont('helvetica', 'bold');
   doc.text(businessName, marginLeft, yPosition);
+
+  yPosition += 15;
+
+  // ========== OBSERVAÇÕES ==========
+
+  if ((quote as any).observations) {
+    if (checkPageBreak(15)) {
+      addNewPage();
+    }
+
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(0, 0, 0);
+    doc.text('OBSERVAÇÕES:', marginLeft, yPosition);
+    yPosition += 4;
+
+    doc.setFont('helvetica', 'normal');
+    const splitNotes = doc.splitTextToSize((quote as any).observations, pageWidth - marginLeft - marginRight);
+    splitNotes.forEach((line: string) => {
+      if (checkPageBreak(3)) {
+        addNewPage();
+      }
+      doc.text(line, marginLeft, yPosition);
+      yPosition += 3;
+    });
+
+    yPosition += 4;
+  }
 
   // Aplicar marca d'água na primeira página
   addWatermark();
