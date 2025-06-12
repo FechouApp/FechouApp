@@ -143,19 +143,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Regras de expiração dos planos
       if (plan === "PREMIUM") {
-        // Premium pago: 30 dias a partir da ativação
-        planExpiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+        // Se não há data customizada, Premium ativo sem expiração (renovação automática)
+        if (!customExpiryDate) {
+          planExpiresAt = null; // Sem expiração para renovação automática
+        } else {
+          // Cancelamento manual com data específica
+          planExpiresAt = new Date(customExpiryDate);
+        }
       } else if (plan === "PREMIUM_CORTESIA") {
         // Premium cortesia: sem expiração (null)
         planExpiresAt = null;
       } else if (plan === "FREE") {
         // Plano gratuito: sem expiração
         planExpiresAt = null;
-      }
-
-      // Se for cancelamento manual e tiver data customizada
-      if (customExpiryDate && plan === "PREMIUM") {
-        planExpiresAt = new Date(customExpiryDate);
       }
 
       const updatedUser = await storage.upsertUser({
@@ -172,6 +172,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error updating user plan:", error);
       res.status(500).json({ message: "Failed to update user plan" });
+    }
+  });
+
+  // Endpoint para cancelamento manual de plano premium
+  app.patch('/api/admin/users/:userId/cancel', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const { cancelDate } = req.body;
+
+      console.log("Canceling user plan:", { userId, cancelDate });
+
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      if (user.plan !== "PREMIUM") {
+        return res.status(400).json({ message: "Only Premium plans can be cancelled" });
+      }
+
+      const updatedUser = await storage.upsertUser({
+        id: userId,
+        planExpiresAt: new Date(cancelDate),
+        paymentStatus: "cancelado",
+        updatedAt: new Date(),
+      });
+
+      console.log("User plan cancelled successfully:", updatedUser);
+      res.json(updatedUser);
+    } catch (error) {
+      console.error("Error cancelling user plan:", error);
+      res.status(500).json({ message: "Failed to cancel user plan" });
     }
   });
 

@@ -93,35 +93,46 @@ export default function AdminDashboard() {
     },
   });
 
-  const resetQuotesMutation = useMutation({
-    mutationFn: async (userId: string) => {
-      return await apiRequest(`/api/admin/users/${userId}/reset-quotes`, "PATCH");
+  const cancelPlanMutation = useMutation({
+    mutationFn: async ({ userId, cancelDate }: { userId: string; cancelDate: string }) => {
+      return await apiRequest("PATCH", `/api/admin/users/${userId}/cancel`, {
+        cancelDate
+      });
     },
     onSuccess: () => {
       toast({
         title: "Sucesso",
-        description: "Orçamentos resetados!",
+        description: "Plano cancelado com sucesso!",
       });
       queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/stats"] });
     },
     onError: (error) => {
       toast({
         title: "Erro",
-        description: `Falha ao resetar orçamentos: ${error.message}`,
+        description: `Falha ao cancelar plano: ${error.message}`,
         variant: "destructive",
       });
     },
   });
 
   const handleTogglePlan = (user: User, planType: string) => {
-    if (planType === "PREMIUM" && user.plan === "PREMIUM") {
-      // Cancelamento manual - perguntar até que data manter
-      const expiryDate = prompt("Até que data manter o plano Premium? (YYYY-MM-DD)");
-      if (expiryDate) {
-        updatePlanMutation.mutate({ userId: user.id, newPlan: planType, customExpiryDate: expiryDate });
+    updatePlanMutation.mutate({ userId: user.id, newPlan: planType });
+  };
+
+  const handleCancelPlan = (user: User) => {
+    const cancelDate = prompt("A partir de qual data cancelar o plano Premium? (YYYY-MM-DD)");
+    if (cancelDate) {
+      const date = new Date(cancelDate);
+      if (isNaN(date.getTime())) {
+        toast({
+          title: "Erro",
+          description: "Data inválida. Use o formato YYYY-MM-DD",
+          variant: "destructive",
+        });
+        return;
       }
-    } else {
-      updatePlanMutation.mutate({ userId: user.id, newPlan: planType });
+      cancelPlanMutation.mutate({ userId: user.id, cancelDate });
     }
   };
 
@@ -649,23 +660,39 @@ export default function AdminDashboard() {
                                user.plan === "PREMIUM_CORTESIA" ? "Premium Cortesia" :
                                "Gratuito"}
                             </Badge>
+                            {user.plan === "PREMIUM" && !user.planExpiresAt && (
+                              <p className="text-xs text-green-600 mt-1">
+                                Renovação automática
+                              </p>
+                            )}
                             {user.planExpiresAt && (
-                              <p className="text-xs text-gray-500 mt-1">
-                                Expira: {format(new Date(user.planExpiresAt), "dd/MM/yyyy", { locale: ptBR })}
+                              <p className="text-xs text-orange-600 mt-1">
+                                {user.paymentStatus === "cancelado" ? "Cancela em:" : "Expira:"} {format(new Date(user.planExpiresAt), "dd/MM/yyyy", { locale: ptBR })}
+                              </p>
+                            )}
+                            {user.plan === "PREMIUM_CORTESIA" && (
+                              <p className="text-xs text-purple-600 mt-1">
+                                Sem expiração
                               </p>
                             )}
                           </TableCell>
                           <TableCell>
                             <div className="text-sm">
-                              <p>{user.quotesUsedThisMonth}/{user.quotesLimit}</p>
-                              <div className="w-16 bg-gray-200 rounded-full h-1.5 mt-1">
-                                <div 
-                                  className="bg-blue-500 h-1.5 rounded-full" 
-                                  style={{ 
-                                    width: `${Math.min((user.quotesUsedThisMonth / user.quotesLimit) * 100, 100)}%` 
-                                  }}
-                                ></div>
-                              </div>
+                              {(user.plan === "PREMIUM" || user.plan === "PREMIUM_CORTESIA") && !user.planExpiresAt ? (
+                                <p className="text-green-600 font-medium">Ilimitados</p>
+                              ) : (
+                                <>
+                                  <p>{user.quotesUsedThisMonth}/{user.quotesLimit || 5}</p>
+                                  <div className="w-16 bg-gray-200 rounded-full h-1.5 mt-1">
+                                    <div 
+                                      className="bg-blue-500 h-1.5 rounded-full" 
+                                      style={{ 
+                                        width: `${Math.min((user.quotesUsedThisMonth / (user.quotesLimit || 5)) * 100, 100)}%` 
+                                      }}
+                                    ></div>
+                                  </div>
+                                </>
+                              )}
                             </div>
                           </TableCell>
                           <TableCell>
@@ -715,15 +742,15 @@ export default function AdminDashboard() {
                                   Tornar Gratuito
                                 </Button>
                               )}
-                              {user.plan === "FREE" && user.quotesUsedThisMonth > 0 && (
+                              {user.plan === "PREMIUM" && (
                                 <Button
                                   size="sm"
-                                  variant="outline"
-                                  onClick={() => resetQuotesMutation.mutate(user.id)}
-                                  disabled={resetQuotesMutation.isPending}
+                                  variant="destructive"
+                                  onClick={() => handleCancelPlan(user)}
+                                  disabled={cancelPlanMutation.isPending}
                                   className="text-xs"
                                 >
-                                  Reset Orçamentos
+                                  Cancelar Plano
                                 </Button>
                               )}
                             </div>
