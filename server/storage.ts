@@ -6,7 +6,9 @@ import {
   reviews,
   payments,
   notifications,
-  savedItems, // ADDED
+  savedItems,
+  referrals,
+  userActivityLog,
   type User,
   type UpsertUser,
   type InsertClient,
@@ -21,8 +23,12 @@ import {
   type Payment,
   type InsertNotification,
   type Notification,
-  type InsertSavedItem, // ADDED
-  type SavedItem, // ADDED
+  type InsertSavedItem,
+  type SavedItem,
+  type InsertReferral,
+  type Referral,
+  type InsertUserActivityLog,
+  type UserActivityLog,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, count, sql, and, or, like, asc, gte, lte } from "drizzle-orm";
@@ -36,6 +42,19 @@ export interface IStorage {
   addReferralBonus(userId: string): Promise<User>;
   updateUserColors(id: string, primaryColor: string, secondaryColor: string): Promise<User>;
   updateUserProfile(id: string, profileData: Partial<User>): Promise<User>;
+  generateReferralCode(userId: string): Promise<string>;
+  getUserByReferralCode(referralCode: string): Promise<User | undefined>;
+
+  // Referral operations
+  createReferral(referral: InsertReferral): Promise<Referral>;
+  getReferrals(userId: string): Promise<Referral[]>;
+  updateReferralStatus(id: string, status: string, rewardData?: any): Promise<Referral | undefined>;
+  processReferralReward(referralId: string): Promise<boolean>;
+
+  // Activity Log operations
+  logUserActivity(activity: InsertUserActivityLog): Promise<UserActivityLog>;
+  getUserActivity(userId: string, limit?: number): Promise<UserActivityLog[]>;
+  getActivityByAction(action: string, startDate?: Date, endDate?: Date): Promise<UserActivityLog[]>;
 
   // Client operations
   getClients(userId: string): Promise<Client[]>;

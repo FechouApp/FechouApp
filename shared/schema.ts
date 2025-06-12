@@ -52,6 +52,8 @@ export const users = pgTable("users", {
   quotesLimit: integer("quotes_limit").notNull().default(5),
   bonusQuotes: integer("bonus_quotes").notNull().default(0), // Orçamentos bonus por indicações
   referralCount: integer("referral_count").notNull().default(0), // Contador de indicações
+  referralCode: varchar("referral_code").unique(), // Código único de indicação do usuário
+  referredBy: varchar("referred_by"), // ID do usuário que indicou este usuário
   whatsappNotifications: boolean("whatsapp_notifications").notNull().default(true),
   emailNotifications: boolean("email_notifications").notNull().default(true),
   primaryColor: varchar("primary_color").default("#3B82F6"), // Cor personalizada Premium
@@ -307,6 +309,41 @@ export const insertQuoteAttachmentSchema = createInsertSchema(quoteAttachments).
   createdAt: true,
 });
 
+// Referrals table - Sistema de indicações
+export const referrals = pgTable("referrals", {
+  id: varchar("id").primaryKey().notNull(),
+  referrerId: varchar("referrer_id").notNull(), // Quem indicou
+  referredId: varchar("referred_id").notNull(), // Quem foi indicado
+  referralCode: varchar("referral_code").notNull(), // Código usado na indicação
+  status: varchar("status").notNull().default("pending"), // pending, completed, rewarded
+  rewardType: varchar("reward_type"), // bonus_quote, premium_extension
+  rewardValue: integer("reward_value"), // quantidade do bônus
+  completedAt: timestamp("completed_at"), // quando o indicado se cadastrou
+  rewardedAt: timestamp("rewarded_at"), // quando o bônus foi dado
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// User Activity Log - Log de ações do usuário
+export const userActivityLog = pgTable("user_activity_log", {
+  id: varchar("id").primaryKey().notNull(),
+  userId: varchar("user_id").notNull(),
+  action: varchar("action").notNull(), // login, create_quote, send_quote, upgrade_plan, etc.
+  category: varchar("category").notNull(), // authentication, quote, payment, referral, etc.
+  details: jsonb("details"), // dados adicionais da ação
+  metadata: jsonb("metadata"), // browser, IP, device info
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertReferralSchema = createInsertSchema(referrals).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertUserActivityLogSchema = createInsertSchema(userActivityLog).omit({
+  id: true,
+  createdAt: true,
+});
+
 // Types
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
@@ -327,3 +364,7 @@ export type SavedItem = typeof savedItems.$inferSelect;
 
 export type InsertQuoteAttachment = z.infer<typeof insertQuoteAttachmentSchema>;
 export type QuoteAttachment = typeof quoteAttachments.$inferSelect;
+export type InsertReferral = z.infer<typeof insertReferralSchema>;
+export type Referral = typeof referrals.$inferSelect;
+export type InsertUserActivityLog = z.infer<typeof insertUserActivityLogSchema>;
+export type UserActivityLog = typeof userActivityLog.$inferSelect;
