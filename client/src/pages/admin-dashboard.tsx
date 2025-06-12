@@ -10,7 +10,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { 
   Shield, Users, TrendingUp, DollarSign, FileText, Calendar,
   Activity, RefreshCw, Settings, AlertTriangle, CheckCircle,
-  XCircle, Clock, BarChart3, PieChart, Target, Zap
+  XCircle, Clock, BarChart3, PieChart, Target, Zap, Crown
 } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -328,186 +328,235 @@ export default function AdminDashboard() {
           </TabsContent>
 
           {/* Usuários */}
-          <TabsContent value="users" className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+          <TabsContent value="users" className="space-y-4 md:space-y-6">
+            {/* Métricas Principais de Usuários */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6">
               <Card>
-                <CardContent className="p-6">
+                <CardContent className="p-4 md:p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-gray-600">Premium Pago</p>
-                      <p className="text-3xl font-bold text-yellow-600">
+                      <p className="text-xs md:text-sm font-medium text-gray-600">Total Usuários</p>
+                      <p className="text-2xl md:text-3xl font-bold text-blue-600">{users.length}</p>
+                    </div>
+                    <Users className="w-6 h-6 md:w-8 md:h-8 text-blue-600" />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardContent className="p-4 md:p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-xs md:text-sm font-medium text-gray-600">Premium Pago</p>
+                      <p className="text-2xl md:text-3xl font-bold text-yellow-600">
                         {users.filter(u => u.plan === "PREMIUM").length}
                       </p>
-                    </div>
-                    <Zap className="w-8 h-8 text-yellow-600" />
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-gray-600">Premium Cortesia</p>
-                      <p className="text-3xl font-bold text-purple-600">
-                        {users.filter(u => u.plan === "PREMIUM_CORTESIA").length}
-                      </p>
-                    </div>
-                    <Zap className="w-8 h-8 text-purple-600" />
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-gray-600">Usuários Gratuitos</p>
-                      <p className="text-3xl font-bold text-gray-600">
-                        {users.filter(u => u.plan === "FREE").length}
-                      </p>
-                    </div>
-                    <Users className="w-8 h-8 text-gray-600" />
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-gray-600">Taxa Premium</p>
-                      <p className="text-3xl font-bold text-blue-600">
+                      <p className="text-xs text-gray-500">
                         {users.length > 0 ? Math.round((users.filter(u => u.plan === "PREMIUM").length / users.length) * 100) : 0}%
                       </p>
                     </div>
-                    <PieChart className="w-8 h-8 text-blue-600" />
+                    <Crown className="w-6 h-6 md:w-8 md:h-8 text-yellow-600" />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardContent className="p-4 md:p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-xs md:text-sm font-medium text-gray-600">Premium Cortesia</p>
+                      <p className="text-2xl md:text-3xl font-bold text-purple-600">
+                        {users.filter(u => u.plan === "PREMIUM_CORTESIA").length}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        {users.length > 0 ? Math.round((users.filter(u => u.plan === "PREMIUM_CORTESIA").length / users.length) * 100) : 0}%
+                      </p>
+                    </div>
+                    <Zap className="w-6 h-6 md:w-8 md:h-8 text-purple-600" />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardContent className="p-4 md:p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-xs md:text-sm font-medium text-gray-600">Usuários Gratuitos</p>
+                      <p className="text-2xl md:text-3xl font-bold text-gray-600">
+                        {users.filter(u => u.plan === "FREE").length}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        {users.length > 0 ? Math.round((users.filter(u => u.plan === "FREE").length / users.length) * 100) : 0}%
+                      </p>
+                    </div>
+                    <Users className="w-6 h-6 md:w-8 md:h-8 text-gray-600" />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardContent className="p-4 md:p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-xs md:text-sm font-medium text-gray-600">Usuários Ativos</p>
+                      <p className="text-2xl md:text-3xl font-bold text-green-600">
+                        {users.filter(u => u.quotesUsedThisMonth > 0).length}
+                      </p>
+                      <p className="text-xs text-gray-500">Este mês</p>
+                    </div>
+                    <Activity className="w-6 h-6 md:w-8 md:h-8 text-green-600" />
                   </div>
                 </CardContent>
               </Card>
             </div>
 
-            <Card>
-              <CardHeader>
-                <CardTitle>Gerenciamento de Usuários ({users.length})</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="overflow-x-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Usuário</TableHead>
-                        <TableHead>Email</TableHead>
-                        <TableHead>Plano</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead>Orçamentos</TableHead>
-                        <TableHead>Registro</TableHead>
-                        <TableHead>Ações</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {users.map((user: User) => (
-                        <TableRow key={user.id}>
-                          <TableCell>
-                            <div>
-                              <p className="font-medium">{user.firstName} {user.lastName}</p>
-                              <p className="text-xs text-gray-500">ID: {user.id}</p>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <p className="text-sm">{user.email}</p>
-                          </TableCell>
-                          <TableCell>
-                            <Badge className={
-                              user.plan === "PREMIUM" ? "bg-yellow-500 text-black" : 
-                              user.plan === "PREMIUM_CORTESIA" ? "bg-purple-500 text-white" : 
-                              "bg-gray-500 text-white"
-                            }>
-                              {user.plan === "PREMIUM" ? "Premium Pago" : 
-                               user.plan === "PREMIUM_CORTESIA" ? "Premium Cortesia" : 
-                               "Gratuito"}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>
-                            <Badge 
-                              variant={user.paymentStatus === "ativo" ? "default" : "secondary"}
-                              className={user.paymentStatus === "ativo" ? "bg-green-500" : ""}
-                            >
-                              {user.paymentStatus || "pendente"}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>
-                            <div>
-                              <p className="text-sm font-medium">{user.quotesUsedThisMonth}/{user.quotesLimit}</p>
-                              <div className="w-20 bg-gray-200 rounded-full h-1.5 mt-1">
-                                <div 
-                                  className="bg-blue-600 h-1.5 rounded-full" 
-                                  style={{ 
-                                    width: `${Math.min((user.quotesUsedThisMonth / user.quotesLimit) * 100, 100)}%` 
-                                  }}
-                                ></div>
-                              </div>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <p className="text-xs text-gray-500">
-                              {format(new Date(user.createdAt), "dd/MM/yyyy", { locale: ptBR })}
-                            </p>
-                            {user.planExpiresAt && (
-                              <p className="text-xs text-yellow-600">
-                                Expira: {format(new Date(user.planExpiresAt), "dd/MM/yyyy", { locale: ptBR })}
-                              </p>
-                            )}
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex gap-1 flex-wrap">
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handleTogglePlan(user, "FREE")}
-                                disabled={updatePlanMutation.isPending || user.plan === "FREE"}
-                                className="text-xs"
-                              >
-                                Gratuito
-                              </Button>
-                              
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handleTogglePlan(user, "PREMIUM")}
-                                disabled={updatePlanMutation.isPending || user.plan === "PREMIUM"}
-                                className="text-xs bg-yellow-50"
-                              >
-                                Premium
-                              </Button>
-                              
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handleTogglePlan(user, "PREMIUM_CORTESIA")}
-                                disabled={updatePlanMutation.isPending || user.plan === "PREMIUM_CORTESIA"}
-                                className="text-xs bg-purple-50"
-                              >
-                                Cortesia
-                              </Button>
-                              
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => resetQuotesMutation.mutate(user.id)}
-                                disabled={resetQuotesMutation.isPending}
-                              >
-                                <RefreshCw className="w-4 h-4" />
-                              </Button>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
-              </CardContent>
-            </Card>
+            {/* Estatísticas Detalhadas */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+              <Card>
+                <CardContent className="p-4 md:p-6">
+                  <div className="text-center">
+                    <p className="text-xs md:text-sm font-medium text-gray-600">Média Orçamentos/Usuário</p>
+                    <p className="text-xl md:text-2xl font-bold text-blue-600">
+                      {users.length > 0 ? Math.round(users.reduce((acc, u) => acc + u.quotesUsedThisMonth, 0) / users.length) : 0}
+                    </p>
+                    <p className="text-xs text-gray-500">Por mês</p>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardContent className="p-4 md:p-6">
+                  <div className="text-center">
+                    <p className="text-xs md:text-sm font-medium text-gray-600">Limite Atingido</p>
+                    <p className="text-xl md:text-2xl font-bold text-red-600">
+                      {users.filter(u => u.quotesUsedThisMonth >= u.quotesLimit && u.plan === "FREE").length}
+                    </p>
+                    <p className="text-xs text-gray-500">Usuários gratuitos</p>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardContent className="p-4 md:p-6">
+                  <div className="text-center">
+                    <p className="text-xs md:text-sm font-medium text-gray-600">Novos Usuários</p>
+                    <p className="text-xl md:text-2xl font-bold text-green-600">
+                      {users.filter(u => new Date(u.createdAt) > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)).length}
+                    </p>
+                    <p className="text-xs text-gray-500">Últimos 30 dias</p>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardContent className="p-4 md:p-6">
+                  <div className="text-center">
+                    <p className="text-xs md:text-sm font-medium text-gray-600">Premium Expirando</p>
+                    <p className="text-xl md:text-2xl font-bold text-yellow-600">
+                      {users.filter(u => u.planExpiresAt && new Date(u.planExpiresAt) < new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)).length}
+                    </p>
+                    <p className="text-xs text-gray-500">Próximos 7 dias</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Análise de Conversão */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg md:text-xl">Taxa de Conversão Premium</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-600">Premium Pago</span>
+                      <div className="flex items-center gap-2">
+                        <div className="w-20 bg-gray-200 rounded-full h-2">
+                          <div 
+                            className="bg-yellow-500 h-2 rounded-full" 
+                            style={{ 
+                              width: `${users.length > 0 ? (users.filter(u => u.plan === "PREMIUM").length / users.length) * 100 : 0}%` 
+                            }}
+                          ></div>
+                        </div>
+                        <span className="text-sm font-medium">
+                          {users.length > 0 ? Math.round((users.filter(u => u.plan === "PREMIUM").length / users.length) * 100) : 0}%
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-600">Premium Cortesia</span>
+                      <div className="flex items-center gap-2">
+                        <div className="w-20 bg-gray-200 rounded-full h-2">
+                          <div 
+                            className="bg-purple-500 h-2 rounded-full" 
+                            style={{ 
+                              width: `${users.length > 0 ? (users.filter(u => u.plan === "PREMIUM_CORTESIA").length / users.length) * 100 : 0}%` 
+                            }}
+                          ></div>
+                        </div>
+                        <span className="text-sm font-medium">
+                          {users.length > 0 ? Math.round((users.filter(u => u.plan === "PREMIUM_CORTESIA").length / users.length) * 100) : 0}%
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-600">Gratuito</span>
+                      <div className="flex items-center gap-2">
+                        <div className="w-20 bg-gray-200 rounded-full h-2">
+                          <div 
+                            className="bg-gray-500 h-2 rounded-full" 
+                            style={{ 
+                              width: `${users.length > 0 ? (users.filter(u => u.plan === "FREE").length / users.length) * 100 : 0}%` 
+                            }}
+                          ></div>
+                        </div>
+                        <span className="text-sm font-medium">
+                          {users.length > 0 ? Math.round((users.filter(u => u.plan === "FREE").length / users.length) * 100) : 0}%
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg md:text-xl">Engajamento de Usuários</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-600">Usuários Muito Ativos</span>
+                      <Badge className="bg-green-500">
+                        {users.filter(u => u.quotesUsedThisMonth >= 5).length}
+                      </Badge>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-600">Usuários Moderadamente Ativos</span>
+                      <Badge variant="secondary">
+                        {users.filter(u => u.quotesUsedThisMonth >= 1 && u.quotesUsedThisMonth < 5).length}
+                      </Badge>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-600">Usuários Inativos</span>
+                      <Badge variant="outline">
+                        {users.filter(u => u.quotesUsedThisMonth === 0).length}
+                      </Badge>
+                    </div>
+                    <div className="pt-2 border-t">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm font-medium text-gray-700">Taxa de Ativação</span>
+                        <span className="text-lg font-bold text-blue-600">
+                          {users.length > 0 ? Math.round((users.filter(u => u.quotesUsedThisMonth > 0).length / users.length) * 100) : 0}%
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
 
           {/* Financeiro */}
