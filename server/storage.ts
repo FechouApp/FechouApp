@@ -1261,7 +1261,162 @@ export class DatabaseStorage implements IStorage {
     };
   }
 
-  
+  // Referral operations
+  async generateReferralCode(userId: string): Promise<string> {
+    const user = await this.getUser(userId);
+    if (!user) throw new Error("User not found");
+
+    // Se já tem código, retorna o existente
+    if (user.referralCode) return user.referralCode;
+
+    // Gera novo código único
+    let referralCode: string = '';
+    let isUnique = false;
+    
+    while (!isUnique) {
+      referralCode = `FECHOU${nanoid(6).toUpperCase()}`;
+      const existing = await this.getUserByReferralCode(referralCode);
+      if (!existing) isUnique = true;
+    }
+
+    // Atualiza o usuário com o código
+    await db
+      .update(users)
+      .set({ referralCode })
+      .where(eq(users.id, userId));
+
+    return referralCode;
+  }
+
+  async getUserByReferralCode(referralCode: string): Promise<User | undefined> {
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(eq(users.referralCode, referralCode));
+    return user;
+  }
+
+  async createReferral(referral: InsertReferral): Promise<Referral> {
+    const [newReferral] = await db
+      .insert(referrals)
+      .values({ ...referral, id: nanoid() })
+      .returning();
+    return newReferral;
+  }
+
+  async getReferrals(userId: string): Promise<Referral[]> {
+    return await db
+      .select()
+      .from(referrals)
+      .where(eq(referrals.referrerId, userId))
+      .orderBy(desc(referrals.createdAt));
+  }
+
+  async updateReferralStatus(id: string, status: string, rewardData?: any): Promise<Referral | undefined> {
+    const updateData: any = { status };
+    
+    if (rewardData) {
+      updateData.rewardType = rewardData.rewardType;
+      updateData.rewardValue = rewardData.rewardValue;
+      updateData.rewardedAt = new Date();
+    }
+
+    const [updatedReferral] = await db
+      .update(referrals)
+      .set(updateData)
+      .where(eq(referrals.id, id))
+      .returning();
+
+    return updatedReferral;
+  }
+
+  async processReferralReward(referralId: string): Promise<boolean> {
+    const [referral] = await db
+      .select()
+      .from(referrals)
+      .where(eq(referrals.id, referralId));
+
+    if (!referral || referral.status !== "completed") return false;
+
+    const referrer = await this.getUser(referral.referrerId);
+    const referred = await this.getUser(referral.referredId);
+
+    if (!referrer || !referred) return false;
+
+    // Lógica de recompensa baseada no plano do referrer
+    if (referrer.plan === "FREE") {
+      // Usuário gratuito: +1 orçamento bônus por mês
+      await db
+        .update(users)
+        .set({ 
+          bonusQuotes: (referrer.bonusQuotes || 0) + 1,
+          referralCount: (referrer.referralCount || 0) + 1 
+        })
+        .where(eq(users.id, referrer.id));
+
+      await this.updateReferralStatus(referralId, "rewarded", {
+        rewardType: "bonus_quote",
+        rewardValue: 1
+      });
+
+    } else if (referrer.plan === "PREMIUM") {
+      // Usuário premium: +15 dias se o indicado virar premium
+      if (referred.plan === "PREMIUM") {
+        const currentExpiry = referrer.planExpiresAt || new Date();
+        const newExpiry = new Date(currentExpiry.getTime() + (15 * 24 * 60 * 60 * 1000));
+
+        await db
+          .update(users)
+          .set({ 
+            planExpiresAt: newExpiry,
+            referralCount: (referrer.referralCount || 0) + 1 
+          })
+          .where(eq(users.id, referrer.id));
+
+        await this.updateReferralStatus(referralId, "rewarded", {
+          rewardType: "premium_extension",
+          rewardValue: 15
+        });
+      }
+    }
+
+    return true;
+  }
+
+  // Activity Log operations
+  async logUserActivity(activity: InsertUserActivityLog): Promise<UserActivityLog> {
+    const [newActivity] = await db
+      .insert(userActivityLog)
+      .values({ ...activity, id: nanoid() })
+      .returning();
+    return newActivity;
+  }
+
+  async getUserActivity(userId: string, limit: number = 50): Promise<UserActivityLog[]> {
+    return await db
+      .select()
+      .from(userActivityLog)
+      .where(eq(userActivityLog.userId, userId))
+      .orderBy(desc(userActivityLog.createdAt))
+      .limit(limit);
+  }
+
+  async getActivityByAction(action: string, startDate?: Date, endDate?: Date): Promise<UserActivityLog[]> {
+    let whereConditions = [eq(userActivityLog.action, action)];
+
+    if (startDate && endDate) {
+      whereConditions.push(
+        gte(userActivityLog.createdAt, startDate),
+        lte(userActivityLog.createdAt, endDate)
+      );
+    }
+
+    return await db
+      .select()
+      .from(userActivityLog)
+      .where(and(...whereConditions))
+      .orderBy(desc(userActivityLog.createdAt));
+  }
 }
 
 export const storage = new DatabaseStorage();

@@ -1129,6 +1129,113 @@ _Gerado pelo Fechou! - www.meufechou.com.br_`;
     }
   });
 
+  // Referral system routes
+  app.get('/api/referrals/my-code', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const referralCode = await storage.generateReferralCode(userId);
+      
+      // Log activity
+      await storage.logUserActivity({
+        userId,
+        action: "generate_referral_code",
+        category: "referral",
+        details: { referralCode }
+      });
+
+      res.json({ referralCode });
+    } catch (error) {
+      console.error("Error generating referral code:", error);
+      res.status(500).json({ message: "Failed to generate referral code" });
+    }
+  });
+
+  app.get('/api/referrals/my-referrals', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const referrals = await storage.getReferrals(userId);
+      res.json(referrals);
+    } catch (error) {
+      console.error("Error fetching referrals:", error);
+      res.status(500).json({ message: "Failed to fetch referrals" });
+    }
+  });
+
+  app.post('/api/referrals/register', async (req, res) => {
+    try {
+      const { referralCode, newUserId } = req.body;
+      
+      if (!referralCode || !newUserId) {
+        return res.status(400).json({ message: "Missing referral code or user ID" });
+      }
+
+      const referrer = await storage.getUserByReferralCode(referralCode);
+      if (!referrer) {
+        return res.status(404).json({ message: "Invalid referral code" });
+      }
+
+      // Criar a indicação
+      const referral = await storage.createReferral({
+        referrerId: referrer.id,
+        referredId: newUserId,
+        referralCode,
+        status: "completed",
+        completedAt: new Date()
+      });
+
+      // Atualizar o usuário indicado
+      await storage.upsertUser({
+        id: newUserId,
+        referredBy: referrer.id
+      });
+
+      // Processar recompensa
+      await storage.processReferralReward(referral.id);
+
+      // Log activity
+      await storage.logUserActivity({
+        userId: referrer.id,
+        action: "referral_completed",
+        category: "referral",
+        details: { referredUserId: newUserId, referralCode }
+      });
+
+      res.json({ message: "Referral processed successfully" });
+    } catch (error) {
+      console.error("Error processing referral:", error);
+      res.status(500).json({ message: "Failed to process referral" });
+    }
+  });
+
+  // Activity log routes (admin only)
+  app.get('/api/admin/activity/:userId', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const { limit } = req.query;
+      
+      const activities = await storage.getUserActivity(userId, limit ? parseInt(limit as string) : 50);
+      res.json(activities);
+    } catch (error) {
+      console.error("Error fetching user activity:", error);
+      res.status(500).json({ message: "Failed to fetch user activity" });
+    }
+  });
+
+  app.get('/api/admin/activity-report', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { action, startDate, endDate } = req.query;
+      
+      const start = startDate ? new Date(startDate as string) : undefined;
+      const end = endDate ? new Date(endDate as string) : undefined;
+      
+      const activities = await storage.getActivityByAction(action as string, start, end);
+      res.json(activities);
+    } catch (error) {
+      console.error("Error fetching activity report:", error);
+      res.status(500).json({ message: "Failed to fetch activity report" });
+    }
+  });
+
   const server = createServer(app);
   return server;
 }
