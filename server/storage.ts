@@ -1272,7 +1272,7 @@ export class DatabaseStorage implements IStorage {
     // Gera novo código único
     let referralCode: string = '';
     let isUnique = false;
-    
+
     while (!isUnique) {
       referralCode = `FECHOU${nanoid(6).toUpperCase()}`;
       const existing = await this.getUserByReferralCode(referralCode);
@@ -1314,7 +1314,7 @@ export class DatabaseStorage implements IStorage {
 
   async updateReferralStatus(id: string, status: string, rewardData?: any): Promise<Referral | undefined> {
     const updateData: any = { status };
-    
+
     if (rewardData) {
       updateData.rewardType = rewardData.rewardType;
       updateData.rewardValue = rewardData.rewardValue;
