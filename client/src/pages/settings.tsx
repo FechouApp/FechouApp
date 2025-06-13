@@ -8,13 +8,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { User, Building, Bell, Crown, Mail, Phone, MapPin, Save, Upload, Lock } from "lucide-react";
+import { User, Building, Bell, Crown, Mail, Phone, MapPin, Save, Upload, Lock, Smartphone } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import BackButton from "@/components/common/back-button";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { formatPhone, formatCPF, formatCEP } from "@/lib/utils";
 import type { User as UserType } from "@/types";
+import InstallButton from "@/components/pwa/install-button";
 
 export default function Settings() {
   const { user, isLoading } = useAuth();
@@ -780,6 +781,27 @@ export default function Settings() {
         </Card>
 
 
+
+        {/* PWA Installation */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Smartphone className="w-5 h-5" />
+              Instalação do App
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-sm text-gray-600">
+              Instale o Fechou! no seu dispositivo para acesso rápido e funcionamento offline
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <InstallButton size="default" className="w-full sm:w-auto" />
+              <div className="text-xs text-gray-500 sm:self-center">
+                Funciona como um app nativo
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Account Actions */}
         <Card>

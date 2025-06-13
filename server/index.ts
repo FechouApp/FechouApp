@@ -18,6 +18,23 @@ if (!fs.existsSync(uploadsDir)) {
 // Serve uploaded files statically
 app.use('/uploads', express.static(uploadsDir));
 
+// Serve PWA files with correct headers
+app.get('/manifest.json', (req, res) => {
+  res.setHeader('Content-Type', 'application/manifest+json');
+  res.sendFile(path.join(process.cwd(), 'public/manifest.json'));
+});
+
+app.get('/sw.js', (req, res) => {
+  res.setHeader('Content-Type', 'application/javascript');
+  res.setHeader('Service-Worker-Allowed', '/');
+  res.sendFile(path.join(process.cwd(), 'public/sw.js'));
+});
+
+app.get('/icon-512x512.png', (req, res) => {
+  res.setHeader('Content-Type', 'image/png');
+  res.sendFile(path.join(process.cwd(), 'public/icon-512x512.png'));
+});
+
 app.use((req, res, next) => {
   const start = Date.now();
   const path = req.path;

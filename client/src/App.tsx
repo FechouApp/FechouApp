@@ -28,6 +28,7 @@ import ClientProfile from "@/pages/client-profile";
 import AdminPanel from "@/pages/admin-dashboard";
 import Welcome from "@/pages/welcome";
 import ReferralsPage from "@/pages/referrals";
+import InstallPrompt from "@/components/pwa/install-prompt";
 
 function Router() {
   const { isAuthenticated, isLoading, user } = useAuth();
@@ -141,6 +142,7 @@ function App() {
       <TooltipProvider>
         <Toaster />
         <AppLayout />
+        <InstallPrompt />
       </TooltipProvider>
     </QueryClientProvider>
   );
