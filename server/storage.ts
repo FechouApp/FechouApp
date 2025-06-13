@@ -40,6 +40,7 @@ export interface IStorage {
   getUserByEmail(email: string): Promise<User | undefined>;
   createUser(user: UpsertUser): Promise<User>;
   updateUser(uid: string, userData: Partial<User>): Promise<User>;
+  upsertUser(user: UpsertUser): Promise<User>; // Legacy compatibility
   updateUserPlan(uid: string, plan: string, planExpiresAt: Date | null): Promise<User>;
   addReferralBonus(userId: string): Promise<User>;
   updateUserColors(uid: string, primaryColor: string, secondaryColor: string): Promise<User>;
@@ -180,6 +181,22 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
+  // Legacy function for backward compatibility
+  async upsertUser(userData: UpsertUser): Promise<User> {
+    const [user] = await db
+      .insert(users)
+      .values(userData)
+      .onConflictDoUpdate({
+        target: users.id,
+        set: {
+          ...userData,
+          updatedAt: new Date(),
+        },
+      })
+      .returning();
+    return user;
+  }
+
   async updateUserPlan(uid: string, plan: string, planExpiresAt: Date | null): Promise<User> {
     const [user] = await db
       .update(users)
@@ -188,7 +205,7 @@ export class DatabaseStorage implements IStorage {
         planExpiresAt,
         updatedAt: new Date() 
       })
-      .where(eq(users.id, id))
+      .where(eq(users.id, uid))
       .returning();
     return user;
   }

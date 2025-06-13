@@ -22,11 +22,14 @@ const isAdmin = async (req: any, res: any, next: any) => {
 };
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Auth middleware
+  // Firebase Auth routes
+  app.use('/api/auth', authRoutes);
+
+  // Legacy Replit Auth middleware for backward compatibility
   await setupAuth(app);
 
-  // Auth routes
-  app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
+  // Legacy auth route - keeping for compatibility during transition
+  app.get('/api/auth/user-legacy', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const user = await storage.getUser(userId);

@@ -49,7 +49,7 @@ router.post('/register', requireAuth, async (req: AuthenticatedRequest, res) => 
     const userReferralCode = nanoid(8).toUpperCase();
 
     // Create user data
-    const userData = {
+    const userData: any = {
       id: req.firebaseUser.uid,
       email: email || req.firebaseUser.email,
       firstName: firstName || '',
@@ -91,7 +91,6 @@ router.post('/register', requireAuth, async (req: AuthenticatedRequest, res) => 
 
         // Create referral record
         await storage.createReferral({
-          id: nanoid(),
           referrerId: referrer.id,
           referredId: req.firebaseUser.uid,
           referralCode: referralCode,
@@ -108,7 +107,6 @@ router.post('/register', requireAuth, async (req: AuthenticatedRequest, res) => 
 
     // Log registration activity
     await storage.logUserActivity({
-      id: nanoid(),
       userId: newUser.id,
       action: 'register',
       category: 'authentication',
@@ -204,7 +202,6 @@ router.post('/toggle-plan', requireAuth, async (req: AuthenticatedRequest, res) 
 
     // Log plan change activity
     await storage.logUserActivity({
-      id: nanoid(),
       userId: updatedUser.id,
       action: 'plan_changed',
       category: 'payment',
