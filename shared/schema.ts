@@ -14,18 +14,7 @@ import { createInsertSchema } from "drizzle-zod";
 import { relations } from "drizzle-orm";
 import { z } from "zod";
 
-// Session storage table - mandatory for Replit Auth
-export const sessions = pgTable(
-  "sessions",
-  {
-    sid: varchar("sid").primaryKey(),
-    sess: jsonb("sess").notNull(),
-    expire: timestamp("expire").notNull(),
-  },
-  (table) => [index("IDX_session_expire").on(table.expire)],
-);
-
-// User storage table - mandatory for Replit Auth
+// User storage table - Firebase Auth UID based
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().notNull(),
   email: varchar("email").unique(),
@@ -52,7 +41,7 @@ export const users = pgTable("users", {
   quotesLimit: integer("quotes_limit").notNull().default(5),
   bonusQuotes: integer("bonus_quotes").notNull().default(0), // Orçamentos bonus por indicações
   referralCount: integer("referral_count").notNull().default(0), // Contador de indicações
-  referralCode: varchar("referral_code").unique(), // Código único de indicação do usuário
+  referralCode: text("referral_code").unique(), // Código único de indicação do usuário
   referredBy: varchar("referred_by"), // ID do usuário que indicou este usuário
   whatsappNotifications: boolean("whatsapp_notifications").notNull().default(true),
   emailNotifications: boolean("email_notifications").notNull().default(true),

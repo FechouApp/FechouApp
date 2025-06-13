@@ -59,7 +59,6 @@ export function useFirebaseAuth(): AuthContextType {
           // Get user data from our backend
           const token = await firebaseUser.getIdToken();
           const userData = await apiRequest(`/api/auth/user`, {
-            method: 'GET',
             headers: {
               'Authorization': `Bearer ${token}`
             }
