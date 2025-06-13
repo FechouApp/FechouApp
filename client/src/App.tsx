@@ -3,9 +3,13 @@ import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/hooks/useFirebaseAuth";
+import { AuthProvider } from "@/contexts/AuthProvider";
 import NotFound from "@/pages/not-found";
 import Landing from "@/pages/landing";
+import Login from "@/pages/login";
+import Register from "@/pages/register";
+import ForgotPassword from "@/pages/forgot-password";
 import Dashboard from "@/pages/dashboard";
 import Clients from "@/pages/clients";
 import Quotes from "@/pages/quotes";
@@ -47,7 +51,14 @@ function Router() {
 
   // Allow public access to quote and receipt pages
   if (!isAuthenticated && !isPublicRoute) {
-    return <Landing />;
+    return (
+      <Switch>
+        <Route path="/login" component={Login} />
+        <Route path="/register" component={Register} />
+        <Route path="/forgot-password" component={ForgotPassword} />
+        <Route component={Landing} />
+      </Switch>
+    );
   }
 
   // If not authenticated but accessing public route, show only the public pages
