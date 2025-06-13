@@ -1,25 +1,11 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { setupAuth, isAuthenticated } from "./replitAuth";
+import { requireAuth, requireAdmin, type AuthenticatedRequest } from "./middleware/auth";
 import authRoutes from "./routes/auth";
 import { insertClientSchema, insertQuoteSchema, insertQuoteItemSchema, insertReviewSchema, insertSavedItemSchema, insertQuoteItemWithoutQuoteIdSchema } from "@shared/schema";
 import { z } from "zod";
 import "./types";
-
-// Admin middleware
-const isAdmin = async (req: any, res: any, next: any) => {
-  try {
-    const userId = req.user.claims.sub;
-    const user = await storage.getUser(userId);
-    if (!user || !user.isAdmin) {
-      return res.status(403).json({ message: "Admin access required" });
-    }
-    next();
-  } catch (error) {
-    res.status(500).json({ message: "Error checking admin status" });
-  }
-};
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Firebase Auth routes

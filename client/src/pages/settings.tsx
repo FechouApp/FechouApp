@@ -1,26 +1,23 @@
 import { useState, useEffect } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { User, Building, Bell, Crown, Mail, Phone, MapPin, Save, Upload, Lock, Smartphone } from "lucide-react";
+import { User, Building, Bell, Crown, Mail, Phone, MapPin, Save, Upload, Lock, Smartphone, Eye, EyeOff } from "lucide-react";
 import { useAuth } from "@/hooks/useFirebaseAuth";
 import BackButton from "@/components/common/back-button";
-import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { formatPhone, formatCPF, formatCEP } from "@/lib/utils";
-import type { User as UserType } from "@/types";
 import InstallButton from "@/components/pwa/install-button";
 
 export default function Settings() {
-  const { user, isLoading } = useAuth();
+  const { user, isLoading, updateUserProfile, changePassword } = useAuth();
   const { toast } = useToast();
-  const typedUser = user as UserType;
 
   const [formData, setFormData] = useState({
     firstName: "",
@@ -30,46 +27,20 @@ export default function Settings() {
     businessName: "",
     phone: "",
     address: "",
-    cep: "", // new field
-    numero: "", // new field
-    complemento: "", // new field
-    cidade: "", // new field
-    estado: "", // new field
+    cep: "",
+    numero: "",
+    complemento: "",
+    cidade: "",
+    estado: "",
     pixKey: "",
     logoUrl: "",
     profileImageUrl: "",
-    primaryColor: "#3B82F6",
-    secondaryColor: "#10B981",
+    notifications: false,
     whatsappNotifications: false,
-    emailNotifications: true,
+    emailNotifications: false,
+    darkMode: false,
+    autoSave: false,
   });
-
-  // Atualizar formData quando user estiver disponível
-  useEffect(() => {
-    if (typedUser) {
-      setFormData({
-        firstName: typedUser.firstName || "",
-        lastName: typedUser.lastName || "",
-        cpfCnpj: formatCPF(typedUser.cpfCnpj || ""),
-        profession: typedUser.profession || "",
-        businessName: typedUser.businessName || "",
-        phone: formatPhone(typedUser.phone || ""),
-        address: typedUser.address || "",
-        cep: typedUser.cep || "",
-        numero: typedUser.numero || "",
-        complemento: typedUser.complemento || "",
-        cidade: typedUser.cidade || "",
-        estado: typedUser.estado || "",
-        pixKey: typedUser.pixKey || "",
-        logoUrl: typedUser.logoUrl || "",
-        profileImageUrl: typedUser.profileImageUrl || "",
-        primaryColor: typedUser.primaryColor || "#3B82F6",
-        secondaryColor: typedUser.secondaryColor || "#10B981",
-        whatsappNotifications: typedUser.whatsappNotifications || false,
-        emailNotifications: typedUser.emailNotifications || true,
-      });
-    }
-  }, [typedUser]);
 
   const [passwordData, setPasswordData] = useState({
     currentPassword: "",
@@ -77,26 +48,55 @@ export default function Settings() {
     confirmPassword: "",
   });
 
-  const updateUserMutation = useMutation({
-    mutationFn: async (data: Partial<UserType>) => {
-      const response = await apiRequest("/api/auth/user", {
-        method: "PUT",
-        body: JSON.stringify(data)
+  const [showPasswords, setShowPasswords] = useState({
+    current: false,
+    new: false,
+    confirm: false,
+  });
+
+  // Carregar dados do usuário
+  useEffect(() => {
+    if (user) {
+      setFormData({
+        firstName: user.firstName || "",
+        lastName: user.lastName || "",
+        cpfCnpj: user.cpfCnpj || "",
+        profession: user.profession || "",
+        businessName: user.businessName || "",
+        phone: user.phone || "",
+        address: user.address || "",
+        cep: user.cep || "",
+        numero: user.numero || "",
+        complemento: user.complemento || "",
+        cidade: user.cidade || "",
+        estado: user.estado || "",
+        pixKey: user.pixKey || "",
+        logoUrl: user.logoUrl || "",
+        profileImageUrl: user.profileImageUrl || "",
+        notifications: user.notifications || false,
+        whatsappNotifications: user.whatsappNotifications || false,
+        emailNotifications: user.emailNotifications || false,
+        darkMode: user.darkMode || false,
+        autoSave: user.autoSave || false,
       });
-      return response;
+    }
+  }, [user]);
+
+  // Mutation para atualizar perfil
+  const updateUserMutation = useMutation({
+    mutationFn: async (data: any) => {
+      await updateUserProfile(data);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
       toast({
         title: "Configurações salvas",
         description: "Suas configurações foram atualizadas com sucesso!",
       });
 
-     // Mark as visited and setup complete if user saves basic info
+      // Marcar como visitado se tiver informações básicas
       if (formData.firstName && (formData.businessName || formData.profession)) {
         localStorage.setItem('fechou_has_visited', 'true');
       }
-
     },
     onError: (error: any) => {
       console.error("Erro ao atualizar perfil:", error);
@@ -108,6 +108,7 @@ export default function Settings() {
     },
   });
 
+  // Mutation para alterar senha com Firebase
   const changePasswordMutation = useMutation({
     mutationFn: async (data: { currentPassword: string; newPassword: string }) => {
       await changePassword(data.currentPassword, data.newPassword);
@@ -119,711 +120,424 @@ export default function Settings() {
         description: "Sua senha foi alterada com sucesso.",
       });
     },
-    onError: () => {
+    onError: (error: any) => {
       toast({
-        title: "Erro",
-        description: "Não foi possível alterar a senha. Verifique a senha atual.",
+        title: "Erro ao alterar senha",
+        description: error?.message || "Não foi possível alterar a senha. Verifique a senha atual.",
         variant: "destructive",
       });
     },
   });
 
-  const togglePlanMutation = useMutation({
-    mutationFn: async () => {
-      await apiRequest("/api/auth/toggle-plan", {
-        method: "POST",
-        body: JSON.stringify({ userId: user?.id })
-      });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+  // Handlers
+  const handleInputChange = (field: string, value: any) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleSaveProfile = () => {
+    if (!formData.firstName || !formData.lastName) {
       toast({
-        title: "Plano alterado!",
-        description: "O plano foi alterado com sucesso.",
-      });
-    },
-    onError: () => {
-      toast({
-        title: "Erro",
-        description: "Não foi possível alterar o plano.",
+        title: "Campos obrigatórios",
+        description: "Nome e sobrenome são obrigatórios.",
         variant: "destructive",
       });
-    },
-  });
+      return;
+    }
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
     updateUserMutation.mutate(formData);
   };
 
-  const handleInputChange = (field: string, value: string | boolean) => {
-    let formattedValue = value;
-
-    // Aplicar formatação automática nos campos específicos
-    if (typeof value === "string") {
-      if (field === "cpfCnpj") {
-        formattedValue = formatCPF(value);
-      } else if (field === "phone") {
-        formattedValue = formatPhone(value);
-      } else if (field === "cep") {
-        formattedValue = formatCEP(value);
-      }
+  const handleChangePassword = () => {
+    // Validações
+    if (!passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword) {
+      toast({
+        title: "Campos obrigatórios",
+        description: "Todos os campos de senha são obrigatórios.",
+        variant: "destructive",
+      });
+      return;
     }
 
-    setFormData(prev => ({ ...prev, [field]: formattedValue }));
-  };
-
-  const handleProfileImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      // Verificar tamanho do arquivo (máx. 2MB)
-      if (file.size > 2 * 1024 * 1024) {
-        toast({
-          title: "Erro",
-          description: "A imagem deve ter no máximo 2MB.",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      // Verificar tipo do arquivo
-      if (!file.type.startsWith('image/')) {
-        toast({
-          title: "Erro",
-          description: "Por favor, selecione um arquivo de imagem válido.",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const base64String = event.target?.result as string;
-        handleInputChange("profileImageUrl", base64String);
-
-        // Auto-salvar após upload
-        setTimeout(() => {
-          updateUserMutation.mutate({
-            ...formData,
-            profileImageUrl: base64String
-          });
-        }, 500);
-
-        toast({
-          title: "Sucesso",
-          description: "Foto de perfil carregada com sucesso!",
-        });
-      };
-      reader.readAsDataURL(file);
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      toast({
+        title: "Senhas não coincidem",
+        description: "A nova senha e confirmação devem ser iguais.",
+        variant: "destructive",
+      });
+      return;
     }
-  };
 
-  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      // Verificar tamanho do arquivo (máx. 5MB)
-      if (file.size > 5 * 1024 * 1024) {
-        toast({
-          title: "Erro",
-          description: "A imagem deve ter no máximo 5MB.",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      // Verificar tipo do arquivo
-      if (!file.type.startsWith('image/')) {
-        toast({
-          title: "Erro",
-          description: "Por favor, selecione um arquivo de imagem válido.",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const base64String = event.target?.result as string;
-        handleInputChange("logoUrl", base64String);
-
-        // Auto-salvar após upload
-        setTimeout(() => {
-          updateUserMutation.mutate({
-            ...formData,
-            logoUrl: base64String
-          });
-        }, 500);
-
-        toast({
-          title: "Sucesso",
-          description: "Logo carregado com sucesso!",
-        });
-      };
-      reader.readAsDataURL(file);
+    if (passwordData.newPassword.length < 6) {
+      toast({
+        title: "Senha muito curta",
+        description: "A nova senha deve ter pelo menos 6 caracteres.",
+        variant: "destructive",
+      });
+      return;
     }
-  };
 
-  const handleCEPChange = async (cep: string) => {
-    if (cep.length === 9) {
-      try {
-        const response = await fetch(`https://viacep.com.br/ws/${cep.replace(/\D/g, '')}/json/`);
-        const data = await response.json();
-
-        if (!data.erro) {
-          setFormData(prev => ({
-            ...prev,
-            address: data.logradouro,
-            complemento: data.complemento,
-            cidade: data.localidade,
-            estado: data.uf,
-            bairro: data.bairro,
-          }));
-        } else {
-          toast({
-            title: "Erro",
-            description: "CEP não encontrado.",
-            variant: "destructive",
-          });
-        }
-      } catch (error) {
-        toast({
-          title: "Erro",
-          description: "Erro ao buscar CEP.",
-          variant: "destructive",
-        });
-      }
+    if (passwordData.currentPassword === passwordData.newPassword) {
+      toast({
+        title: "Senha inválida",
+        description: "A nova senha deve ser diferente da atual.",
+        variant: "destructive",
+      });
+      return;
     }
+
+    changePasswordMutation.mutate({
+      currentPassword: passwordData.currentPassword,
+      newPassword: passwordData.newPassword,
+    });
   };
 
-  // Mostrar loading enquanto dados do usuário estão carregando
   if (isLoading) {
     return (
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
-        <div className="flex items-center justify-center min-h-[400px]">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
-            <p className="text-gray-600">Carregando configurações...</p>
-          </div>
-        </div>
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-6 sm:py-8 max-w-4xl">
-      <BackButton />
-      
-      <div className="mb-6 sm:mb-8">
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-2">Configurações</h1>
-        <p className="text-sm sm:text-base text-gray-600">Gerencie suas informações pessoais e preferências</p>
-      </div>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white p-4">
+      <div className="max-w-4xl mx-auto">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-6">
+          <BackButton />
+          <div className="flex items-center gap-4">
+            <InstallButton />
+          </div>
+        </div>
 
-      <div className="grid gap-6">
-        {/* Personal Information */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <User className="w-5 h-5" />
-              Informações Pessoais
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              {/* Profile Photo */}
-              <div>
-                <Label htmlFor="profileImage">Foto de Perfil</Label>
-                <div className="mt-2 space-y-3">
-                  {formData.profileImageUrl && (
-                    <div className="flex items-center gap-3">
-                      <img
-                        src={formData.profileImageUrl}
-                        alt="Foto atual"
-                        className="w-16 h-16 rounded-full object-cover"
-                      />
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleInputChange("profileImageUrl", "")}
-                      >
-                        Remover Foto
-                      </Button>
-                    </div>
-                  )}
-                  <input
-                    type="file"
-                    id="profileImage"
-                    accept="image/*"
-                    onChange={handleProfileImageUpload}
-                    className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-                  />
-                  <p className="text-sm text-gray-500">
-                    Aparecerá em seus orçamentos e perfil público. Formatos aceitos: JPG, PNG (máx. 2MB)
-                  </p>
+        <div className="grid gap-6">
+          {/* Informações do Plano */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Crown className="h-5 w-5 text-yellow-500" />
+                  <CardTitle>Plano Atual</CardTitle>
                 </div>
+                <Badge variant={user?.plan === 'premium' ? 'default' : 'secondary'}>
+                  {user?.plan === 'premium' ? 'Premium' : 'Gratuito'}
+                </Badge>
               </div>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-gray-600">
+                {user?.plan === 'premium' 
+                  ? 'Você tem acesso a todos os recursos premium!' 
+                  : 'Faça upgrade para acessar recursos avançados.'}
+              </p>
+            </CardContent>
+          </Card>
 
-              <div>
-                <Label htmlFor="email">E-mail</Label>
-                <Input
-                  id="email"
-                  value={user?.email || ""}
-                  disabled
-                  className="bg-gray-50 text-gray-600"
-                />
-                <p className="text-sm text-gray-500 mt-1">
-                  O e-mail não pode ser alterado pois é usado para login
-                </p>
+          {/* Informações Pessoais */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <User className="h-5 w-5" />
+                <CardTitle>Informações Pessoais</CardTitle>
               </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <CardDescription>
+                Configure suas informações básicas
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="firstName">Nome</Label>
+                  <Label htmlFor="firstName">Nome *</Label>
                   <Input
                     id="firstName"
                     value={formData.firstName}
-                    onChange={(e) => handleInputChange("firstName", e.target.value)}
-                    placeholder="Seu primeiro nome"
+                    onChange={(e) => handleInputChange('firstName', e.target.value)}
+                    placeholder="Seu nome"
                   />
                 </div>
                 <div>
-                  <Label htmlFor="lastName">Sobrenome</Label>
+                  <Label htmlFor="lastName">Sobrenome *</Label>
                   <Input
                     id="lastName"
                     value={formData.lastName}
-                    onChange={(e) => handleInputChange("lastName", e.target.value)}
+                    onChange={(e) => handleInputChange('lastName', e.target.value)}
                     placeholder="Seu sobrenome"
                   />
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="cpfCnpj">CPF/CNPJ</Label>
                   <Input
                     id="cpfCnpj"
                     value={formData.cpfCnpj}
-                    onChange={(e) => handleInputChange("cpfCnpj", e.target.value)}
+                    onChange={(e) => handleInputChange('cpfCnpj', formatCPF(e.target.value))}
                     placeholder="000.000.000-00"
                   />
                 </div>
-                <div>
-                  <Label htmlFor="profession">Profissão</Label>
-                  <Input
-                    id="profession"
-                    value={formData.profession}
-                    onChange={(e) => handleInputChange("profession", e.target.value)}
-                    placeholder="Ex: Eletricista, Pedreiro, etc."
-                  />
-                </div>
-              </div>
-
-              <div>
-                <Label htmlFor="businessName">Nome do Negócio (opcional)</Label>
-                <Input
-                  id="businessName"
-                  value={formData.businessName}
-                  onChange={(e) => handleInputChange("businessName", e.target.value)}
-                  placeholder="Nome da sua empresa ou negócio"
-                />
-              </div>
-
-               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="phone">Telefone</Label>
                   <Input
                     id="phone"
                     value={formData.phone}
-                    onChange={(e) => handleInputChange("phone", e.target.value)}
+                    onChange={(e) => handleInputChange('phone', formatPhone(e.target.value))}
                     placeholder="(11) 99999-9999"
                   />
                 </div>
+              </div>
+
+              <div>
+                <Label htmlFor="profession">Profissão</Label>
+                <Input
+                  id="profession"
+                  value={formData.profession}
+                  onChange={(e) => handleInputChange('profession', e.target.value)}
+                  placeholder="Sua profissão"
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Informações da Empresa */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <Building className="h-5 w-5" />
+                <CardTitle>Informações da Empresa</CardTitle>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <Label htmlFor="businessName">Nome da Empresa</Label>
+                <Input
+                  id="businessName"
+                  value={formData.businessName}
+                  onChange={(e) => handleInputChange('businessName', e.target.value)}
+                  placeholder="Nome da sua empresa"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="address">Endereço</Label>
+                <Textarea
+                  id="address"
+                  value={formData.address}
+                  onChange={(e) => handleInputChange('address', e.target.value)}
+                  placeholder="Endereço completo"
+                  className="min-h-[80px]"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <Label htmlFor="cep">CEP</Label>
                   <Input
                     id="cep"
                     value={formData.cep}
-                    onChange={(e) => {
-                      handleInputChange("cep", e.target.value);
-                      handleCEPChange(e.target.value);
-                    }}
+                    onChange={(e) => handleInputChange('cep', formatCEP(e.target.value))}
                     placeholder="00000-000"
                   />
                 </div>
-              </div>
-               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                 <div>
-                    <Label htmlFor="address">Endereço</Label>
-                    <Input
-                      id="address"
-                      value={formData.address}
-                      onChange={(e) => handleInputChange("address", e.target.value)}
-                      placeholder="Rua"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="numero">Número</Label>
-                    <Input
-                      id="numero"
-                      value={formData.numero}
-                      onChange={(e) => handleInputChange("numero", e.target.value)}
-                      placeholder="Número"
-                    />
-                  </div>
-               </div>
-               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="complemento">Complemento</Label>
-                    <Input
-                      id="complemento"
-                      value={formData.complemento}
-                      onChange={(e) => handleInputChange("complemento", e.target.value)}
-                      placeholder="Complemento"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="cidade">Cidade</Label>
-                    <Input
-                      id="cidade"
-                      value={formData.cidade}
-                      onChange={(e) => handleInputChange("cidade", e.target.value)}
-                      placeholder="Cidade"
-                    />
-                  </div>
-               </div>
-               <div>
+                <div>
+                  <Label htmlFor="cidade">Cidade</Label>
+                  <Input
+                    id="cidade"
+                    value={formData.cidade}
+                    onChange={(e) => handleInputChange('cidade', e.target.value)}
+                    placeholder="Cidade"
+                  />
+                </div>
+                <div>
                   <Label htmlFor="estado">Estado</Label>
                   <Input
                     id="estado"
                     value={formData.estado}
-                    onChange={(e) => handleInputChange("estado", e.target.value)}
-                    placeholder="Estado"
+                    onChange={(e) => handleInputChange('estado', e.target.value)}
+                    placeholder="UF"
+                    maxLength={2}
                   />
                 </div>
+              </div>
 
-              <Button 
-                type="submit" 
-                disabled={updateUserMutation.isPending}
-                className="w-full md:w-auto"
-              >
-                <Save className="w-4 h-4 mr-2" />
-                {updateUserMutation.isPending ? "Salvando..." : "Salvar Informações"}
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
-
-        {/* Business Information */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Building className="w-5 h-5" />
-              Informações do Negócio
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <Label htmlFor="pixKey">Chave PIX</Label>
                 <Input
                   id="pixKey"
                   value={formData.pixKey}
-                  onChange={(e) => handleInputChange("pixKey", e.target.value)}
-                  placeholder="Digite sua chave PIX"
+                  onChange={(e) => handleInputChange('pixKey', e.target.value)}
+                  placeholder="Sua chave PIX para recebimentos"
                 />
-                <p className="text-sm text-gray-500 mt-1">
-                  Será exibida nos orçamentos para facilitar pagamentos
-                </p>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Alteração de Senha */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <Lock className="h-5 w-5" />
+                <CardTitle>Alterar Senha</CardTitle>
+              </div>
+              <CardDescription>
+                Configure uma nova senha para sua conta
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <Label htmlFor="currentPassword">Senha Atual *</Label>
+                <div className="relative">
+                  <Input
+                    id="currentPassword"
+                    type={showPasswords.current ? "text" : "password"}
+                    value={passwordData.currentPassword}
+                    onChange={(e) => setPasswordData(prev => ({ ...prev, currentPassword: e.target.value }))}
+                    placeholder="Digite sua senha atual"
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="absolute right-0 top-0 h-full px-3"
+                    onClick={() => setShowPasswords(prev => ({ ...prev, current: !prev.current }))}
+                  >
+                    {showPasswords.current ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </Button>
+                </div>
               </div>
 
-              <Button 
-                type="submit" 
-                disabled={updateUserMutation.isPending}
-                className="w-full md:w-auto"
+              <div>
+                <Label htmlFor="newPassword">Nova Senha *</Label>
+                <div className="relative">
+                  <Input
+                    id="newPassword"
+                    type={showPasswords.new ? "text" : "password"}
+                    value={passwordData.newPassword}
+                    onChange={(e) => setPasswordData(prev => ({ ...prev, newPassword: e.target.value }))}
+                    placeholder="Digite sua nova senha (mín. 6 caracteres)"
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="absolute right-0 top-0 h-full px-3"
+                    onClick={() => setShowPasswords(prev => ({ ...prev, new: !prev.new }))}
+                  >
+                    {showPasswords.new ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </Button>
+                </div>
+              </div>
+
+              <div>
+                <Label htmlFor="confirmPassword">Confirmar Nova Senha *</Label>
+                <div className="relative">
+                  <Input
+                    id="confirmPassword"
+                    type={showPasswords.confirm ? "text" : "password"}
+                    value={passwordData.confirmPassword}
+                    onChange={(e) => setPasswordData(prev => ({ ...prev, confirmPassword: e.target.value }))}
+                    placeholder="Confirme sua nova senha"
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="absolute right-0 top-0 h-full px-3"
+                    onClick={() => setShowPasswords(prev => ({ ...prev, confirm: !prev.confirm }))}
+                  >
+                    {showPasswords.confirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </Button>
+                </div>
+              </div>
+
+              <Button
+                onClick={handleChangePassword}
+                disabled={changePasswordMutation.isPending}
+                className="w-full"
               >
-                <Save className="w-4 h-4 mr-2" />
-                {updateUserMutation.isPending ? "Salvando..." : "Salvar PIX"}
-              </Button>
-            </form>
-
-            {(user as any)?.plan === "PREMIUM" && (
-              <div>
-                <Label htmlFor="logoUpload">Logo da Empresa (Premium)</Label>
-                <div className="mt-2 space-y-3">
-                  {formData.logoUrl && (
-                    <div className="flex items-center gap-3">
-                      <img
-                        src={formData.logoUrl}
-                        alt="Logo atual"
-                        className="w-16 h-16 object-contain border rounded"
-                      />
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleInputChange("logoUrl", "")}
-                      >
-                        Remover Logo
-                      </Button>
-                    </div>
-                  )}
-                  <div className="p-4 border-2 border-dashed border-gray-300 rounded-lg text-center">
-                    <Upload className="w-8 h-8 mx-auto mb-2 text-gray-400" />
-                    <input
-                      type="file"
-                      id="logoUpload"
-                      accept="image/*"
-                      onChange={handleLogoUpload}
-                      className="hidden"
-                    />
-                    <label
-                      htmlFor="logoUpload"
-                      className="cursor-pointer text-sm text-gray-600 hover:text-gray-800"
-                    >
-                      Clique para fazer upload do seu logo
-                    </label>
-                    <p className="text-xs text-gray-400 mt-1">PNG, JPG até 2MB</p>
+                {changePasswordMutation.isPending ? (
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    Alterando senha...
                   </div>
-                  <p className="text-sm text-gray-500">
-                    Logo aparecerá no canto superior direito dos orçamentos Premium
-                  </p>
-                </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Plan Information */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Crown className="w-5 h-5" />
-              Seu Plano
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <div className="flex items-center gap-2 mb-1">
-                  <Badge variant={user?.plan === "PREMIUM" || user?.plan === "PREMIUM_CORTESIA" ? "default" : "secondary"}>
-                    {user?.plan === "PREMIUM" || user?.plan === "PREMIUM_CORTESIA" ? "Premium" : "Gratuito"}
-                  </Badge>
-                  {(user?.plan === "PREMIUM" || user?.plan === "PREMIUM_CORTESIA") && (
-                    <Crown className="w-4 h-4 text-yellow-500" />
-                  )}
-                </div>
-                <p className="text-sm text-gray-600">
-                  {(user?.plan === "PREMIUM" || user?.plan === "PREMIUM_CORTESIA") ? 
-                    "Orçamentos ilimitados" : 
-                    `${user?.quotesUsedThisMonth || 0}/5 orçamentos este mês`
-                  }
-                </p>
-              </div>
-              {!(user?.plan === "PREMIUM" || user?.plan === "PREMIUM_CORTESIA") && (
-                <Button 
-                  variant="outline"
-                  onClick={() => window.open("https://www.mercadopago.com.br/subscriptions/checkout?preapproval_plan_id=2c9380849763dae001976518e1ce0072", "_blank")}
-                >
-                  Fazer Upgrade
-                </Button>
-              )}
-            </div>
-
-            <div className="text-xs text-gray-500">
-              <strong>Recursos do seu plano:</strong>
-              <ul className="mt-2 space-y-1">
-                {(user?.plan === "PREMIUM" || user?.plan === "PREMIUM_CORTESIA") ? (
-                  <>
-                    <li>✓ Emissão de orçamentos ilimitados</li>
-                    <li>✓ Emissão de recibos ilimitados</li>
-                    <li>✓ Envio de recibos por WhatsApp</li>
-                    <li>✓ Logotipo no orçamento e no recibo</li>
-                    <li>✓ Relatórios estatísticos avançados</li>
-                    <li>✓ Salvamento de até 15 itens favoritos</li>
-                    <li>✓ Monitoramento de prazos</li>
-                    <li>✓ Suporte técnico prioritário</li>
-                    <li>✓ 7 dias de garantia com devolução</li>
-                  </>
                 ) : (
                   <>
-                    <li>✓ Até 5 orçamentos por mês</li>
-                    <li>✗ Recibos ilimitados</li>
-                    <li>✗ Envio de recibos por WhatsApp</li>
-                    <li>✗ Logotipo no orçamento e recibo</li>
-                    <li>✗ Relatórios estatísticos avançados</li>
-                    <li>✗ 15 itens favoritos salvos</li>
-                    <li>✗ Monitoramento de prazos</li>
-                    <li>✗ Suporte técnico prioritário</li>
+                    <Lock className="w-4 h-4 mr-2" />
+                    Alterar Senha
                   </>
                 )}
-              </ul>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Notification Preferences */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Bell className="w-5 h-5" />
-              Notificações
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <Label htmlFor="emailNotifications">Notificações por E-mail</Label>
-                <p className="text-sm text-gray-500">
-                  Receba atualizações sobre seus orçamentos por e-mail
-                </p>
-              </div>
-              <Switch
-                id="emailNotifications"
-                checked={formData.emailNotifications}
-                onCheckedChange={(checked) => handleInputChange("emailNotifications", checked)}
-              />
-            </div>
-
-            <Separator />
-
-            <div className="flex items-center justify-between">
-              <div>
-                <Label htmlFor="whatsappNotifications">Notificações por WhatsApp</Label>
-                <p className="text-sm text-gray-500">
-                  Receba notificações importantes via WhatsApp
-                </p>
-              </div>
-              <Switch
-                id="whatsappNotifications"
-                checked={formData.whatsappNotifications}
-                onCheckedChange={(checked) => handleInputChange("whatsappNotifications", checked)}
-                disabled={user?.plan !== "premium"}
-              />
-            </div>
-
-            {user?.plan !== "premium" && (
-              <p className="text-xs text-amber-600">
-                Notificações por WhatsApp disponíveis apenas no plano Premium
-              </p>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Password Change */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Lock className="w-5 h-5" />
-              Segurança da Conta
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={(e) => {
-              e.preventDefault();
-              if (passwordData.newPassword !== passwordData.confirmPassword) {
-                toast({
-                  title: "Erro",
-                  description: "As senhas não coincidem.",
-                  variant: "destructive",
-                });
-                return;
-              }
-              if (passwordData.newPassword.length < 6) {
-                toast({
-                  title: "Erro", 
-                  description: "A nova senha deve ter pelo menos 6 caracteres.",
-                  variant: "destructive",
-                });
-                return;
-              }
-              changePasswordMutation.mutate({
-                currentPassword: passwordData.currentPassword,
-                newPassword: passwordData.newPassword
-              });
-            }} className="space-y-4">
-              <div>
-                <Label htmlFor="currentPassword">Senha Atual</Label>
-                <Input
-                  id="currentPassword"
-                  type="password"
-                  value={passwordData.currentPassword}
-                  onChange={(e) => setPasswordData(prev => ({ ...prev, currentPassword: e.target.value }))}
-                  placeholder="Digite sua senha atual"
-                  required
-                />
-              </div>
-              <div>
-                <Label htmlFor="newPassword">Nova Senha</Label>
-                <Input
-                  id="newPassword"
-                  type="password"
-                  value={passwordData.newPassword}
-                  onChange={(e) => setPasswordData(prev => ({ ...prev, newPassword: e.target.value }))}
-                  placeholder="Digite a nova senha (mín. 6 caracteres)"
-                  required
-                />
-              </div>
-              <div>
-                <Label htmlFor="confirmPassword">Confirmar Nova Senha</Label>
-                <Input
-                  id="confirmPassword"
-                  type="password"
-                  value={passwordData.confirmPassword}
-                  onChange={(e) => setPasswordData(prev => ({ ...prev, confirmPassword: e.target.value }))}
-                  placeholder="Confirme a nova senha"
-                  required
-                />
-              </div>
-              <Button 
-                type="submit" 
-                disabled={changePasswordMutation.isPending}
-                className="w-full md:w-auto"
-              >
-                <Lock className="w-4 h-4 mr-2" />
-                {changePasswordMutation.isPending ? "Alterando..." : "Alterar Senha"}
               </Button>
-            </form>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
 
-
-
-        {/* PWA Installation */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Smartphone className="w-5 h-5" />
-              Instalação do App
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <p className="text-sm text-gray-600">
-              Instale o Fechou! no seu dispositivo para acesso rápido e funcionamento offline
-            </p>
-            <div className="flex flex-col sm:flex-row gap-3">
-              <InstallButton size="default" className="w-full sm:w-auto" />
-              <div className="text-xs text-gray-500 sm:self-center">
-                Funciona como um app nativo
+          {/* Notificações */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <Bell className="h-5 w-5" />
+                <CardTitle>Notificações</CardTitle>
               </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label htmlFor="notifications">Notificações Gerais</Label>
+                  <p className="text-sm text-gray-600">Receba notificações sobre atualizações</p>
+                </div>
+                <Switch
+                  id="notifications"
+                  checked={formData.notifications}
+                  onCheckedChange={(checked) => handleInputChange('notifications', checked)}
+                />
+              </div>
 
-        {/* Account Actions */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Ações da Conta</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <Button 
-              variant="outline" 
-              onClick={() => window.location.href = "/api/logout"}
-              className="w-full md:w-auto"
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label htmlFor="emailNotifications">Notificações por E-mail</Label>
+                  <p className="text-sm text-gray-600">Receba e-mails sobre orçamentos</p>
+                </div>
+                <Switch
+                  id="emailNotifications"
+                  checked={formData.emailNotifications}
+                  onCheckedChange={(checked) => handleInputChange('emailNotifications', checked)}
+                />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label htmlFor="whatsappNotifications">Notificações WhatsApp</Label>
+                  <p className="text-sm text-gray-600">Receba atualizações via WhatsApp</p>
+                </div>
+                <Switch
+                  id="whatsappNotifications"
+                  checked={formData.whatsappNotifications}
+                  onCheckedChange={(checked) => handleInputChange('whatsappNotifications', checked)}
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Botão Salvar */}
+          <div className="flex justify-end">
+            <Button
+              onClick={handleSaveProfile}
+              disabled={updateUserMutation.isPending}
+              size="lg"
             >
-              Sair da Conta
+              {updateUserMutation.isPending ? (
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  Salvando...
+                </div>
+              ) : (
+                <>
+                  <Save className="w-4 h-4 mr-2" />
+                  Salvar Configurações
+                </>
+              )}
             </Button>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
     </div>
   );
