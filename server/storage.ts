@@ -35,13 +35,15 @@ import { eq, desc, count, sql, and, or, like, asc, gte, lte } from "drizzle-orm"
 import { nanoid } from "nanoid";
 
 export interface IStorage {
-  // User operations - mandatory for Replit Auth
-  getUser(id: string): Promise<User | undefined>;
-  upsertUser(user: UpsertUser): Promise<User>;
-  updateUserPlan(id: string, plan: string, planExpiresAt: Date | null): Promise<User>;
+  // User operations - Firebase Auth based
+  getUser(uid: string): Promise<User | undefined>;
+  getUserByEmail(email: string): Promise<User | undefined>;
+  createUser(user: UpsertUser): Promise<User>;
+  updateUser(uid: string, userData: Partial<User>): Promise<User>;
+  updateUserPlan(uid: string, plan: string, planExpiresAt: Date | null): Promise<User>;
   addReferralBonus(userId: string): Promise<User>;
-  updateUserColors(id: string, primaryColor: string, secondaryColor: string): Promise<User>;
-  updateUserProfile(id: string, profileData: Partial<User>): Promise<User>;
+  updateUserColors(uid: string, primaryColor: string, secondaryColor: string): Promise<User>;
+  updateUserProfile(uid: string, profileData: Partial<User>): Promise<User>;
   generateReferralCode(userId: string): Promise<string>;
   getUserByReferralCode(referralCode: string): Promise<User | undefined>;
 
@@ -143,23 +145,37 @@ export interface IStorage {
 }
 
 export class DatabaseStorage implements IStorage {
-  // User operations - mandatory for Replit Auth
-  async getUser(id: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.id, id));
+  // User operations - Firebase Auth based
+  async getUser(uid: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.id, uid));
     return user;
   }
 
-  async upsertUser(userData: UpsertUser): Promise<User> {
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.email, email));
+    return user;
+  }
+
+  async createUser(userData: UpsertUser): Promise<User> {
     const [user] = await db
       .insert(users)
-      .values(userData)
-      .onConflictDoUpdate({
-        target: users.id,
-        set: {
-          ...userData,
-          updatedAt: new Date(),
-        },
+      .values({
+        ...userData,
+        createdAt: new Date(),
+        updatedAt: new Date(),
       })
+      .returning();
+    return user;
+  }
+
+  async updateUser(uid: string, userData: Partial<User>): Promise<User> {
+    const [user] = await db
+      .update(users)
+      .set({
+        ...userData,
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, uid))
       .returning();
     return user;
   }
