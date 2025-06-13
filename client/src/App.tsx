@@ -150,11 +150,13 @@ function AppLayout() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <AppLayout />
-        <InstallPrompt />
-      </TooltipProvider>
+      <AuthProvider>
+        <TooltipProvider>
+          <Toaster />
+          <AppLayout />
+          <InstallPrompt />
+        </TooltipProvider>
+      </AuthProvider>
     </QueryClientProvider>
   );
 }
