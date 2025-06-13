@@ -36,7 +36,7 @@ export default function LoginPage() {
     try {
       setError('');
       await login(data.email, data.password);
-      navigate('/');
+      navigate('/dashboard');
     } catch (error: any) {
       setError(getFirebaseErrorMessage(error.message));
     }

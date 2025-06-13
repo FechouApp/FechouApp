@@ -139,6 +139,11 @@ export function useFirebaseAuth(): AuthContextType {
   const logout = async () => {
     try {
       await signOut(auth);
+      // Clear user state immediately
+      setUser(null);
+      setFirebaseUser(null);
+      // Redirect to login page
+      window.location.href = '/login';
     } catch (error: any) {
       throw new Error(error.message);
     }

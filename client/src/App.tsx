@@ -33,6 +33,7 @@ import AdminPanel from "@/pages/admin-dashboard";
 import Welcome from "@/pages/welcome";
 import ReferralsPage from "@/pages/referrals";
 import InstallPrompt from "@/components/pwa/install-prompt";
+import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 
 function Router() {
   const { isAuthenticated, isLoading, user } = useAuth();

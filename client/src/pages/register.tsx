@@ -44,7 +44,7 @@ export default function RegisterPage() {
     try {
       setError('');
       await registerUser(data.email, data.password, data.firstName, data.lastName);
-      navigate('/');
+      navigate('/dashboard');
     } catch (error: any) {
       setError(getFirebaseErrorMessage(error.message));
     }
