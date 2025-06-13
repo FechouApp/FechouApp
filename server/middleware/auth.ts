@@ -26,7 +26,7 @@ export const authenticateToken = async (
     const decodedToken = await auth.verifyIdToken(token);
     req.firebaseUser = {
       uid: decodedToken.uid,
-      email: decodedToken.email || null,
+      email: decodedToken.email,
       emailVerified: decodedToken.email_verified || false,
     };
 

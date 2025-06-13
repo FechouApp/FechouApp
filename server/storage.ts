@@ -180,7 +180,7 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
-  async updateUserPlan(id: string, plan: string, planExpiresAt: Date | null): Promise<User> {
+  async updateUserPlan(uid: string, plan: string, planExpiresAt: Date | null): Promise<User> {
     const [user] = await db
       .update(users)
       .set({ 
