@@ -7,16 +7,23 @@ async function throwIfResNotOk(res: Response) {
   }
 }
 
-export const apiRequest = async (method: string, url: string, data?: any) => {
-  const requestOptions: RequestInit = {
-    method: method.toUpperCase(),
+export const apiRequest = async (url: string, options?: RequestInit) => {
+  const defaultOptions: RequestInit = {
+    method: 'GET',
     headers: {
       'Content-Type': 'application/json',
     },
+    credentials: 'include',
   };
 
-  if (data && (method.toUpperCase() === 'POST' || method.toUpperCase() === 'PUT' || method.toUpperCase() === 'PATCH')) {
-    requestOptions.body = JSON.stringify(data);
+  const requestOptions = { ...defaultOptions, ...options };
+
+  // Merge headers properly
+  if (options?.headers) {
+    requestOptions.headers = {
+      ...defaultOptions.headers,
+      ...options.headers,
+    };
   }
 
   const response = await fetch(url, requestOptions);
