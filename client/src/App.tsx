@@ -88,25 +88,97 @@ function Router() {
       <Route path="/quote/:quoteNumber" component={PublicQuote} />
       <Route path="/receipt/:quoteNumber" component={PublicReceipt} />
       <Route path="/receipt/:quoteNumber/pdf" component={PublicReceiptPDF} />
-        <Route path="/public-receipt/:quoteNumber" component={PublicReceipt} />
-        <Route path="/quotes/:id/receipt" component={ReceiptView} />
+      <Route path="/public-receipt/:quoteNumber" component={PublicReceipt} />
 
-      <Route path="/" component={Dashboard} />
-      <Route path="/clients" component={Clients} />
-      <Route path="/clients/:clientId" component={ClientProfile} />
-      <Route path="/quotes" component={Quotes} />
-      <Route path="/new-quote" component={NewQuote} />
-      <Route path="/quotes/:quoteId/edit" component={NewQuote} />
-      <Route path="/quotes/view/:quoteId" component={QuoteView} />
-      <Route path="/quotes/:id/receipt" component={ReceiptView} />
-      <Route path="/reviews" component={Reviews} />
-      <Route path="/saved-items" component={SavedItemsPage} />
-      <Route path="/reports" component={Reports} />
-      <Route path="/plans" component={Plans} />
-      <Route path="/settings" component={Settings} />
-      <Route path="/referrals" component={ReferralsPage} />
-      <Route path="/admin" component={AdminPanel} />
-      <Route path="/welcome" component={Welcome} />
+      {/* Protected routes */}
+      <Route path="/">
+        <ProtectedRoute>
+          <Dashboard />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/dashboard">
+        <ProtectedRoute>
+          <Dashboard />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/clients">
+        <ProtectedRoute>
+          <Clients />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/clients/:clientId">
+        <ProtectedRoute>
+          <ClientProfile />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/quotes">
+        <ProtectedRoute>
+          <Quotes />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/new-quote">
+        <ProtectedRoute>
+          <NewQuote />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/quotes/:quoteId/edit">
+        <ProtectedRoute>
+          <NewQuote />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/quotes/view/:quoteId">
+        <ProtectedRoute>
+          <QuoteView />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/quotes/:id/receipt">
+        <ProtectedRoute>
+          <ReceiptView />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/reviews">
+        <ProtectedRoute>
+          <Reviews />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/saved-items">
+        <ProtectedRoute>
+          <SavedItemsPage />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/reports">
+        <ProtectedRoute>
+          <Reports />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/plans">
+        <ProtectedRoute>
+          <Plans />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/settings">
+        <ProtectedRoute>
+          <Settings />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/referrals">
+        <ProtectedRoute>
+          <ReferralsPage />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/welcome">
+        <ProtectedRoute>
+          <Welcome />
+        </ProtectedRoute>
+      </Route>
+      
+      {/* Admin-only route */}
+      <Route path="/admin">
+        <ProtectedRoute adminOnly>
+          <AdminPanel />
+        </ProtectedRoute>
+      </Route>
+      
       <Route component={NotFound} />
     </Switch>
   );

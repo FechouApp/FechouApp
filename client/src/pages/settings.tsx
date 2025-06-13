@@ -79,7 +79,10 @@ export default function Settings() {
 
   const updateUserMutation = useMutation({
     mutationFn: async (data: Partial<UserType>) => {
-      const response = await apiRequest("PATCH", "/api/auth/user", data);
+      const response = await apiRequest("/api/auth/user", {
+        method: "PUT",
+        body: JSON.stringify(data)
+      });
       return response;
     },
     onSuccess: () => {
@@ -107,7 +110,10 @@ export default function Settings() {
 
   const changePasswordMutation = useMutation({
     mutationFn: async (data: { currentPassword: string; newPassword: string }) => {
-      await apiRequest("POST", "/api/auth/change-password", data);
+      await apiRequest("/api/auth/change-password", {
+        method: "POST",
+        body: JSON.stringify(data)
+      });
     },
     onSuccess: () => {
       setPasswordData({ currentPassword: "", newPassword: "", confirmPassword: "" });
@@ -127,7 +133,10 @@ export default function Settings() {
 
   const togglePlanMutation = useMutation({
     mutationFn: async () => {
-      await apiRequest("POST", "/api/auth/toggle-plan");
+      await apiRequest("/api/auth/toggle-plan", {
+        method: "POST",
+        body: JSON.stringify({ userId: user?.id })
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
