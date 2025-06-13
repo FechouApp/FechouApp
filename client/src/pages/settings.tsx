@@ -9,7 +9,7 @@ import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { User, Building, Bell, Crown, Mail, Phone, MapPin, Save, Upload, Lock, Smartphone } from "lucide-react";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/hooks/useFirebaseAuth";
 import BackButton from "@/components/common/back-button";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -110,10 +110,7 @@ export default function Settings() {
 
   const changePasswordMutation = useMutation({
     mutationFn: async (data: { currentPassword: string; newPassword: string }) => {
-      await apiRequest("/api/auth/change-password", {
-        method: "POST",
-        body: JSON.stringify(data)
-      });
+      await changePassword(data.currentPassword, data.newPassword);
     },
     onSuccess: () => {
       setPasswordData({ currentPassword: "", newPassword: "", confirmPassword: "" });

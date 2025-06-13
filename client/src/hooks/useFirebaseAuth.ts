@@ -7,7 +7,10 @@ import {
   sendPasswordResetEmail,
   sendEmailVerification,
   onAuthStateChanged,
-  updateProfile
+  updateProfile,
+  updatePassword,
+  reauthenticateWithCredential,
+  EmailAuthProvider
 } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import { apiRequest } from '@/lib/queryClient';
@@ -35,6 +38,7 @@ interface AuthContextType {
   resetPassword: (email: string) => Promise<void>;
   sendVerificationEmail: () => Promise<void>;
   updateUserProfile: (data: Partial<AuthUser>) => Promise<void>;
+  changePassword: (currentPassword: string, newPassword: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -186,6 +190,53 @@ export function useFirebaseAuth(): AuthContextType {
     }
   };
 
+  const changePassword = async (currentPassword: string, newPassword: string) => {
+    if (!firebaseUser || !firebaseUser.email) {
+      throw new Error('Usuário não autenticado');
+    }
+
+    try {
+      // Validar nova senha
+      if (newPassword.length < 6) {
+        throw new Error('A nova senha deve ter pelo menos 6 caracteres');
+      }
+
+      // Reautenticar o usuário com a senha atual
+      const credential = EmailAuthProvider.credential(
+        firebaseUser.email,
+        currentPassword
+      );
+      
+      await reauthenticateWithCredential(firebaseUser, credential);
+
+      // Atualizar a senha
+      await updatePassword(firebaseUser, newPassword);
+      
+    } catch (error: any) {
+      // Tratar erros específicos do Firebase
+      let errorMessage = 'Erro ao alterar senha';
+      
+      switch (error.code) {
+        case 'auth/wrong-password':
+          errorMessage = 'Senha atual incorreta';
+          break;
+        case 'auth/weak-password':
+          errorMessage = 'A nova senha é muito fraca';
+          break;
+        case 'auth/requires-recent-login':
+          errorMessage = 'Por segurança, faça login novamente antes de alterar a senha';
+          break;
+        case 'auth/too-many-requests':
+          errorMessage = 'Muitas tentativas. Tente novamente mais tarde';
+          break;
+        default:
+          errorMessage = error.message || errorMessage;
+      }
+      
+      throw new Error(errorMessage);
+    }
+  };
+
   return {
     user,
     firebaseUser,
@@ -196,7 +247,8 @@ export function useFirebaseAuth(): AuthContextType {
     logout,
     resetPassword,
     sendVerificationEmail,
-    updateUserProfile
+    updateUserProfile,
+    changePassword
   };
 }
 
